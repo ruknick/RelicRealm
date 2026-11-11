@@ -2,10 +2,14 @@
 window.Forest = (() => {
   const SIZE = 7;
   const MOVES = 20;
-  const GOLD_CHANCE = 0.03;
+  const GOLD_CHANCE = 0.02;
+  // Spawn weights for everything except gold: each resource ~11%, each filler ~22%.
+  const TILE_WEIGHTS = { wood: 11, stone: 11, hide: 11, leaves: 22, mushroom: 22, berries: 22 };
   const GOBLIN_CHANCE = 0.08;   // per move
   const MAX_GOBLINS = 3;
   const BASIC = ['wood', 'stone', 'hide'];
+  const FILLER = ['leaves', 'mushroom', 'berries'];   // match normally, give no resources
+  const WEIGHT_TOTAL = Object.values(TILE_WEIGHTS).reduce((a, b) => a + b, 0);
   const ALL_RES = ['wood', 'stone', 'hide', 'gold'];
   const DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
   const points = len => (len >= 5 ? 9 : len === 4 ? 6 : 3);
@@ -43,7 +47,12 @@ window.Forest = (() => {
     promise.catch(e => { if (e !== ABORT) console.error(e); });
   }
   function randType() {
-    return Math.random() < GOLD_CHANCE ? 'gold' : BASIC[rnd(BASIC.length)];
+    if (Math.random() < GOLD_CHANCE) return 'gold';
+    let roll = Math.random() * WEIGHT_TOTAL;
+    for (const [type, w] of Object.entries(TILE_WEIGHTS)) {
+      if ((roll -= w) < 0) return type;
+    }
+    return 'leaves';
   }
   function newTile(type) {
     return { id: nextId++, type: type || randType() };
@@ -269,11 +278,12 @@ window.Forest = (() => {
       if (!runs.length) return;
       const clear = new Set();
       for (const runInfo of runs) {
+        runInfo.cells.forEach(([r, c]) => clear.add(r * SIZE + c));
+        if (FILLER.includes(runInfo.type)) continue;   // filler: clears, no resources
         const pts = points(runInfo.cells.length);
         stats.collected[runInfo.type] += pts;
         const mid = runInfo.cells[Math.floor(runInfo.cells.length / 2)];
         gain(runInfo.type, pts, mid);
-        runInfo.cells.forEach(([r, c]) => clear.add(r * SIZE + c));
       }
       // Fight: any goblin touching a matched tile is defeated.
       const hit = new Set();

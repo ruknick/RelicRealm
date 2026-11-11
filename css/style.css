@@ -128,6 +128,12 @@ button.link {
 .g-hide::after  { width: 40%; height: 40%; transform: rotate(45deg); background: #6c431d; border-radius: 3px; }
 .g-gold  { background: var(--gold); box-shadow: inset 0 -4px 0 rgba(0,0,0,.2), 0 0 10px rgba(242,194,48,.6); }
 .g-gold::after  { content: "★"; color: #9b6f00; font-size: 8cqw; line-height: 1; }
+.g-leaves { background: #a3c44a; }
+.g-leaves::after { width: 44%; height: 44%; background: #6f8f22; border-radius: 0 70% 0 70%; }
+.g-mushroom { background: #ddc9a3; }
+.g-mushroom::after { width: 54%; height: 34%; background: #b0593f; border-radius: 60% 60% 15% 15%; box-shadow: 0 6px 0 -2px #f2e8d4; }
+.g-berries { background: #7d55b0; }
+.g-berries::after { width: 16%; height: 16%; border-radius: 50%; background: #c9b3ef; box-shadow: -10px 7px 0 #c9b3ef, 10px 7px 0 #c9b3ef; }
 .g-goblin { background: var(--goblin); box-shadow: inset 0 -4px 0 rgba(0,0,0,.3), 0 0 0 2px #ff9a9a; }
 .g-goblin::after { content: "G"; color: #fff; font-weight: 900; font-size: 8cqw; line-height: 1; }
 
