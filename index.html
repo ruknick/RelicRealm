@@ -9,12 +9,13 @@
 </head>
 <body>
   <div id="app">
-    <!-- Stockpile bar: visible on every screen -->
+    <!-- Stockpile bar (banked resources at home): visible on every screen -->
     <header id="stockbar">
       <div class="res" data-res="wood"><span class="chip c-wood"></span><b id="s-wood">0</b></div>
       <div class="res" data-res="stone"><span class="chip c-stone"></span><b id="s-stone">0</b></div>
       <div class="res" data-res="hide"><span class="chip c-hide"></span><b id="s-hide">0</b></div>
       <div class="res" data-res="gold"><span class="chip c-gold"></span><b id="s-gold">0</b></div>
+      <div class="res" data-res="iron"><span class="chip c-iron"></span><b id="s-iron">0</b></div>
     </header>
 
     <!-- HOME -->
@@ -23,27 +24,50 @@
       <p class="sub">Gather → Craft → Fortify → Raid</p>
 
       <nav class="menu">
-        <button class="big" id="btn-forest">🌲 Forest Level</button>
-        <button class="big" disabled>🔨 Craft <small>coming in step 3</small></button>
-        <button class="big" disabled>⚔️ Raid Goblin Village <small>step 4</small></button>
-        <button class="big" disabled>🧱 Fortify <small>step 5</small></button>
-        <button class="big" disabled>🛡️ Defend <small>step 6</small></button>
+        <button class="big" id="btn-forest">🌲 Forest Trail</button>
+        <button class="big" disabled>🔨 Craft <small>coming next</small></button>
+        <button class="big" disabled>⚔️ Raid Goblin Village <small>later</small></button>
+        <button class="big" disabled>🧱 Fortify <small>later</small></button>
+        <button class="big" disabled>🛡️ Defend <small>later</small></button>
       </nav>
 
       <div class="panel">
         <h3>Inventory</h3>
         <div id="home-inventory" class="inv"></div>
-        <p class="hint">You start with a test Club &amp; Sling so you can try weapons on goblins.</p>
+        <h3 class="mt">Goblin spoils</h3>
+        <div id="home-spoils" class="inv"></div>
       </div>
 
-      <button class="link" id="btn-reset">Reset save</button>
+      <div class="panel debug">
+        <h3>🛠 Debug</h3>
+        <label class="field">Next forest encounter
+          <select id="dbg-enc">
+            <option value="random">Random (normal odds)</option>
+            <option value="nothing">Nothing</option>
+            <option value="camp">Abandoned camp</option>
+            <option value="scouts">Goblin scouts</option>
+            <option value="village">Goblin village</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" id="dbg-skip"> Skip the walk (encounter is already on the board)</label>
+        <button class="link" id="btn-reset">Reset save</button>
+      </div>
     </section>
 
-    <!-- FOREST LEVEL -->
+    <!-- FOREST TRAIL -->
     <section id="screen-forest" class="screen hidden">
       <div class="forest-top">
-        <button class="small" id="forest-quit">← Home</button>
-        <div class="moves">Moves <b id="moves">20</b></div>
+        <button class="small" id="forest-exit">🏠 Head home</button>
+        <div class="trail" id="trail">🌲 0</div>
+        <div class="moves">Moves <b id="moves">30</b></div>
+      </div>
+
+      <div class="backpack" id="backpack">
+        <span class="bp-label">🎒 <b id="bp-total">0</b>/<span id="bp-cap">15</span></span>
+        <span class="bp-item"><span class="chip c-wood"></span><b id="bp-wood">0</b></span>
+        <span class="bp-item"><span class="chip c-stone"></span><b id="bp-stone">0</b></span>
+        <span class="bp-item"><span class="chip c-hide"></span><b id="bp-hide">0</b></span>
+        <span class="bp-item"><span class="chip c-gold"></span><b id="bp-gold">0</b></span>
       </div>
 
       <div id="board-wrap">
@@ -56,14 +80,14 @@
         <span class="label">Weapons</span>
         <div id="weapon-tray"></div>
       </div>
-      <p class="hint" id="forest-hint">Swap adjacent tiles to match 3+. Swipe or tap two tiles.</p>
+      <p class="hint" id="forest-hint"></p>
 
       <div id="summary" class="modal hidden">
         <div class="card">
-          <h2>Out of moves!</h2>
+          <h2 id="summary-title">Back home</h2>
           <div id="summary-body"></div>
           <div class="row">
-            <button class="big" id="sum-again">Play again</button>
+            <button class="big" id="sum-again">Walk again</button>
             <button class="big alt" id="sum-home">Home</button>
           </div>
         </div>
