@@ -19,8 +19,8 @@ window.Data = (() => {
     wall:   { name: 'Stone wall', icon: '🧱', desc: 'Defense: blocks a tile, 2 hits.' },
     trap:   { name: 'Pit trap', icon: '🕳️', desc: 'Defense: attacker loses a move.' },
     // Tier 2 — Forge (multi-use)
-    axe:     { name: 'Iron axe', icon: '🪓', weapon: true, uses: 3, desc: '3 dmg to wood & plants. Chopping stumps gives bonus wood.' },
-    pickaxe: { name: 'Pickaxe', icon: '⛏️', weapon: true, uses: 3, desc: '3 dmg to stone, 2 to iron. Mines extra ore from veins.' },
+    axe:     { name: 'Iron axe', icon: '🪓', weapon: true, uses: 3, desc: '4 dmg to wood & thorns, and cleaves 1 into anything next to it. Stumps give bonus wood.' },
+    pickaxe: { name: 'Pickaxe', icon: '⛏️', weapon: true, uses: 3, desc: '4 dmg to stone, 2 to iron, and cracks 1 into neighbours. Mines double ore.' },
     sword:   { name: 'Iron sword', icon: '⚔️', weapon: true, uses: 3, desc: '3 dmg to goblins & dwarves, 2 to any keep.' },
     // Tools — passive, permanent
     hatchet: { name: 'Hatchet', icon: '🪚', tool: true, desc: '+1 wood on every wood match.' },
@@ -34,7 +34,7 @@ window.Data = (() => {
     drum:      { name: 'War drum', icon: '🥁', spoil: 'goblin', desc: '+3 moves in a raid.' },
     blueprint: { name: 'Palisade blueprint', icon: '📜', spoil: 'goblin', desc: 'Unlocks the Spiked palisade defense.' },
     // Dwarf spoils
-    dpick:     { name: 'Dwarven pick', icon: '⚒️', weapon: true, uses: 3, spoil: 'dwarf', desc: 'Smashes stone & iron in one blow.' },
+    dpick:     { name: 'Dwarven pick', icon: '⚒️', weapon: true, uses: 3, spoil: 'dwarf', desc: 'Smashes stone & iron in one blow, and 2 into neighbours.' },
     ale:       { name: 'Dwarf ale', icon: '🍺', spoil: 'dwarf', desc: '+3 moves in a raid.' },
     runestone: { name: 'Runestone', icon: '🪨', spoil: 'dwarf', desc: '+1 HP to your walls (for Fortify).' },
     cartbp:    { name: 'Mine-cart blueprint', icon: '🛤️', spoil: 'dwarf', desc: 'Unlocks the Mine-cart defense.' },
@@ -49,12 +49,12 @@ window.Data = (() => {
   const WEAPONS = {
     club:    { wood: 2, plant: 2, creature: 1, other: 1, stone: 0, iron: 0 },
     sling:   { wood: 1, plant: 1, creature: 1, other: 1, stone: 1, iron: 1, fog: true },
-    axe:     { wood: 3, plant: 3, creature: 1, other: 1, stone: 0, iron: 0 },
-    pickaxe: { stone: 3, iron: 2, wood: 1, plant: 1, creature: 0, other: 1 },
+    axe:     { wood: 4, plant: 4, creature: 1, other: 1, stone: 0, iron: 0, splash: 1 },
+    pickaxe: { stone: 4, iron: 2, wood: 1, plant: 1, creature: 0, other: 1, splash: 1 },
     sword:   { creature: 3, wood: 1, plant: 1, other: 1, stone: 1, iron: 1, keep: 2 },
     firepot: { wood: 2, plant: 2, creature: 1, other: 1, stone: 0, iron: 0, fog: true, area: true },
     shiv:    { creature: 2, wood: 1, plant: 1, other: 0, stone: 0, iron: 0 },
-    dpick:   { stone: 9, iron: 9, wood: 2, plant: 2, creature: 1, other: 2 },
+    dpick:   { stone: 9, iron: 9, wood: 2, plant: 2, creature: 1, other: 2, splash: 2 },
     key:     { unlock: true },
   };
   function weaponDamage(w, piece) {
@@ -111,5 +111,20 @@ window.Data = (() => {
     { id: 'lamp',    tier: 'tool', cost: { coal: 4, iron: 2, gold: 2 } },
   ];
 
-  return { RESOURCES, ITEMS, MATCH_DMG, WEAPONS, weaponDamage, MAT_LABEL, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES };
+  // ---------- player levels ----------
+  // Total XP needed to reach level L: 30, 90, 180, 300, 450, 630, ...
+  const xpForLevel = L => 15 * (L - 1) * L;
+  const levelFromXp = xp => { let L = 1; while (xp >= xpForLevel(L + 1)) L++; return L; };
+  // How gathering boards scale with level. Tougher boards also bury more treasure.
+  function levelInfo(L) {
+    return {
+      startObstacles: Math.min(10, 4 + Math.floor((L - 1) * 0.75)),
+      growEvery: L < 2 ? 0 : Math.max(3, 8 - L),          // a new obstacle every N moves (0 = never)
+      hpBonus: L >= 7 ? 2 : L >= 4 ? 1 : 0,               // extra HP on stumps, thorns, boulders, veins
+      buried: Math.min(6, 3 + Math.floor((L - 1) / 3)),
+    };
+  }
+  const XP = { match: 1, obstacle: 3, find: 5, chase: 8, discover: 5, craft: 5, craft2: 10, raidWin: 40, raidWinDwarf: 60, loot: 10, retreat: 10 };
+
+  return { xpForLevel, levelFromXp, levelInfo, XP, RESOURCES, ITEMS, MATCH_DMG, WEAPONS, weaponDamage, MAT_LABEL, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES };
 })();

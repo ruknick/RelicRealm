@@ -651,3 +651,15 @@ body[data-scene] .res, body[data-scene] .sound-btn { background: rgba(10,14,11,.
 .board-wrap { margin: 24px auto 26px; }
 .p-cart .pl:empty::after { content: none; }
 #battle-wrap { margin-top: 34px; }
+
+/* ---------- Levels ---------- */
+.panel.level { margin: 0 0 12px; }
+.lv-row { display: flex; justify-content: space-between; align-items: baseline; }
+.lv-row b { font-size: 1.05rem; color: #ffe08a; }
+.lv-row span { color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; }
+.xpbar { display: inline-block; width: 60px; height: 7px; border-radius: 4px; background: rgba(255,255,255,.12); overflow: hidden; vertical-align: middle; margin-left: 4px; }
+.xpbar i { display: block; height: 100%; background: linear-gradient(90deg, #f2c230, #ffe08a); border-radius: 4px; transition: width .4s; }
+.xpbar.big { display: block; width: 100%; height: 10px; margin: 6px 0; }
+.lv-info { color: var(--muted); font-size: .8rem; }
+.subbar { justify-content: space-between; align-items: center; }
+#g-level { color: #ffe08a; font-weight: 700; }

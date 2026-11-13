@@ -13,6 +13,7 @@ window.App = (() => {
       marked: { goblin: 0, dwarf: 0 },
       scraps: { goblin: 0, dwarf: 0 },
       shards: 0,
+      xp: 0,
       debug: { discoverNow: false, eventNow: false },
     };
   }
@@ -31,6 +32,7 @@ window.App = (() => {
         marked: typeof s.marked === 'number' ? { goblin: s.marked, dwarf: 0 } : { ...base.marked, ...s.marked },
         scraps: { ...base.scraps, ...s.scraps },
         shards: s.shards || 0,
+        xp: s.xp || 0,
         debug: { ...base.debug, ...(s.debug || {}) },
       };
     } catch (e) { /* ignore broken saves */ }
@@ -39,6 +41,26 @@ window.App = (() => {
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* private mode etc. */ }
     renderStock();
+  }
+
+  // ---------- levels ----------
+  const level = () => Data.levelFromXp(state.xp);
+  // Adds XP; returns the new level if this crossed a level boundary, else 0.
+  function addXP(n) {
+    const before = level();
+    state.xp += n;
+    save();
+    const after = level();
+    return after > before ? after : 0;
+  }
+  function levelPerks(L) {
+    const a = Data.levelInfo(L - 1), b = Data.levelInfo(L);
+    const out = [];
+    if (b.startObstacles > a.startObstacles) out.push('more obstacles');
+    if (b.growEvery && b.growEvery !== a.growEvery) out.push(`new ones every ${b.growEvery} moves`);
+    if (b.hpBonus > a.hpBonus) out.push('tougher obstacles');
+    if (b.buried > a.buried) out.push(`${b.buried} buried finds per board`);
+    return out.length ? `The wilds grow wilder: ${out.join(', ')}.` : 'Your legend grows.';
   }
 
   // ---------- spoils ----------
@@ -144,6 +166,11 @@ window.App = (() => {
     if (state.unlocks.palisade) spoils += '<span class="item unlock">🔓 Spiked palisade</span>';
     if (state.unlocks.minecart) spoils += '<span class="item unlock">🔓 Mine-cart defense</span>';
     const empty = t => `<span class="empty">${t}</span>`;
+    const L = level(), a = Data.xpForLevel(L), b = Data.xpForLevel(L + 1), info = Data.levelInfo(L);
+    document.getElementById('home-level').innerHTML = `
+      <div class="lv-row"><b>⭐ Level ${L}</b><span>${state.xp - a} / ${b - a} XP</span></div>
+      <div class="xpbar big"><i style="width:${Math.round((state.xp - a) / (b - a) * 100)}%"></i></div>
+      <div class="lv-info">Gathering boards: ${info.startObstacles} obstacles${info.growEvery ? `, a new one every ${info.growEvery} moves` : ''}${info.hpBonus ? `, +${info.hpBonus} HP each` : ''} · ${info.buried} buried finds</div>`;
     document.getElementById('home-inventory').innerHTML = `
       <h3>Weapons</h3><div class="inv">${weapons || empty('Craft some in the Workshop.')}</div>
       <h3 class="mt">Tools & treasures</h3><div class="inv">${tools || empty('Tools give passive bonuses while gathering.')}</div>
@@ -188,6 +215,7 @@ window.App = (() => {
     on('btn-raid-dwarf', () => prepareRaid('dwarf'));
     on('craft-back', () => go('home'));
     on('btn-reset', () => { if (confirm('Reset all resources and items?')) { state = fresh(); save(); renderHome(); } });
+    on('dbg-level', () => { state.xp = Data.xpForLevel(level() + 1); save(); renderHome(); });
     on('dbg-raid', () => { state.marked.goblin++; state.marked.dwarf++; state.stockpile.food += 8; save(); renderHome(); });
     on('dbg-rich', () => {
       ['wood', 'stone', 'hide', 'food', 'gold', 'iron', 'coal'].forEach(k => { state.stockpile[k] += 20; });
@@ -200,7 +228,7 @@ window.App = (() => {
   }
 
   return {
-    ENEMY_NAME, boot, go, save, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
+    ENEMY_NAME, addXP, levelPerks, get level() { return level(); }, boot, go, save, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
     get state() { return state; },
   };
 })();

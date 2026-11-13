@@ -67,6 +67,28 @@ Both lands also have:
 
 War drum and dwarf ale each give +3 moves when used at raid prep.
 
+## Levels
+You earn XP from:
+- resource matches (1)
+- breaking obstacles (3)
+- finds (5)
+- following tracks or a rune stone (5)
+- catching the thief or cart (8)
+- crafting (5, or 10 for Tier 2)
+- raids: a win is 40 (60 for dwarves), opening the loot chest or vault adds 10, and a retreat gives 10
+
+Levels need 30, 90, 180, 300, 450… total XP. As you level up, the gathering boards fight back:
+
+| Level | Start obstacles | New obstacle every | Obstacle HP | Buried finds |
+|---|---|---|---|---|
+| 1 | 4 | – | base | 3 |
+| 2 | 4 | 6 moves | base | 3 |
+| 4 | 6 | 4 moves | +1 | 4 |
+| 7 | 8 | 3 moves | +2 | 5 |
+| 10+ | 10 | 3 moves | +2 | 6 |
+
+Thornbushes sprout and trees fall in the forest. Rocks tumble from the ceiling and new ore veins appear in the mine. Tier 2 weapons hit harder (axe 4 vs wood, pickaxe 4 vs stone) and **cleave** 1 damage into neighbouring obstacles, so they clear crowded high-level boards much faster than a club.
+
 ## Workshop
 - **Tier 1 · Camp:** Club 5 wood · Sling 4 wood, 3 hide
 - **Tier 2 · Forge:** Iron axe 4 wood, 3 iron · Pickaxe 3 wood, 4 iron · Iron sword 2 hide, 5 iron, 2 coal
@@ -77,6 +99,7 @@ War drum and dwarf ale each give +3 moves when used at raid prep.
 - Make tracks or a rune stone appear right away, or the thief or cart.
 - +1 marked village and stronghold, +8 food.
 - +20 of every resource.
+- ⭐ +1 level.
 
 ## Not built yet
 Fortify editor, goblins and dwarves raiding your board, PvP, Tier 3+.

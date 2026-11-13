@@ -347,7 +347,7 @@ window.Board = (() => {
     }
 
     // Big "you found something!" moment. Queued so several finds play one after another.
-    celebrate(cell, { icon, title, sub = '', rare = false }) {
+    celebrate(cell, { icon, title, sub = '', rare = false, kicker = '' }) {
       this.celebrateQ = this.celebrateQ.then(() => new Promise(done => {
         this.celebrating++;
         this.dirt(cell);
@@ -358,7 +358,7 @@ window.Board = (() => {
         d.style.setProperty('--fx', ((c + 0.5) / this.cols * 100) + '%');
         d.style.setProperty('--fy', ((r + 0.5) / this.rows * 100) + '%');
         d.innerHTML = `<div class="cel-rays"></div><div class="cel-icon">${icon}</div>
-          <div class="cel-text"><div class="cel-kicker">${rare ? '✦ Rare find ✦' : 'You found'}</div>
+          <div class="cel-text"><div class="cel-kicker">${kicker || (rare ? '✦ Rare find ✦' : 'You found')}</div>
           <div class="cel-title">${title}</div><div class="cel-sub">${sub}</div><div class="cel-tap">tap to continue</div></div>`;
         this.wrap.appendChild(d);
         let closed = false;
@@ -445,12 +445,29 @@ window.Board = (() => {
         else if (this.isPiece(x)) hit.add(x.piece);
       });
       if (W.area) this.toast('BOOM!');
+      // Tier 2 weapons cleave into obstacles next to the one you hit.
+      const splash = new Map();
+      if (W.splash && !W.area) {
+        hit.forEach(p => {
+          for (let i = 0; i < p.w; i++) DIRS.forEach(([dr, dc]) => {
+            const r2 = p.r + dr, c2 = p.c + i + dc;
+            const x = this.inBounds(r2, c2) && this.grid[r2][c2];
+            if (this.isPiece(x) && x.piece !== p && x.piece.kind !== 'fog' && !hit.has(x.piece)) splash.set(x.piece, true);
+          });
+        });
+      }
       hit.forEach(p => {
         if (p.gone) return;
         if (p.kind === 'fog') { if (W.fog) this.hooks.onPieceHit(p, 1, 'weapon', w); return; }
         const dmg = Data.weaponDamage(w, p);
         if (dmg > 0) { this.float([p.r, p.c + Math.floor(p.w / 2)], `−${Math.min(dmg, p.hp)}`, 'loss'); this.hooks.onPieceHit(p, dmg, 'weapon', w); }
       });
+      splash.forEach((_, p) => {
+        if (p.gone) return;
+        const dmg = Math.min(W.splash, Data.weaponDamage(w, p));
+        if (dmg > 0) { this.float([p.r, p.c + Math.floor(p.w / 2)], `−${Math.min(dmg, p.hp)} cleave`, 'loss'); this.hooks.onPieceHit(p, dmg, 'weapon', w); }
+      });
+      if (splash.size) this.toast(`${Data.ITEMS[w].icon} Cleave! Neighbours take damage too.`, 'win');
       this.popCells(clear);
       this.render();
       window.Sound?.sfx(W.area ? 'blast' : 'hit');

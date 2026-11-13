@@ -339,6 +339,11 @@ window.Battle = (() => {
       run.bag.spoils.forEach(k => gained.push(App.grantSpoil(k)));
       App.save();
     }
+    const gainXp = (run.won ? (run.enemy === 'dwarf' ? Data.XP.raidWinDwarf : Data.XP.raidWin) : reason === 'retreat' ? Data.XP.retreat : 0)
+      + (run.lootOpened && keepLoot ? Data.XP.loot : 0);
+    const newLv = gainXp ? App.addXP(gainXp) : 0;
+    if (gainXp) gained.push(`⭐ +${gainXp} XP`);
+    if (newLv) gained.push(`🎉 <b>Level ${newLv}!</b> ${App.levelPerks(newLv)}`);
     const stars = [run.lootOpened, run.won, run.lootOpened && run.won && run.moves > 0];
     const title = run.won ? 'Victory!' : reason === 'retreat' ? 'You retreated' : 'Defeated!';
     const line = run.won ? `The ${cfg.name} has fallen.`

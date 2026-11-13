@@ -102,7 +102,8 @@ window.Craft = (() => {
     App.save();
     forge.classList.add('done');
     item.classList.add('pop');
-    text.textContent = `${it.name} ${isTool(r) ? 'made' : 'crafted'}!`;
+    const newLv = App.addXP(r.tier === 2 ? Data.XP.craft2 : Data.XP.craft);
+    text.textContent = `${it.name} ${isTool(r) ? 'made' : 'crafted'}!` + (newLv ? ` ⭐ Level ${newLv}!` : '');
     text.classList.add('show');
     Sound.sfx('crafted');
     await sleep(1300);

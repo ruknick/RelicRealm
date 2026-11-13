@@ -31,7 +31,9 @@ window.Gather = (() => {
       weights: { wood: 18, stone: 18, hide: 18, berries: 16, leaves: 30 },
       gives: { wood: 'wood', stone: 'stone', hide: 'hide', berries: 'food', gold: 'gold' },
       bag: ['wood', 'stone', 'hide', 'food', 'gold'],
-      obstacles: () => ['stump', 'stump', 'thorn', 'thorn', ...(Math.random() < 0.4 ? ['locked'] : [])],
+      obstacles: n => [...Array.from({ length: n }, (_, i) => (i % 2 ? 'thorn' : 'stump')), ...(Math.random() < 0.4 ? ['locked'] : [])],
+      grow: () => (Math.random() < 0.6 ? 'thorn' : 'stump'),
+      growMsg: { thorn: '🌿 A thornbush sprouts up!', stump: '🌳 A tree falls — a new stump!' },
       event: { piece: 'thief', msg: '🏃 A goblin thief grabbed a sack and is running! Catch it →', loot: ['wood', 'stone', 'hide', 'food'] },
       discover: { piece: 'tracks', enemy: 'goblin', spot: '🐾 Fresh goblin tracks! Match next to them to follow.' },
       finds: 'forest',
@@ -42,7 +44,9 @@ window.Gather = (() => {
       weights: { stone: 18, ore: 17, coal: 17, gravel: 26, bones: 22 },
       gives: { stone: 'stone', ore: 'iron', coal: 'coal', gold: 'gold' },
       bag: ['stone', 'iron', 'coal', 'gold'],
-      obstacles: () => ['boulder', 'boulder', 'vein', 'vein', ...(Math.random() < 0.5 ? ['locked'] : [])],
+      obstacles: n => [...Array.from({ length: n }, (_, i) => (i % 2 ? 'vein' : 'boulder')), ...(Math.random() < 0.5 ? ['locked'] : [])],
+      grow: () => (Math.random() < 0.7 ? 'boulder' : 'vein'),
+      growMsg: { boulder: '🪨 Rocks tumble from the ceiling!', vein: '✨ A new ore vein glints in the wall!' },
       event: { piece: 'cart', msg: '⛏️ A runaway ore cart! Stop it before it rolls off →', loot: ['iron', 'coal', 'stone'] },
       discover: { piece: 'rune', enemy: 'dwarf', spot: 'ᚱ A cracked rune stone… match next to it to read it.' },
       finds: 'mine',
@@ -60,6 +64,26 @@ window.Gather = (() => {
   const pick = a => a[Math.floor(Math.random() * a.length)];
   const has = k => App.state.inventory[k] > 0;
   const midOf = p => [p.r, p.c + Math.floor(p.w / 2)];
+
+  const SCALES = ['stump', 'thorn', 'boulder', 'vein'];
+  function addObstacle(kind, r, c, appear = false) {
+    const spec = { ...P[kind] };
+    if (SCALES.includes(kind)) spec.hp += run.lv.hpBonus;
+    return board.addPiece(spec, r, c, 1, appear);
+  }
+  function xp(n, why) {
+    const lv = App.addXP(n);
+    run.xp += n;
+    hudLevel();
+    if (lv) {
+      board.celebrate([3, 3], { icon: '⭐', title: `Level ${lv}!`, sub: App.levelPerks(lv), rare: true, kicker: '✦ Level up ✦' });
+    }
+  }
+  function hudLevel() {
+    const st = App.state, L = App.level;
+    const a = Data.xpForLevel(L), b = Data.xpForLevel(L + 1);
+    document.getElementById('g-level').innerHTML = `⭐ Lv ${L} <span class="xpbar"><i style="width:${Math.round((st.xp - a) / (b - a) * 100)}%"></i></span>`;
+  }
 
   const needsKey = () => board.piecesOf('locked').length > 0 && App.state.inventory.key < 1;
 
@@ -130,6 +154,7 @@ window.Gather = (() => {
     run.finds.push(`${info.icon} ${info.name}`);
     if (id === 'key' && board.piecesOf('locked').length) detail = 'Now tap 🗝️ Old key, then the locked chest!';
     board.celebrate(cell, { icon: info.icon, title: `${info.name}!`, sub: detail || info.desc, rare: id === 'shard' || id === 'key' });
+    xp(Data.XP.find);
     board.renderWeapons();
     board.renderPieces();
   }
@@ -229,6 +254,7 @@ window.Gather = (() => {
         let n = points(ri.cells.length) + (step > 1 ? 1 : 0);
         if (TOOL_BONUS[res] && has(TOOL_BONUS[res])) n += 1;
         addToBackpack(res, n, ri.cells[Math.floor(ri.cells.length / 2)]);
+        xp(Data.XP.match);
       }
     },
     onPieceHit(p, n, src, w) {
@@ -247,6 +273,7 @@ window.Gather = (() => {
         addToBackpack('iron', mined, cell);
       }
       if (!board.hurt(p, dmg)) return;
+      xp(p.kind === 'thief' || p.kind === 'cart' ? Data.XP.chase : p.kind === 'tracks' || p.kind === 'rune' ? Data.XP.discover : Data.XP.obstacle);
       switch (p.kind) {
         case 'stump':
           addToBackpack('wood', w === 'axe' ? 5 : 2, cell);
@@ -281,10 +308,10 @@ window.Gather = (() => {
     onFind(id, cell) { applyFind(id, cell); },
     onPieceTap(p) {
       const msg = {
-        stump: 'Old stump (wood, 2 hits). An Axe chops it for bonus wood.',
-        thorn: 'Thornbush — something\'s inside. Cut it with a Club, Axe, Sling or Firepot.',
+        stump: `Old stump (wood, ${p.hp} HP). An Axe chops it fast for bonus wood.`,
+        thorn: `Thornbush (${p.hp} HP) — something's inside. Cut it with a Club, Axe, Sling or Firepot.`,
         locked: App.state.inventory.key > 0 ? 'Locked chest — tap 🗝️ Old key, then tap the chest!' : 'Locked chest. Its key is buried somewhere on this board — clear tiles to dig it up.',
-        boulder: 'Boulder (stone, 3 hits). A Pickaxe cracks it fast. Sometimes hides a find.',
+        boulder: `Boulder (stone, ${p.hp} HP). A Pickaxe cracks it fast. Sometimes hides a find.`,
         vein: 'Ore vein — every hit gives iron. Pickaxes mine double.',
         thief: 'A goblin thief! Match next to it or hit it before it escapes.',
         cart: 'A runaway cart full of ore! Stop it before it rolls off.',
@@ -305,6 +332,20 @@ window.Gather = (() => {
         if (!run.eventSpawned && run.movesMade >= EVENT_AFTER && Math.random() < EVENT_CHANCE) {
           run.eventSpawned = true;
           run.eventPiece = spawnOn(land.event.piece, (r, c) => c === 0 && r >= 1, land.event.msg);
+        }
+        if (run.lv.growEvery && ++run.sinceGrow >= run.lv.growEvery) {
+          run.sinceGrow = 0;
+          const n = board.pieces.filter(x => SCALES.includes(x.kind)).length;
+          const spots = board.tileCells(r => r >= 1);
+          if (n < 12 && spots.length) {
+            const kind = land.grow();
+            const [r, c] = pick(spots);
+            addObstacle(kind, r, c, true);
+            board.render();
+            board.toast(land.growMsg[kind], 'alert');
+            Sound.sfx(kind === 'boulder' ? 'break' : 'reveal');
+            await board.wait(450);
+          }
         }
         if (!run.discoverSpawned && run.movesMade >= DISCOVER_AFTER && Math.random() < DISCOVER_CHANCE) {
           run.discoverSpawned = true;
@@ -334,6 +375,7 @@ window.Gather = (() => {
     else if (run.discoverSpawned && !run.discovered) notes.push('You left something unexplored…');
     if (board.buried.size) notes.push(`${board.buried.size} find${board.buried.size > 1 ? 's' : ''} stayed buried.`);
     if (run.overflow) notes.push(`${run.overflow} more didn't fit in your backpack.`);
+    notes.unshift(`⭐ +${run.xp} XP · Level ${App.level}`);
     App.choose({
       title: reason === 'moves' ? 'Out of moves' : 'Back home safe',
       html: `<table class="sum-table"><thead><tr><th></th><th>Banked</th></tr></thead><tbody>${rows}</tbody></table>
@@ -359,21 +401,23 @@ window.Gather = (() => {
     document.getElementById('g-title').textContent = `${land.icon} ${land.name}`;
     buildBackpack();
     board.reset();
+    const lv = Data.levelInfo(App.level);
     run = {
+      lv, xp: 0, sinceGrow: 0,
       moves: MOVES, movesMade: 0, backpack: Object.fromEntries(land.bag.map(t => [t, 0])), overflow: 0, fullWarned: false,
       finds: [], told: {}, eventPiece: null, eventSpawned: false,
       discoverSpawned: false, followed: false, discovered: false, marked: false, ended: false,
     };
     // Obstacles first (rows 1-6), then tiles, then buried finds under random tiles.
     const used = new Set();
-    for (const kind of land.obstacles()) {
+    for (const kind of land.obstacles(lv.startObstacles)) {
       let r, c;
       do { r = 1 + Math.floor(Math.random() * (SIZE - 1)); c = Math.floor(Math.random() * SIZE); } while (used.has(`${r},${c}`));
       used.add(`${r},${c}`);
-      board.addPiece(P[kind], r, c);
+      addObstacle(kind, r, c);
     }
     board.fillEmpty();
-    const spots = board.tileCells().sort(() => Math.random() - 0.5).slice(0, BURIED);
+    const spots = board.tileCells().sort(() => Math.random() - 0.5).slice(0, lv.buried);
     spots.forEach(([r, c]) => board.buried.set(`${r},${c}`, Data.rollFrom(Data.FINDS[land.finds])));
     // A locked chest always has its key buried somewhere on the same board.
     if (board.piecesOf('locked').length && ![...board.buried.values()].includes('key')) {
@@ -388,6 +432,7 @@ window.Gather = (() => {
     board.renderBuried();
     board.scheduleHint();
     hud();
+    hudLevel();
     Sound.music(land.music);
     if (App.state.debug.discoverNow) {
       run.discoverSpawned = true;
@@ -398,7 +443,7 @@ window.Gather = (() => {
     } else if (board.piecesOf('locked').length) {
       board.toast('🔒 A locked chest! Its key is buried somewhere here…', 'alert', 2800);
     } else {
-      board.toast(`${land.icon} ${land.name}: ${BURIED} finds are buried somewhere…`, '', 2400);
+      board.toast(`${land.icon} ${land.name}: ${lv.buried} finds are buried somewhere…`, '', 2400);
     }
   }
 
