@@ -168,8 +168,8 @@ window.App = (() => {
   function go(screen, opts) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById('screen-' + screen).classList.remove('hidden');
-    if (screen === 'home') { renderHome(); Sound.music('home'); }
-    if (screen === 'craft') { Craft.render(); Sound.music('home'); }
+    if (screen === 'home') { renderHome(); Sound.music('home'); Art.setScene('home'); }
+    if (screen === 'craft') { Craft.render(); Sound.music('home'); Art.setScene('craft'); }
     if (screen === 'gather') Gather.start(opts);
     if (screen === 'battle') Battle.start(opts);
     window.scrollTo(0, 0);

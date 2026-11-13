@@ -13,16 +13,17 @@ window.Gather = (() => {
   const points = len => (len >= 5 ? 3 : len === 4 ? 2 : 1);   // +1 on chain reactions
 
   const P = {
-    stump:   { kind: 'stump',   label: 'STUMP', mat: 'wood',     hp: 2 },
-    thorn:   { kind: 'thorn',   label: '',      mat: 'plant',    hp: 1 },
-    locked:  { kind: 'locked',  label: '',      mat: 'iron',     hp: 2, lock: true },
-    boulder: { kind: 'boulder', label: '',      mat: 'stone',    hp: 3 },
-    vein:    { kind: 'vein',    label: 'ORE',   mat: 'stone',    hp: 3 },
-    thief:   { kind: 'thief',   label: 'THIEF', mat: 'creature', hp: 1 },
-    cart:    { kind: 'cart',    label: '',      mat: 'wood',     hp: 1 },
-    tracks:  { kind: 'tracks',  label: '🐾',    mat: 'other',    hp: 1 },
-    rune:    { kind: 'rune',    label: 'ᚱ',     mat: 'other',    hp: 1 },
+    stump:   { kind: 'stump',   label: '', mat: 'wood',     hp: 2, art: 'stump' },
+    thorn:   { kind: 'thorn',   label: '', mat: 'plant',    hp: 1, art: 'thorn' },
+    locked:  { kind: 'locked',  label: '', mat: 'iron',     hp: 1, lock: true, keyOnly: true, art: 'locked' },
+    boulder: { kind: 'boulder', label: '', mat: 'stone',    hp: 3, art: 'boulder' },
+    vein:    { kind: 'vein',    label: '', mat: 'stone',    hp: 3, art: 'vein' },
+    thief:   { kind: 'thief',   label: '', mat: 'creature', hp: 1, art: 'thief' },
+    cart:    { kind: 'cart',    label: '', mat: 'wood',     hp: 1, art: 'cart' },
+    tracks:  { kind: 'tracks',  label: '', mat: 'other',    hp: 1, art: 'tracks' },
+    rune:    { kind: 'rune',    label: '', mat: 'other',    hp: 1, art: 'rune' },
   };
+
 
   const LANDS = {
     forest: {
@@ -42,7 +43,7 @@ window.Gather = (() => {
       gives: { stone: 'stone', ore: 'iron', coal: 'coal', gold: 'gold' },
       bag: ['stone', 'iron', 'coal', 'gold'],
       obstacles: () => ['boulder', 'boulder', 'vein', 'vein', ...(Math.random() < 0.5 ? ['locked'] : [])],
-      event: { piece: 'cart', msg: '🛒 A runaway ore cart! Stop it before it rolls off →', loot: ['iron', 'coal', 'stone'] },
+      event: { piece: 'cart', msg: '⛏️ A runaway ore cart! Stop it before it rolls off →', loot: ['iron', 'coal', 'stone'] },
       discover: { piece: 'rune', enemy: 'dwarf', spot: 'ᚱ A cracked rune stone… match next to it to read it.' },
       finds: 'mine',
       hint: 'Match ore for iron and coal for the forge. Pickaxes crack boulders and mine veins fast.',
@@ -59,6 +60,8 @@ window.Gather = (() => {
   const pick = a => a[Math.floor(Math.random() * a.length)];
   const has = k => App.state.inventory[k] > 0;
   const midOf = p => [p.r, p.c + Math.floor(p.w / 2)];
+
+  const needsKey = () => board.piecesOf('locked').length > 0 && App.state.inventory.key < 1;
 
   function randType() {
     const roll = Math.random();
@@ -101,9 +104,9 @@ window.Gather = (() => {
       case 'orepocket': addToBackpack('iron', 3, cell, delay); break;
       case 'coalseam': addToBackpack('coal', 3, cell, delay); break;
       case 'nugget': addToBackpack('gold', 3, cell, delay); break;
-      case 'lostclub': st.inventory.club++; detail = 'added to your weapons'; break;
-      case 'sling': st.inventory.sling++; detail = 'added to your weapons'; break;
-      case 'key': st.inventory.key++; detail = 'opens a locked chest or iron gate'; break;
+      case 'lostclub': st.inventory.club++; break;
+      case 'sling': st.inventory.sling++; break;
+      case 'key': st.inventory.key++; break;
       case 'scrap': {
         const enemy = land.discover.enemy;
         st.scraps[enemy]++;
@@ -125,10 +128,10 @@ window.Gather = (() => {
     }
     App.save();
     run.finds.push(`${info.icon} ${info.name}`);
-    board.float(cell, `${info.icon} ${info.name}!`, id === 'shard' ? 'gold' : 'bonus', delay);
-    board.toast(`${info.icon} ${info.name}${detail ? ' — ' + detail : '!'}`, 'win', 2600);
-    Sound.sfx(id === 'shard' ? 'victory' : 'coin');
+    if (id === 'key' && board.piecesOf('locked').length) detail = 'Now tap 🗝️ Old key, then the locked chest!';
+    board.celebrate(cell, { icon: info.icon, title: `${info.name}!`, sub: detail || info.desc, rare: id === 'shard' || id === 'key' });
     board.renderWeapons();
+    board.renderPieces();
   }
 
   // ---------- HUD ----------
@@ -139,7 +142,9 @@ window.Gather = (() => {
     document.getElementById('bp-total').textContent = bagTotal();
     document.getElementById('backpack').classList.toggle('full', bagTotal() >= BACKPACK);
     document.getElementById('g-exit').classList.toggle('glow', run.fullWarned);
-    document.getElementById('g-finds').textContent = `🔍 ${board.buried.size} buried`;
+    const keyHere = [...board.buried.values()].includes('key');
+    document.getElementById('g-finds').textContent = `🔍 ${board.buried.size} buried` +
+      (board.piecesOf('locked').length ? (App.state.inventory.key > 0 ? ' · 🗝️ you have a key!' : keyHere ? ' · 🔒 its key is buried here' : '') : '');
     const ev = run.eventPiece && !run.eventPiece.gone;
     document.getElementById('gather-hint').textContent = board.armedHint() ||
       (ev ? (land === LANDS.forest ? 'Catch the thief: match next to it or hit it with a weapon!' : 'Stop the cart: match next to it or hit it!')
@@ -232,7 +237,7 @@ window.Gather = (() => {
         if (!run.told[p.kind]) {
           run.told[p.kind] = true;
           board.toast(p.kind === 'thorn' ? '🌿 Matches can\'t cut thorns — use a Club, Axe, Sling or Firepot.'
-            : '🔒 Locked! Open it with an Old key, Pickaxe, Sword or Sling.', '', 2800);
+            : '🔒 Locked tight! Its key is buried somewhere on this board — dig it up.', '', 2800);
         }
         return;
       }
@@ -254,15 +259,16 @@ window.Gather = (() => {
           break;
         case 'vein': board.toast('Vein mined out!'); break;
         case 'locked':
-          addToBackpack('gold', 4, cell);
-          applyFind(Data.rollFrom([['shard', 40], ['sling', 30], ['scrap', 30]]), cell, 300);
-          Sound.sfx('victory');
+          addToBackpack('gold', 6, cell);
+          board.toast('🔓 The chest creaks open!', 'win');
+          applyFind(Data.rollFrom([['shard', 45], ['sling', 20], ['scrap', 20], ['lostclub', 15]]), cell);
           break;
         case 'thief':
         case 'cart':
           for (let i = 0; i < 4; i++) addToBackpack(pick(land.event.loot), 1, cell, i * 180);
           board.toast(p.kind === 'thief' ? 'Caught the thief! You take the sack.' : 'Cart stopped! You grab the ore.', 'win');
-          if (p.kind === 'thief' && Math.random() < 0.35) applyFind(pick(['lostclub', 'sling', 'scrap']), cell, 800);
+          if (needsKey() && Math.random() < 0.6) applyFind('key', cell);
+          else if (Math.random() < 0.35) applyFind(pick(['lostclub', 'sling', 'scrap']), cell);
           run.eventPiece = null;
           Sound.sfx('victory');
           break;
@@ -277,7 +283,7 @@ window.Gather = (() => {
       const msg = {
         stump: 'Old stump (wood, 2 hits). An Axe chops it for bonus wood.',
         thorn: 'Thornbush — something\'s inside. Cut it with a Club, Axe, Sling or Firepot.',
-        locked: 'Locked chest (iron). Needs an Old key, Pickaxe, Sword or Sling.',
+        locked: App.state.inventory.key > 0 ? 'Locked chest — tap 🗝️ Old key, then tap the chest!' : 'Locked chest. Its key is buried somewhere on this board — clear tiles to dig it up.',
         boulder: 'Boulder (stone, 3 hits). A Pickaxe cracks it fast. Sometimes hides a find.',
         vein: 'Ore vein — every hit gives iron. Pickaxes mine double.',
         thief: 'A goblin thief! Match next to it or hit it before it escapes.',
@@ -369,6 +375,13 @@ window.Gather = (() => {
     board.fillEmpty();
     const spots = board.tileCells().sort(() => Math.random() - 0.5).slice(0, BURIED);
     spots.forEach(([r, c]) => board.buried.set(`${r},${c}`, Data.rollFrom(Data.FINDS[land.finds])));
+    // A locked chest always has its key buried somewhere on the same board.
+    if (board.piecesOf('locked').length && ![...board.buried.values()].includes('key')) {
+      const [r, c] = spots[0];
+      board.buried.set(`${r},${c}`, 'key');
+    }
+    board.setFrame(key);
+    Art.setScene(key);
     board.showBuried = has('lamp');
     board.renderWeapons(document.getElementById('gather-weapons'));
     board.render();
@@ -382,6 +395,8 @@ window.Gather = (() => {
     } else if (App.state.debug.eventNow) {
       run.eventSpawned = true;
       run.eventPiece = spawnOn(land.event.piece, (r, c) => c === 0 && r >= 1, land.event.msg);
+    } else if (board.piecesOf('locked').length) {
+      board.toast('🔒 A locked chest! Its key is buried somewhere here…', 'alert', 2800);
     } else {
       board.toast(`${land.icon} ${land.name}: ${BURIED} finds are buried somewhere…`, '', 2400);
     }

@@ -372,6 +372,8 @@ window.Battle = (() => {
     document.getElementById('screen-battle').dataset.enemy = enemy;
     document.getElementById('b-title').textContent = `${cfg.icon} ${cfg.name}`;
     board.reset();
+    board.setFrame(enemy);
+    Art.setScene(enemy);
     run = {
       enemy, moves: cfg.moves + bonusMoves, sinceEnemy: 0, keep: null, broken: [], gateOpen: false,
       bag: { spoils: [] }, won: false, lootOpened: false, ended: false, weaponsUsed: 0, told: {},

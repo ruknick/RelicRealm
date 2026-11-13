@@ -56,6 +56,12 @@ window.Sound = (() => {
       const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = o.lp;
       g.connect(f); out = f;
     }
+    if (o.vib) {   // vibrato (flute-like)
+      const lfo = ctx.createOscillator(), lg = ctx.createGain();
+      lfo.frequency.value = o.vibRate || 5.5; lg.gain.value = o.vib;
+      lfo.connect(lg); lg.connect(osc.frequency);
+      lfo.start(t); lfo.stop(t + dur + 0.05);
+    }
     osc.connect(g); out.connect(o.bus || sfxBus);
     osc.start(t); osc.stop(t + dur + 0.05);
   }
@@ -73,6 +79,29 @@ window.Sound = (() => {
     tone(midi(m), t, dur, { type: 'triangle', vol, bus });
     tone(midi(m) * 2.001, t, dur * 0.5, { type: 'sawtooth', vol: vol * 0.18, bus, lp: 2200 });
   }
+  // Wooden flute: soft attack, vibrato.
+  const flute = (m, t, dur, vol, bus) => {
+    tone(midi(m), t, dur, { type: 'sine', vol, attack: 0.05, vib: midi(m) * 0.012, bus });
+    tone(midi(m) * 2, t, dur * 0.8, { type: 'sine', vol: vol * 0.12, attack: 0.06, bus });
+    noise(t, 0.06, { filter: 'bandpass', freq: midi(m) * 2, vol: vol * 0.25, bus });
+  };
+  // Dwarven bell: inharmonic partials, long ring.
+  const bell = (m, t, dur, vol, bus) => {
+    tone(midi(m), t, dur, { type: 'sine', vol, bus });
+    tone(midi(m) * 2.76, t, dur * 0.5, { type: 'sine', vol: vol * 0.35, bus });
+    tone(midi(m) * 5.4, t, dur * 0.25, { type: 'sine', vol: vol * 0.15, bus });
+  };
+  const bird = (t, bus) => {
+    const f = 2600 + Math.random() * 1400;
+    for (let i = 0; i < 2 + Math.floor(Math.random() * 3); i++)
+      tone(f, t + i * 0.09, 0.07, { type: 'sine', glide: f * 1.35, vol: 0.035, bus });
+  };
+  const drip = (t, bus) => tone(1500 + Math.random() * 700, t, 0.12, { type: 'sine', glide: 700, vol: 0.06, bus });
+  const clink = (t, bus, vol = 0.05) => {
+    tone(1900, t, 0.18, { type: 'square', vol: vol * 0.5, lp: 5000, bus });
+    tone(2830, t, 0.25, { type: 'sine', vol, bus });
+    noise(t, 0.04, { filter: 'highpass', freq: 4000, vol: vol * 2, bus });
+  };
   const kick = (t, bus, vol = 0.5) => tone(130, t, 0.22, { type: 'sine', glide: 42, vol, bus });
   const snare = (t, bus, vol = 0.14) => noise(t, 0.14, { filter: 'bandpass', freq: 1800, vol, bus });
   const hat = (t, bus, vol = 0.04) => noise(t, 0.04, { filter: 'highpass', freq: 7000, vol, bus });
@@ -80,8 +109,8 @@ window.Sound = (() => {
   // ---------- music ----------
   const _ = null;
   const TRACKS = {
-    // Calm D-dorian folk tune for home and gathering.
-    forest: {
+    // Calm D-dorian folk tune for the home screen.
+    home: {
       bpm: 92,
       roots: [38, 36, 31, 33],
       chords: [[50, 53, 57], [48, 52, 55], [43, 47, 50], [45, 48, 52]],
@@ -131,31 +160,55 @@ window.Sound = (() => {
       },
     },
   };
-  // Echoing E-minor mine tune: low drone, sparse plucks, pick clinks.
+  // Deep, echoing mine: low drone, dwarven bells, pickaxe clinks, water drips.
   TRACKS.mine = {
-    bpm: 84,
-    roots: [28, 28, 24, 26],
+    bpm: 66,
+    roots: [28, 28, 29, 26],
     melody: [
-      64, _, _, 67, _, 71, _, _,   69, _, 67, _, 64, _, _, _,
-      60, _, 64, _, 67, _, 72, 71, 69, _, _, 67, 66, _, _, _,
-      64, _, 71, _, 76, _, 74, 71, 72, _, 69, _, 67, _, _, _,
-      64, 67, 71, _, 69, _, 67, 64, 62, _, 64, _, _, _, _, _,
+      52, _, _, 53, _, _, 52, _,   55, _, 53, _, 52, _, _, _,
+      57, _, _, 55, _, 53, _, _,   52, _, 53, 55, 53, _, 52, _,
+      _, _, 64, _, _, 65, _, _,    67, _, 65, _, 64, _, _, _,
+      _, _, 60, _, 59, _, 57, _,   52, _, _, _, _, _, _, _,
     ],
     play(i, t, d) {
       const bar = Math.floor(i / 8) % 4, s = i % 8;
       const root = this.roots[bar];
       if (s === 0) {
-        tone(midi(root), t, d * 8, { type: 'sawtooth', vol: 0.05, bus: musicBus, lp: 300, attack: 0.3 });
-        tone(midi(root + 12), t, d * 8, { type: 'sine', vol: 0.06, bus: musicBus, attack: 0.4 });
-        tone(80, t, 0.3, { type: 'sine', glide: 45, vol: 0.2, bus: musicBus });
+        tone(midi(root), t, d * 8.2, { type: 'sawtooth', vol: 0.07, bus: musicBus, lp: 260, attack: 0.4 });
+        tone(midi(root + 7), t, d * 8.2, { type: 'sine', vol: 0.05, bus: musicBus, attack: 0.5 });
+        tone(70, t, 0.4, { type: 'sine', glide: 40, vol: 0.22, bus: musicBus });
       }
-      if (s === 7 && bar % 2 === 1) tone(2400, t, 0.12, { type: 'sine', vol: 0.03, bus: musicBus });
+      if (s === 2 || s === 6) clink(t, musicBus, s === 2 ? 0.045 : 0.03);
+      if (s === 4) tone(60, t, 0.3, { type: 'sine', glide: 38, vol: 0.12, bus: musicBus });
       const m = this.melody[i % this.melody.length];
-      if (m) pluck(m - 12, t, d * 2.6, 0.12, musicBus);
+      if (m) bell(m, t, d * 3.5, 0.07, musicBus);
+      if (Math.random() < 0.09) drip(t + d * Math.random(), musicBus);
     },
   };
-  TRACKS.home = TRACKS.forest;
+
+  // Bright G-major woodland tune: wooden flute, plucked bass, shaker, birdsong.
+  TRACKS.forest = {
+    bpm: 100,
+    roots: [43, 40, 36, 38, 43, 40, 36, 38],
+    melody: [
+      74, _, 76, 74, 71, _, 67, _,   69, _, 71, _, 67, _, 64, _,
+      72, _, 71, 69, 67, _, 69, 71,  74, _, _, _, 78, _, 76, 74,
+      79, _, 78, 76, 74, _, 71, _,   76, _, 74, 71, 69, _, 67, _,
+      64, 67, 72, _, 71, _, 69, _,   67, _, 66, _, 67, _, _, _,
+    ],
+    play(i, t, d) {
+      const bar = Math.floor(i / 8) % 8, s = i % 8;
+      const root = this.roots[bar];
+      if (s === 0 || s === 3 || s === 4 || s === 6) pluck(root + (s === 3 ? 12 : s === 6 ? 7 : 0), t, d * 1.4, 0.12, musicBus);
+      if (s === 0) [0, 4, 7].forEach(n => tone(midi(root + 24 + n), t, d * 8, { type: 'triangle', vol: 0.018, attack: 0.3, bus: musicBus }));
+      if (s % 2 === 1) noise(t, 0.05, { filter: 'highpass', freq: 6000, vol: 0.03, bus: musicBus });
+      const m = this.melody[i % this.melody.length];
+      if (m) flute(m, t, d * 1.9, 0.09, musicBus);
+      if (s === 5 && Math.random() < 0.3) bird(t, musicBus);
+    },
+  };
   TRACKS.dwarf = TRACKS.battle;
+  TRACKS.craft = TRACKS.home;
 
   function startLoop() {
     if (!ctx || timer || !wanted) return;
@@ -212,6 +265,17 @@ window.Sound = (() => {
       for (let i = 0; i < 6; i++) tone(2000 + Math.random() * 2000, t + 0.35 + i * 0.05, 0.12, { type: 'sine', vol: 0.03 });
     },
     tick: t => tone(1500, t, 0.03, { type: 'sine', vol: 0.04 }),
+    found: t => {
+      noise(t, 0.2, { filter: 'lowpass', freq: 900, vol: 0.18 });
+      [72, 76, 79, 84].forEach((m, i) => tone(midi(m), t + 0.12 + i * 0.07, 0.45, { type: 'triangle', vol: 0.1 }));
+      for (let i = 0; i < 5; i++) tone(2200 + i * 380, t + 0.45 + i * 0.04, 0.14, { type: 'sine', vol: 0.035 });
+    },
+    rare: t => {
+      noise(t, 0.25, { filter: 'lowpass', freq: 900, vol: 0.2 });
+      [67, 72, 76, 79, 84, 88].forEach((m, i) => tone(midi(m), t + 0.1 + i * 0.08, 0.6, { type: 'square', vol: 0.035, lp: 3000 }));
+      [72, 76, 79, 84].forEach(m => tone(midi(m), t + 0.65, 1.4, { type: 'triangle', vol: 0.07 }));
+      for (let i = 0; i < 10; i++) tone(2000 + Math.random() * 2500, t + 0.6 + i * 0.06, 0.15, { type: 'sine', vol: 0.03 });
+    },
   };
 
   function sfx(name, arg) {

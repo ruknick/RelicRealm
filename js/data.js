@@ -37,7 +37,7 @@ window.Data = (() => {
     dpick:     { name: 'Dwarven pick', icon: '⚒️', weapon: true, uses: 3, spoil: 'dwarf', desc: 'Smashes stone & iron in one blow.' },
     ale:       { name: 'Dwarf ale', icon: '🍺', spoil: 'dwarf', desc: '+3 moves in a raid.' },
     runestone: { name: 'Runestone', icon: '🪨', spoil: 'dwarf', desc: '+1 HP to your walls (for Fortify).' },
-    cartbp:    { name: 'Mine-cart blueprint', icon: '🛒', spoil: 'dwarf', desc: 'Unlocks the Mine-cart defense.' },
+    cartbp:    { name: 'Mine-cart blueprint', icon: '🛤️', spoil: 'dwarf', desc: 'Unlocks the Mine-cart defense.' },
     // Relic
     crown:     { name: 'Old King\'s Crown', icon: '👑', trinket: true, desc: 'Legendary. +2 moves in every raid.' },
   };
@@ -61,6 +61,7 @@ window.Data = (() => {
     const W = WEAPONS[w];
     if (!W) return 0;
     if (W.unlock) return piece.lock ? 99 : 0;
+    if (piece.keyOnly) return 0;          // locked chests open only with a key
     if (piece.kind === 'keep' && W.keep) return Math.max(W.keep, W[piece.mat] || 0);
     return W[piece.mat] || 0;
   }
@@ -71,18 +72,19 @@ window.Data = (() => {
     forest: [['cache', 30], ['basket', 20], ['lostclub', 12], ['scrap', 15], ['key', 13], ['shard', 10]],
     mine:   [['orepocket', 30], ['coalseam', 20], ['nugget', 15], ['scrap', 15], ['key', 10], ['shard', 10]],
   };
-  const FIND_INFO = {
-    cache:     { icon: '🎁', name: 'Hidden cache' },
-    basket:    { icon: '🧺', name: 'Food basket' },
-    lostclub:  { icon: '🏏', name: 'Lost club' },
-    scrap:     { icon: '🗺️', name: 'Map scrap' },
-    key:       { icon: '🗝️', name: 'Old key' },
-    shard:     { icon: '💎', name: 'Relic shard' },
-    orepocket: { icon: '⛓️', name: 'Ore pocket' },
-    coalseam:  { icon: '🪨', name: 'Coal seam' },
-    nugget:    { icon: '🪙', name: 'Gold nuggets' },
-    sling:     { icon: '🪃', name: 'Old sling' },
+  const FIND_INFO = {   // desc is shown under the name when you dig it up
+    cache:     { icon: '🎁', name: 'Hidden cache', desc: 'Someone\'s stash — +3 supplies' },
+    basket:    { icon: '🧺', name: 'Food basket', desc: '+3 food for your next raid' },
+    lostclub:  { icon: '🏏', name: 'Lost club', desc: 'Added to your weapons' },
+    scrap:     { icon: '🗺️', name: 'Map scrap', desc: 'Collect 3 to reveal a raid target' },
+    key:       { icon: '🗝️', name: 'Old key', desc: 'Opens a locked chest or iron gate' },
+    shard:     { icon: '💎', name: 'Relic shard', desc: 'A piece of the Old King\'s Crown' },
+    orepocket: { icon: '⛓️', name: 'Ore pocket', desc: '+3 iron' },
+    coalseam:  { icon: '🪨', name: 'Coal seam', desc: '+3 coal' },
+    nugget:    { icon: '🪙', name: 'Gold nuggets', desc: '+3 gold' },
+    sling:     { icon: '🪃', name: 'Old sling', desc: 'Added to your weapons' },
   };
+
   function rollFrom(list) {
     const total = list.reduce((s, [, w]) => s + w, 0);
     let roll = Math.random() * total;

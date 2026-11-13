@@ -16,7 +16,8 @@ It's plain HTML/CSS/JS with no build step and no backend. Progress is saved in `
 | `js/battle.js` | Battle boards: **Goblin Village** and **Dwarf Stronghold** |
 | `js/craft.js` | Workshop (Tier 1, Tier 2, Tools) with the forge animation |
 | `js/main.js` | Save data, home screen, popups, raid prep, spoils |
-| `js/sound.js` | Music and sound effects, generated in the browser |
+| `js/sound.js` | Music and sound effects, generated in the browser (home, forest, mine, battle themes) |
+| `js/art.js` | Vector art: tiles, obstacles (ore cart, stump, thornbush…), themed board frames, scene backgrounds |
 
 ## Materials: why weapons matter
 Every obstacle and defense is made of something:
@@ -43,6 +44,10 @@ Tapping a weapon on something it can't hurt tells you so and doesn't use it up.
 | Obstacles | stumps (wood), thornbushes (hide a find), sometimes a locked chest | boulders (stone), ore veins (each hit = iron), sometimes a locked chest |
 | Runaway event | 🏃 goblin thief with a sack | 🛒 runaway ore cart |
 | Discovery | 🐾 tracks → Goblin Village | ᚱ rune stone → Dwarf Stronghold |
+
+**Locked chests open only with a key.** When one appears, its key is always buried somewhere on the same board. A goblin thief may also be carrying it. Dig it up, then tap 🗝️ and the chest.
+
+Every find plays a **reveal**: dirt bursts out of the tile, the item flies to the centre in a burst of light with a fanfare, and keys and relic shards count as rare finds.
 
 Both lands also have:
 - **3 buried finds per board**, dug up when you clear the tile above one: caches, food baskets, ore pockets, coal seams, gold nuggets, lost clubs, **old keys**, **map scraps** (3 complete a map that marks a raid target) and **relic shards** (5 make the 👑 Old King's Crown, +2 moves in every raid).

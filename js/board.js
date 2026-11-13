@@ -34,6 +34,10 @@ window.Board = (() => {
       this.pointer = null;
       this.armed = null;
       this.tray = null;
+      if (!wrap.querySelector('.frame')) wrap.insertAdjacentHTML('afterbegin', '<div class="frame"></div>');
+      this.frameEl = wrap.querySelector('.frame');
+      this.celebrateQ = Promise.resolve();
+      this.celebrating = 0;
       wrap.style.setProperty('--rows', rows);
       wrap.style.setProperty('--cols', cols);
 
@@ -249,7 +253,7 @@ window.Board = (() => {
           if (!el) {
             el = document.createElement('div');
             el.className = 'tile';
-            el.innerHTML = `<div class="gem g-${t.type}"></div>`;
+            el.innerHTML = `<div class="gem art g-${t.type}">${window.Art ? Art.tile(t.type) : ''}</div>`;
             this.els.set(t.id, el);
             this.el.appendChild(el);
             if (t.fromRow !== undefined) {
@@ -274,8 +278,8 @@ window.Board = (() => {
         let el = this.pieceEls.get(p.id);
         if (!el) {
           el = document.createElement('div');
-          el.className = `piece p-${p.kind}` + (p.cls ? ` p-${p.cls}` : '') + (p.appear ? ' appear' : '');
-          el.innerHTML = '<div class="pc"><span class="pl"></span><span class="hp"></span></div>';
+          el.className = `piece p-${p.kind}` + (p.cls ? ` p-${p.cls}` : '') + (p.appear ? ' appear' : '') + (p.art ? ' art' : '');
+          el.innerHTML = `<div class="pc">${p.art ? `<div class="pa">${Art.piece(p.art)}</div>` : ''}<span class="pl"></span><span class="hp"></span></div>`;
           this.pieceEls.set(p.id, el);
           this.el.appendChild(el);
         }
@@ -286,6 +290,7 @@ window.Board = (() => {
         el.querySelector('.hp').textContent = p.maxHp > 1 ? '♥'.repeat(p.hp) + '♡'.repeat(p.maxHp - p.hp) : '';
         el.classList.toggle('target', canHit(p));
         el.classList.toggle('locked', !!p.lock);
+        el.classList.toggle('wants-key', !!p.keyOnly && App.state.inventory.key > 0);
       }
     }
 
@@ -318,6 +323,54 @@ window.Board = (() => {
       this.toastEl.className = 'toast show ' + kind;
       clearTimeout(this.toastTimer);
       this.toastTimer = setTimeout(() => this.toastEl.classList.remove('show'), ms);
+    }
+
+    setFrame(scene) {
+      this.wrap.dataset.frame = scene;
+      this.frameEl.innerHTML = window.Art ? Art.frame(scene) : '';
+    }
+
+    // A dirt burst where something was dug up.
+    dirt([r, c]) {
+      for (let i = 0; i < 14; i++) {
+        const d = document.createElement('div');
+        d.className = 'dirt';
+        d.style.left = ((c + 0.5) / this.cols * 100) + '%';
+        d.style.top = ((r + 0.5) / this.rows * 100) + '%';
+        const a = Math.random() * Math.PI * 2, dist = 20 + Math.random() * 45;
+        d.style.setProperty('--dx', Math.cos(a) * dist + 'px');
+        d.style.setProperty('--dy', Math.sin(a) * dist - 20 + 'px');
+        d.style.background = ['#6b4a2b', '#8a6a44', '#4f3820', '#a88b5c'][i % 4];
+        this.fx.appendChild(d);
+        setTimeout(() => d.remove(), 800);
+      }
+    }
+
+    // Big "you found something!" moment. Queued so several finds play one after another.
+    celebrate(cell, { icon, title, sub = '', rare = false }) {
+      this.celebrateQ = this.celebrateQ.then(() => new Promise(done => {
+        this.celebrating++;
+        this.dirt(cell);
+        window.Sound?.sfx(rare ? 'rare' : 'found');
+        const [r, c] = cell;
+        const d = document.createElement('div');
+        d.className = 'celebrate' + (rare ? ' rare' : '');
+        d.style.setProperty('--fx', ((c + 0.5) / this.cols * 100) + '%');
+        d.style.setProperty('--fy', ((r + 0.5) / this.rows * 100) + '%');
+        d.innerHTML = `<div class="cel-rays"></div><div class="cel-icon">${icon}</div>
+          <div class="cel-text"><div class="cel-kicker">${rare ? '✦ Rare find ✦' : 'You found'}</div>
+          <div class="cel-title">${title}</div><div class="cel-sub">${sub}</div><div class="cel-tap">tap to continue</div></div>`;
+        this.wrap.appendChild(d);
+        let closed = false;
+        const close = () => {
+          if (closed) return;
+          closed = true;
+          d.classList.add('out');
+          setTimeout(() => { d.remove(); this.celebrating--; done(); }, 280);
+        };
+        setTimeout(() => d.addEventListener('pointerdown', close), 350);
+        setTimeout(close, rare ? 2600 : 2000);
+      }));
     }
 
     smoke() {
@@ -598,7 +651,7 @@ window.Board = (() => {
       return this.inBounds(r, c) ? [r, c] : null;
     }
     onDown(e) {
-      if (this.busy || !this.hooks.canPlay()) return;
+      if (this.busy || this.celebrating || !this.hooks.canPlay()) return;
       const cell = this.cellFromEvent(e);
       if (!cell) return;
       this.clearHint();
