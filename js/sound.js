@@ -131,7 +131,31 @@ window.Sound = (() => {
       },
     },
   };
+  // Echoing E-minor mine tune: low drone, sparse plucks, pick clinks.
+  TRACKS.mine = {
+    bpm: 84,
+    roots: [28, 28, 24, 26],
+    melody: [
+      64, _, _, 67, _, 71, _, _,   69, _, 67, _, 64, _, _, _,
+      60, _, 64, _, 67, _, 72, 71, 69, _, _, 67, 66, _, _, _,
+      64, _, 71, _, 76, _, 74, 71, 72, _, 69, _, 67, _, _, _,
+      64, 67, 71, _, 69, _, 67, 64, 62, _, 64, _, _, _, _, _,
+    ],
+    play(i, t, d) {
+      const bar = Math.floor(i / 8) % 4, s = i % 8;
+      const root = this.roots[bar];
+      if (s === 0) {
+        tone(midi(root), t, d * 8, { type: 'sawtooth', vol: 0.05, bus: musicBus, lp: 300, attack: 0.3 });
+        tone(midi(root + 12), t, d * 8, { type: 'sine', vol: 0.06, bus: musicBus, attack: 0.4 });
+        tone(80, t, 0.3, { type: 'sine', glide: 45, vol: 0.2, bus: musicBus });
+      }
+      if (s === 7 && bar % 2 === 1) tone(2400, t, 0.12, { type: 'sine', vol: 0.03, bus: musicBus });
+      const m = this.melody[i % this.melody.length];
+      if (m) pluck(m - 12, t, d * 2.6, 0.12, musicBus);
+    },
+  };
   TRACKS.home = TRACKS.forest;
+  TRACKS.dwarf = TRACKS.battle;
 
   function startLoop() {
     if (!ctx || timer || !wanted) return;

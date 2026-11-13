@@ -1,64 +1,110 @@
-// Goblin Village battle board: fog hides the village, goblins act every few moves.
+// Battle boards (Goblin Village, Dwarf Stronghold): fog hides the base, defenders act every few moves.
 window.Battle = (() => {
   // ---------- tuning knobs ----------
   const ROWS = 9;
   const COLS = 7;
-  const FOG_ROWS = 4;           // top rows start hidden
-  const MOVES = 20;
-  const ENEMY_EVERY = 3;        // goblins act after this many of your moves
-  const MAX_GOBLINS = 3;
-  const FOOD_COST = 3;
-  const TYPES = ['wood', 'stone', 'hide', 'berries', 'leaves'];   // battle tiles give nothing
-  const STAR_CHANCE = 0.02;     // wild tile: completes any match
+  const FOG_ROWS = 4;
+  const ENEMY_EVERY = 3;
+  const MAX_MINIONS = 3;
+  const STAR_CHANCE = 0.02;
 
   const P = {
-    fog:      { kind: 'fog',      label: '',        hp: 1 },
-    keep:     { kind: 'keep',     label: 'KEEP',    hp: 5 },
-    fence:    { kind: 'fence',    label: 'FENCE',   hp: 1 },
-    tower:    { kind: 'tower',    label: 'TOWER',   hp: 2 },
-    chest:    { kind: 'chest',    label: '',        hp: 1 },
-    loot:     { kind: 'loot',     label: 'LOOT',    hp: 1 },
-    prisoner: { kind: 'prisoner', label: 'PRISONER', hp: 1 },
-    goblin:   { kind: 'goblin',   label: 'G',       hp: 1 },
-    rubble:   { kind: 'rubble',   label: '',        hp: 1 },
+    fog:      { kind: 'fog',      label: '',        mat: 'other', hp: 1 },
+    rubble:   { kind: 'rubble',   label: '',        mat: 'stone', hp: 1 },
+    // Goblins: mostly wood
+    gkeep:    { kind: 'keep',     label: 'KEEP',    mat: 'wood',  hp: 5 },
+    fence:    { kind: 'fence',    label: 'FENCE',   mat: 'wood',  hp: 1 },
+    tower:    { kind: 'tower',    label: 'TOWER',   mat: 'wood',  hp: 2 },
+    loot:     { kind: 'loot',     label: 'LOOT',    mat: 'wood',  hp: 1 },
+    chest:    { kind: 'chest',    label: '',        mat: 'wood',  hp: 1 },
+    prisoner: { kind: 'prisoner', label: 'PRISONER', mat: 'other', hp: 1 },
+    goblin:   { kind: 'minion',   label: 'G',       mat: 'creature', hp: 1, cls: 'goblin' },
+    // Dwarves: stone and iron
+    hall:     { kind: 'keep',     label: 'GREAT HALL', mat: 'stone', hp: 6, cls: 'hall' },
+    swall:    { kind: 'swall',    label: 'WALL',    mat: 'stone', hp: 2 },
+    gate:     { kind: 'gate',     label: 'GATE',    mat: 'iron',  hp: 3, lock: true },
+    ballista: { kind: 'tower',    label: 'BALLISTA', mat: 'wood', hp: 2, cls: 'ballista' },
+    vault:    { kind: 'loot',     label: 'VAULT',   mat: 'stone', hp: 2, cls: 'vault' },
+    gems:     { kind: 'chest',    label: '',        mat: 'stone', hp: 1, cls: 'gems' },
+    keyp:     { kind: 'keyp',     label: '🗝️',      mat: 'other', hp: 1 },
+    guard:    { kind: 'minion',   label: 'D',       mat: 'creature', hp: 2, cls: 'guard' },
   };
-  const REVEAL_MSG = {
-    fence: 'A goblin fence.',
-    tower: 'A watchtower! It throws an extra spear every goblin turn.',
-    chest: 'A buried chest! Match next to it to dig it up.',
-    loot: 'The goblin loot chest! Open it for goblin spoils.',
-    prisoner: 'A prisoner! Free them for +3 moves.',
+
+  const rnd = n => Math.floor(Math.random() * n);
+  const pick = arr => arr[rnd(arr.length)];
+
+  function scatter(set, kinds) {
+    const free = [];
+    for (let r = 1; r < FOG_ROWS; r++)
+      for (let c = 0; c < COLS; c++)
+        if (!set.has(`${r},${c}`)) free.push([r, c]);
+    free.sort(() => Math.random() - 0.5);
+    kinds.forEach((k, i) => set.set(`${free[i][0]},${free[i][1]}`, k));
+  }
+
+  const CONFIG = {
+    goblin: {
+      name: 'Goblin Village', icon: '🔥', foodCost: 3, moves: 20, spoils: 'goblin',
+      types: ['wood', 'stone', 'hide', 'berries', 'leaves'],
+      foundTitle: 'A goblin village!', foundBanner: 'Smoke rises through the trees…',
+      foundText: 'You followed the tracks to a goblin village hidden in the trees.',
+      prep: 'Goblins build with <b>wood</b> — Clubs, Axes and Firepots shine. Every 3 moves they throw spears, sneak goblins in, or rebuild fences.',
+      intro: 'The village lies in the fog ahead…',
+      keep: 'gkeep', keepW: 3, minion: 'goblin', minionName: 'goblin', rebuild: 'fence',
+      winBonus: { gold: 3 },
+      layout() {
+        const h = new Map();
+        [2, 3, 4].forEach(c => h.set(`0,${c}`, 'keep'));
+        h.set('0,1', 'fence'); h.set('0,5', 'fence');
+        h.set(`0,${pick([0, 6])}`, 'tower');
+        h.set(`1,${1 + rnd(5)}`, 'loot');
+        scatter(h, ['fence', 'trap', 'trap', 'chest', ...(Math.random() < 0.6 ? ['prisoner'] : [])]);
+        return h;
+      },
+      turnMsgs: { missile: 'A spear lands and blocks a tile!', minion: 'A goblin sneaks in! It repairs the keep each goblin turn.', rebuild: 'Goblins rebuilt a fence!', heal: 'Goblins repair the keep' },
+      reveal: {
+        fence: 'A goblin fence (wood).', tower: 'A watchtower! It throws an extra spear every goblin turn.',
+        chest: 'A buried chest! Match next to it to dig it up.', loot: 'The goblin loot chest! Open it for goblin spoils.',
+        prisoner: 'A prisoner! Free them for +3 moves.', keep: 'The goblin keep (wood)! Break it to win.',
+      },
+    },
+    dwarf: {
+      name: 'Dwarf Stronghold', icon: '⛏️', foodCost: 4, moves: 22, spoils: 'dwarf',
+      types: ['stone', 'ore', 'coal', 'gravel', 'bones'],
+      foundTitle: 'A dwarf stronghold!', foundBanner: 'The rune glows… a door in the hillside!',
+      foundText: 'The rune stone marks the hidden gate of a dwarf stronghold.',
+      prep: 'Dwarves build with <b>stone and iron</b> — Clubs bounce off. Bring Pickaxes and Swords. The iron gate opens with a key hidden in the fog. Every 3 moves they fire bolts, send armored guards, or shore up walls.',
+      intro: 'Torchlight flickers behind the fog…',
+      keep: 'hall', keepW: 3, minion: 'guard', minionName: 'dwarf guard', rebuild: 'swall',
+      winBonus: { gold: 3, iron: 4 },
+      layout() {
+        const h = new Map();
+        [2, 3, 4].forEach(c => h.set(`0,${c}`, 'keep'));
+        h.set('0,1', 'swall'); h.set('0,5', 'swall');
+        h.set('1,2', 'swall'); h.set('1,3', 'gate'); h.set('1,4', 'swall');
+        h.set(`0,${pick([0, 6])}`, 'ballista');
+        h.set(`1,${pick([0, 1, 5, 6])}`, 'vault');
+        scatter(h, ['keyp', 'trap', 'trap', 'gems']);
+        return h;
+      },
+      turnMsgs: { missile: 'A ballista bolt slams into the board!', minion: 'An armored dwarf guard marches in! (2 HP, repairs the hall)', rebuild: 'Dwarves rebuilt a stone wall!', heal: 'Dwarves shore up the hall' },
+      reveal: {
+        swall: 'A stone wall (2 hits).', gate: 'An iron gate! Matches can\'t dent it — find the key, or use a Pickaxe/Sword.',
+        ballista: 'A ballista! It fires an extra bolt every dwarf turn.', vault: 'The dwarven vault! Break it for dwarf spoils.',
+        gems: 'A gem chest!', keyp: 'The gate key! Match next to it to grab it.', keep: 'The Great Hall (stone, 6 HP). Break it to win.',
+        ballistaKind: 'tower',
+      },
+    },
   };
 
   let board = null;
   let run = null;
-  const rnd = n => Math.floor(Math.random() * n);
-  const pick = arr => arr[rnd(arr.length)];
-
-  // ---------- village layout (different every raid) ----------
-  function makeLayout() {
-    const hidden = new Map();
-    const set = (r, c, k) => hidden.set(`${r},${c}`, k);
-    [2, 3, 4].forEach(c => set(0, c, 'keep'));
-    set(0, 1, 'fence');
-    set(0, 5, 'fence');
-    set(0, pick([0, 6]), 'tower');
-    set(1, 1 + rnd(5), 'loot');
-    const free = [];
-    for (let r = 1; r < FOG_ROWS; r++)
-      for (let c = 0; c < COLS; c++)
-        if (!hidden.has(`${r},${c}`)) free.push([r, c]);
-    free.sort(() => Math.random() - 0.5);
-    const extras = ['fence', 'trap', 'trap', 'chest'];
-    if (Math.random() < 0.6) extras.push('prisoner');
-    extras.forEach((k, i) => set(free[i][0], free[i][1], k));
-    return hidden;
-  }
+  let cfg = CONFIG.goblin;
 
   // ---------- HUD ----------
   function lootText() {
     const b = run.bag;
-    const parts = ['wood', 'stone', 'hide', 'food', 'gold'].filter(t => b[t] > 0).map(t => `${b[t]} ${App.RESOURCES[t].label}`);
+    const parts = Object.keys(Data.RESOURCES).filter(t => b[t] > 0).map(t => `${b[t]} ${Data.RESOURCES[t].label}`);
     run.bag.spoils.forEach(k => parts.push(App.spoilName(k)));
     return parts.length ? parts.join(', ') : 'nothing yet';
   }
@@ -67,21 +113,27 @@ window.Battle = (() => {
     document.getElementById('b-moves').textContent = run.moves;
     document.querySelector('#screen-battle .moves').classList.toggle('low', run.moves <= 5);
     const left = ENEMY_EVERY - run.sinceEnemy;
+    const who = run.enemy === 'dwarf' ? 'Dwarves' : 'Goblins';
     document.getElementById('enemy').innerHTML = run.won
-      ? '🏳️ Goblins fled'
-      : `Goblins act in <b>${'●'.repeat(left)}${'○'.repeat(ENEMY_EVERY - left)}</b>`;
+      ? `🏳️ ${who} fled`
+      : `${who} act in <b>${'●'.repeat(left)}${'○'.repeat(ENEMY_EVERY - left)}</b>`;
     document.getElementById('lootbar-text').textContent = lootText();
     const exit = document.getElementById('battle-exit');
     exit.textContent = run.won ? '🏠 Head home' : '🏳️ Retreat';
     exit.classList.toggle('danger', !run.won);
     exit.classList.toggle('glow', run.won);
     document.getElementById('battle-hint').textContent = board.armedHint() || (run.won
-      ? 'Victory! Open the loot chest if you can, then head home.'
-      : run.keep ? 'Match next to the KEEP to damage it. Goblins (G) repair it — knock them out.'
-      : 'Match next to the fog (?) to scout. Find and break the KEEP to win.');
+      ? 'Victory! Grab any loot you can reach, then head home.'
+      : run.keep ? `Match next to the ${run.keep.label} to damage it. Knock out ${cfg.minionName}s — they repair it.`
+      : 'Match next to the fog (?) to scout. Find and break the keep to win.');
   }
 
   // ---------- pieces ----------
+  function addKeep() {
+    run.keep = board.addPiece(P[cfg.keep], 0, 2, cfg.keepW, true);
+    board.toast(cfg.reveal.keep, 'alert', 2600);
+  }
+
   function reveal(fog, src) {
     const k = fog.hidden;
     const { r, c } = fog;
@@ -90,56 +142,69 @@ window.Battle = (() => {
     if (!k) return;
     if (k === 'keep') {
       board.pieces.filter(p => p.kind === 'fog' && p.hidden === 'keep').forEach(f => board.removePiece(f, 'fog-out'));
-      run.keep = board.addPiece(P.keep, 0, 2, 3, true);
-      board.toast('The goblin keep! Break it to win.', 'alert', 2400);
+      addKeep();
       return;
     }
     if (k === 'trap') {
       if (src === 'match') {
         run.moves = Math.max(0, run.moves - 1);
         board.float([r, c], '−1 move', 'loss');
-        board.toast('Hidden pit trap! You lose 1 move.', 'alert');
+        board.toast(run.enemy === 'dwarf' ? 'Rockfall trap! You lose 1 move.' : 'Hidden pit trap! You lose 1 move.', 'alert');
       } else {
         board.float([r, c], 'Trap disarmed', 'bonus');
       }
       return;
     }
+    if (k === 'gate' && run.gateOpen) return;
     board.addPiece(P[k], r, c, 1, true);
-    board.toast(REVEAL_MSG[k], k === 'tower' ? 'alert' : '', 2400);
+    board.toast(cfg.reveal[k] || 'Something in the fog…', k === 'tower' || k === 'ballista' || k === 'gate' ? 'alert' : '', 2600);
   }
 
-  function destroyed(p) {
+  function addLoot(res, n, cell, delay = 0) {
+    run.bag[res] = (run.bag[res] || 0) + n;
+    board.float(cell, `+${n} ${Data.RESOURCES[res].label}`, res === 'gold' ? 'gold' : 'gain', delay);
+  }
+
+  function destroyed(p, w) {
     const cell = [p.r, p.c + Math.floor(p.w / 2)];
     switch (p.kind) {
       case 'keep': win(cell); break;
       case 'fence':
-        run.brokenFences.push([p.r, p.c]);
-        board.toast('Fence smashed!');
+      case 'swall':
+        run.broken.push([p.r, p.c]);
+        board.toast(p.kind === 'fence' ? 'Fence smashed!' : 'Stone wall crumbles!');
         break;
-      case 'tower': board.toast('Watchtower down! No more extra spears.'); break;
-      case 'goblin': board.float(cell, 'Goblin down!', 'bonus'); break;
+      case 'gate': board.toast('The iron gate gives way!', 'win'); break;
+      case 'tower': board.toast(p.cls === 'ballista' ? 'Ballista wrecked!' : 'Watchtower down! No more extra spears.'); break;
+      case 'minion': board.float(cell, `${cfg.minionName} down!`, 'bonus'); break;
       case 'prisoner':
         run.moves += 3;
         board.float(cell, '+3 moves', 'bonus');
         board.toast('Prisoner freed! They show you a shortcut: +3 moves.', 'win');
         break;
-      case 'chest': {
-        run.bag.gold += 2;
-        board.float(cell, '+2 Gold', 'gold');
-        for (let i = 0; i < 2; i++) {
-          const t = pick(['wood', 'stone', 'hide']);
-          run.bag[t]++;
-          board.float(cell, `+1 ${App.RESOURCES[t].label}`, 'gain', 250 * (i + 1));
-        }
-        board.toast('Buried chest dug up!', 'win');
+      case 'keyp': {
+        run.gateOpen = true;
+        const gates = board.piecesOf('gate');
+        gates.forEach(g => board.removePiece(g));
+        board.toast(gates.length ? '🗝️ Key turned — the iron gate swings open!' : '🗝️ You grab the gate key — the gate will open when you find it.', 'win', 2600);
+        Sound.sfx('coin');
         break;
       }
+      case 'chest':
+        if (p.cls === 'gems') { addLoot('gold', 4, cell); board.toast('Gem chest! +4 gold', 'win'); }
+        else {
+          addLoot('gold', 2, cell);
+          for (let i = 0; i < 2; i++) addLoot(pick(['wood', 'stone', 'hide']), 1, cell, 250 * (i + 1));
+          board.toast('Buried chest dug up!', 'win');
+        }
+        break;
       case 'loot': {
-        const k = App.rollSpoil();
+        const k = App.rollSpoil(cfg.spoils);
         run.bag.spoils.push(k);
         run.lootOpened = true;
         board.float(cell, 'Spoils!', 'gold');
-        board.toast(`Loot chest: ${App.spoilName(k)}!`, 'win', 2600);
+        board.toast(`${p.cls === 'vault' ? 'Vault' : 'Loot chest'}: ${App.spoilName(k)}!`, 'win', 2600);
+        Sound.sfx('victory');
         break;
       }
       default: break;
@@ -149,34 +214,41 @@ window.Battle = (() => {
   function win(cell) {
     run.won = true;
     Sound.sfx('victory');
-    const k = App.rollSpoil();
+    const k = App.rollSpoil(cfg.spoils);
     run.bag.spoils.push(k);
-    run.bag.gold += 3;
-    board.float(cell, '+3 Gold', 'gold');
-    board.piecesOf('goblin').forEach(g => board.removePiece(g));
-    board.toast(`Keep destroyed! The goblins flee! ${App.spoilName(k)}`, 'win', 3000);
+    Object.entries(cfg.winBonus).forEach(([res, n], i) => addLoot(res, n, cell, i * 250));
+    board.piecesOf('minion').forEach(g => board.removePiece(g));
+    board.toast(`${run.keep.label} destroyed! ${App.spoilName(k)}`, 'win', 3000);
   }
 
-  // ---------- goblins' turn ----------
+  // ---------- defenders' turn ----------
   async function act(a) {
     if (a === 'rebuild') {
-      const spots = run.brokenFences.filter(([r, c]) => board.isTile(board.grid[r][c]));
+      const spots = run.broken.filter(([r, c]) => board.isTile(board.grid[r][c]));
       if (!spots.length) return;
       const [r, c] = pick(spots);
-      run.brokenFences = run.brokenFences.filter(([a2, b2]) => a2 !== r || b2 !== c);
-      board.addPiece(P.fence, r, c, 1, true);
-      board.toast('Goblins rebuilt a fence!', 'alert');
+      run.broken = run.broken.filter(([a2, b2]) => a2 !== r || b2 !== c);
+      board.addPiece(P[cfg.rebuild], r, c, 1, true);
+      board.toast(cfg.turnMsgs.rebuild, 'alert');
+    } else if (a === 'shore') {
+      const hurt = board.pieces.filter(p => (p.kind === 'swall' || p.kind === 'gate') && p.hp < p.maxHp);
+      if (!hurt.length) return act('missile');
+      const p = pick(hurt);
+      p.hp++;
+      board.renderPieces();
+      board.float([p.r, p.c], '+1 ♥', 'loss');
+      board.toast('Dwarves shore up a wall!', 'alert');
     } else {
       const spots = board.tileCells(r => r >= 1);
       if (!spots.length) return;
       const [r, c] = pick(spots);
-      if (a === 'spear') {
+      if (a === 'missile') {
         board.addPiece(P.rubble, r, c, 1, true);
-        board.float([r, c], '🗡️ Spear!', 'loss');
-        board.toast('A spear lands and blocks a tile!', 'alert');
+        board.float([r, c], run.enemy === 'dwarf' ? '🏹 Bolt!' : '🗡️ Spear!', 'loss');
+        board.toast(cfg.turnMsgs.missile, 'alert');
       } else {
-        board.addPiece(P.goblin, r, c, 1, true);
-        board.toast('A goblin sneaks in! It repairs the keep each goblin turn.', 'alert', 2400);
+        board.addPiece(P[cfg.minion], r, c, 1, true);
+        board.toast(cfg.turnMsgs.minion, 'alert', 2400);
       }
     }
     board.render();
@@ -184,23 +256,24 @@ window.Battle = (() => {
   }
 
   async function enemyTurn() {
-    board.toast('Goblins\' turn!', 'alert', 1200);
+    board.toast(run.enemy === 'dwarf' ? 'Dwarves\' turn!' : 'Goblins\' turn!', 'alert', 1200);
     Sound.sfx('drums');
     await board.wait(700);
-    const options = ['spear', 'sneak'];
-    if (board.piecesOf('goblin').length >= MAX_GOBLINS) options.pop();
-    if (run.brokenFences.some(([r, c]) => board.isTile(board.grid[r][c]))) options.push('rebuild', 'rebuild');
+    const options = ['missile', 'minion'];
+    if (board.piecesOf('minion').length >= MAX_MINIONS) options.pop();
+    if (run.broken.some(([r, c]) => board.isTile(board.grid[r][c]))) options.push('rebuild', 'rebuild');
+    if (run.enemy === 'dwarf') options.push('shore');
     await act(pick(options));
-    if (board.piecesOf('tower').length) await act('spear');
+    if (board.piecesOf('tower').length) await act('missile');
 
-    const gobs = board.piecesOf('goblin').length;
+    const mins = board.piecesOf('minion').length;
     const keep = run.keep;
-    if (gobs && keep && !keep.gone && keep.hp < keep.maxHp) {
-      const heal = Math.min(gobs, keep.maxHp - keep.hp);
+    if (mins && keep && !keep.gone && keep.hp < keep.maxHp) {
+      const heal = Math.min(mins, keep.maxHp - keep.hp);
       keep.hp += heal;
       board.renderPieces();
       board.float([0, 3], `+${heal} ♥`, 'loss');
-      board.toast(`Goblins repair the keep (+${heal})!`, 'alert');
+      board.toast(`${cfg.turnMsgs.heal} (+${heal})!`, 'alert');
       await board.wait(800);
     }
     await board.ensurePlayable();
@@ -210,21 +283,30 @@ window.Battle = (() => {
   const hooks = {
     canPlay: () => !!run && !run.ended && run.moves > 0,
     onMove: () => { run.moves--; if (!run.won) run.sinceEnemy++; hud(); },
-    onMatch(runs, step) { if (step === 2) board.toast('Chain reaction!'); },
-    onPieceHit(p, n, src) {
-      if (p.kind !== 'fog' && p.kind !== 'prisoner') run.attacked = true;
-      if (p.kind === 'fog') reveal(p, src);
-      else if (board.hurt(p, n)) destroyed(p);
+    onPieceHit(p, n, src, w) {
+      if (p.kind === 'fog') { reveal(p, src); hud(); return; }
+      const dmg = src === 'match' ? n * (Data.MATCH_DMG[p.mat] ?? 1) : n;
+      if (dmg <= 0) {
+        if (!run.told[p.kind]) {
+          run.told[p.kind] = true;
+          board.toast('🔒 Matches can\'t dent iron. Find the key in the fog — or use a Pickaxe, Sword or Sling.', '', 3000);
+        }
+        return;
+      }
+      if (board.hurt(p, dmg)) destroyed(p, w);
       hud();
     },
     onPieceTap(p) {
       const msg = {
         fog: 'Fog — match next to it to see what\'s there.',
-        keep: 'The keep. Match next to it to damage it.',
-        goblin: 'A goblin! It repairs the keep. Match next to it.',
-        rubble: 'A spear. Match next to it to clear it.',
-      }[p.kind] || 'Match next to it to break it.';
-      board.toast(msg);
+        keep: `${p.label} (${p.mat}). Match next to it to damage it.`,
+        minion: `A ${cfg.minionName}! It repairs the keep. Match next to it.`,
+        rubble: 'Rubble. Match next to it to clear it.',
+        gate: 'Iron gate. Needs the key from the fog, an Old key, or a Pickaxe/Sword/Sling.',
+        swall: 'Stone wall (2 hits). Pickaxes crack it in one.',
+        keyp: 'The gate key! Match next to it.',
+      }[p.kind] || `Match next to it to break it (${p.mat}).`;
+      board.toast(msg, '', 2600);
     },
     onWeaponUsed: () => { run.weaponsUsed++; },
     onArm: () => hud(),
@@ -251,45 +333,50 @@ window.Battle = (() => {
     const keepLoot = run.won || reason === 'retreat';
     const gained = [];
     if (keepLoot) {
-      ['wood', 'stone', 'hide', 'food', 'gold'].forEach(t => {
-        if (run.bag[t]) { App.state.stockpile[t] += run.bag[t]; gained.push(`+${run.bag[t]} ${App.RESOURCES[t].label}`); }
+      Object.keys(Data.RESOURCES).forEach(t => {
+        if (run.bag[t]) { App.state.stockpile[t] += run.bag[t]; gained.push(`+${run.bag[t]} ${Data.RESOURCES[t].label}`); }
       });
       run.bag.spoils.forEach(k => gained.push(App.grantSpoil(k)));
       App.save();
     }
     const stars = [run.lootOpened, run.won, run.lootOpened && run.won && run.moves > 0];
     const title = run.won ? 'Victory!' : reason === 'retreat' ? 'You retreated' : 'Defeated!';
-    const line = run.won ? 'The goblin keep has fallen.'
+    const line = run.won ? `The ${cfg.name} has fallen.`
       : reason === 'retreat' ? 'You slipped away with what you grabbed.'
-      : 'Out of moves. The goblins drove you off — you lost what you grabbed.';
+      : 'Out of moves. You were driven off — you lost what you grabbed.';
     App.choose({
       title,
       html: `<div class="stars">${stars.map(s => `<span class="${s ? '' : 'off'}">★</span>`).join('')}</div>
         <p>${line}</p>
         ${gained.length ? `<div class="sum-spoils"><b>Brought home</b><br>${gained.join('<br>')}</div>` : ''}
-        <p class="sum-notes">★ open the loot chest · ★ break the keep · ★ both, with moves left<br>
-        Food spent: ${FOOD_COST}${run.weaponsUsed ? ` · Weapons used: ${run.weaponsUsed}` : ''}</p>`,
-      buttons: [{ id: 'home', label: 'Home' }, { id: 'forest', label: 'Go gather', cls: 'alt' }],
+        <p class="sum-notes">★ open the ${run.enemy === 'dwarf' ? 'vault' : 'loot chest'} · ★ break the keep · ★ both, with moves left<br>
+        Food spent: ${cfg.foodCost}${run.weaponsUsed ? ` · Weapon uses: ${run.weaponsUsed}` : ''}</p>`,
+      buttons: [{ id: 'home', label: 'Home' }, { id: 'craft', label: '🔨 Workshop', cls: 'alt' }],
     }).then(c => App.go(c));
   }
 
   // ---------- public ----------
   function init() {
-    board = new Board({ rows: ROWS, cols: COLS, wrap: document.getElementById('battle-wrap'), randType: () => (Math.random() < STAR_CHANCE ? 'star' : pick(TYPES)), hooks });
+    board = new Board({
+      rows: ROWS, cols: COLS, wrap: document.getElementById('battle-wrap'),
+      randType: () => (Math.random() < STAR_CHANCE ? 'star' : pick(cfg.types)), hooks,
+    });
     document.getElementById('battle-exit').onclick = () => {
       if (!run || run.ended || board.busy) return;
       finish(run.won ? 'home' : 'retreat');
     };
   }
 
-  function start({ drum = false } = {}) {
+  function start({ enemy = 'goblin', bonusMoves = 0 } = {}) {
+    cfg = CONFIG[enemy];
+    document.getElementById('screen-battle').dataset.enemy = enemy;
+    document.getElementById('b-title').textContent = `${cfg.icon} ${cfg.name}`;
     board.reset();
     run = {
-      moves: MOVES + (drum ? 3 : 0), sinceEnemy: 0, keep: null, brokenFences: [],
-      bag: { wood: 0, stone: 0, hide: 0, food: 0, gold: 0, spoils: [] },
-      won: false, lootOpened: false, attacked: false, ended: false, weaponsUsed: 0,
+      enemy, moves: cfg.moves + bonusMoves, sinceEnemy: 0, keep: null, broken: [], gateOpen: false,
+      bag: { spoils: [] }, won: false, lootOpened: false, ended: false, weaponsUsed: 0, told: {},
     };
-    const hidden = makeLayout();
+    const hidden = cfg.layout();
     for (let r = 0; r < FOG_ROWS; r++)
       for (let c = 0; c < COLS; c++)
         board.addPiece({ ...P.fog, hidden: hidden.get(`${r},${c}`) || null }, r, c);
@@ -298,9 +385,9 @@ window.Battle = (() => {
     board.render();
     board.scheduleHint();
     hud();
-    Sound.music('battle');
-    board.toast(drum ? '🥁 The war drum rallies you: +3 moves!' : 'The village lies in the fog ahead…', '', 2400);
+    Sound.music(enemy === 'dwarf' ? 'dwarf' : 'battle');
+    board.toast(bonusMoves ? `${cfg.intro} (+${bonusMoves} moves)` : cfg.intro, '', 2400);
   }
 
-  return { init, start, FOOD_COST, get board() { return board; }, get run() { return run; } };
+  return { init, start, CONFIG, get board() { return board; }, get run() { return run; } };
 })();

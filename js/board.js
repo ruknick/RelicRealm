@@ -70,6 +70,8 @@ window.Board = (() => {
       this.pieceEls.forEach(el => el.remove()); this.pieceEls.clear();
       this.fx.innerHTML = '';
       this.pieces = [];
+      this.buried = new Map();
+      this.showBuried = false;
       this.grid = Array.from({ length: this.rows }, () => Array(this.cols).fill(null));
     }
 
@@ -266,12 +268,13 @@ window.Board = (() => {
     }
 
     renderPieces() {
-      const canHitPieces = this.armed && this.armed !== 'club' && this.armed !== 'shiv';
+      const W = this.armed && Data.WEAPONS[this.armed];
+      const canHit = p => !!W && (p.kind === 'fog' ? !!(W.fog || W.area) : Data.weaponDamage(this.armed, p) > 0);
       for (const p of this.pieces) {
         let el = this.pieceEls.get(p.id);
         if (!el) {
           el = document.createElement('div');
-          el.className = `piece p-${p.kind}` + (p.appear ? ' appear' : '');
+          el.className = `piece p-${p.kind}` + (p.cls ? ` p-${p.cls}` : '') + (p.appear ? ' appear' : '');
           el.innerHTML = '<div class="pc"><span class="pl"></span><span class="hp"></span></div>';
           this.pieceEls.set(p.id, el);
           this.el.appendChild(el);
@@ -281,7 +284,8 @@ window.Board = (() => {
         el.style.width = (p.w / this.cols * 100) + '%';
         el.querySelector('.pl').textContent = p.label || '';
         el.querySelector('.hp').textContent = p.maxHp > 1 ? '♥'.repeat(p.hp) + '♡'.repeat(p.maxHp - p.hp) : '';
-        el.classList.toggle('target', !!canHitPieces);
+        el.classList.toggle('target', canHit(p));
+        el.classList.toggle('locked', !!p.lock);
       }
     }
 
@@ -328,12 +332,12 @@ window.Board = (() => {
       if (tray) this.tray = tray;
       if (!this.tray) return;
       const inv = App.state.inventory;
-      const keys = Object.keys(App.ITEMS).filter(k => App.ITEMS[k].weapon && (inv[k] > 0 || !App.ITEMS[k].spoil));
-      this.tray.innerHTML = keys.map(k => {
-        const it = App.ITEMS[k];
-        return `<button class="weapon${this.armed === k ? ' armed' : ''}" data-w="${k}" ${inv[k] > 0 ? '' : 'disabled'}>
-          ${it.icon} ${it.name.replace('Goblin ', '')} ${it.uses ? inv[k] + '⚔' : '×' + inv[k]}</button>`;
-      }).join('');
+      const keys = Object.keys(Data.ITEMS).filter(k => Data.ITEMS[k].weapon && inv[k] > 0);
+      this.tray.innerHTML = keys.length ? keys.map(k => {
+        const it = Data.ITEMS[k];
+        return `<button class="weapon${this.armed === k ? ' armed' : ''}" data-w="${k}">
+          ${it.icon} ${it.name.replace(/^(Goblin|Iron|Old|Dwarven) /, '')} <b>${inv[k]}</b></button>`;
+      }).join('') : '<span class="hint">None — craft some in the Workshop.</span>';
       this.tray.querySelectorAll('.weapon').forEach(b => { b.onclick = () => this.arm(b.dataset.w); });
     }
 
@@ -346,25 +350,38 @@ window.Board = (() => {
     }
 
     armedHint() {
-      return this.armed ? WEAPON_HINTS[this.armed] + ' Tap the weapon again to cancel.' : '';
+      if (!this.armed) return '';
+      const it = Data.ITEMS[this.armed];
+      return `${it.icon} ${it.name}: ${it.desc} Tap a target — tap the weapon again to cancel.`;
     }
 
     async useWeapon(r, c) {
       const w = this.armed;
+      const W = Data.WEAPONS[w];
       const t = this.grid[r][c];
-      if ((w === 'club' || w === 'shiv') && this.isPiece(t)) {
-        this.toast(`The ${App.ITEMS[w].name.replace('Goblin ', '')} can't hurt that — use the Sling or a Firepot.`);
-        return;
+      const name = Data.ITEMS[w].name;
+      // Check the target is something this weapon can affect, so a wasted tap doesn't burn a use.
+      if (this.isPiece(t) && !W.area) {
+        const p = t.piece;
+        if (p.kind === 'fog' && !W.fog) { this.toast(`The ${name} can't reach into the fog — try a Sling or Firepot.`); return; }
+        if (p.kind !== 'fog' && Data.weaponDamage(w, p) <= 0) {
+          this.toast(W.unlock ? 'The key only opens locked chests and iron gates.'
+            : `The ${name} does nothing to ${Data.MAT_LABEL[p.mat] || 'that'}!`);
+          window.Sound?.sfx('nope');
+          return;
+        }
       }
+      if (W.unlock && !this.isPiece(t)) { this.toast('Tap a locked chest or iron gate.'); return; }
       this.busy = true;
       this.armed = null;
+      this.clearHint();
       App.state.inventory[w]--;
       App.save();
       this.hooks.onWeaponUsed?.(w);
       this.renderWeapons();
       this.hooks.onArm?.();
 
-      const cells = w === 'firepot'
+      const cells = W.area
         ? [-1, 0, 1].flatMap(dr => [-1, 0, 1].map(dc => [r + dr, c + dc])).filter(([a, b]) => this.inBounds(a, b))
         : [[r, c]];
       const clear = new Set();
@@ -374,16 +391,18 @@ window.Board = (() => {
         if (this.isTile(x)) clear.add(a * this.cols + b);
         else if (this.isPiece(x)) hit.add(x.piece);
       });
-      if (w === 'firepot') this.toast('BOOM!');
-      hit.forEach(p => this.hooks.onPieceHit(p, 1, 'weapon'));
+      if (W.area) this.toast('BOOM!');
+      hit.forEach(p => {
+        if (p.gone) return;
+        if (p.kind === 'fog') { if (W.fog) this.hooks.onPieceHit(p, 1, 'weapon', w); return; }
+        const dmg = Data.weaponDamage(w, p);
+        if (dmg > 0) { this.float([p.r, p.c + Math.floor(p.w / 2)], `−${Math.min(dmg, p.hp)}`, 'loss'); this.hooks.onPieceHit(p, dmg, 'weapon', w); }
+      });
       this.popCells(clear);
       this.render();
-      window.Sound?.sfx(w === 'firepot' ? 'blast' : 'hit');
+      window.Sound?.sfx(W.area ? 'blast' : 'hit');
       await this.wait(200);
-      clear.forEach(k => {
-        const rr = Math.floor(k / this.cols), cc = k % this.cols;
-        if (this.isTile(this.grid[rr][cc])) this.grid[rr][cc] = null;
-      });
+      this.clearCells(clear);
       this.collapse(); this.render();
       await this.wait(250);
       await this.resolve();
@@ -391,6 +410,48 @@ window.Board = (() => {
       await this.hooks.afterAction(false);
       this.busy = false;
       this.scheduleHint();
+    }
+
+    // Empty the given tile cells, digging up anything buried there.
+    clearCells(keys) {
+      keys.forEach(k => {
+        const r = Math.floor(k / this.cols), c = k % this.cols;
+        if (this.isTile(this.grid[r][c])) this.grid[r][c] = null;
+        const bk = `${r},${c}`;
+        if (this.buried && this.buried.has(bk)) {
+          const f = this.buried.get(bk);
+          this.buried.delete(bk);
+          this.hooks.onFind?.(f, [r, c]);
+          this.renderBuried();
+        }
+      });
+    }
+
+    // Buried finds glimmer when the player owns a Miner's lamp.
+    renderBuried() {
+      this.fx.querySelectorAll('.glimmer').forEach(e => e.remove());
+      if (!this.buried || !this.showBuried) return;
+      this.buried.forEach((_, k) => {
+        const [r, c] = k.split(',').map(Number);
+        const d = document.createElement('div');
+        d.className = 'glimmer';
+        d.style.left = (c / this.cols * 100) + '%';
+        d.style.top = (r / this.rows * 100) + '%';
+        d.style.width = (100 / this.cols) + '%';
+        d.style.height = (100 / this.rows) + '%';
+        this.fx.appendChild(d);
+      });
+    }
+
+    // Move a piece one cell; the tile it steps onto takes its old place.
+    movePiece(p, r, c) {
+      const t = this.grid[r][c];
+      if (!this.isTile(t) || p.w !== 1) return false;
+      this.grid[p.r][p.c] = t;
+      this.grid[r][c] = { type: 'piece', piece: p };
+      p.r = r; p.c = c;
+      this.render();
+      return true;
     }
 
     // ---------- turn flow ----------
@@ -439,10 +500,7 @@ window.Board = (() => {
         hits.forEach((n, p) => { if (!p.gone) this.hooks.onPieceHit(p, n, 'match'); });
         this.popCells(clear);
         await this.wait(170);
-        clear.forEach(k => {
-          const r = Math.floor(k / this.cols), c = k % this.cols;
-          if (this.isTile(this.grid[r][c])) this.grid[r][c] = null;
-        });
+        this.clearCells(clear);
         stars.forEach(([r, c]) => {
           if (this.grid[r][c] === null) { const t = this.newTile('star'); t.born = true; this.grid[r][c] = t; }
         });

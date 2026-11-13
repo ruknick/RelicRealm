@@ -35,7 +35,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 /* ---------- Stockpile bar ---------- */
 #stockbar {
   position: sticky; top: 0; z-index: 5;
-  display: grid; grid-template-columns: repeat(6, 1fr) auto; gap: 4px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
   padding: 8px 0;
   background: var(--bg);
 }
@@ -445,3 +445,87 @@ button.big.danger:disabled, button.big:disabled { background: var(--panel); colo
   text-shadow: 0 2px 0 #7a4a08; transition: opacity .3s, transform .3s;
 }
 .forge-text.show { opacity: 1; transform: none; }
+
+/* ---------- Two-row stockpile ---------- */
+.sound-btn { width: auto; }
+
+/* ---------- Mine tiles ---------- */
+.c-coal { background: #26272b; border-radius: 3px; box-shadow: inset 2px 2px 0 #4a4c52; }
+.g-ore { background: #6e6a66; }
+.g-ore::after { width: 56%; height: 56%; border-radius: 30%;
+  background: radial-gradient(circle at 30% 35%, #e08a4a 0 14%, transparent 16%), radial-gradient(circle at 68% 60%, #d27a3a 0 13%, transparent 15%), radial-gradient(circle at 40% 75%, #c96b2f 0 10%, transparent 12%), #4f4b47; }
+.g-coal { background: #2e3035; }
+.g-coal::after { width: 50%; height: 44%; background: linear-gradient(135deg, #5a5d66, #141518 60%); clip-path: polygon(20% 0, 80% 10%, 100% 55%, 70% 100%, 15% 85%, 0 40%); }
+.g-gravel { background: #b9ab92; }
+.g-gravel::after { width: 60%; height: 60%;
+  background: radial-gradient(circle at 25% 30%, #8a7d66 0 10%, transparent 12%), radial-gradient(circle at 65% 40%, #7d715c 0 12%, transparent 14%), radial-gradient(circle at 45% 75%, #8f826a 0 9%, transparent 11%), radial-gradient(circle at 80% 78%, #776b57 0 8%, transparent 10%); }
+.g-bones { background: #d9d2c0; }
+.g-bones::after { content: "🦴"; font-size: 6cqw; line-height: 1; filter: grayscale(.3); }
+
+/* ---------- Home menu ---------- */
+.menu-h { margin: 8px 0 -2px; font-size: .85rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.menu-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+button.big.land { flex-direction: column; gap: 2px; padding: 14px 8px; }
+button.big.land small { font-size: .72rem; }
+button.big.land.forest { background: #4f9a4a; color: #fff; }
+button.big.land.mine { background: #7a6a58; color: #fff; }
+button.big.danger:not(:disabled) { background: #b8442f; color: #fff; }
+#home-inventory h3 { font-size: .95rem; }
+#home-inventory h3 small { color: var(--muted); font-weight: 400; }
+.land-title { font-weight: 800; white-space: nowrap; }
+.subbar { display: flex; justify-content: flex-end; color: var(--muted); font-size: .8rem; margin: -4px 2px 6px; }
+.tag { font-size: .68rem; background: var(--panel-2); color: var(--muted); padding: 1px 6px; border-radius: 6px; font-weight: 600; vertical-align: middle; }
+.weapon b { color: var(--accent); margin-left: 2px; }
+
+/* ---------- Gathering obstacles ---------- */
+.piece { transition: top .3s ease-in, left .25s ease-out, opacity .4s, transform .4s; }
+.p-stump .pc { background: radial-gradient(circle, #c9a06a 0 18%, #8a6236 20% 30%, #b88b55 32% 44%, #6d4a26 46%); border-radius: 50%; font-size: 2.3cqw; }
+.p-thorn .pc { background: radial-gradient(circle at 50% 60%, #3f6b2a, #24401a 70%); border-radius: 40%; }
+.p-thorn .pc::after { content: "🌿"; font-size: 6cqw; position: absolute; }
+.p-thorn .pc::before { content: ""; position: absolute; inset: 8%; border-radius: 40%;
+  background: repeating-conic-gradient(#8fb35a 0 6deg, transparent 6deg 30deg); opacity: .55; }
+.p-locked .pc { background: linear-gradient(#7a5530 0 40%, #9aa3ad 40% 54%, #5c3d1e 54%); border: 2px solid #3a2612; }
+.p-locked .pl:empty::after { content: "🔒"; font-size: 4.5cqw; }
+.p-boulder .pc { background: radial-gradient(circle at 35% 30%, #a7a39c, #6a665f 60%, #48443f); border-radius: 46% 40% 44% 50%; }
+.p-vein .pc { background: radial-gradient(circle at 25% 30%, #e08a4a 0 10%, transparent 12%), radial-gradient(circle at 70% 65%, #e08a4a 0 12%, transparent 14%), radial-gradient(circle at 55% 25%, #f0a060 0 8%, transparent 10%), linear-gradient(#77726b, #514d47); color: #ffd0a0; }
+.p-thief .pc { background: #b33a2a; border-radius: 30%; font-size: 2.3cqw; box-shadow: 0 0 0 2px #ffb3a3; }
+.p-thief .pc::before { content: "💰"; font-size: 4.5cqw; }
+.p-cart .pc { background: linear-gradient(#8a6a44, #5c4428); border-radius: 12% 12% 30% 30%; }
+.p-cart .pl:empty::after { content: "🛒"; font-size: 5cqw; }
+.p-rune .pc { background: linear-gradient(#7c8290, #4b505b); color: #8fd8ff; font-size: 6cqw; text-shadow: 0 0 8px #48b6ff; border-radius: 20% 20% 8% 8%; }
+.glimmer { position: absolute; pointer-events: none; z-index: 3;
+  background: radial-gradient(circle, rgba(255,240,160,.55), transparent 60%); animation: glimmer 1.6s ease-in-out infinite; }
+.glimmer::after { content: "✦"; position: absolute; right: 10%; top: 4%; color: #fff6c0; font-size: 3cqw; }
+@keyframes glimmer { 50% { opacity: .35; } }
+
+/* ---------- Dwarf stronghold ---------- */
+.p-hall .pc { background: linear-gradient(#8a8f98, #50555e); border-color: #b9bec6; }
+.p-swall .pc { background: repeating-linear-gradient(0deg, #8b8f96 0 30%, #5d6168 30% 34%), #8b8f96; border: 2px solid #4a4e55; }
+.p-gate .pc { background: repeating-linear-gradient(90deg, #4a4f57 0 16%, #2a2d33 16% 22%); border: 2px solid #9aa3ad; color: #cfd6de; }
+.piece.locked .pc { box-shadow: inset 0 -4px 0 rgba(0,0,0,.35), 0 0 0 2px #9aa3ad; }
+.p-ballista .pc { background: linear-gradient(#7c5a3a, #4a331e); font-size: 2.1cqw; }
+.p-vault .pc { background: linear-gradient(#6f7480 0 40%, #f2c230 40% 52%, #4b4f58 52%); border: 2px solid #2b2e33; }
+.p-gems .pc { background: linear-gradient(#5b616b, #3b3f46); }
+.p-gems .pl:empty::after { content: "💎"; font-size: 4.5cqw; }
+.p-keyp .pc { background: radial-gradient(circle, #f6d76b, #a87b0c); font-size: 5cqw; }
+.p-guard .pc { background: linear-gradient(#5e6b7c, #384250); font-size: 5cqw; box-shadow: 0 0 0 2px #9fb4cf; }
+.p-minion .pc { color: #fff; font-weight: 900; }
+.p-goblin .pc { background: var(--goblin); }
+[data-enemy="dwarf"] .board { background: #23252a; box-shadow: inset 0 0 0 2px #3a3e46; }
+[data-land="mine"] .board { background: #2a2622; box-shadow: inset 0 0 0 2px #463e35; }
+
+/* ---------- Forge (hot for Tier 2) ---------- */
+.forge.hot { background: radial-gradient(circle at 50% 55%, rgba(170,60,10,.95), rgba(8,3,2,.97) 70%); }
+
+/* ---------- Fit every game screen on one phone screen ---------- */
+.res { padding: 4px 4px; border-radius: 8px; }
+.res b { font-size: .88rem; }
+#stockbar { padding: 6px 0; }
+.board-wrap { width: min(100%, calc((100dvh - 285px) * var(--cols, 7) / var(--rows, 7))); }
+.weapons { margin-top: 8px; }
+.weapon-tray { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 2px; }
+.weapon-tray::-webkit-scrollbar { display: none; }
+.weapon { white-space: nowrap; flex: none; padding: 7px 10px; font-size: .88rem; }
+.weapons .label { flex: none; }
+#screen-gather .hint, #screen-battle .hint { font-size: .8rem; margin-top: 6px; }
+.forest-top { margin: 2px 0 6px; min-height: 40px; }

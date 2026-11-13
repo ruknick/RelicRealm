@@ -1,49 +1,49 @@
-// Crafting: Tier 1 (Camp) recipes with a forge animation.
+// Workshop: Tier 1 (Camp), Tier 2 (Forge, needs iron), and Tools — with a forge animation.
 window.Craft = (() => {
-  const RECIPES = [
-    { id: 'club',  cost: { wood: 5 },           group: 'weapon', effect: 'Clears 1 tile. Use it in the forest or a raid.' },
-    { id: 'sling', cost: { wood: 4, hide: 3 },  group: 'weapon', effect: 'Hits any tile or defense — breaks fog, fences, the keep.' },
-    { id: 'fence', cost: { wood: 6 },           group: 'defense', effect: 'Blocks a tile. Takes 1 hit.' },
-    { id: 'wall',  cost: { stone: 12 },         group: 'defense', effect: 'Blocks a tile. Takes 2 hits.' },
-    { id: 'trap',  cost: { wood: 4, hide: 2 },  group: 'defense', effect: 'Attackers lose a move when they match next to it.' },
-  ];
-
   let forging = false;
-  const canAfford = r => Object.entries(r.cost).every(([k, n]) => App.state.stockpile[k] >= n);
+  const st = () => App.state;
+  const canAfford = r => Object.entries(r.cost).every(([k, n]) => st().stockpile[k] >= n);
+  const isTool = r => r.tier === 'tool';
+  const ownedTool = r => isTool(r) && st().inventory[r.id] > 0;
 
   function card(r) {
-    const it = App.ITEMS[r.id];
-    const sp = App.state.stockpile;
+    const it = Data.ITEMS[r.id];
+    const sp = st().stockpile;
     const cost = Object.entries(r.cost).map(([k, n]) =>
-      `<span class="cost ${sp[k] >= n ? '' : 'short'}"><span class="chip c-${k}"></span>${n} ${App.RESOURCES[k].label}</span>`).join('');
-    const owned = App.state.inventory[r.id];
-    return `<div class="recipe ${canAfford(r) ? 'ready' : ''}" data-id="${r.id}">
+      `<span class="cost ${sp[k] >= n ? '' : 'short'}"><span class="chip c-${k}"></span>${n} ${Data.RESOURCES[k].label}</span>`).join('');
+    const owned = st().inventory[r.id];
+    const ownedTxt = isTool(r) ? (owned ? '✓ Owned' : '') : owned ? (it.uses > 1 ? `${owned} uses` : `Owned ×${owned}`) : '';
+    const ready = canAfford(r) && !ownedTool(r);
+    const usesTag = it.uses > 1 ? `<span class="tag">${it.uses} uses</span>` : it.weapon ? '<span class="tag">1 use</span>' : '';
+    return `<div class="recipe ${ready ? 'ready' : ''}" data-id="${r.id}">
       <div class="r-icon">${it.icon}</div>
       <div class="r-body">
-        <div class="r-name">${it.name} <span class="r-owned">${owned ? 'Owned ×' + owned : ''}</span></div>
-        <div class="r-effect">${r.effect}</div>
+        <div class="r-name">${it.name} ${usesTag} <span class="r-owned">${ownedTxt}</span></div>
+        <div class="r-effect">${it.desc}</div>
         <div class="r-cost">${cost}</div>
       </div>
-      <button class="craft-btn" data-id="${r.id}" ${canAfford(r) ? '' : 'disabled'}>Craft</button>
+      <button class="craft-btn" data-id="${r.id}" ${ready ? '' : 'disabled'}>${ownedTool(r) ? 'Owned' : 'Craft'}</button>
     </div>`;
   }
 
   function render() {
-    const w = RECIPES.filter(r => r.group === 'weapon').map(card).join('');
-    const d = RECIPES.filter(r => r.group === 'defense').map(card).join('');
-    document.getElementById('craft-list').innerHTML = `
-      <h3 class="craft-h">⚔️ Weapons <small>used up when you use them</small></h3>${w}
-      <h3 class="craft-h">🛡️ Defenses <small>for fortifying your base — coming soon</small></h3>${d}`;
-    document.querySelectorAll('.craft-btn').forEach(b => { b.onclick = () => craft(b.dataset.id, b); });
+    const R = Data.RECIPES;
+    const sec = (title, sub, list) => `<h3 class="craft-h">${title} <small>${sub}</small></h3>${list.map(card).join('')}`;
+    document.getElementById('craft-list').innerHTML =
+      sec('🏕️ Tier 1 · Camp', 'wood, stone & hide', R.filter(r => r.tier === 1 && !r.defense)) +
+      sec('🔥 Tier 2 · Forge', 'needs iron & coal from the Iron Hills — multi-use', R.filter(r => r.tier === 2)) +
+      sec('🧰 Tools', 'passive & permanent — they work every run', R.filter(isTool)) +
+      sec('🛡️ Defenses', 'for fortifying your base — coming soon', R.filter(r => r.defense));
+    document.querySelectorAll('.craft-btn').forEach(b => { b.onclick = () => craft(b.dataset.id); });
   }
 
   const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-  async function craft(id, btn) {
-    const r = RECIPES.find(x => x.id === id);
-    if (forging || !canAfford(r)) return;
+  async function craft(id) {
+    const r = Data.RECIPES.find(x => x.id === id);
+    if (forging || !canAfford(r) || ownedTool(r)) return;
     forging = true;
-    const it = App.ITEMS[id];
+    const it = Data.ITEMS[id];
     const forge = document.getElementById('forge');
     const stage = forge.querySelector('.forge-stage');
     const anvil = forge.querySelector('.anvil');
@@ -54,19 +54,21 @@ window.Craft = (() => {
     item.className = 'forge-item';
     text.textContent = '';
     text.className = 'forge-text';
-    stage.querySelectorAll('.fly-chip, .spark').forEach(e => e.remove());
+    stage.querySelectorAll('.spark').forEach(e => e.remove());
+    forge.querySelectorAll('.fly-chip').forEach(e => e.remove());
     forge.classList.remove('hidden', 'done');
+    forge.classList.toggle('hot', r.tier === 2);
     void forge.offsetWidth;
     forge.classList.add('show');
     Sound.sfx('whoosh');
 
-    // 1) Pay: resource chips fly from the stockpile bar onto the anvil.
+    // 1) Resources fly from the stockpile bar onto the anvil.
     const target = anvil.getBoundingClientRect();
     const tx = target.left + target.width / 2, ty = target.top + 6;
     const chips = [];
     let i = 0;
     for (const [k, n] of Object.entries(r.cost)) {
-      App.state.stockpile[k] -= n;
+      st().stockpile[k] -= n;
       const from = document.querySelector(`.res[data-res="${k}"]`).getBoundingClientRect();
       for (let j = 0; j < Math.min(n, 6); j++, i++) {
         const c = document.createElement('div');
@@ -82,24 +84,25 @@ window.Craft = (() => {
     App.save();
     await sleep(60 * i + 450);
 
-    // 2) Three hammer strikes with sparks.
-    for (let s = 0; s < 3; s++) {
+    // 2) Hammer strikes (Forge items take more).
+    const strikes = r.tier === 2 ? 4 : 3;
+    for (let s = 0; s < strikes; s++) {
       hammer.classList.remove('strike'); void hammer.offsetWidth; hammer.classList.add('strike');
       await sleep(210);
       Sound.sfx('clank');
       anvil.classList.remove('jolt'); void anvil.offsetWidth; anvil.classList.add('jolt');
-      sparks(stage, anvil);
-      chips.forEach(c => { c.style.opacity = String(0.7 - s * 0.3); });
+      sparks(stage, anvil, r.tier === 2 ? 18 : 12);
+      chips.forEach(c => { c.style.opacity = String(Math.max(0, 0.7 - s * 0.3)); });
       await sleep(240);
     }
     chips.forEach(c => c.remove());
 
     // 3) The item appears.
-    App.state.inventory[id]++;
+    st().inventory[id] += it.uses || 1;
     App.save();
     forge.classList.add('done');
     item.classList.add('pop');
-    text.textContent = `${it.name} crafted!`;
+    text.textContent = `${it.name} ${isTool(r) ? 'made' : 'crafted'}!`;
     text.classList.add('show');
     Sound.sfx('crafted');
     await sleep(1300);
@@ -112,10 +115,10 @@ window.Craft = (() => {
     if (fresh) fresh.classList.add('flash');
   }
 
-  function sparks(stage, anvil) {
+  function sparks(stage, anvil, count) {
     const a = anvil.getBoundingClientRect(), s = stage.getBoundingClientRect();
     const x = a.left - s.left + a.width / 2, y = a.top - s.top;
-    for (let n = 0; n < 12; n++) {
+    for (let n = 0; n < count; n++) {
       const sp = document.createElement('div');
       sp.className = 'spark';
       sp.style.left = x + 'px';
@@ -129,5 +132,5 @@ window.Craft = (() => {
     }
   }
 
-  return { render, RECIPES };
+  return { render };
 })();

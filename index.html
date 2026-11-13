@@ -17,6 +17,7 @@
       <div class="res" data-res="food"><span class="chip c-food"></span><b id="s-food">0</b></div>
       <div class="res" data-res="gold"><span class="chip c-gold"></span><b id="s-gold">0</b></div>
       <div class="res" data-res="iron"><span class="chip c-iron"></span><b id="s-iron">0</b></div>
+      <div class="res" data-res="coal"><span class="chip c-coal"></span><b id="s-coal">0</b></div>
       <button id="sound-btn" class="sound-btn" aria-label="Sound">🔊</button>
       <div id="sound-toast" class="sound-toast"></div>
     </header>
@@ -24,49 +25,44 @@
     <!-- HOME -->
     <section id="screen-home" class="screen">
       <h1>Warrior Match-3</h1>
-      <p class="sub">Gather → Craft → Fortify → Raid</p>
+      <p class="sub">Gather → Craft → Raid</p>
 
       <nav class="menu">
-        <button class="big" id="btn-forest">🌲 Gather in the Forest</button>
-        <button class="big" id="btn-craft">🔨 Craft</button>
-        <button class="big" id="btn-raid">⚔️ Raid Goblin Village</button>
-        <button class="big" disabled>⛏️ Dwarf Stronghold <small>later</small></button>
+        <h3 class="menu-h">Gather</h3>
+        <div class="menu-row">
+          <button class="big land forest" id="btn-forest">🌲 Forest<small>wood · hide · food</small></button>
+          <button class="big land mine" id="btn-mine">⛏️ Iron Hills<small>stone · iron · coal</small></button>
+        </div>
+        <button class="big" id="btn-craft">🔨 Workshop</button>
+        <h3 class="menu-h">Raid</h3>
+        <button class="big danger" id="btn-raid-goblin">⚔️ Raid Goblin Village</button>
+        <button class="big danger" id="btn-raid-dwarf">⚒️ Raid Dwarf Stronghold</button>
         <button class="big" disabled>🧱 Fortify <small>later</small></button>
       </nav>
 
-      <div class="panel">
-        <h3>Inventory</h3>
-        <div id="home-inventory" class="inv"></div>
-        <h3 class="mt">Goblin spoils</h3>
-        <div id="home-spoils" class="inv"></div>
-      </div>
+      <div class="panel" id="home-inventory"></div>
 
       <div class="panel debug">
         <h3>🛠 Debug</h3>
-        <label class="check"><input type="checkbox" id="dbg-tracks"> 🐾 Goblin tracks appear right away in the forest</label>
-        <button class="big alt" id="dbg-village" style="margin-top:10px">+1 marked village &amp; +5 food</button>
+        <label class="check"><input type="checkbox" id="dbg-discover"> Tracks / rune stone appear right away</label>
+        <label class="check"><input type="checkbox" id="dbg-event"> Thief / runaway cart appears right away</label>
+        <button class="big alt" id="dbg-raid" style="margin-top:10px">+1 marked village &amp; stronghold, +8 food</button>
         <button class="big alt" id="dbg-rich" style="margin-top:10px">+20 of every resource</button>
         <button class="link" id="btn-reset">Reset save</button>
       </div>
     </section>
 
-    <!-- FOREST (gathering) -->
-    <section id="screen-forest" class="screen hidden">
+    <!-- GATHERING (Forest / Iron Hills) -->
+    <section id="screen-gather" class="screen hidden">
       <div class="forest-top">
-        <button class="small" id="forest-exit">🏠 Head home</button>
-        <div class="moves">Moves <b id="f-moves">20</b></div>
+        <button class="small" id="g-exit">🏠 Head home</button>
+        <div class="land-title" id="g-title"></div>
+        <div class="moves">Moves <b id="g-moves">20</b></div>
       </div>
+      <div class="backpack" id="backpack"></div>
+      <div class="subbar"><span id="g-finds"></span></div>
 
-      <div class="backpack" id="backpack">
-        <span class="bp-label">🎒 <b id="bp-total">0</b>/<span id="bp-cap">15</span></span>
-        <span class="bp-item"><span class="chip c-wood"></span><b id="bp-wood">0</b></span>
-        <span class="bp-item"><span class="chip c-stone"></span><b id="bp-stone">0</b></span>
-        <span class="bp-item"><span class="chip c-hide"></span><b id="bp-hide">0</b></span>
-        <span class="bp-item"><span class="chip c-food"></span><b id="bp-food">0</b></span>
-        <span class="bp-item"><span class="chip c-gold"></span><b id="bp-gold">0</b></span>
-      </div>
-
-      <div class="board-wrap" id="forest-wrap">
+      <div class="board-wrap" id="gather-wrap">
         <div class="board"></div>
         <div class="board-fx"></div>
         <div class="toast"></div>
@@ -74,21 +70,20 @@
 
       <div class="weapons">
         <span class="label">Weapons</span>
-        <div id="forest-weapons" class="weapon-tray"></div>
+        <div id="gather-weapons" class="weapon-tray"></div>
       </div>
-      <p class="hint" id="forest-hint"></p>
+      <p class="hint" id="gather-hint"></p>
     </section>
 
-    <!-- GOBLIN VILLAGE (battle) -->
+    <!-- BATTLE (Goblin Village / Dwarf Stronghold) -->
     <section id="screen-battle" class="screen hidden">
       <div class="forest-top">
         <button class="small danger" id="battle-exit">🏳️ Retreat</button>
         <div class="enemy" id="enemy"></div>
         <div class="moves">Moves <b id="b-moves">20</b></div>
       </div>
-
       <div class="lootbar">
-        <span class="lb-label">💰 Loot</span>
+        <span class="lb-label" id="b-title"></span>
         <span id="lootbar-text">nothing yet</span>
       </div>
 
@@ -105,11 +100,11 @@
       <p class="hint" id="battle-hint"></p>
     </section>
 
-    <!-- CRAFT -->
+    <!-- WORKSHOP -->
     <section id="screen-craft" class="screen hidden">
       <div class="forest-top">
         <button class="small" id="craft-back">← Home</button>
-        <div class="craft-title">🔨 Camp Workshop <small>Tier 1</small></div>
+        <div class="craft-title">🔨 Workshop</div>
       </div>
       <div id="craft-list"></div>
     </section>
@@ -135,10 +130,11 @@
     </div>
   </div>
 
+  <script src="js/data.js"></script>
   <script src="js/sound.js"></script>
-  <script src="js/main.js"></script>
   <script src="js/board.js"></script>
-  <script src="js/forest.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/gather.js"></script>
   <script src="js/battle.js"></script>
   <script src="js/craft.js"></script>
   <script>App.boot();</script>

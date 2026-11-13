@@ -1,6 +1,6 @@
 # RelicRealm — Warrior Match-3 prototype
 
-A basic browser prototype of the core loop: gather → craft → fortify → raid.
+A browser prototype of the core loop: **gather → find → craft → raid**.
 It's plain HTML/CSS/JS with no build step and no backend. Progress is saved in `localStorage`.
 
 ## Run it
@@ -8,83 +8,70 @@ It's plain HTML/CSS/JS with no build step and no backend. Progress is saved in `
 - Serve the folder: `python3 -m http.server 8000`, then open `http://<your-computer-ip>:8000`
 
 ## Files
-- `js/board.js`: shared match-3 engine (tiles, fixed pieces, gravity, weapons, input)
-- `js/forest.js`: Forest gathering board
-- `js/battle.js`: Goblin Village battle board
-- `js/main.js`: save data, home screen, popups, raid prep
-- `js/craft.js`: Camp Workshop (Tier 1 crafting + forge animation)
-- `js/sound.js`: music and sound effects, generated in the browser (no audio files)
+| File | What |
+|---|---|
+| `js/data.js` | Resources, items, **materials & weapon damage**, finds, spoils, recipes |
+| `js/board.js` | Shared match-3 engine: tiles, fixed pieces, gravity, wild stars, specials, weapons, buried finds |
+| `js/gather.js` | Gathering boards: **Forest** and **Iron Hills** |
+| `js/battle.js` | Battle boards: **Goblin Village** and **Dwarf Stronghold** |
+| `js/craft.js` | Workshop (Tier 1, Tier 2, Tools) with the forge animation |
+| `js/main.js` | Save data, home screen, popups, raid prep, spoils |
+| `js/sound.js` | Music and sound effects, generated in the browser |
 
-Each game file has its tuning knobs at the top.
+## Materials: why weapons matter
+Every obstacle and defense is made of something:
+- **Matches** do 1 damage to wood, stone, creatures and other pieces, and **nothing to thorns or iron**.
+- **Weapons** do damage according to what the target is made of:
 
-## Forest (gathering)
-- 7x7 board, 20 moves, 30-slot backpack. Resources are banked when you head home.
-- Tiles (5 main types, so matches come easily):
-  - Wood, Stone, Hide (~18% each)
-  - **Berries → Food** (~16%)
-  - Leaves are filler (~30%)
-  - **🪙 Coin** tile → Gold (4%)
-  - **🌈★ Star** (3%): wild, completes any match. One star can finish two matches at once (wood-wood-★-stone-stone). Stars also appear on the battle board.
-- 3/4/5-match = 1/2/3, +1 on chain reactions.
-- **🐾 Goblin tracks** sometimes appear (about 3 in 5 runs). Match next to them to follow them to a goblin village, then:
-  - **Raid now:** costs 3 food
-  - **Mark it on the map:** raid it later from home
-  - **Keep gathering**
+| Weapon | Wood | Thorns | Stone | Iron | Creatures | Notes |
+|---|---|---|---|---|---|---|
+| 🏏 Club (T1) | 2 | 2 | 0 | 0 | 1 | |
+| 🪃 Sling (T1) | 1 | 1 | 1 | 1 | 1 | reaches into fog |
+| 🪓 Iron axe (T2, 3 uses) | 3 | 3 | 0 | 0 | 1 | stumps give +5 wood |
+| ⛏️ Pickaxe (T2, 3 uses) | 1 | 1 | 3 | 2 | 0 | ore veins give double iron |
+| ⚔️ Iron sword (T2, 3 uses) | 1 | 1 | 1 | 1 | 3 | 2 damage to any keep |
+| 🔥 Firepot (goblin spoil) | 2 | 2 | 0 | 0 | 1 | 3x3 area, burns fog |
+| ⚒️ Dwarven pick (dwarf spoil, 3 uses) | 2 | 2 | 9 | 9 | 1 | |
+| 🗝️ Old key (found) | – | – | – | – | – | opens locked chests and iron gates |
 
-## Match specials (both boards)
-- **4-match** leaves a wild ★ star behind.
-- **5-match** = **line blast**: clears the whole row or column and hits every defense in it.
-- Chain reactions show "Nice! / Great! / Awesome!".
-- After 4 idle seconds, a possible move wiggles as a hint.
+Tapping a weapon on something it can't hurt tells you so and doesn't use it up.
 
-## Crafting (Camp Workshop, Tier 1)
-| Item | Cost | Use |
+## Gathering boards
+| | 🌲 Forest | ⛏️ Iron Hills |
 |---|---|---|
-| Club | 5 wood | Clears 1 tile (forest or raid) |
-| Sling | 4 wood, 3 hide | Hits a tile or defense |
-| Wooden fence | 6 wood | Defense (for Fortify, later) |
-| Stone wall | 12 stone | Defense, 2 hits (for Fortify, later) |
-| Pit trap | 4 wood, 2 hide | Defense (for Fortify, later) |
+| Tiles | wood, stone, hide, berries→food, leaves (filler) | stone, ore→iron, coal, gravel & bones (filler) |
+| Obstacles | stumps (wood), thornbushes (hide a find), sometimes a locked chest | boulders (stone), ore veins (each hit = iron), sometimes a locked chest |
+| Runaway event | 🏃 goblin thief with a sack | 🛒 runaway ore cart |
+| Discovery | 🐾 tracks → Goblin Village | ᚱ rune stone → Dwarf Stronghold |
 
-Crafting plays a forge animation: resources fly onto the anvil, 3 hammer strikes with sparks, then the item appears.
+Both lands also have:
+- **3 buried finds per board**, dug up when you clear the tile above one: caches, food baskets, ore pockets, coal seams, gold nuggets, lost clubs, **old keys**, **map scraps** (3 complete a map that marks a raid target) and **relic shards** (5 make the 👑 Old King's Crown, +2 moves in every raid).
+- Wild ★ stars (3%) and 🪙 coins (4%).
+- A 4-match makes a star and a 5-match blasts a whole line.
+- 20 moves and a 30-slot backpack.
 
-## Sound
-🔊 button at the top right: music + effects → effects only → off. There's a calm folk tune for home and the forest and a drum march for raids.
+## Battle boards (7x9, fog over the top 4 rows, layout shuffled every raid)
+| | 🔥 Goblin Village | ⚒️ Dwarf Stronghold |
+|---|---|---|
+| Cost / moves | 3 food / 20 | 4 food / 22 |
+| Built from | wood | stone & iron |
+| Keep | KEEP (wood, 5 HP) with fences | GREAT HALL (stone, 6 HP), walled in by stone walls and an **iron gate** |
+| Hidden in the fog | watchtower, loot chest, buried chest, pit traps, sometimes a prisoner (+3 moves) | ballista, vault, gem chest, rockfall traps, **the gate key** |
+| Every 3 moves | spears, sneaking goblins (repair the keep), rebuilt fences | ballista bolts, armored guards (2 HP, repair the hall), shored-up walls, rebuilt walls |
+| Spoils (can't be crafted) | firepot, shiv, war drum, iron scraps, palisade blueprint | dwarven pick, dwarf ale, runestone, iron ingots, mine-cart blueprint |
 
-## Goblin Village (battle)
-- 7x9 board. The top 4 rows are **fog**. Match next to fog to reveal what's underneath.
-- The layout is shuffled every raid:
-  - Keep (3 wide, 5 HP) with fences on each side
-  - Watchtower (2 HP)
-  - Loot chest
-  - A third fence
-  - 2 hidden pit traps (−1 move when you uncover one with a match)
-  - A buried chest
-  - Sometimes a prisoner (+3 moves when freed)
-- **Goblins act every 3 moves** and do one of these:
-  - throw a spear (blocks a tile)
-  - sneak a goblin in (each goblin repairs the keep +1 every goblin turn)
-  - rebuild a broken fence
+War drum and dwarf ale each give +3 moves when used at raid prep.
 
-  A standing watchtower adds an extra spear each goblin turn.
-- 20 moves (+3 with a War drum).
-- Breaking the keep = **victory**: a guaranteed goblin spoil and +3 gold. You can keep playing for the loot chest after that.
-- **Retreat** keeps what you've grabbed. Running out of moves loses it all.
-- Stars:
-  - ★ open the loot chest
-  - ★ break the keep
-  - ★ both, with moves left
-- Goblin spoils (can't be crafted):
-  - firepot (3x3 blast)
-  - shiv (2 uses)
-  - rusty iron scraps (+3 iron)
-  - war drum (+3 raid moves)
-  - palisade blueprint
+## Workshop
+- **Tier 1 · Camp:** Club 5 wood · Sling 4 wood, 3 hide
+- **Tier 2 · Forge:** Iron axe 4 wood, 3 iron · Pickaxe 3 wood, 4 iron · Iron sword 2 hide, 5 iron, 2 coal
+- **Tools (passive, permanent):** Hatchet (+1 wood per wood match) · Skinning knife (+1 hide) · Miner's lamp (buried finds glimmer)
+- **Defenses (for Fortify, later):** Wooden fence · Stone wall · Pit trap
 
 ## Debug (home screen)
-- "Goblin tracks appear right away"
-- "+1 marked village & +5 food", to jump straight into a raid
-- "+20 of every resource", to try crafting
+- Make tracks or a rune stone appear right away, or the thief or cart.
+- +1 marked village and stronghold, +8 food.
+- +20 of every resource.
 
 ## Not built yet
-Dwarf Stronghold, Quarry, Tier 2+ crafting, fortify editor, goblins raiding your board, PvP.
+Fortify editor, goblins and dwarves raiding your board, PvP, Tier 3+.
