@@ -12,7 +12,7 @@ window.App = (() => {
   };
 
   const ITEMS = {
-    // Tier 1 (crafting comes later; a test Club + Sling are given for now)
+    // Tier 1 (crafted in the Camp Workshop)
     club:  { name: 'Club',  icon: '🏏', weapon: true, desc: 'Clears 1 tile' },
     sling: { name: 'Sling', icon: '🪃', weapon: true, desc: 'Hits any 1 tile, incl. defenses' },
     fence: { name: 'Wooden fence', icon: '🪵' },
@@ -31,7 +31,7 @@ window.App = (() => {
   function fresh() {
     return {
       stockpile: { wood: 0, stone: 0, hide: 0, food: 0, gold: 0, iron: 0 },
-      inventory: { club: 1, sling: 1, fence: 0, wall: 0, trap: 0, firepot: 0, shiv: 0, drum: 0, blueprint: 0 },
+      inventory: { club: 0, sling: 0, fence: 0, wall: 0, trap: 0, firepot: 0, shiv: 0, drum: 0, blueprint: 0 },
       unlocks: { palisade: false },
       marked: 0,                       // goblin villages found and marked on the map
       debug: { tracksNow: false },
@@ -175,7 +175,8 @@ window.App = (() => {
   function go(screen, opts) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById('screen-' + screen).classList.remove('hidden');
-    if (screen === 'home') renderHome();
+    if (screen === 'home') { renderHome(); Sound.music('home'); }
+    if (screen === 'craft') { Craft.render(); Sound.music('home'); }
     if (screen === 'forest') Forest.start();
     if (screen === 'battle') Battle.start(opts);
     window.scrollTo(0, 0);
@@ -188,6 +189,13 @@ window.App = (() => {
     Battle.init();
     document.getElementById('btn-forest').onclick = () => go('forest');
     document.getElementById('btn-raid').onclick = () => prepareRaid();
+    document.getElementById('btn-craft').onclick = () => go('craft');
+    document.getElementById('craft-back').onclick = () => go('home');
+    document.getElementById('dbg-rich').onclick = () => {
+      ['wood', 'stone', 'hide', 'food', 'gold'].forEach(k => { state.stockpile[k] += 20; });
+      save(); renderHome();
+    };
+    Sound.bind();
     document.getElementById('btn-reset').onclick = () => {
       if (confirm('Reset all resources and items?')) { state = fresh(); save(); renderHome(); }
     };

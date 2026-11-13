@@ -17,6 +17,8 @@
       <div class="res" data-res="food"><span class="chip c-food"></span><b id="s-food">0</b></div>
       <div class="res" data-res="gold"><span class="chip c-gold"></span><b id="s-gold">0</b></div>
       <div class="res" data-res="iron"><span class="chip c-iron"></span><b id="s-iron">0</b></div>
+      <button id="sound-btn" class="sound-btn" aria-label="Sound">🔊</button>
+      <div id="sound-toast" class="sound-toast"></div>
     </header>
 
     <!-- HOME -->
@@ -26,9 +28,9 @@
 
       <nav class="menu">
         <button class="big" id="btn-forest">🌲 Gather in the Forest</button>
+        <button class="big" id="btn-craft">🔨 Craft</button>
         <button class="big" id="btn-raid">⚔️ Raid Goblin Village</button>
         <button class="big" disabled>⛏️ Dwarf Stronghold <small>later</small></button>
-        <button class="big" disabled>🔨 Craft <small>later</small></button>
         <button class="big" disabled>🧱 Fortify <small>later</small></button>
       </nav>
 
@@ -43,6 +45,7 @@
         <h3>🛠 Debug</h3>
         <label class="check"><input type="checkbox" id="dbg-tracks"> 🐾 Goblin tracks appear right away in the forest</label>
         <button class="big alt" id="dbg-village" style="margin-top:10px">+1 marked village &amp; +5 food</button>
+        <button class="big alt" id="dbg-rich" style="margin-top:10px">+20 of every resource</button>
         <button class="link" id="btn-reset">Reset save</button>
       </div>
     </section>
@@ -101,6 +104,26 @@
       </div>
       <p class="hint" id="battle-hint"></p>
     </section>
+
+    <!-- CRAFT -->
+    <section id="screen-craft" class="screen hidden">
+      <div class="forest-top">
+        <button class="small" id="craft-back">← Home</button>
+        <div class="craft-title">🔨 Camp Workshop <small>Tier 1</small></div>
+      </div>
+      <div id="craft-list"></div>
+    </section>
+  </div>
+
+  <!-- Forge animation -->
+  <div id="forge" class="forge hidden">
+    <div class="forge-stage">
+      <div class="forge-rays"></div>
+      <div class="forge-item"></div>
+      <div class="hammer">🔨</div>
+      <div class="anvil"></div>
+      <div class="forge-text"></div>
+    </div>
   </div>
 
   <!-- Shared popup -->
@@ -112,10 +135,12 @@
     </div>
   </div>
 
+  <script src="js/sound.js"></script>
   <script src="js/main.js"></script>
   <script src="js/board.js"></script>
   <script src="js/forest.js"></script>
   <script src="js/battle.js"></script>
+  <script src="js/craft.js"></script>
   <script>App.boot();</script>
 </body>
 </html>

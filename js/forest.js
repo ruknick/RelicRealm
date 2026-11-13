@@ -3,11 +3,11 @@ window.Forest = (() => {
   // ---------- tuning knobs ----------
   const SIZE = 7;
   const MOVES = 20;
-  const BACKPACK = 15;
-  const STAR_CHANCE = 0.02;      // wild tile: completes any match
+  const BACKPACK = 30;
+  const STAR_CHANCE = 0.03;      // wild tile: completes any match (4-matches also make one)
   const GOLD_CHANCE = 0.04;      // coin tile
   // Spawn weights (stars and coins rolled separately). Berries become food.
-  const TILE_WEIGHTS = { wood: 12, stone: 12, hide: 12, berries: 14, leaves: 25, mushroom: 25 };
+  const TILE_WEIGHTS = { wood: 18, stone: 18, hide: 18, berries: 16, leaves: 30 };
   const GIVES = { wood: 'wood', stone: 'stone', hide: 'hide', berries: 'food', gold: 'gold' };
   const TRACKS_AFTER = 2;        // earliest move tracks can appear
   const TRACKS_CHANCE = 0.05;    // per move → shows up in roughly 3 of 5 runs
@@ -112,7 +112,8 @@ window.Forest = (() => {
       if (step === 2) board.toast('Chain reaction! +1 per match');
       for (const ri of runs) {
         const res = GIVES[ri.type];
-        if (!res) continue;   // leaves & mushrooms: filler
+        if (!res) continue;   // leaves: filler
+        if (res === 'gold') Sound.sfx('coin');
         addToBackpack(res, points(ri.cells.length) + (step > 1 ? 1 : 0), ri.cells[Math.floor(ri.cells.length / 2)]);
       }
     },
@@ -124,6 +125,7 @@ window.Forest = (() => {
     async afterAction(wasMove) {
       if (run.followed && !run.discovered) {
         run.discovered = true;
+        Sound.sfx('reveal');
         await discover();
         if (run.ended) return;
       }
@@ -182,7 +184,9 @@ window.Forest = (() => {
     board.fillEmpty();
     board.renderWeapons(document.getElementById('forest-weapons'));
     board.render();
+    board.scheduleHint();
     hud();
+    Sound.music('forest');
     if (App.state.debug.tracksNow) spawnTracks();
     else board.toast(`Into the forest… carry up to ${BACKPACK} resources home.`);
   }

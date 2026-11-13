@@ -86,6 +86,7 @@ window.Battle = (() => {
     const k = fog.hidden;
     const { r, c } = fog;
     board.removePiece(fog, 'fog-out');
+    Sound.sfx('reveal');
     if (!k) return;
     if (k === 'keep') {
       board.pieces.filter(p => p.kind === 'fog' && p.hidden === 'keep').forEach(f => board.removePiece(f, 'fog-out'));
@@ -147,6 +148,7 @@ window.Battle = (() => {
 
   function win(cell) {
     run.won = true;
+    Sound.sfx('victory');
     const k = App.rollSpoil();
     run.bag.spoils.push(k);
     run.bag.gold += 3;
@@ -183,6 +185,7 @@ window.Battle = (() => {
 
   async function enemyTurn() {
     board.toast('Goblins\' turn!', 'alert', 1200);
+    Sound.sfx('drums');
     await board.wait(700);
     const options = ['spear', 'sneak'];
     if (board.piecesOf('goblin').length >= MAX_GOBLINS) options.pop();
@@ -293,7 +296,9 @@ window.Battle = (() => {
     board.fillEmpty();
     board.renderWeapons(document.getElementById('battle-weapons'));
     board.render();
+    board.scheduleHint();
     hud();
+    Sound.music('battle');
     board.toast(drum ? '🥁 The war drum rallies you: +3 moves!' : 'The village lies in the fog ahead…', '', 2400);
   }
 

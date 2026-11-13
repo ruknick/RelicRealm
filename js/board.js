@@ -62,7 +62,7 @@ window.Board = (() => {
     run(promise) {
       promise.catch(e => { if (e !== ABORT) console.error(e); this.busy = false; });
     }
-    stop() { this.session++; this.busy = false; this.armed = null; this.selected = null; }
+    stop() { this.session++; this.busy = false; this.armed = null; this.selected = null; this.clearHint(); }
 
     reset() {
       this.stop();
@@ -147,23 +147,7 @@ window.Board = (() => {
       this.grid[r2][c2] = t;
     }
 
-    hasMove() {
-      for (let r = 0; r < this.rows; r++) {
-        for (let c = 0; c < this.cols; c++) {
-          for (const [dr, dc] of [[0, 1], [1, 0]]) {
-            const r2 = r + dr, c2 = c + dc;
-            if (!this.inBounds(r2, c2)) continue;
-            const a = this.grid[r][c], b = this.grid[r2][c2];
-            if (!this.isTile(a) || !this.isTile(b) || a.type === b.type) continue;
-            this.swap([r, c], [r2, c2]);
-            const ok = this.matchAt(r, c) || this.matchAt(r2, c2);
-            this.swap([r, c], [r2, c2]);
-            if (ok) return true;
-          }
-        }
-      }
-      return false;
-    }
+    hasMove() { return !!this.findMove(); }
 
     // Tiles fall past fixed pieces; new tiles drop in from above the board.
     collapse() {
@@ -234,7 +218,8 @@ window.Board = (() => {
       p.hp = Math.max(0, p.hp - n);
       const el = this.pieceEls.get(p.id);
       if (el) { el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); }
-      if (p.hp <= 0) { this.removePiece(p); return true; }
+      if (p.hp <= 0) { this.removePiece(p); window.Sound?.sfx('break'); return true; }
+      window.Sound?.sfx('hit');
       this.renderPieces();
       return false;
     }
@@ -270,6 +255,7 @@ window.Board = (() => {
               el.getBoundingClientRect();   // force layout so the fall animates
             }
           }
+          if (t.born) { el.firstChild.classList.add('spawn'); delete t.born; }
           delete t.fromRow;
           el.style.transform = this.pos(r, c);
           el.classList.toggle('sel', !!this.selected && this.selected[0] === r && this.selected[1] === c);
@@ -392,21 +378,23 @@ window.Board = (() => {
       hit.forEach(p => this.hooks.onPieceHit(p, 1, 'weapon'));
       this.popCells(clear);
       this.render();
-      await this.wait(250);
+      window.Sound?.sfx(w === 'firepot' ? 'blast' : 'hit');
+      await this.wait(200);
       clear.forEach(k => {
         const rr = Math.floor(k / this.cols), cc = k % this.cols;
         if (this.isTile(this.grid[rr][cc])) this.grid[rr][cc] = null;
       });
       this.collapse(); this.render();
-      await this.wait(330);
+      await this.wait(250);
       await this.resolve();
       await this.ensurePlayable();
       await this.hooks.afterAction(false);
       this.busy = false;
+      this.scheduleHint();
     }
 
     // ---------- turn flow ----------
-    async resolve() {
+    async resolve(swapCells = []) {
       let step = 0;
       for (;;) {
         const runs = this.findRuns();
@@ -414,27 +402,105 @@ window.Board = (() => {
         step++;
         const clear = new Set();
         const hits = new Map();
+        const stars = [];          // 4+ matches leave a wild star behind
+        const blasts = [];         // 5+ matches blast their whole row/column
+        const hitAdj = (r, c, seen) => DIRS.forEach(([dr, dc]) => {
+          const r2 = r + dr, c2 = c + dc;
+          if (this.inBounds(r2, c2) && this.isPiece(this.grid[r2][c2])) seen.add(this.grid[r2][c2].piece);
+        });
         for (const ri of runs) {
           ri.cells.forEach(([r, c]) => clear.add(r * this.cols + c));
           const adj = new Set();
-          ri.cells.forEach(([r, c]) => DIRS.forEach(([dr, dc]) => {
-            const r2 = r + dr, c2 = c + dc;
-            if (this.inBounds(r2, c2) && this.isPiece(this.grid[r2][c2])) adj.add(this.grid[r2][c2].piece);
-          }));
+          ri.cells.forEach(([r, c]) => hitAdj(r, c, adj));
           adj.forEach(p => hits.set(p, (hits.get(p) || 0) + 1));
+          if (ri.cells.length >= 4) {
+            const mine = ri.cells.find(([r, c]) => swapCells.some(([a, b]) => a === r && b === c));
+            stars.push(mine || ri.cells[Math.floor(ri.cells.length / 2)]);
+          }
+          if (ri.cells.length >= 5) blasts.push(ri);
+        }
+        for (const ri of blasts) {
+          const horiz = ri.cells[0][0] === ri.cells[1][0];
+          const line = horiz ? this.lines[ri.cells[0][0]] : this.lines[this.rows + ri.cells[0][1]];
+          const inLine = new Set();
+          line.forEach(([r, c]) => {
+            const t = this.grid[r][c];
+            if (this.isTile(t)) clear.add(r * this.cols + c);
+            else if (this.isPiece(t)) inLine.add(t.piece);
+          });
+          inLine.forEach(p => hits.set(p, (hits.get(p) || 0) + 1));
+          this.lineFlash(horiz, horiz ? ri.cells[0][0] : ri.cells[0][1]);
         }
         this.hooks.onMatch?.(runs, step);
+        window.Sound?.sfx(blasts.length ? 'blast' : 'match', step);
+        if (step >= 2) this.combo(step);
+        if (blasts.length) this.toast('💥 Line blast!', 'win');
+        else if (stars.length) this.toast('★ Wild star created!', 'win');
         hits.forEach((n, p) => { if (!p.gone) this.hooks.onPieceHit(p, n, 'match'); });
         this.popCells(clear);
-        await this.wait(220);
+        await this.wait(170);
         clear.forEach(k => {
           const r = Math.floor(k / this.cols), c = k % this.cols;
           if (this.isTile(this.grid[r][c])) this.grid[r][c] = null;
         });
+        stars.forEach(([r, c]) => {
+          if (this.grid[r][c] === null) { const t = this.newTile('star'); t.born = true; this.grid[r][c] = t; }
+        });
         this.collapse();
         this.render();
-        await this.wait(330);
+        await this.wait(250);
       }
+    }
+
+    combo(step) {
+      const words = ['', '', 'Nice!', 'Great!', 'Awesome!', 'Legendary!'];
+      const d = document.createElement('div');
+      d.className = 'combo';
+      d.textContent = words[Math.min(step, 5)] + (step > 2 ? ` x${step}` : '');
+      this.fx.appendChild(d);
+      setTimeout(() => d.remove(), 1000);
+    }
+
+    lineFlash(horiz, idx) {
+      const d = document.createElement('div');
+      d.className = 'lineflash ' + (horiz ? 'h' : 'v');
+      if (horiz) { d.style.top = (idx / this.rows * 100) + '%'; d.style.height = (100 / this.rows) + '%'; }
+      else { d.style.left = (idx / this.cols * 100) + '%'; d.style.width = (100 / this.cols) + '%'; }
+      this.fx.appendChild(d);
+      setTimeout(() => d.remove(), 500);
+    }
+
+    // ---------- hint: wiggle a valid move after a few idle seconds ----------
+    findMove() {
+      for (let r = 0; r < this.rows; r++) {
+        for (let c = 0; c < this.cols; c++) {
+          for (const [dr, dc] of [[0, 1], [1, 0]]) {
+            const r2 = r + dr, c2 = c + dc;
+            if (!this.inBounds(r2, c2)) continue;
+            const a = this.grid[r][c], b = this.grid[r2][c2];
+            if (!this.isTile(a) || !this.isTile(b) || a.type === b.type) continue;
+            this.swap([r, c], [r2, c2]);
+            const ok = this.matchAt(r, c) || this.matchAt(r2, c2);
+            this.swap([r, c], [r2, c2]);
+            if (ok) return [[r, c], [r2, c2]];
+          }
+        }
+      }
+      return null;
+    }
+    clearHint() {
+      clearTimeout(this.hintTimer);
+      this.el.querySelectorAll('.tile.hint').forEach(e => e.classList.remove('hint'));
+    }
+    scheduleHint(ms = 4000) {
+      this.clearHint();
+      const tok = this.session;
+      this.hintTimer = setTimeout(() => {
+        if (tok !== this.session || this.busy || !this.hooks.canPlay()) return;
+        const m = this.findMove();
+        if (!m) return;
+        m.forEach(([r, c]) => { const t = this.grid[r][c]; const el = t && this.els.get(t.id); if (el) el.classList.add('hint'); });
+      }, ms);
     }
 
     async trySwap(a, b) {
@@ -446,19 +512,24 @@ window.Board = (() => {
       }
       this.busy = true;
       this.selected = null;
+      this.clearHint();
+      window.Sound?.sfx('swap');
       this.swap(a, b); this.render();
-      await this.wait(200);
+      await this.wait(140);
       if (!this.findRuns().length) {
+        window.Sound?.sfx('nope');
         this.swap(a, b); this.render();
-        await this.wait(220);
+        await this.wait(160);
         this.busy = false;
+        this.scheduleHint();
         return;
       }
       this.hooks.onMove();
-      await this.resolve();
+      await this.resolve([a, b]);
       await this.ensurePlayable();
       await this.hooks.afterAction(true);
       this.busy = false;
+      this.scheduleHint();
     }
 
     // ---------- input ----------
@@ -472,6 +543,8 @@ window.Board = (() => {
       if (this.busy || !this.hooks.canPlay()) return;
       const cell = this.cellFromEvent(e);
       if (!cell) return;
+      this.clearHint();
+      this.scheduleHint(6000);
       this.pointer = { cell, x: e.clientX, y: e.clientY, done: false };
       try { this.el.setPointerCapture(e.pointerId); } catch (_) { /* ignore */ }
     }
