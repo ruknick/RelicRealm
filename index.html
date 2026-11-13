@@ -14,6 +14,7 @@
       <div class="res" data-res="wood"><span class="chip c-wood"></span><b id="s-wood">0</b></div>
       <div class="res" data-res="stone"><span class="chip c-stone"></span><b id="s-stone">0</b></div>
       <div class="res" data-res="hide"><span class="chip c-hide"></span><b id="s-hide">0</b></div>
+      <div class="res" data-res="food"><span class="chip c-food"></span><b id="s-food">0</b></div>
       <div class="res" data-res="gold"><span class="chip c-gold"></span><b id="s-gold">0</b></div>
       <div class="res" data-res="iron"><span class="chip c-iron"></span><b id="s-iron">0</b></div>
     </header>
@@ -24,11 +25,11 @@
       <p class="sub">Gather → Craft → Fortify → Raid</p>
 
       <nav class="menu">
-        <button class="big" id="btn-forest">🌲 Forest Trail</button>
-        <button class="big" disabled>🔨 Craft <small>coming next</small></button>
-        <button class="big" disabled>⚔️ Raid Goblin Village <small>later</small></button>
+        <button class="big" id="btn-forest">🌲 Gather in the Forest</button>
+        <button class="big" id="btn-raid">⚔️ Raid Goblin Village</button>
+        <button class="big" disabled>⛏️ Dwarf Stronghold <small>later</small></button>
+        <button class="big" disabled>🔨 Craft <small>later</small></button>
         <button class="big" disabled>🧱 Fortify <small>later</small></button>
-        <button class="big" disabled>🛡️ Defend <small>later</small></button>
       </nav>
 
       <div class="panel">
@@ -40,26 +41,17 @@
 
       <div class="panel debug">
         <h3>🛠 Debug</h3>
-        <label class="field">Next forest encounter
-          <select id="dbg-enc">
-            <option value="random">Random (normal odds)</option>
-            <option value="nothing">Nothing</option>
-            <option value="camp">Abandoned camp</option>
-            <option value="scouts">Goblin scouts</option>
-            <option value="village">Goblin village</option>
-          </select>
-        </label>
-        <label class="check"><input type="checkbox" id="dbg-skip"> Skip the walk (encounter is already on the board)</label>
+        <label class="check"><input type="checkbox" id="dbg-tracks"> 🐾 Goblin tracks appear right away in the forest</label>
+        <button class="big alt" id="dbg-village" style="margin-top:10px">+1 marked village &amp; +5 food</button>
         <button class="link" id="btn-reset">Reset save</button>
       </div>
     </section>
 
-    <!-- FOREST TRAIL -->
+    <!-- FOREST (gathering) -->
     <section id="screen-forest" class="screen hidden">
       <div class="forest-top">
         <button class="small" id="forest-exit">🏠 Head home</button>
-        <div class="trail" id="trail">🌲 0</div>
-        <div class="moves">Moves <b id="moves">30</b></div>
+        <div class="moves">Moves <b id="f-moves">20</b></div>
       </div>
 
       <div class="backpack" id="backpack">
@@ -67,36 +59,63 @@
         <span class="bp-item"><span class="chip c-wood"></span><b id="bp-wood">0</b></span>
         <span class="bp-item"><span class="chip c-stone"></span><b id="bp-stone">0</b></span>
         <span class="bp-item"><span class="chip c-hide"></span><b id="bp-hide">0</b></span>
+        <span class="bp-item"><span class="chip c-food"></span><b id="bp-food">0</b></span>
         <span class="bp-item"><span class="chip c-gold"></span><b id="bp-gold">0</b></span>
       </div>
 
-      <div id="board-wrap">
-        <div id="board"></div>
-        <div id="board-fx"></div>
-        <div id="toast"></div>
+      <div class="board-wrap" id="forest-wrap">
+        <div class="board"></div>
+        <div class="board-fx"></div>
+        <div class="toast"></div>
       </div>
 
       <div class="weapons">
         <span class="label">Weapons</span>
-        <div id="weapon-tray"></div>
+        <div id="forest-weapons" class="weapon-tray"></div>
       </div>
       <p class="hint" id="forest-hint"></p>
+    </section>
 
-      <div id="summary" class="modal hidden">
-        <div class="card">
-          <h2 id="summary-title">Back home</h2>
-          <div id="summary-body"></div>
-          <div class="row">
-            <button class="big" id="sum-again">Walk again</button>
-            <button class="big alt" id="sum-home">Home</button>
-          </div>
-        </div>
+    <!-- GOBLIN VILLAGE (battle) -->
+    <section id="screen-battle" class="screen hidden">
+      <div class="forest-top">
+        <button class="small danger" id="battle-exit">🏳️ Retreat</button>
+        <div class="enemy" id="enemy"></div>
+        <div class="moves">Moves <b id="b-moves">20</b></div>
       </div>
+
+      <div class="lootbar">
+        <span class="lb-label">💰 Loot</span>
+        <span id="lootbar-text">nothing yet</span>
+      </div>
+
+      <div class="board-wrap" id="battle-wrap">
+        <div class="board"></div>
+        <div class="board-fx"></div>
+        <div class="toast"></div>
+      </div>
+
+      <div class="weapons">
+        <span class="label">Weapons</span>
+        <div id="battle-weapons" class="weapon-tray"></div>
+      </div>
+      <p class="hint" id="battle-hint"></p>
     </section>
   </div>
 
+  <!-- Shared popup -->
+  <div id="modal" class="modal hidden">
+    <div class="card">
+      <h2 id="modal-title"></h2>
+      <div id="modal-body"></div>
+      <div class="btns" id="modal-btns"></div>
+    </div>
+  </div>
+
   <script src="js/main.js"></script>
+  <script src="js/board.js"></script>
   <script src="js/forest.js"></script>
+  <script src="js/battle.js"></script>
   <script>App.boot();</script>
 </body>
 </html>
