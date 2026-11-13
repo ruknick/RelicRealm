@@ -4,8 +4,9 @@ window.Forest = (() => {
   const SIZE = 7;
   const MOVES = 20;
   const BACKPACK = 15;
-  const GOLD_CHANCE = 0.02;
-  // Spawn weights (gold rolled separately). Berries become food.
+  const STAR_CHANCE = 0.02;      // wild tile: completes any match
+  const GOLD_CHANCE = 0.04;      // coin tile
+  // Spawn weights (stars and coins rolled separately). Berries become food.
   const TILE_WEIGHTS = { wood: 12, stone: 12, hide: 12, berries: 14, leaves: 25, mushroom: 25 };
   const GIVES = { wood: 'wood', stone: 'stone', hide: 'hide', berries: 'food', gold: 'gold' };
   const TRACKS_AFTER = 2;        // earliest move tracks can appear
@@ -24,7 +25,9 @@ window.Forest = (() => {
   const zero = () => Object.fromEntries(BAG.map(t => [t, 0]));
 
   function randType() {
-    if (Math.random() < GOLD_CHANCE) return 'gold';
+    const roll0 = Math.random();
+    if (roll0 < STAR_CHANCE) return 'star';
+    if (roll0 < STAR_CHANCE + GOLD_CHANCE) return 'gold';
     let roll = Math.random() * WEIGHT_TOTAL;
     for (const [type, w] of Object.entries(TILE_WEIGHTS)) if ((roll -= w) < 0) return type;
     return 'leaves';

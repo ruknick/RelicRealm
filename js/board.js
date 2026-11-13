@@ -4,6 +4,7 @@
 window.Board = (() => {
   const ABORT = Symbol('abort');
   const DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+  const WILD = 'star';
   let nextId = 1;
 
   const WEAPON_HINTS = {
@@ -86,46 +87,58 @@ window.Board = (() => {
     }
 
     // ---------- matching ----------
-    runLenThrough(r, c, type) {
-      let best = 0;
-      for (const [dr, dc] of [[0, 1], [1, 0]]) {
-        let n = 1;
-        for (const s of [1, -1]) {
-          let rr = r + dr * s, cc = c + dc * s;
-          while (this.inBounds(rr, cc) && this.isTile(this.grid[rr][cc]) && this.grid[rr][cc].type === type) {
-            n++; rr += dr * s; cc += dc * s;
-          }
+    // A "star" tile is wild: it counts as whatever type it sits next to.
+    // One star can complete two different runs (e.g. wood-wood-★-stone-stone).
+    scanLine(line, runs) {
+      const isWild = t => t.type === WILD;
+      let i = 0;
+      while (i < line.length) {
+        const t = this.at(line[i]);
+        if (!this.isTile(t)) { i++; continue; }
+        let type = isWild(t) ? null : t.type;
+        let j = i + 1;
+        while (j < line.length) {
+          const u = this.at(line[j]);
+          if (!this.isTile(u)) break;
+          if (isWild(u)) { j++; continue; }
+          if (type === null) { type = u.type; j++; continue; }
+          if (u.type === type) { j++; continue; }
+          break;
         }
-        best = Math.max(best, n);
+        if (j - i >= 3) runs.push({ type: type || WILD, cells: line.slice(i, j) });
+        // Let trailing stars start the next run too.
+        let k = j;
+        while (k > i + 1 && isWild(this.at(line[k - 1]))) k--;
+        i = (k < j && j - i >= 1) ? Math.max(k, i + 1) : j;
       }
-      return best;
-    }
-    safeType(r, c) {
-      for (let i = 0; i < 30; i++) {
-        const t = this.randType();
-        if (this.runLenThrough(r, c, t) < 3) return t;
-      }
-      return this.randType();
+      return runs;
     }
 
     findRuns() {
       const runs = [];
-      for (const line of this.lines) {
-        let i = 0;
-        while (i < line.length) {
-          const t = this.at(line[i]);
-          let j = i + 1;
-          if (this.isTile(t)) {
-            while (j < line.length) {
-              const u = this.at(line[j]);
-              if (this.isTile(u) && u.type === t.type) j++; else break;
-            }
-            if (j - i >= 3) runs.push({ type: t.type, cells: line.slice(i, j) });
-          }
-          i = j;
-        }
-      }
+      for (const line of this.lines) this.scanLine(line, runs);
       return runs;
+    }
+
+    // Is (r, c) part of a 3+ run right now? Only scans its row and column.
+    matchAt(r, c) {
+      const runs = [];
+      this.scanLine(this.lines[r], runs);
+      this.scanLine(this.lines[this.rows + c], runs);
+      return runs.some(ru => ru.cells.some(([a, b]) => a === r && b === c));
+    }
+
+    safeType(r, c) {
+      const prev = this.grid[r][c];
+      let pick = this.randType();
+      for (let i = 0; i < 30; i++) {
+        const t = this.randType();
+        this.grid[r][c] = { type: t };
+        const bad = this.matchAt(r, c);
+        if (!bad) { pick = t; break; }
+      }
+      this.grid[r][c] = prev;
+      return pick;
     }
 
     swap([r1, c1], [r2, c2]) {
@@ -143,7 +156,7 @@ window.Board = (() => {
             const a = this.grid[r][c], b = this.grid[r2][c2];
             if (!this.isTile(a) || !this.isTile(b) || a.type === b.type) continue;
             this.swap([r, c], [r2, c2]);
-            const ok = this.runLenThrough(r, c, b.type) >= 3 || this.runLenThrough(r2, c2, a.type) >= 3;
+            const ok = this.matchAt(r, c) || this.matchAt(r2, c2);
             this.swap([r, c], [r2, c2]);
             if (ok) return true;
           }

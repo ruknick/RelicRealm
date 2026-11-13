@@ -127,8 +127,19 @@ button.link {
 .g-stone::after { width: 52%; height: 44%; border-radius: 50%; background: #666c75; }
 .g-hide  { background: var(--hide); }
 .g-hide::after  { width: 40%; height: 40%; transform: rotate(45deg); background: #6c431d; border-radius: 3px; }
-.g-gold  { background: var(--gold); box-shadow: inset 0 -4px 0 rgba(0,0,0,.2), 0 0 10px rgba(242,194,48,.6); }
-.g-gold::after  { content: "★"; color: #9b6f00; font-size: 8cqw; line-height: 1; }
+.g-gold  { background: #c99a1c; }
+.g-gold::after  {
+  width: 62%; height: 62%; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff3b0 0 12%, #f6cf3a 30%, #d9a514 70%);
+  box-shadow: 0 0 0 3px #a87b0c, inset 0 0 0 3px #f9de6a;
+}
+.g-star  {
+  background: conic-gradient(from 0deg, #ff6b6b, #ffd166, #6ee7a8, #6ec6ff, #c39bff, #ff6b6b);
+  box-shadow: inset 0 -4px 0 rgba(0,0,0,.2), 0 0 12px rgba(255,255,255,.55);
+  animation: shimmer 2.4s linear infinite;
+}
+.g-star::after  { content: "★"; color: #fff; font-size: 9cqw; line-height: 1; text-shadow: 0 0 6px rgba(0,0,0,.45); }
+@keyframes shimmer { 50% { filter: brightness(1.25); } }
 .g-leaves { background: #a3c44a; }
 .g-leaves::after { width: 44%; height: 44%; background: #6f8f22; border-radius: 0 70% 0 70%; }
 .g-mushroom { background: #ddc9a3; }

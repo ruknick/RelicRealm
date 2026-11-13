@@ -21,7 +21,8 @@ Each game file has its tuning knobs at the top.
   - Wood, Stone, Hide (~12% each)
   - **Berries → Food** (~14%)
   - Leaves and Mushrooms are filler (~25% each)
-  - Gold 2%
+  - **🪙 Coin** tile → Gold (4%)
+  - **🌈★ Star** (2%): wild, completes any match. One star can finish two matches at once (wood-wood-★-stone-stone). Stars also appear on the battle board.
 - 3/4/5-match = 1/2/3, +1 on chain reactions.
 - **🐾 Goblin tracks** sometimes appear (about 3 in 5 runs). Match next to them to follow them to a goblin village, then:
   - **Raid now:** costs 3 food

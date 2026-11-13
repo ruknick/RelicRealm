@@ -9,6 +9,7 @@ window.Battle = (() => {
   const MAX_GOBLINS = 3;
   const FOOD_COST = 3;
   const TYPES = ['wood', 'stone', 'hide', 'berries', 'leaves'];   // battle tiles give nothing
+  const STAR_CHANCE = 0.02;     // wild tile: completes any match
 
   const P = {
     fog:      { kind: 'fog',      label: '',        hp: 1 },
@@ -271,7 +272,7 @@ window.Battle = (() => {
 
   // ---------- public ----------
   function init() {
-    board = new Board({ rows: ROWS, cols: COLS, wrap: document.getElementById('battle-wrap'), randType: () => pick(TYPES), hooks });
+    board = new Board({ rows: ROWS, cols: COLS, wrap: document.getElementById('battle-wrap'), randType: () => (Math.random() < STAR_CHANCE ? 'star' : pick(TYPES)), hooks });
     document.getElementById('battle-exit').onclick = () => {
       if (!run || run.ended || board.busy) return;
       finish(run.won ? 'home' : 'retreat');
