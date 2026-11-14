@@ -294,6 +294,7 @@ window.Board = (() => {
         el.style.top = (p.r / this.rows * 100) + '%';
         el.style.width = (p.w / this.cols * 100) + '%';
         el.querySelector('.pl').textContent = p.label || '';
+        el.classList.toggle('readying', p.cls === 'readying');
         const hpEl = el.querySelector('.hp'), hpN = Math.ceil(p.hp);
         if (p.maxHp > 6) hpEl.innerHTML = `<span class="hpbar"><i style="width:${Math.max(0, p.hp / p.maxHp * 100)}%"></i></span><span class="hpn">${hpN}</span>`;
         else hpEl.textContent = p.maxHp > 1 ? '♥'.repeat(hpN) + '♡'.repeat(Math.max(0, p.maxHp - hpN)) : '';

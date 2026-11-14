@@ -402,7 +402,7 @@ window.Data = (() => {
     max: Math.min(6, 2 + Math.floor(L / 7)),              // most on the board at once
     hp: Math.round(7 + L * 0.5),
     armor: landEra(L), weapon: landEra(L),                // wood → iron (Lv 10) → steel (Lv 20)
-    attackEvery: 4,                                       // each one swings at you every N moves
+    attackEvery: 3,                                       // each one swings at you every N moves (first swing 2 moves after it appears)
   });
 
   // Revenge: win raids (or leave goblins alive) and they'll come for your Storehouse.

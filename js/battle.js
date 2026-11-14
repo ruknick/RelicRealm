@@ -298,6 +298,7 @@ window.Battle = (() => {
       if (hit.down) break;
     }
     if (troops.length) {
+      if (total) { const wrap = document.getElementById('battle-wrap'); wrap.classList.remove('ouch'); void wrap.offsetWidth; wrap.classList.add('ouch'); board.toast(`💢 Their troops hit you: −${total} ❤️ (${App.state.hp}/${App.maxHp})`, 'alert', 1800); }
       board.renderHealth(true);
       Sound.sfx('slash');
       run.log = total ? `Their troops hit you for ${total} ❤️${note ? ` — ${note}` : ''}.` : `Your armor turns every blow!`;

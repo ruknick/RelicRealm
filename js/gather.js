@@ -251,7 +251,8 @@ window.Gather = (() => {
     const [r, c] = pick(spots), M = land.monster, plan = run.mon;
     const carries = run.keyCarrier && !board.piecesOf('monster').some(x => x.carriesKey);
     if (carries) run.keyCarrier = false;
-    const p = board.addPiece({ ...P.monster, hp: plan.hp, armor: plan.armor, weapon: plan.weapon, art: M.art, kin: M.kin, name: M.name, age: 0, carriesKey: carries, label: carries ? '🗝️' : '' }, r, c, 1, appear);
+    const p = board.addPiece({ ...P.monster, hp: plan.hp, armor: plan.armor, weapon: plan.weapon, art: M.art, kin: M.kin, name: M.name, age: 1, carriesKey: carries }, r, c, 1, appear);
+    monLabel(p);
     if (carries && appear) setTimeout(() => board.toast(`🗝️ That ${M.name} has the chest key! Take it down.`, 'alert', 2600), 1500);
     if (appear) {
       board.render();
@@ -286,6 +287,13 @@ window.Gather = (() => {
     finish('collapse');
   }
 
+  // Each monster wears a countdown: ⚔️2 = it strikes you in 2 moves.
+  function monLabel(m) {
+    const left = run.mon.attackEvery - (m.age % run.mon.attackEvery);
+    m.label = `${m.carriesKey ? '🗝️' : ''}⚔️${left}`;
+    m.cls = left === 1 ? 'readying' : '';
+  }
+
   async function monstersAct() {
     const mons = board.piecesOf('monster');
     let stole = 0;
@@ -305,11 +313,15 @@ window.Gather = (() => {
         if (!run.told.armorNote && hit.note) { run.told.armorNote = true; setTimeout(() => board.toast(`🛡️ ${hit.note[0].toUpperCase() + hit.note.slice(1)}.`, '', 2000), 700); }
         if (hit.down) break;
       }
+      monLabel(m);
     }
     if (stole) {
+      const wrap = document.getElementById('gather-wrap');
+      wrap.classList.remove('ouch'); void wrap.offsetWidth; wrap.classList.add('ouch');
+      board.toast(`💢 −${stole} ❤️ — ${App.state.hp}/${App.maxHp} left`, 'alert', 1600);
       board.renderHealth(true);
       Sound.sfx('slash');
-      if (!run.told.attack) { run.told.attack = true; board.toast(`${land.monster.icon} Monsters left on the board strike at you every few moves! Kill them — or eat (🍖) to heal.`, 'alert', 3000); }
+      if (!run.told.attack) { run.told.attack = true; setTimeout(() => board.toast(`${land.monster.icon} Monsters strike when their ⚔️ countdown hits zero! Kill them first — or eat 🍖 to heal.`, 'alert', 3200), 1700); }
     }
     if (App.state.hp <= 0) { await board.wait(500); collapse(); return; }
     // More arrive as the land grows wilder.
@@ -625,7 +637,7 @@ window.Gather = (() => {
       if (Math.random() < 0.5) { const [r, c] = spots[0]; board.buried.set(`${r},${c}`, 'key'); }
       else {
         const m = board.piecesOf('monster')[0];
-        if (m) { m.carriesKey = true; m.label = '🗝️'; } else run.keyCarrier = true;
+        if (m) { m.carriesKey = true; monLabel(m); } else run.keyCarrier = true;
       }
     }
     board.setFrame(key);
