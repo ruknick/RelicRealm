@@ -28,61 +28,130 @@ window.Hero = (() => {
 
   // The warrior figure: plain clothes, with each worn piece drawn over it.
   // The look comes from character creation; `bare` draws it without any gear (for the creation screen).
+  // Drawn like an ink illustration: inked outlines, muted dyes, hatched shadow on the right side.
   function figure(opts = {}) {
     const look = opts.look || App.state.profile?.look || { skin: '#e0b089', hair: '#5a3a1e', style: 'short', beard: 'none' };
     const eq = s => (opts.bare ? null : App.state.equip[s]);
     const tierOf = s => (eq(s) ? Data.ITEMS[eq(s).id].tier : 0);
-    const skin = look.skin, hairC = look.hair;
-    const hair = {
-      short: `<path d="M63 30c2-12 10-17 17-17s15 5 17 17c-8-6-26-6-34 0z" fill="${hairC}"/>`,
-      long: `<path d="M61 36c0-16 9-23 19-23s19 7 19 23v18c-3 2-6 2-8 0V30c-6-5-16-5-22 0v24c-2 2-5 2-8 0z" fill="${hairC}"/>`,
-      tied: `<path d="M63 30c2-12 10-17 17-17s15 5 17 17c-8-6-26-6-34 0z" fill="${hairC}"/><circle cx="80" cy="12" r="6" fill="${hairC}"/>`,
-      bald: '',
-    }[look.style] || '';
-    const beard = {
-      none: '',
-      short: `<path d="M66 38c2 10 8 14 14 14s12-4 14-14c-2 4-6 6-14 6s-12-2-14-6z" fill="${hairC}" opacity=".45"/>`,
-      full: `<path d="M64 36c0 14 7 22 16 22s16-8 16-22c-3 5-8 8-16 8s-13-3-16-8z" fill="${hairC}"/><path d="M74 44c4 2 8 2 12 0" stroke="${skin}" stroke-width="2" fill="none" stroke-linecap="round"/>`,
-    }[look.beard] || '';
-    const fill = (s, plain) => (tierOf(s) ? TINT[tierOf(s)][0] : plain);
-    const edge = (s, plain) => (tierOf(s) ? TINT[tierOf(s)][1] : plain);
-    const inset = (s, x, y, w) => (eq(s) ? Art.piece(Data.ITEMS[eq(s).id].art).replace('<svg ', `<svg x="${x}" y="${y}" width="${w}" height="${w}" `) : '');
-    const shieldT = tierOf('shield');
-    return `<svg viewBox="0 0 160 220" class="fig" aria-hidden="true">
-      <ellipse cx="80" cy="210" rx="46" ry="7" fill="#000" opacity=".35"/>
-      <!-- legs -->
-      <path d="M62 128h16l-2 72h-16z" fill="${fill('legs', '#4a3a2a')}" stroke="${edge('legs', '#2a2018')}" stroke-width="2"/>
-      <path d="M82 128h16l2 72h-16z" fill="${fill('legs', '#4a3a2a')}" stroke="${edge('legs', '#2a2018')}" stroke-width="2"/>
-      ${tierOf('legs') >= 2 ? '<path d="M60 160h18M82 160h18M60 176h17M83 176h17" stroke="#fff" stroke-opacity=".35" stroke-width="2"/>' : ''}
-      <path d="M58 198h20v10H54zM82 198h20l4 10H82z" fill="#3a2614"/>
-      <!-- arms -->
-      <path d="M50 66l-16 52" stroke="${fill('body', '#b8875a')}" stroke-width="13" stroke-linecap="round"/>
-      <path d="M110 66l16 52" stroke="${fill('body', '#b8875a')}" stroke-width="13" stroke-linecap="round"/>
-      <circle cx="33" cy="122" r="8" fill="${fill('gloves', skin)}" stroke="${edge('gloves', '#9a6a4a')}" stroke-width="2"/>
-      <circle cx="127" cy="122" r="8" fill="${fill('gloves', skin)}" stroke="${edge('gloves', '#9a6a4a')}" stroke-width="2"/>
-      <!-- torso -->
-      <path d="M52 58h56l-6 74H58z" fill="${fill('body', '#6a7a4a')}" stroke="${edge('body', '#3a4428')}" stroke-width="2.5"/>
-      ${tierOf('body') === 2 ? '<g fill="none" stroke="#2f363e" stroke-opacity=".6"><path d="M56 72h48M56 84h48M57 96h46M58 108h44M58 120h44"/></g>' : ''}
-      ${tierOf('body') >= 3 ? '<path d="M80 60v70M58 92c14 6 30 6 44 0" stroke="#7d8896" stroke-width="2.5" fill="none"/><path d="M62 66l6 20" stroke="#fff" stroke-width="3" opacity=".6"/>' : ''}
-      ${tierOf('body') === 1 ? '<path d="M66 60v70M94 60v70" stroke="#3a2614" stroke-width="2" stroke-dasharray="4 4"/>' : ''}
-      <path d="M56 126h48v8H56z" fill="#3a2614"/><rect x="76" y="125" width="8" height="10" fill="#c9a227"/>
-      ${eq('amulet') ? `<path d="M68 58c4 10 20 10 24 0" stroke="#d6dde5" stroke-width="1.6" fill="none"/><path d="M80 66l6 6-6 8-6-8z" fill="${{ emerald: '#2fbf71', sapphire: '#3d7bff', ruby: '#e0324b' }[Data.ITEMS[eq('amulet').id].gem]}" stroke="#fff" stroke-width="1" filter="url(#fGlow)"/>` : ''}
-      <!-- head -->
-      <rect x="74" y="44" width="12" height="14" fill="${skin}" style="filter:brightness(.92)"/>
-      ${look.style === 'long' && !eq('helmet') ? hair : ''}<circle cx="80" cy="34" r="17" fill="${skin}" stroke="#000" stroke-opacity=".3" stroke-width="2"/>
-      <circle cx="74" cy="34" r="2" fill="#2a1a10"/><circle cx="86" cy="34" r="2" fill="#2a1a10"/>
-      <path d="M74 42c4 3 8 3 12 0" stroke="#7a4a30" stroke-width="2" fill="none" stroke-linecap="round"/>
-      ${eq('helmet') ? `<path d="M61 32c0-14 9-22 19-22s19 8 19 22v4H61z" fill="${fill('helmet')}" stroke="${edge('helmet')}" stroke-width="2.5"/>
-        ${tierOf('helmet') >= 2 ? `<path d="M78 34h4v14h-4z" fill="${edge('helmet')}"/><path d="M68 18c4-4 9-5 12-5" stroke="#fff" stroke-width="3" opacity=".5" fill="none"/>` : ''}`
-        : look.style === 'long' ? '' : hair}
-      ${beard}
-      <!-- weapon in the right hand, tool on the belt, shield on the left arm -->
-      ${inset('weapon', 0, 72, 52)}
-      ${inset('tool', 96, 128, 40)}
-      ${shieldT ? `<g transform="translate(118 74)"><path d="M0 0h34v24c0 14-8 22-17 28C8 46 0 38 0 24z" fill="${shieldT === 1 ? '#8a5a2c' : TINT[shieldT][0]}" stroke="${shieldT === 1 ? '#4a2a10' : TINT[shieldT][1]}" stroke-width="3"/>
-        <path d="M17 4v44M3 20h28" stroke="${shieldT === 1 ? '#5a3414' : TINT[shieldT][1]}" stroke-width="3"/><circle cx="17" cy="20" r="5" fill="#c9a227"/></g>` : ''}
-    </svg>`;
+    const K = '#2b1b0d', skin = look.skin, hairC = look.hair;
+    const METAL = { 1: ['#8a5a30', '#4a2a10'], 2: ['#8b939c', '#3e454d'], 3: ['#d5dce3', '#6e7a86'], 4: ['#c4b5fd', '#6d5bd0'] };
+    const ink = (w = 1.2) => `stroke="${K}" stroke-width="${w}" stroke-linejoin="round"`;
+    const mirror = d => `<g transform="translate(160 0) scale(-1 1)">${d}</g>`;
+    const hatch = (x1, y1, x2, y2, n, dx, dy) => Array.from({ length: n }, (_, i) =>
+      `<path d="M${x1 + (x2 - x1) * i / (n - 1)} ${y1 + (y2 - y1) * i / (n - 1)} l${dx} ${dy}" stroke="${K}" stroke-width=".6" opacity=".35"/>`).join('');
+    const inset = (s, x, y, w, flip = false) => {
+      if (!eq(s)) return '';
+      const art = Art.piece(Data.ITEMS[eq(s).id].art).replace(/<ellipse cx="30" cy="58"[^>]*\/>/, '').replace('<svg ', `<svg x="0" y="0" width="${w}" height="${w}" `);
+      return `<g transform="translate(${x} ${y})${flip ? ' scale(-1 1)' : ''}">${art}</g>`;
+    };
+
+    // ---- base body ----
+    const legT = tierOf('legs'), bodyT = tierOf('body'), helmT = tierOf('helmet'), gloveT = tierOf('gloves'), shieldT = tierOf('shield');
+    const trouser = legT === 1 ? METAL[1][0] : '#4b3d2c';
+    const leg = `<path d="M62.5 117H79.5L77.5 168 76 206H66.5L64.5 168Q62 140 62.5 117z" fill="${trouser}" ${ink()}/><path d="M73 124q1 22 0 40" stroke="${K}" stroke-width=".6" opacity=".3" fill="none"/>`;
+    const boot = `<path d="M65 202h12l1 18q0 6-6 6h-13q-4 0-4-4t6-6z" fill="#4a2e16" ${ink()}/><path d="M66 206h11" stroke="${K}" stroke-width=".8" opacity=".6"/>`;
+    const arm = sleeve => `<path d="M60 50Q49 50 46.5 59L44 92 44.5 124H52.5L54 94 58.5 68z" fill="${sleeve}" ${ink()}/><path d="M48 92h7" stroke="${K}" stroke-width=".6" opacity=".35"/>`;
+    const hand = t => (t ? `<path d="M43 121h10v7q0 7-5 7t-5-7z" fill="${METAL[t][0]}" ${ink(1)}/><path d="M42 119h12l-1 4H43z" fill="${METAL[t][1]}"/>${t >= 2 ? `<path d="M45 127h6M45 130h6" stroke="${K}" stroke-width=".6" opacity=".6"/>` : ''}`
+      : `<path d="M44 123h8v6q0 6-4 6t-4-6z" fill="${skin}" ${ink(1)}/>`);
+    const tunic = '#7d6a44';
+    let html = `<ellipse cx="80" cy="228" rx="40" ry="5" fill="${K}" opacity=".25"/>`;
+    html += leg + mirror(leg) + boot + mirror(boot);
+    // leg armor
+    if (legT === 1) html += `<ellipse cx="70" cy="170" rx="6" ry="5" fill="${METAL[1][1]}" ${ink(.8)}/>` + mirror(`<ellipse cx="70" cy="170" rx="6" ry="5" fill="${METAL[1][1]}" ${ink(.8)}/>`);
+    if (legT >= 2) {
+      const [m, e] = METAL[legT];
+      const g = `<path d="M65 174h11l-1 30h-9z" fill="${m}" ${ink()}/><circle cx="70.5" cy="170" r="5.5" fill="${m}" ${ink(1)}/><path d="M67 178v22" stroke="#fff" stroke-width="1.4" opacity=".5"/>`
+        + (legT >= 3 ? `<path d="M64 122h14l-1 42h-12z" fill="${m}" ${ink()}/><path d="M66 126v34" stroke="#fff" stroke-width="1.4" opacity=".5"/><path d="M64 140h14M64 152h14" stroke="${e}" stroke-width=".8"/>` : '');
+      html += g + mirror(g);
+    }
+    // long hair falls behind the shoulders
+    if (look.style === 'long') html += `<path d="M66 24C66 6 94 6 94 24l1 30q-5 4-9-1H74q-4 5-9 1z" fill="${hairC}" ${ink(1)}/>`;
+    // tool slung across the back, poking up over the left shoulder
+    html += inset('tool', 92, 26, 44);
+    // arms & torso
+    const sleeve = bodyT === 2 ? METAL[2][0] : bodyT === 3 ? METAL[2][0] : tunic;
+    html += arm(sleeve) + mirror(arm(sleeve));
+    html += `<path d="M57 50Q80 45 103 50L101 70Q98 88 97.5 104L99.5 120H60.5L62.5 104Q62 88 59 70z" fill="${tunic}" ${ink()}/>`
+      + `<path d="M74 50l6 10 6-10" fill="none" stroke="${K}" stroke-width="1" opacity=".7"/>`
+      + `<path d="M66 64q-2 20 0 38M92 70q2 16 0 30" stroke="${K}" stroke-width=".7" fill="none" opacity=".35"/>`;
+    // body armor
+    if (bodyT === 1) {
+      const [m, e] = METAL[1];
+      html += `<path d="M59 52h42l-5 54H64z" fill="${m}" ${ink()}/><path d="M80 56l-3 4 6 4-6 4 6 4-6 4 6 4-6 4" stroke="#e8d2a2" stroke-width="1" fill="none"/>`
+        + `<path d="M62 56v46M98 56v46" stroke="${e}" stroke-width=".8" stroke-dasharray="2 2"/>`
+        + `<ellipse cx="55" cy="56" rx="7" ry="5" fill="${m}" ${ink(1)}/><ellipse cx="105" cy="56" rx="7" ry="5" fill="${m}" ${ink(1)}/>`;
+    }
+    if (bodyT === 2) {
+      const [m, e] = METAL[2];
+      const rings = [];
+      for (let y = 56; y <= 118; y += 4.5) rings.push(`<path d="M${y % 9 < 4.5 ? 58 : 60} ${y}${' q2 2.2 4 0'.repeat(10)}" fill="none" stroke="${e}" stroke-width=".7" opacity=".75"/>`);
+      html += `<path d="M57 50Q80 45 103 50L101 70Q98 88 98 104L99.5 122H60.5L62 104Q62 88 59 70z" fill="${m}" ${ink()}/>${rings.join('')}`
+        + `<path d="M60 50Q49 50 46.5 59L44.5 90H55.5L58.5 68z" fill="${m}" ${ink(1)}/>` + mirror(`<path d="M60 50Q49 50 46.5 59L44.5 90H55.5L58.5 68z" fill="${m}" ${ink(1)}/>`);
+    }
+    if (bodyT >= 3) {
+      const [m, e] = METAL[bodyT];
+      const pauldron = `<path d="M46 60q0-12 14-12l2 10q-8 0-10 8z" fill="${m}" ${ink(1)}/><path d="M47 64q2-8 12-8" stroke="${e}" stroke-width=".8" fill="none"/>`;
+      html += `<path d="M57 50Q80 45 103 50L101 68Q99 88 95 100H65Q61 88 59 68z" fill="${m}" ${ink()}/>`
+        + `<path d="M80 52v46" stroke="${e}" stroke-width="1.2"/><path d="M64 56q2 18 6 38" stroke="#fff" stroke-width="2" opacity=".6" fill="none"/>`
+        + `<path d="M64 100h32l2 7H62zM62 107h36l2 7H60z" fill="${m}" ${ink(.9)}/>` + pauldron + mirror(pauldron);
+    }
+    // shadow hatching on the right side of the torso
+    html += hatch(92, 58, 96, 112, 9, 5, 4);
+    // belt, tool on the belt
+    html += `<path d="M61 106h38v6H61z" fill="#3a2412" ${ink(.9)}/><rect x="77" y="105" width="7" height="8" rx="1" fill="#c9a227" ${ink(.7)}/>`;
+    // amulet
+    if (eq('amulet')) {
+      const gem = { emerald: '#2fbf71', sapphire: '#3d7bff', ruby: '#e0324b' }[Data.ITEMS[eq('amulet').id].gem];
+      html += `<path d="M72 50q8 14 16 0" stroke="#c9cfd6" stroke-width="1" fill="none"/><path d="M80 60l4 4-4 6-4-6z" fill="${gem}" stroke="#fff" stroke-width=".8" filter="url(#fGlow)"/>`;
+    }
+    // neck & head
+    html += `<path d="M75 38h10v13h-10z" fill="${skin}" ${ink(1)}/><path d="M75 46h10" stroke="${K}" stroke-width=".6" opacity=".4"/>`
+      + `<ellipse cx="69.5" cy="29" rx="2.2" ry="3.5" fill="${skin}" ${ink(.9)}/><ellipse cx="90.5" cy="29" rx="2.2" ry="3.5" fill="${skin}" ${ink(.9)}/>`
+      + `<path d="M69 26C69 10 91 10 91 26c0 9-4 16-11 16S69 35 69 26z" fill="${skin}" ${ink()}/>`
+      + `<path d="M86 22c3 6 3 12-1 17" stroke="${K}" stroke-width=".6" opacity=".3" fill="none"/>`
+      + `<path d="M72.5 23.5q3-1.5 5.5 0M82 23.5q3-1.5 5.5 0" stroke="${hairC}" stroke-width="1.3" fill="none" stroke-linecap="round"/>`
+      + `<path d="M73.5 27.5q2-1.2 4 0q-2 1-4 0zM82.5 27.5q2-1.2 4 0q-2 1-4 0z" fill="${K}"/>`
+      + `<path d="M80 28l-1.6 5.5h2.8" stroke="${K}" stroke-width=".8" fill="none" opacity=".7"/>`
+      + `<path d="M76.5 37q3.5 .8 7 0" stroke="${K}" stroke-width=".9" fill="none" stroke-linecap="round"/>`;
+    // beard
+    if (look.beard === 'short') html += `<path d="M70 30q1 12 10 12t10-12q-2 8-10 8t-10-8z" fill="${hairC}" opacity=".45"/>`;
+    if (look.beard === 'full') html += `<path d="M69.5 29q0 18 10.5 20 10.5-2 10.5-20-2 8-6 8-2 2-4.5 1.5-2.5.5-4.5-1.5-4 0-6-8z" fill="${hairC}" ${ink(.8)}/><path d="M75.5 36.5q4.5-2 9 0" stroke="${hairC}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
+    // hair (under any helmet)
+    if (!helmT) {
+      const top = `<path d="M68.5 27C67 9 93 9 91.5 27q-2-9-11.5-9.5T68.5 27z" fill="${hairC}" ${ink(1)}/>`;
+      if (look.style === 'short' || look.style === 'long') html += top;
+      if (look.style === 'tied') html += top + `<circle cx="80" cy="9" r="4.5" fill="${hairC}" ${ink(.9)}/>`;
+    }
+    // helmet
+    if (helmT === 1) {
+      const [m, e] = METAL[1];
+      html += `<path d="M68 25C68 9 92 9 92 25v2H68z" fill="${m}" ${ink()}/><path d="M68 23h24" stroke="${e}" stroke-width="1" stroke-dasharray="2 1.5"/><path d="M80 10v13" stroke="${e}" stroke-width=".9"/>`;
+    }
+    if (helmT >= 2) {
+      const [m, e] = METAL[helmT];
+      html += `<path d="M67 27C67 15 73 6 80 3c7 3 13 12 13 24z" fill="${m}" ${ink()}/><path d="M66.5 24h27v4h-27z" fill="${e}" ${ink(.8)}/>`
+        + `<path d="M79 26h2v12h-2z" fill="${e}" ${ink(.6)}/><path d="M73 9q-4 6-4 14" stroke="#fff" stroke-width="1.6" opacity=".55" fill="none"/>`
+        + `<g fill="${K}"><circle cx="70" cy="26" r=".7"/><circle cx="75" cy="26" r=".7"/><circle cx="85" cy="26" r=".7"/><circle cx="90" cy="26" r=".7"/></g>`
+        + (helmT >= 3 ? `<path d="M67 27h4v12l-4-3z" fill="${m}" ${ink(.8)}/><path d="M93 27h-4v12l4-3z" fill="${m}" ${ink(.8)}/>` : '');
+    }
+    // weapon raised in the right hand, then the hands over the grips
+    html += inset('weapon', 66, 72, 72, true);
+    html += hand(gloveT) + mirror(hand(gloveT));
+    // shield on the left forearm
+    if (shieldT === 1) {
+      html += `<circle cx="113" cy="106" r="17" fill="#8a5a2c" ${ink(1.4)}/><path d="M101 98h24M98 106h30M101 114h24" stroke="#5a3414" stroke-width=".8"/>`
+        + `<circle cx="113" cy="106" r="17" fill="none" stroke="#5a5f66" stroke-width="2.2"/><circle cx="113" cy="106" r="4.5" fill="#8b939c" ${ink(.8)}/>`;
+    } else if (shieldT >= 2) {
+      const [m, e] = METAL[shieldT];
+      const field = shieldT === 2 ? '#8e2a1a' : '#2a3a5a';
+      html += `<path d="M97 84h32v20q0 22-16 34-16-12-16-34z" fill="${m}" ${ink(1.4)}/>`
+        + `<path d="M100.5 87.5h25v16.5q0 18-12.5 28-12.5-10-12.5-28z" fill="${field}"/>`
+        + (shieldT === 2 ? `<path d="M113 90v38M102 104h22" stroke="#c9a227" stroke-width="3"/>` : `<path d="M103 96l10 10 10-10M103 106l10 10 10-10" stroke="#c9a227" stroke-width="2.6" fill="none"/>`)
+        + `<path d="M100 88q-1 20 6 34" stroke="#fff" stroke-width="1.2" opacity=".45" fill="none"/>`;
+    }
+    return `<svg viewBox="0 0 160 236" class="fig" aria-hidden="true">${html}</svg>`;
   }
+
 
   function slotBtn(s) {
     const g = eq(s), I = SLOT_INFO[s];
