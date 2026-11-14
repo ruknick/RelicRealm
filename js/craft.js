@@ -176,6 +176,7 @@ window.Craft = (() => {
       const cur = st().equip[slot];
       if (!cur || (slot !== 'amulet' && Data.ITEMS[cur.id].tier < it.tier)) App.equip(slot, st().gear.length - 1);
     }
+    Story.flag('crafted');
     App.save();
     forge.classList.add('done');
     item.classList.add('pop');

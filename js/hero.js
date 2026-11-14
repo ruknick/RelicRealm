@@ -27,7 +27,23 @@ window.Hero = (() => {
   };
 
   // The warrior figure: plain clothes, with each worn piece drawn over it.
-  function figure() {
+  // The look comes from character creation; `bare` draws it without any gear (for the creation screen).
+  function figure(opts = {}) {
+    const look = opts.look || App.state.profile?.look || { skin: '#e0b089', hair: '#5a3a1e', style: 'short', beard: 'none' };
+    const eq = s => (opts.bare ? null : App.state.equip[s]);
+    const tierOf = s => (eq(s) ? Data.ITEMS[eq(s).id].tier : 0);
+    const skin = look.skin, hairC = look.hair;
+    const hair = {
+      short: `<path d="M63 30c2-12 10-17 17-17s15 5 17 17c-8-6-26-6-34 0z" fill="${hairC}"/>`,
+      long: `<path d="M61 36c0-16 9-23 19-23s19 7 19 23v18c-3 2-6 2-8 0V30c-6-5-16-5-22 0v24c-2 2-5 2-8 0z" fill="${hairC}"/>`,
+      tied: `<path d="M63 30c2-12 10-17 17-17s15 5 17 17c-8-6-26-6-34 0z" fill="${hairC}"/><circle cx="80" cy="12" r="6" fill="${hairC}"/>`,
+      bald: '',
+    }[look.style] || '';
+    const beard = {
+      none: '',
+      short: `<path d="M66 38c2 10 8 14 14 14s12-4 14-14c-2 4-6 6-14 6s-12-2-14-6z" fill="${hairC}" opacity=".45"/>`,
+      full: `<path d="M64 36c0 14 7 22 16 22s16-8 16-22c-3 5-8 8-16 8s-13-3-16-8z" fill="${hairC}"/><path d="M74 44c4 2 8 2 12 0" stroke="${skin}" stroke-width="2" fill="none" stroke-linecap="round"/>`,
+    }[look.beard] || '';
     const fill = (s, plain) => (tierOf(s) ? TINT[tierOf(s)][0] : plain);
     const edge = (s, plain) => (tierOf(s) ? TINT[tierOf(s)][1] : plain);
     const inset = (s, x, y, w) => (eq(s) ? Art.piece(Data.ITEMS[eq(s).id].art).replace('<svg ', `<svg x="${x}" y="${y}" width="${w}" height="${w}" `) : '');
@@ -42,8 +58,8 @@ window.Hero = (() => {
       <!-- arms -->
       <path d="M50 66l-16 52" stroke="${fill('body', '#b8875a')}" stroke-width="13" stroke-linecap="round"/>
       <path d="M110 66l16 52" stroke="${fill('body', '#b8875a')}" stroke-width="13" stroke-linecap="round"/>
-      <circle cx="33" cy="122" r="8" fill="${fill('gloves', '#e0b089')}" stroke="${edge('gloves', '#9a6a4a')}" stroke-width="2"/>
-      <circle cx="127" cy="122" r="8" fill="${fill('gloves', '#e0b089')}" stroke="${edge('gloves', '#9a6a4a')}" stroke-width="2"/>
+      <circle cx="33" cy="122" r="8" fill="${fill('gloves', skin)}" stroke="${edge('gloves', '#9a6a4a')}" stroke-width="2"/>
+      <circle cx="127" cy="122" r="8" fill="${fill('gloves', skin)}" stroke="${edge('gloves', '#9a6a4a')}" stroke-width="2"/>
       <!-- torso -->
       <path d="M52 58h56l-6 74H58z" fill="${fill('body', '#6a7a4a')}" stroke="${edge('body', '#3a4428')}" stroke-width="2.5"/>
       ${tierOf('body') === 2 ? '<g fill="none" stroke="#2f363e" stroke-opacity=".6"><path d="M56 72h48M56 84h48M57 96h46M58 108h44M58 120h44"/></g>' : ''}
@@ -52,13 +68,14 @@ window.Hero = (() => {
       <path d="M56 126h48v8H56z" fill="#3a2614"/><rect x="76" y="125" width="8" height="10" fill="#c9a227"/>
       ${eq('amulet') ? `<path d="M68 58c4 10 20 10 24 0" stroke="#d6dde5" stroke-width="1.6" fill="none"/><path d="M80 66l6 6-6 8-6-8z" fill="${{ emerald: '#2fbf71', sapphire: '#3d7bff', ruby: '#e0324b' }[Data.ITEMS[eq('amulet').id].gem]}" stroke="#fff" stroke-width="1" filter="url(#fGlow)"/>` : ''}
       <!-- head -->
-      <rect x="74" y="44" width="12" height="14" fill="#d9a77c"/>
-      <circle cx="80" cy="34" r="17" fill="#e0b089" stroke="#9a6a4a" stroke-width="2"/>
+      <rect x="74" y="44" width="12" height="14" fill="${skin}" style="filter:brightness(.92)"/>
+      ${look.style === 'long' && !eq('helmet') ? hair : ''}<circle cx="80" cy="34" r="17" fill="${skin}" stroke="#000" stroke-opacity=".3" stroke-width="2"/>
       <circle cx="74" cy="34" r="2" fill="#2a1a10"/><circle cx="86" cy="34" r="2" fill="#2a1a10"/>
       <path d="M74 42c4 3 8 3 12 0" stroke="#7a4a30" stroke-width="2" fill="none" stroke-linecap="round"/>
       ${eq('helmet') ? `<path d="M61 32c0-14 9-22 19-22s19 8 19 22v4H61z" fill="${fill('helmet')}" stroke="${edge('helmet')}" stroke-width="2.5"/>
         ${tierOf('helmet') >= 2 ? `<path d="M78 34h4v14h-4z" fill="${edge('helmet')}"/><path d="M68 18c4-4 9-5 12-5" stroke="#fff" stroke-width="3" opacity=".5" fill="none"/>` : ''}`
-        : '<path d="M63 30c2-12 10-17 17-17s15 5 17 17c-8-6-26-6-34 0z" fill="#5a3a1e"/>'}
+        : look.style === 'long' ? '' : hair}
+      ${beard}
       <!-- weapon in the right hand, tool on the belt, shield on the left arm -->
       ${inset('weapon', 0, 72, 52)}
       ${inset('tool', 96, 128, 40)}
@@ -136,5 +153,5 @@ window.Hero = (() => {
 
   function init() { document.getElementById('hero-close').onclick = close; }
 
-  return { init, open, close };
+  return { init, open, close, figure };
 })();

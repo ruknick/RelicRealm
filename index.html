@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#16201a">
-  <title>Warrior Match-3</title>
+  <title>Relic Realm</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -23,12 +23,26 @@
       <div id="sound-toast" class="sound-toast"></div>
     </header>
 
+    <!-- TITLE & CHARACTER CREATION -->
+    <section id="screen-title" class="screen hidden"></section>
+    <section id="screen-create" class="screen hidden"></section>
+
+    <!-- JOURNAL -->
+    <section id="screen-journal" class="screen hidden">
+      <div class="forest-top">
+        <button class="small" id="journal-back">← Map</button>
+        <div class="craft-title">📜 Journal</div>
+      </div>
+      <div id="journal-list"></div>
+    </section>
+
     <!-- HOME -->
     <section id="screen-home" class="screen">
       <div class="home-top">
         <div class="home-level" id="home-level"></div>
-        <span class="home-btns"><button class="small hero-btn" id="btn-hero">🧍 Warrior</button><button class="small items-btn" id="btn-items">🎒 Items</button></span>
+        <span class="home-btns"><button class="small journal-btn" id="btn-journal">📜 Journal</button><button class="small hero-btn" id="btn-hero">🧍 Warrior</button><button class="small items-btn" id="btn-items">🎒 Items</button></span>
       </div>
+      <div id="quest-slot"></div>
       <div class="world" id="world">
         <div class="world-map" id="world-map"></div>
         <div class="world-spots" id="world-spots"></div>
@@ -160,6 +174,9 @@
     </div>
   </div>
 
+  <!-- The opening tale -->
+  <div id="story" class="story hidden"></div>
+
   <!-- Shared popup -->
   <div id="modal" class="modal hidden">
     <div class="card">
@@ -181,6 +198,7 @@
   <script src="js/world.js"></script>
   <script src="js/items.js"></script>
   <script src="js/hero.js"></script>
+  <script src="js/story.js"></script>
   <script>App.boot();</script>
 </body>
 </html>

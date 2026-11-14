@@ -1,7 +1,26 @@
-# RelicRealm — Warrior Match-3 prototype
+# Relic Realm: The Shattered Crown (match-3 prototype)
 
 A browser prototype of the core loop: **gather → find → craft → raid**.
 It's plain HTML/CSS/JS with no build step and no backend. Progress is saved in `localStorage`.
+
+## The story
+**Relic Realm: The Shattered Crown.** The Old King's Crown held the realm of Valdmoor together until the dragon **Emberwyrm** burned the king's hall and shattered it into five relic shards. Goblins raid, the dwarves have sealed their halls, and your village of Ashford burned. Rebuild, find the shards, forge the Crown and face the dragon.
+
+- **Title screen:** Continue or New game. Saves made before characters existed can continue and keep their progress.
+- **Create your warrior:** pick a name, skin, hair colour and style, beard, and an **origin** with a starting gift:
+  - Woodcutter: hatchet
+  - Hunter: bow + skinning knife
+  - Miner: lamp
+  - Fisher: chowder + water
+- **The opening tale:** four story panels. You can replay them from the title screen or the Journal.
+- **📜 Journal and chapters:** each chapter has goals tied to what you already do. Finishing all of a chapter's goals plays its ending, gives a reward and opens the next chapter. A banner on the map shows your next goal.
+  - **Prologue · From the Ashes:** forage, craft, fortify.
+  - **Ch 1 · Goblin Trouble:** find and raid the goblin village.
+  - **Ch 2 · Iron in the Hills:** mine, forge iron, beat the dwarves (meet Thrain Ironbeard).
+  - **Ch 3 · Salt and Pearls:** coast, pearls, water flasks.
+  - **Ch 4 · The Old King's Crown:** 5 shards, steel, full armor.
+  - **Ch 5 · Emberwyrm:** flasks, an elderwood ward, the Dragon's Lair (next update).
+- **Places introduce themselves** with a short story the first time you travel there.
 
 ## Run it
 - Open `index.html` in a browser, **or**

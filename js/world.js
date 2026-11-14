@@ -43,12 +43,15 @@ window.World = (() => {
     void hero.offsetWidth;
     hero.style.transition = '';
     renderLevel();
+    document.getElementById('quest-slot').innerHTML = Story.banner();
+    const qb = document.getElementById('quest-banner');
+    if (qb) qb.onclick = () => App.go('journal');
   }
 
   function renderLevel() {
     const st = App.state, L = App.level, a = Data.xpForLevel(L), b = Data.xpForLevel(L + 1);
     document.getElementById('home-level').innerHTML =
-      `<b>⭐ Level ${L}</b><span class="xpbar"><i style="width:${Math.round((st.xp - a) / (b - a) * 100)}%"></i></span><small>${st.xp - a}/${b - a} XP</small>`;
+      `<b>${st.profile ? `${Story.ORIGINS[st.profile.origin].icon} ${st.profile.name} · ` : ''}⭐ ${L}</b><span class="xpbar"><i style="width:${Math.round((st.xp - a) / (b - a) * 100)}%"></i></span><small>${st.xp - a}/${b - a} XP</small>`;
   }
 
   function travel(id) {
@@ -58,7 +61,7 @@ window.World = (() => {
     if (s.locked) {
       App.choose({
         title: '🐉 The Dragon\'s Lair',
-        html: `<p>A dragon sleeps inside the fire mountain, on a hoard of gold and relics.</p>
+        html: `<p>Emberwyrm sleeps inside the fire mountain on the Old King\'s stolen gold. This is where your journey ends.</p>
           <p class="hint">Coming next: lava that spreads across the board, dragonfire, and treasure you can't find anywhere else.</p>
           <p>Prepare now: gather <b>💧 water</b> at the Sunlit Coast and craft <b>Water flasks</b> in the Workshop to douse the flames.</p>`,
         buttons: [{ id: 'ok', label: 'I\'ll be ready' }],
@@ -77,8 +80,9 @@ window.World = (() => {
     Sound.sfx('whoosh');
     st.heroAt = id;
     App.save();
-    setTimeout(() => {
+    setTimeout(async () => {
       hero.classList.remove('walking');
+      await Story.visit(s.id);
       travelling = false;
       if (s.land) App.go('gather', { land: s.land });
       else if (s.raid) App.prepareRaid(s.raid);

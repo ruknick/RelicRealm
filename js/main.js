@@ -22,6 +22,8 @@ window.App = (() => {
       equip: { weapon: null, tool: null, helmet: null, amulet: null, body: null, gloves: null, legs: null, shield: null },
       captured: { goblin: [], dwarf: [] },   // your weapons the enemy carried off
       seen: {},                          // rare materials already discovered
+      profile: null,                     // { name, origin, look }
+      story: { chapter: 0, flags: {}, places: {}, introSeen: false },
       debug: { discoverNow: false, eventNow: false },
     };
   }
@@ -52,6 +54,8 @@ window.App = (() => {
         starterGear: !!s.starterGear,
         debug: { ...base.debug, ...(s.debug || {}) },
         heroAt: s.heroAt || 'camp',
+        profile: s.profile || null,
+        story: s.story || { chapter: 0, flags: {}, places: {}, introSeen: false },
       };
       migrateGear(s);
     } catch (e) { /* ignore broken saves */ }
@@ -275,10 +279,31 @@ window.App = (() => {
     document.getElementById('dbg-event').checked = state.debug.eventNow;
   }
 
+  // A brand-new journey: fresh save, starter kit, your chosen character.
+  function newGame(profile) {
+    state = fresh();
+    state.profile = profile;
+    starterKit();
+    save();
+  }
+  function starterKit() {
+    Camp.giveStarterKit();
+    if (!state.starterGear) {
+      state.starterGear = true;
+      ['baxe1', 'waxe1', 'pick1'].forEach(addGear);
+      if (!state.equip.weapon) equip('weapon', state.gear.findIndex(g => Data.ITEMS[g.id].gear === 'weapon'));
+      if (!state.equip.tool) equip('tool', state.gear.findIndex(g => g.id === 'waxe1'));
+    }
+  }
+
   function go(screen, opts) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById('screen-' + screen).classList.remove('hidden');
-    if (screen === 'home') { renderHome(); Sound.music('home'); Art.setScene('home'); }
+    document.body.classList.toggle('no-stock', screen === 'title' || screen === 'create');
+    if (screen === 'home') { renderHome(); Sound.music('home'); Art.setScene('home'); Story.check(); }
+    if (screen === 'title' || screen === 'create') Art.setScene('home');
+    if (screen === 'journal') { Story.journal(); Art.setScene('craft'); }
+    if (screen === 'fortify') Story.flag('fortify');
     if (screen === 'items') { Items.render(); Art.setScene('craft'); }
     if (screen === 'craft') { Craft.render(); Sound.music('home'); Art.setScene('craft'); }
     if (screen === 'fortify') { Camp.render(); Sound.music('home'); Art.setScene('craft'); }
@@ -304,7 +329,7 @@ window.App = (() => {
       if (e.target.id === 'prep-fortify') { e.preventDefault(); document.getElementById('modal').classList.add('hidden'); go('fortify'); }
       if (e.target.id === 'prep-hero') { e.preventDefault(); document.getElementById('modal').classList.add('hidden'); Hero.open({ onClose: () => prepareRaid(...prepareRaid.last) }); }
     });
-    on('btn-reset', () => { if (confirm('Reset all resources and items?')) { state = fresh(); save(); renderHome(); } });
+    on('btn-reset', () => { if (confirm('Reset your whole save and start over?')) { state = fresh(); save(); Story.title(); } });
     on('dbg-level', () => { state.xp = Data.xpForLevel(level() + 1); save(); renderHome(); });
     on('dbg-raid', () => { state.marked.goblin++; state.marked.dwarf++; state.stockpile.food += 8; save(); renderHome(); });
     on('dbg-rich', () => {
@@ -314,18 +339,14 @@ window.App = (() => {
     document.getElementById('dbg-discover').onchange = e => { state.debug.discoverNow = e.target.checked; save(); };
     document.getElementById('dbg-event').onchange = e => { state.debug.eventNow = e.target.checked; save(); };
     Sound.bind();
-    Camp.giveStarterKit();
-    if (!state.starterGear) {
-      state.starterGear = true;
-      ['baxe1', 'waxe1', 'pick1'].forEach(addGear);
-      if (!state.equip.weapon) equip('weapon', state.gear.findIndex(g => Data.ITEMS[g.id].gear === 'weapon'));
-      if (!state.equip.tool) equip('tool', state.gear.findIndex(g => g.id === 'waxe1'));
-    }
-    go('home');
+    starterKit();
+    on('btn-journal', () => go('journal'));
+    on('journal-back', () => go('home'));
+    Story.title();
   }
 
   return {
-    ENEMY_NAME, grantSpecial, addXP, levelPerks, get level() { return level(); }, boot, go, save, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
+    ENEMY_NAME, grantSpecial, addXP, levelPerks, get level() { return level(); }, boot, go, save, newGame, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
     addGear, gearCount, equip, unequip, wear, wardLayers, captureWeapon, recoverWeapons,
     get state() { return state; },
   };
