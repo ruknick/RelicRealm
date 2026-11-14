@@ -2,59 +2,157 @@
 window.Art = (() => {
   const svg = (body, vb = '0 0 64 64') => `<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${body}</svg>`;
 
-  // ---------- tiles ----------
+  // ---------- shared gradients & filters (injected once into the page) ----------
+  const ringStops = (a, b, n = 7) => Array.from({ length: n }, (_, i) => `<stop offset="${(i / (n - 1)) * 100}%" stop-color="${i % 2 ? b : a}"/>`).join('');
+  const DEFS = `<svg id="art-defs" width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <radialGradient id="rgPine" cx="50%" cy="50%" r="55%">${ringStops('#f0cf98', '#c99a5c')}<stop offset="100%" stop-color="#8a5a2c"/></radialGradient>
+    <radialGradient id="rgOak" cx="50%" cy="50%" r="55%">${ringStops('#c98f52', '#8a5426', 9)}<stop offset="100%" stop-color="#4a2a10"/></radialGradient>
+    <radialGradient id="rgIron" cx="50%" cy="50%" r="55%">${ringStops('#8a5a46', '#5a3628', 11)}<stop offset="100%" stop-color="#2a1a14"/></radialGradient>
+    <radialGradient id="rgElder" cx="50%" cy="50%" r="55%">${ringStops('#f4fbf6', '#c6e8da', 7)}<stop offset="100%" stop-color="#8fbfae"/></radialGradient>
+    <linearGradient id="lgBarkPine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b0703c"/><stop offset=".35" stop-color="#8a4f26"/><stop offset=".8" stop-color="#5a3016"/><stop offset="1" stop-color="#3a1e0c"/></linearGradient>
+    <linearGradient id="lgBarkOak" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a5a3c"/><stop offset=".35" stop-color="#5a3f28"/><stop offset=".8" stop-color="#3a2818"/><stop offset="1" stop-color="#22170c"/></linearGradient>
+    <linearGradient id="lgBarkIron" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d7a80"/><stop offset=".3" stop-color="#4f4c52"/><stop offset=".75" stop-color="#2c2a30"/><stop offset="1" stop-color="#18171b"/></linearGradient>
+    <linearGradient id="lgBarkElder" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2f6f2"/><stop offset=".4" stop-color="#cfdcd4"/><stop offset="1" stop-color="#8fa69a"/></linearGradient>
+    <linearGradient id="lgDrift" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6dfd2"/><stop offset=".5" stop-color="#bfb4a2"/><stop offset="1" stop-color="#857a69"/></linearGradient>
+    <radialGradient id="rgStone" cx="35%" cy="28%" r="80%"><stop offset="0" stop-color="#d9dde2"/><stop offset=".45" stop-color="#9aa1aa"/><stop offset="1" stop-color="#4a5058"/></radialGradient>
+    <radialGradient id="rgRock" cx="35%" cy="28%" r="80%"><stop offset="0" stop-color="#8d857e"/><stop offset=".5" stop-color="#5d5651"/><stop offset="1" stop-color="#2a2623"/></radialGradient>
+    <linearGradient id="lgIronOre" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd2a0"/><stop offset=".35" stop-color="#d9773a"/><stop offset="1" stop-color="#7a3a14"/></linearGradient>
+    <linearGradient id="lgSilver" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".4" stop-color="#d4dbe3"/><stop offset=".7" stop-color="#8a95a3"/><stop offset="1" stop-color="#e9eef3"/></linearGradient>
+    <linearGradient id="lgStar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3e8ff"/><stop offset=".4" stop-color="#a78bfa"/><stop offset=".75" stop-color="#5b4bd6"/><stop offset="1" stop-color="#8ad4ff"/></linearGradient>
+    <radialGradient id="rgCoal" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#5a6070"/><stop offset=".35" stop-color="#23252c"/><stop offset="1" stop-color="#08090b"/></radialGradient>
+    <radialGradient id="rgLeather" cx="45%" cy="40%" r="65%"><stop offset="0" stop-color="#e2ad74"/><stop offset=".6" stop-color="#b47640"/><stop offset="1" stop-color="#6e4020"/></radialGradient>
+    <radialGradient id="rgBerry" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#c9a6ff"/><stop offset=".35" stop-color="#6a3aa6"/><stop offset="1" stop-color="#25103f"/></radialGradient>
+    <linearGradient id="lgLeaf" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#2f5a14"/><stop offset=".5" stop-color="#5f9a2a"/><stop offset="1" stop-color="#a9d45a"/></linearGradient>
+    <linearGradient id="lgGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6c4"/><stop offset=".3" stop-color="#f6cd45"/><stop offset=".65" stop-color="#b8860b"/><stop offset="1" stop-color="#f2c230"/></linearGradient>
+    <radialGradient id="rgWater" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#e6f8ff"/><stop offset=".35" stop-color="#6cc8f5"/><stop offset=".8" stop-color="#1f6fb0"/><stop offset="1" stop-color="#0f3f6e"/></radialGradient>
+    <linearGradient id="lgFish" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb370"/><stop offset=".5" stop-color="#f07a2a"/><stop offset="1" stop-color="#ffe2c0"/></linearGradient>
+    <linearGradient id="lgSteel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#c7cfd8"/><stop offset=".7" stop-color="#7d8896"/><stop offset="1" stop-color="#dfe5eb"/></linearGradient>
+    <linearGradient id="lgIron" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9aa3ad"/><stop offset=".45" stop-color="#5d6672"/><stop offset="1" stop-color="#2f353d"/></linearGradient>
+    <linearGradient id="lgStoneHead" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c2c6cb"/><stop offset=".5" stop-color="#8a9097"/><stop offset="1" stop-color="#555b62"/></linearGradient>
+    <linearGradient id="lgWoodHead" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9a868"/><stop offset=".5" stop-color="#a06a32"/><stop offset="1" stop-color="#5a3414"/></linearGradient>
+    <linearGradient id="lgHaft1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e2b77c"/><stop offset="1" stop-color="#8a5a2c"/></linearGradient>
+    <linearGradient id="lgHaft2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b47a44"/><stop offset="1" stop-color="#5a3416"/></linearGradient>
+    <linearGradient id="lgHaft3" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6a4a3a"/><stop offset="1" stop-color="#241812"/></linearGradient>
+    <filter id="fGrain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="3" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .5 0" result="a"/><feComposite in="a" in2="SourceGraphic" operator="in" result="g"/>
+      <feBlend in="SourceGraphic" in2="g" mode="multiply"/></filter>
+    <filter id="fGlow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs></svg>`;
+  function injectDefs() { if (!document.getElementById('art-defs')) document.body.insertAdjacentHTML('afterbegin', DEFS); }
+
+  // ---------- tiles (shaded, more natural look) ----------
+  const log = (bark, rings, grooves, extra = '') => `
+    <ellipse cx="34" cy="50" rx="24" ry="4" fill="#000" opacity=".28"/>
+    <rect x="6" y="20" width="44" height="26" rx="13" fill="url(#${bark})" filter="url(#fGrain)"/>
+    <path d="${grooves}" stroke="#000" stroke-opacity=".38" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <path d="M10 24c10-2 24-2 36 0" stroke="#fff" stroke-opacity=".22" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <ellipse cx="50" cy="33" rx="9.5" ry="13" fill="url(#${rings})" stroke="#000" stroke-opacity=".35" stroke-width="1"/>
+    <path d="M50 33l6-6" stroke="#000" stroke-opacity=".3" stroke-width="1.2"/>${extra}`;
+  const oreRock = (metal, glints, extra = '') => `
+    <ellipse cx="32" cy="52" rx="22" ry="4" fill="#000" opacity=".3"/>
+    <path d="M10 44 15 23 30 13 47 17 54 38 43 51 21 52Z" fill="url(#rgRock)" filter="url(#fGrain)"/>
+    <path d="M30 13 47 17 54 38 43 51 36 31Z" fill="#000" opacity=".22"/>
+    <g fill="url(#${metal})" stroke="#000" stroke-opacity=".35" stroke-width=".8">
+      <path d="M19 27l8-4 5 6-6 5z"/><path d="M37 32l8-3 3 7-7 3z"/><path d="M23 41l7-2 3 6-7 2z"/><path d="M38 19l5-1 2 4-5 2z"/></g>
+    <g fill="#fff" opacity=".85">${glints}</g>${extra}`;
+
   const TILES = {
-    wood: `<rect x="8" y="20" width="42" height="25" rx="12" fill="#7a4d24"/><rect x="10" y="21" width="36" height="7" rx="3.5" fill="#a26a35" opacity=".8"/>
-      <path d="M15 34h19M18 40h13" stroke="#55331a" stroke-width="2.6" stroke-linecap="round"/>
-      <ellipse cx="49" cy="32.5" rx="9.5" ry="12.5" fill="#edc88f"/><ellipse cx="49" cy="32.5" rx="6.3" ry="8.8" fill="none" stroke="#b9854a" stroke-width="1.8"/>
-      <ellipse cx="49" cy="32.5" rx="2.8" ry="3.8" fill="#b9854a"/>`,
-    stone: `<path d="M11 45 17 23 32 14 48 19 54 40 42 51 21 52Z" fill="#9aa1aa"/><path d="M32 14 48 19 54 40 42 51 36 31Z" fill="#737a83"/>
-      <path d="M17 23 32 14 36 31 21 35Z" fill="#d3d8dd"/><path d="M21 35 36 31 42 51 21 52 11 45Z" fill="#868d96"/>`,
-    hide: `<path d="M20 11c5 4 19 4 24 0 1 7 5 10 10 12-4 7-4 16-1 25-8-2-13 2-21 4-8-2-13-6-21-4 3-9 3-18-1-25 5-2 9-5 10-12z" fill="#e0a86b"/>
-      <path d="M24 19c4 2 12 2 16 0 1 6 3 9 6 11-3 5-3 11-1 16-6-1-9 2-13 3-5-1-8-4-13-3 2-5 2-11-1-16 3-2 5-5 6-11z" fill="#b8793b"/>
-      <path d="M27 28c2 1.5 8 1.5 10 0M28 36c2 1.5 6 1.5 8 0" stroke="#8a5424" stroke-width="1.8" fill="none" stroke-linecap="round"/>`,
-    berries: `<path d="M33 9c7 0 13 5 14 10-7 1-12-3-14-10z" fill="#6bb04a"/><path d="M33 10v12" stroke="#3e6b24" stroke-width="2.4" stroke-linecap="round"/>
-      <circle cx="23" cy="34" r="10" fill="#6b3fa0"/><circle cx="41" cy="33" r="10" fill="#7d4fba"/><circle cx="32" cy="47" r="10" fill="#57308c"/>
-      <circle cx="20" cy="30" r="3" fill="#e2d2fa"/><circle cx="38" cy="29" r="3" fill="#e2d2fa"/><circle cx="29" cy="43" r="3" fill="#e2d2fa"/>`,
-    leaves: `<path d="M12 52C12 26 29 13 54 10c0 25-13 42-42 42z" fill="#5f8f22"/><path d="M15 50C14 30 30 16 50 13c-1 22-13 35-35 37z" fill="#7aab30"/>
-      <path d="M14 51C24 39 35 28 48 17" stroke="#3f6414" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-      <path d="M24 40l-2-9M31 33l-1-9M38 26v-8M27 37l10 1M34 30l9-1" stroke="#3f6414" stroke-width="1.6" stroke-linecap="round"/>`,
-    ore: `<path d="M11 45 16 24 31 14 48 18 54 39 42 51 21 52Z" fill="#6e6762"/><path d="M31 14 48 18 54 39 42 51 36 30Z" fill="#544e4a"/>
-      <path d="M16 24 31 14 36 30 21 34Z" fill="#8a837d"/>
-      <path d="M21 27l7-3 4 6-6 4z" fill="#ef8a3c"/><path d="M38 33l7-2 2 7-7 2z" fill="#f7a256"/><path d="M25 41l6-1 2 5-6 2z" fill="#d8712a"/>
-      <path d="M22 27.5l4-1.6M39 33.5l4-1" stroke="#ffd7ad" stroke-width="1.6" stroke-linecap="round"/>`,
-    coal: `<path d="M13 41 19 21 36 14 51 25 51 43 36 53 19 51Z" fill="#17181c"/><path d="M36 14 51 25 51 43 38 34Z" fill="#30333a"/>
-      <path d="M19 21 36 14 38 34 24 37Z" fill="#44474f"/><path d="M25 23l9-4M41 27l5 4" stroke="#9fb6d6" stroke-width="1.8" stroke-linecap="round"/>`,
-    gravel: `<ellipse cx="21" cy="41" rx="10" ry="7.5" fill="#94866d"/><ellipse cx="41" cy="43" rx="11" ry="8" fill="#837660"/>
-      <ellipse cx="31" cy="27" rx="9" ry="7" fill="#a6987d"/><ellipse cx="47" cy="26" rx="6" ry="4.6" fill="#8f8269"/><ellipse cx="16" cy="26" rx="5" ry="4" fill="#7f735c"/>
-      <path d="M26 24c3-2 7-2 9 0M15 38c3-2 7-2 9 0M36 40c3-2 7-2 9 0" stroke="#d2c6ad" stroke-width="1.6" fill="none" stroke-linecap="round"/>`,
-    bones: `<g fill="#f1ead8"><g transform="rotate(38 32 32)"><rect x="15" y="29" width="34" height="6.5" rx="3"/><circle cx="15" cy="28" r="4.8"/><circle cx="15" cy="36.5" r="4.8"/><circle cx="49" cy="28" r="4.8"/><circle cx="49" cy="36.5" r="4.8"/></g></g>
-      <g fill="#ddd3bc"><g transform="rotate(-38 32 32)"><rect x="15" y="29" width="34" height="6.5" rx="3"/><circle cx="15" cy="28" r="4.8"/><circle cx="15" cy="36.5" r="4.8"/><circle cx="49" cy="28" r="4.8"/><circle cx="49" cy="36.5" r="4.8"/></g></g>`,
-    gold: `<path d="M9 40c-3-7 2-14 9-15 1-8 10-13 18-10 6-5 16-2 18 6 7 2 9 10 5 16 2 7-4 12-11 11-4 5-13 6-18 2-8 3-17 0-19-6-3-1-3-3-2-4z" fill="#8a5c05"/>
-      <path d="M10 37c-2-6 2-12 8-13 1-7 9-11 16-8 5-4 14-2 16 5 6 2 8 9 4 14 2 6-3 10-10 9-4 4-12 5-16 1-7 2-15 0-17-5-2-1-2-2-1-3z" fill="#e0a419"/>
-      <path d="M14 33c0-5 4-8 8-8 2-6 9-8 13-5 5-2 11 1 12 6 4 2 4 7 1 9-6-3-13-1-17 2-5-3-12-3-17-4z" fill="#f6cc43"/>
-      <path d="M22 27c2-3 6-4 9-3M38 22c3-1 6 0 7 3" stroke="#fff3b8" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-      <circle cx="30" cy="31" r="2.2" fill="#fff8d8"/><circle cx="45" cy="34" r="1.6" fill="#fff8d8"/>
-      <path d="M24 42c3 1 6 1 8-1M40 44c2-1 4-3 4-5" stroke="#9a6a08" stroke-width="1.8" fill="none" stroke-linecap="round"/>`,
-    star: `<path d="M32 8l7 14.4 15.8 2.2-11.5 11 2.8 15.7L32 43.8 17.9 51.3l2.8-15.7L9.2 24.6 25 22.4z" fill="#fff" stroke="rgba(255,255,255,.6)" stroke-width="2" stroke-linejoin="round"/>
-      <path d="M32 16l3.5 7.4" stroke="#ffe9a8" stroke-width="2.4" stroke-linecap="round"/>`,
+    wood: log('lgBarkPine', 'rgPine', 'M12 30c6 1 12-1 18 0M10 38c8 1 16-1 26 0M18 43c6 0 10-1 14 0'),
+    oak: log('lgBarkOak', 'rgOak', 'M10 27c4 3 8-3 12 0s8-3 12 0 8 3 10 0M10 34c4 3 8-3 12 0s8-3 12 0 8 3 10 0M12 41c4 3 8-3 12 0s8-3 12 0',
+      '<ellipse cx="16" cy="14" rx="5" ry="6" fill="#8a5a2c"/><path d="M11 12a5 4 0 0 1 10 0z" fill="#4a3018"/><path d="M22 10c4-4 10-4 12 0-4 0-8 2-12 0z" fill="#4f8a2a"/>'),
+    ironwood: log('lgBarkIron', 'rgIron', 'M10 28h34M10 33h34M10 38h34M10 43h34',
+      '<path d="M12 23c10-2 22-2 32 0" stroke="#c9d3de" stroke-opacity=".55" stroke-width="1.6" fill="none"/>'),
+    elderwood: `<g filter="url(#fGlow)">${log('lgBarkElder', 'rgElder', 'M12 30c6 1 12-1 18 0M10 38c8 1 16-1 26 0')}</g>
+      <g stroke="#5fe0c0" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".9"><path d="M16 28l3 5-3 5M26 27v12M24 31h4M36 28l4 8"/></g>
+      <g fill="#c8fff0"><circle cx="8" cy="14" r="1.4"/><circle cx="56" cy="12" r="1.2"/><circle cx="20" cy="10" r="1"/></g>`,
+    stone: `<ellipse cx="32" cy="53" rx="22" ry="4" fill="#000" opacity=".3"/>
+      <path d="M10 45 16 22 32 12 49 18 55 40 43 52 20 53Z" fill="url(#rgStone)" filter="url(#fGrain)"/>
+      <path d="M32 12 49 18 55 40 43 52 37 30Z" fill="#000" opacity=".2"/><path d="M16 22 32 12 37 30 21 34Z" fill="#fff" opacity=".22"/>
+      <path d="M21 34 37 30 43 52" stroke="#000" stroke-opacity=".25" stroke-width="1" fill="none"/><path d="M26 22l4 6" stroke="#000" stroke-opacity=".3" stroke-width="1.2"/>`,
+    hide: `<ellipse cx="32" cy="55" rx="22" ry="3.5" fill="#000" opacity=".25"/>
+      <path d="M20 10c5 4 19 4 24 0 1 7 5 10 10 12-4 7-4 16-1 25-8-2-13 2-21 4-8-2-13-6-21-4 3-9 3-18-1-25 5-2 9-5 10-12z" fill="url(#rgLeather)" filter="url(#fGrain)"/>
+      <path d="M23 16c4 3 14 3 18 0 1 6 4 8 7 10-3 6-3 12-1 18-6-1-10 2-15 3-6-1-10-4-15-3 2-6 2-12-1-18 3-2 6-4 7-10z" fill="none" stroke="#5a3016" stroke-width="1.2" stroke-dasharray="2 2.5" opacity=".7"/>
+      <path d="M26 26c4 2 8 2 12 0M27 34c3 1.5 7 1.5 10 0" stroke="#7a4420" stroke-width="1.4" fill="none" opacity=".6"/>`,
+    berries: `<ellipse cx="32" cy="56" rx="18" ry="3" fill="#000" opacity=".3"/>
+      <path d="M33 8c8 0 14 5 15 11-8 1-13-4-15-11z" fill="url(#lgLeaf)"/><path d="M33 9v12" stroke="#2a4a14" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="22" cy="34" r="11" fill="url(#rgBerry)"/><circle cx="42" cy="33" r="11" fill="url(#rgBerry)"/><circle cx="32" cy="47" r="11" fill="url(#rgBerry)"/>
+      <g fill="#fff" opacity=".85"><ellipse cx="18" cy="29" rx="3" ry="2"/><ellipse cx="38" cy="28" rx="3" ry="2"/><ellipse cx="28" cy="42" rx="3" ry="2"/></g>`,
+    leaves: `<ellipse cx="32" cy="55" rx="20" ry="3" fill="#000" opacity=".25"/>
+      <path d="M10 52C10 26 28 12 54 9c0 26-14 43-44 43z" fill="url(#lgLeaf)"/>
+      <path d="M12 50C22 38 34 26 48 15" stroke="#1f3d0c" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".8"/>
+      <path d="M22 40l-3-9M29 33l-2-9M36 26l-1-8M25 37l11 1M32 30l10-1M39 23l8 0" stroke="#1f3d0c" stroke-width="1.2" stroke-linecap="round" opacity=".6"/>
+      <path d="M16 46c6-14 18-26 34-33" stroke="#e8f8b0" stroke-width="1.6" fill="none" opacity=".35" stroke-linecap="round"/>`,
+    ore: oreRock('lgIronOre', '<circle cx="22" cy="26" r="1.2"/><circle cx="40" cy="32" r="1"/>'),
+    silver: oreRock('lgSilver', '<circle cx="22" cy="26" r="1.6"/><circle cx="40" cy="32" r="1.4"/><circle cx="26" cy="41" r="1.2"/>',
+      '<path d="M50 10l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z" fill="#fff"/>'),
+    starsilver: `<g filter="url(#fGlow)">${oreRock('lgStar', '<circle cx="22" cy="26" r="1.6"/><circle cx="40" cy="32" r="1.4"/>')}</g>
+      <path d="M52 8l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#e6d8ff"/><path d="M10 14l1.2 3 3 1.2-3 1.2-1.2 3-1.2-3-3-1.2 3-1.2z" fill="#bfe8ff"/>`,
+    coal: `<ellipse cx="32" cy="54" rx="20" ry="3.5" fill="#000" opacity=".35"/>
+      <path d="M12 42 18 20 36 12 52 24 52 43 36 54 18 51Z" fill="url(#rgCoal)"/>
+      <path d="M36 12 52 24 52 43 38 33Z" fill="#000" opacity=".35"/><path d="M18 20 36 12 38 33 24 36Z" fill="#8fa4c2" opacity=".18"/>
+      <path d="M24 22l10-4M42 26l6 4" stroke="#b9cbe6" stroke-width="1.6" stroke-linecap="round" opacity=".75"/>`,
+    gravel: `<ellipse cx="32" cy="55" rx="22" ry="3" fill="#000" opacity=".25"/>
+      <g filter="url(#fGrain)"><ellipse cx="21" cy="42" rx="10" ry="7.5" fill="#9b8d74"/><ellipse cx="41" cy="44" rx="11" ry="8" fill="#857860"/>
+      <ellipse cx="31" cy="28" rx="9" ry="7" fill="#ad9f84"/><ellipse cx="47" cy="27" rx="6" ry="4.6" fill="#958870"/><ellipse cx="16" cy="27" rx="5" ry="4" fill="#82765e"/></g>
+      <path d="M26 25c3-2 7-2 9 0M15 39c3-2 7-2 9 0M36 41c3-2 7-2 9 0" stroke="#efe3c8" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".7"/>`,
+    bones: `<ellipse cx="32" cy="55" rx="20" ry="3" fill="#000" opacity=".3"/>
+      <g fill="#ece4cf" stroke="#9a8f78" stroke-width="1"><g transform="rotate(38 32 32)"><rect x="15" y="29" width="34" height="6.5" rx="3"/><circle cx="15" cy="28" r="4.8"/><circle cx="15" cy="36.5" r="4.8"/><circle cx="49" cy="28" r="4.8"/><circle cx="49" cy="36.5" r="4.8"/></g>
+      <g transform="rotate(-38 32 32)"><rect x="15" y="29" width="34" height="6.5" rx="3"/><circle cx="15" cy="28" r="4.8"/><circle cx="15" cy="36.5" r="4.8"/><circle cx="49" cy="28" r="4.8"/><circle cx="49" cy="36.5" r="4.8"/></g></g>`,
+    gold: `<ellipse cx="32" cy="53" rx="22" ry="4" fill="#000" opacity=".35"/>
+      <path d="M9 40c-3-7 2-14 9-15 1-8 10-13 18-10 6-5 16-2 18 6 7 2 9 10 5 16 2 7-4 12-11 11-4 5-13 6-18 2-8 3-17 0-19-6-3-1-3-3-2-4z" fill="url(#lgGold)" stroke="#7a5404" stroke-width="1"/>
+      <path d="M18 30c2-5 8-7 12-5M36 20c5-1 9 2 10 6" stroke="#fffbe0" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".9"/>
+      <g fill="#7a5404" opacity=".45"><circle cx="26" cy="40" r="2"/><circle cx="42" cy="38" r="1.6"/><circle cx="34" cy="46" r="1.4"/></g>
+      <circle cx="30" cy="29" r="1.8" fill="#fff"/>`,
+    water: `<ellipse cx="32" cy="58" rx="16" ry="3" fill="#0a2a4a" opacity=".35"/>
+      <path d="M32 5C24 19 14 30 14 41a18 18 0 0 0 36 0C50 30 40 19 32 5z" fill="url(#rgWater)" stroke="#0d4a7a" stroke-width="1"/>
+      <path d="M21 39c0-7 4-12 8-15" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" opacity=".85"/>
+      <ellipse cx="38" cy="47" rx="5" ry="2.5" fill="#bfeaff" opacity=".45"/>`,
+    fish: `<ellipse cx="32" cy="50" rx="22" ry="3" fill="#000" opacity=".25"/>
+      <path d="M6 32c8-13 25-17 37-8l11-9v34l-11-9c-12 9-29 5-37-8z" fill="url(#lgFish)" stroke="#a04a10" stroke-width="1"/>
+      <g fill="none" stroke="#c4561a" stroke-width="1" opacity=".55"><path d="M24 25q3 3 0 6M30 24q3 3 0 6M36 25q3 3 0 6M27 31q3 3 0 6M33 31q3 3 0 6"/></g>
+      <path d="M22 21c3 6 3 16 0 22" stroke="#ffe0c0" stroke-width="1.6" fill="none" opacity=".7"/>
+      <circle cx="15" cy="29" r="3.2" fill="#fff"/><circle cx="15.6" cy="29.4" r="1.8" fill="#111"/>`,
+    driftwood: `<ellipse cx="32" cy="52" rx="24" ry="3" fill="#000" opacity=".25"/>
+      <path d="M5 40c8-10 20-12 32-14 9-2 16-6 20-10l3 6c-6 6-14 9-22 11-11 3-21 7-29 14z" fill="url(#lgDrift)" filter="url(#fGrain)"/>
+      <path d="M8 44c10-8 22-10 32-12M40 22l8-8M24 30l-4-8" stroke="#6e6556" stroke-width="2" fill="none" stroke-linecap="round" opacity=".7"/>`,
+    sand: `<g filter="url(#fGrain)"><path d="M6 46c8-6 18-8 26-6s18 6 26 2v10H6z" fill="#e8d3a2"/></g>
+      <path d="M26 30c4-6 12-6 16 0-5 5-11 5-16 0z" fill="#f6ead2" stroke="#c9a876" stroke-width="1"/><path d="M30 30h8M34 26v8" stroke="#c9a876" stroke-width="1"/>
+      <g fill="#b89a66"><circle cx="16" cy="22" r="1.6"/><circle cx="48" cy="20" r="1.4"/><circle cx="20" cy="38" r="1.2"/><circle cx="46" cy="36" r="1.4"/></g>`,
+    seaweed: `<g fill="none" stroke-linecap="round" stroke-width="5"><path d="M20 58c-6-10 6-16 0-26s6-16 2-24" stroke="#1f6a42"/><path d="M34 58c6-12-6-18 2-30 5-8-2-14 2-20" stroke="#3a9a5c"/><path d="M47 58c-4-8 5-14 0-22" stroke="#24704a"/></g>
+      <g fill="none" stroke="#bff0cf" stroke-width="1.2" opacity=".35" stroke-linecap="round"><path d="M20 50c-3-6 3-10 0-16M35 46c3-8-3-12 1-20"/></g>`,
+    star: `<g filter="url(#fGlow)"><path d="M32 7l7 14.4 15.8 2.2-11.5 11 2.8 15.7L32 42.8 17.9 50.3l2.8-15.7L9.2 23.6 25 21.4z" fill="#fff" stroke="#fff6c0" stroke-width="2" stroke-linejoin="round"/></g>`,
+    charcoal: `<ellipse cx="32" cy="54" rx="20" ry="3" fill="#000" opacity=".35"/><path d="M12 42 16 24 30 16 48 20 54 38 40 50 20 50Z" fill="url(#rgCoal)"/>
+      <path d="M20 30l8 6 6-4 8 6M24 42l6-4" stroke="#ff6a2a" stroke-width="1.6" fill="none" opacity=".85"/>`,
+    steel: `<ellipse cx="32" cy="52" rx="24" ry="3.5" fill="#000" opacity=".35"/><path d="M8 40l8-16h32l8 16z" fill="url(#lgSteel)" stroke="#4a5560" stroke-width="1"/>
+      <path d="M16 24h32l8 16H8z" fill="none"/><path d="M8 40h48v6H8z" fill="#7d8896"/><path d="M18 28h20" stroke="#fff" stroke-width="2" opacity=".8"/>`,
   };
-  Object.assign(TILES, {
-    water: `<path d="M32 6C24 20 14 30 14 41a18 18 0 0 0 36 0C50 30 40 20 32 6z" fill="#7fd6ff"/>
-      <path d="M32 6c8 14 18 24 18 35a18 18 0 0 1-18 18c8-6 12-14 10-24-1-8-6-16-10-29z" fill="#3fa9e8"/>
-      <path d="M22 40c0-6 3-10 6-13" stroke="#e8f8ff" stroke-width="3.2" fill="none" stroke-linecap="round"/>`,
-    fish: `<path d="M8 32c8-12 24-16 36-8l10-8v32l-10-8c-12 8-28 4-36-8z" fill="#ff9a4a"/>
-      <path d="M8 32c8 12 24 16 36 8-8 2-20 0-28-8z" fill="#e0702a"/>
-      <path d="M26 22c2 6 2 14 0 20" stroke="#ffd2a8" stroke-width="2" fill="none"/>
-      <circle cx="17" cy="29" r="3" fill="#fff"/><circle cx="17.5" cy="29.5" r="1.6" fill="#222"/>`,
-    driftwood: `<path d="M6 40c8-10 20-12 32-14 8-2 16-6 20-10l2 6c-6 6-14 9-22 11-10 2-20 6-28 13z" fill="#c9bfae"/>
-      <path d="M8 44c10-8 22-10 32-12M40 22l8-8M24 30l-4-8" stroke="#8f8576" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-      <ellipse cx="57" cy="19" rx="4" ry="5" fill="#e6dccb" transform="rotate(-40 57 19)"/>`,
-    sand: `<g fill="#c7a86a"><circle cx="18" cy="22" r="2"/><circle cx="34" cy="16" r="1.6"/><circle cx="46" cy="28" r="2.2"/><circle cx="24" cy="40" r="1.8"/><circle cx="40" cy="46" r="2"/><circle cx="14" cy="50" r="1.6"/><circle cx="50" cy="50" r="1.4"/></g>
-      <path d="M30 34c3-4 9-4 12 0-4 4-8 4-12 0z" fill="#f2e6cc"/><path d="M33 34h6M36 31v6" stroke="#d6b98a" stroke-width="1.2"/>`,
-    seaweed: `<g fill="none" stroke-linecap="round" stroke-width="5"><path d="M20 58c-6-10 6-16 0-26s6-16 2-24" stroke="#2f8a5a"/><path d="M34 58c6-12-6-18 2-30 5-8-2-14 2-20" stroke="#3fae6c"/><path d="M47 58c-4-8 5-14 0-22" stroke="#2a7a4e"/></g>`,
-  });
   TILES.mushroom = TILES.leaves;
+
+  // ---------- gear icons: shape by type, finish by tier ----------
+  const HEAD = { 1: 'lgStoneHead', 2: 'lgIron', 3: 'lgSteel', 4: 'lgStar' };
+  const HAFT = { 1: 'lgHaft1', 2: 'lgHaft2', 3: 'lgHaft3', 4: 'lgHaft3' };
+  function gearArt(type, tier) {
+    const head = type === 'baxe' && tier === 1 ? 'lgWoodHead' : HEAD[tier], haft = HAFT[tier];
+    const shine = tier >= 3 ? '<path d="M44 8l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z" fill="#fff"/>' : '';
+    const handle = `<path d="M14 56L44 14" stroke="#1a0f08" stroke-width="7" stroke-linecap="round"/><path d="M14 56L44 14" stroke="url(#${haft})" stroke-width="5" stroke-linecap="round"/>
+      <path d="M16 51l3-4M20 46l3-4" stroke="#2a1608" stroke-width="2" opacity=".6"/>`;
+    const sh = '<ellipse cx="30" cy="58" rx="18" ry="3" fill="#000" opacity=".3"/>';
+    const shapes = {
+      baxe: `${sh}${handle}<path d="M40 8c-8 0-14 6-14 12 6-2 10 0 14 4 2-6 6-10 12-10-2-4-6-6-12-6z" fill="url(#${head})" stroke="#111" stroke-width="1.2"/>
+        <path d="M52 30c0-8-6-14-12-14 2 6 0 10-4 14 6 2 10 6 10 12 4-2 6-6 6-12z" fill="url(#${head})" stroke="#111" stroke-width="1.2"/>`,
+      sword: `${sh}<path d="M50 6l-30 30 4 4 30-30 2-8z" fill="url(#${head})" stroke="#111" stroke-width="1.2"/><path d="M50 8L24 36" stroke="#fff" stroke-width="1.2" opacity=".6"/>
+        <path d="M14 34l16 16" stroke="#3a2a14" stroke-width="5" stroke-linecap="round"/><path d="M14 34l16 16" stroke="#c9a227" stroke-width="3" stroke-linecap="round"/>
+        <path d="M22 42L10 54" stroke="url(#${haft})" stroke-width="5" stroke-linecap="round"/><circle cx="9" cy="55" r="3.5" fill="#c9a227" stroke="#5a4210"/>`,
+      bow: `${sh}<path d="M16 6c26 6 38 22 42 46" stroke="#1a0f08" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M16 6c26 6 38 22 42 46" stroke="url(#${haft})" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M16 6L58 52" stroke="#efe6d0" stroke-width="1.2"/><path d="M10 56L48 18" stroke="#8a6a44" stroke-width="2.2"/><path d="M48 18l-2 8 6-6z" fill="url(#${HEAD[Math.max(2, tier)]})" stroke="#111" stroke-width=".8"/>
+        <path d="M12 54l-4 2 2-4zM14 52l-5 0 3-3z" fill="#c0392b"/>`,
+      waxe: `${sh}${handle}<path d="M38 10c6-4 14-2 18 4l-6 10c-4-2-8-2-12 2z" fill="url(#${head})" stroke="#111" stroke-width="1.2"/><path d="M52 12l-4 10" stroke="#fff" stroke-width="1.4" opacity=".55"/>`,
+      pick: `${sh}${handle}<path d="M22 10c10-6 26-4 36 6-10-4-20-4-30 2-2-2-4-6-6-8z" fill="url(#${head})" stroke="#111" stroke-width="1.2"/><path d="M28 12c8-3 18-2 26 4" stroke="#fff" stroke-width="1.2" opacity=".5" fill="none"/>`,
+      hammer: `${sh}${handle}<path d="M32 6l18 12-8 12-18-12z" fill="url(#${head})" stroke="#111" stroke-width="1.2"/><path d="M33 9l14 9" stroke="#fff" stroke-width="1.4" opacity=".5"/>`,
+    };
+    return shapes[type] + shine;
+  }
+
   const tile = type => TILES[type] ? svg(TILES[type]) : '';
 
   // ---------- obstacle pieces ----------
@@ -260,7 +358,11 @@ window.Art = (() => {
       <g class="flame"><rect x="21" y="32" width="8" height="10" rx="4" fill="#ffb347"/><rect x="163" y="32" width="8" height="10" rx="4" fill="#ffb347"/></g>`,
   };
 
-  const piece = kind => WIDE[kind] ? svg(WIDE[kind], '0 0 192 64') : PIECES[kind] ? svg(PIECES[kind]) : '';
+  const piece = kind => {
+    if (!kind) return '';
+    if (kind.startsWith('gear:')) { const [, type, tier] = kind.split(':'); return svg(gearArt(type, +tier)); }
+    return WIDE[kind] ? svg(WIDE[kind], '0 0 192 64') : PIECES[kind] ? svg(PIECES[kind]) : '';
+  };
 
   // ---------- board frames ----------
   const FRAME_ART = {
@@ -374,5 +476,5 @@ window.Art = (() => {
     document.body.style.setProperty('--scene-art', SCENES[scene] || 'none');
   }
 
-  return { WORLD, tile, piece, frame, setScene, hasPiece: k => !!PIECES[k] || !!WIDE[k] };
+  return { injectDefs, WORLD, tile, piece, frame, setScene, hasPiece: k => !!PIECES[k] || !!WIDE[k] };
 })();

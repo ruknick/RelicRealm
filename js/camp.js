@@ -5,13 +5,14 @@ window.Camp = (() => {
 
   // Defenses you can place. pts = fortify points; hp before runestone bonus.
   const DEF = {
-    fence:     { pts: 1, mat: 'wood',  hp: 2, icon: '🪵', name: 'Fence' },
-    trap:      { pts: 1, mat: 'other', hp: 1, icon: '🕳️', name: 'Pit trap', trap: true },
-    wall:      { pts: 2, mat: 'stone', hp: 4, icon: '🧱', name: 'Stone wall' },
-    palisade:  { pts: 2, mat: 'wood',  hp: 3, icon: '🔱', name: 'Spiked palisade', spiked: true },
-    tower:     { pts: 2, mat: 'wood',  hp: 3, icon: '🗼', name: 'Watchtower', tower: true },
-    gate:      { pts: 3, mat: 'iron',  hp: 4, icon: '🚪', name: 'Iron gate', max: 2 },
-    runestone: { pts: 1, mat: 'stone', hp: 1, icon: '🪨', name: 'Runestone', rune: true },
+    fence:     { pts: 1, mat: 'wood',  hard: 1, hp: 2, icon: '🪵', name: 'Fence' },
+    trap:      { pts: 1, mat: 'other', hard: 1, hp: 1, icon: '🕳️', name: 'Pit trap', trap: true },
+    wall:      { pts: 2, mat: 'stone', hard: 2, hp: 4, icon: '🧱', name: 'Stone wall' },
+    palisade:  { pts: 2, mat: 'wood',  hard: 1, hp: 3, icon: '🔱', name: 'Spiked palisade', spiked: true },
+    tower:     { pts: 2, mat: 'wood',  hard: 1, hp: 3, icon: '🗼', name: 'Watchtower', tower: true },
+    gate:      { pts: 3, mat: 'iron',  hard: 3, hp: 4, icon: '🚪', name: 'Iron gate', max: 2 },
+    runestone: { pts: 1, mat: 'stone', hard: 2, hp: 1, icon: '🪨', name: 'Runestone', rune: true },
+    bulwark:   { pts: 4, mat: 'steel', hard: 4, hp: 5, icon: '🛡️', name: 'Steel bulwark', max: 2 },
   };
   // How each attacker plays your board.
   const AI = {
@@ -51,7 +52,8 @@ window.Camp = (() => {
     // Higher-ranked raiders hit harder and arrive sooner.
     const base = AI[enemy], t = tier - 1;
     const P = { ...base, name: `${enemy === 'dwarf' ? 'Dwarf' : 'Goblin'} ${Data.TIER_NAMES[enemy][tier - 1]}`,
-      miss: Math.max(0.08, base.miss - 0.05 * t), big: base.big + 0.06 * t, iron: Math.min(0.8, base.iron + 0.1 * t), march: Math.max(2, base.march - t) };
+      miss: Math.max(0.08, base.miss - 0.05 * t), big: base.big + 0.06 * t, march: Math.max(2, base.march - t),
+      gear: Data.ENEMY_GEAR[enemy][tier - 1] };
     return { enemy, P, pieces, chest, keep, skip: 0, march: P.march, towerTick: 0, moves: 0, done: false, stolen: [], dry, log: `${AI[enemy].name} are marching on your camp…` };
   }
 
@@ -122,14 +124,18 @@ window.Camp = (() => {
     if (targets.includes(a.keep)) t = targets.includes(a.chest) && Math.random() < 0.5 ? a.chest : a.keep;
     else {
       // Pick the cheapest way through: low HP, not iron, closest to the keep.
-      const cost = p => p.hp / (p.mat === 'iron' ? P.iron : 0.7) + p.r * 0.6;
+      // Cheapest way through: things their weapons can actually break, low HP, close to the keep.
+      const rate = p => { const d = P.gear - (p.hard || 1); return d < 0 ? 0.08 : d === 0 ? 0.7 : 1.2; };
+      const cost = p => p.hp / rate(p) + p.r * 0.6;
       t = targets.sort((x, y) => cost(x) - cost(y))[0];
     }
+    // Hardness rule: their weapon tier vs your defense. Too hard = they barely scratch it.
     let dmg;
-    if (t.mat === 'iron') dmg = Math.random() < P.iron ? 2 : 0;
-    else { const x = Math.random(); dmg = x < P.miss ? 0 : x < 1 - P.big ? 1 : 2; }
+    const diff = P.gear - (t.hard || 1);
+    if (diff < 0) dmg = Math.random() < 0.08 ? 1 : 0;
+    else { const x = Math.random(); dmg = x < P.miss ? 0 : x < 1 - P.big ? 1 : 2; if (diff > 0 && dmg) dmg++; }
     const name = t === a.keep ? 'your keep' : t === a.chest ? 'your loot chest' : `your ${DEF[t.kind].name.toLowerCase()}`;
-    if (!dmg) return say(t.mat === 'iron' ? `${P.name} bang on your iron gate — it holds!` : `${P.name} are hacking at ${name}…`);
+    if (!dmg) return say(diff < 0 ? `${P.name}' ${Data.TIER_LABEL[P.gear].toLowerCase()} weapons bounce off ${name}!` : `${P.name} are hacking at ${name}…`);
     t.hp = Math.max(0, t.hp - dmg);
     let msg = `${P.name} hit ${name}${dmg > 1 ? ' hard' : ''}!`;
     if (t.spiked) { a.skip++; msg += ' 🔱 The spikes hurt them (−1 move).'; }

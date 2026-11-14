@@ -11,22 +11,22 @@ window.Battle = (() => {
 
   const P = {
     fog:      { kind: 'fog',      label: '',        mat: 'other', hp: 1 },
-    rubble:   { kind: 'rubble',   label: '',        mat: 'stone', hp: 1, art: 'rubble' },
+    rubble:   { kind: 'rubble',   label: '',        mat: 'stone', hp: 1, struct: true, art: 'rubble' },
     // Goblins: mostly wood
-    gkeep:    { kind: 'keep',     label: 'KEEP',    mat: 'wood',  hp: 5, art: 'gkeep' },
-    fence:    { kind: 'fence',    label: 'FENCE',   mat: 'wood',  hp: 1, art: 'fence' },
-    tower:    { kind: 'tower',    label: 'TOWER',   mat: 'wood',  hp: 2, art: 'tower' },
-    loot:     { kind: 'loot',     label: 'LOOT',    mat: 'wood',  hp: 1, art: 'loot' },
-    chest:    { kind: 'chest',    label: '',        mat: 'wood',  hp: 1, art: 'chest' },
+    gkeep:    { kind: 'keep',     label: 'KEEP',    mat: 'wood',  hp: 5, struct: true, art: 'gkeep' },
+    fence:    { kind: 'fence',    label: 'FENCE',   mat: 'wood',  hp: 1, struct: true, art: 'fence' },
+    tower:    { kind: 'tower',    label: 'TOWER',   mat: 'wood',  hp: 2, struct: true, art: 'tower' },
+    loot:     { kind: 'loot',     label: 'LOOT',    mat: 'wood',  hp: 1, struct: true, art: 'loot' },
+    chest:    { kind: 'chest',    label: '',        mat: 'wood',  hp: 1, struct: true, art: 'chest' },
     prisoner: { kind: 'prisoner', label: 'PRISONER', mat: 'other', hp: 1, art: 'prisoner' },
     goblin:   { kind: 'minion',   label: 'G',       mat: 'creature', hp: 1, cls: 'goblin', art: 'goblin' },
     // Dwarves: stone and iron
-    hall:     { kind: 'keep',     label: 'GREAT HALL', mat: 'stone', hp: 6, cls: 'hall', art: 'hall' },
-    swall:    { kind: 'swall',    label: 'WALL',    mat: 'stone', hp: 2, art: 'swall' },
-    gate:     { kind: 'gate',     label: 'GATE',    mat: 'iron',  hp: 3, lock: true, art: 'gate' },
-    ballista: { kind: 'tower',    label: 'BALLISTA', mat: 'wood', hp: 2, cls: 'ballista', art: 'ballista' },
-    vault:    { kind: 'loot',     label: 'VAULT',   mat: 'stone', hp: 2, cls: 'vault', art: 'vault' },
-    gems:     { kind: 'chest',    label: '',        mat: 'stone', hp: 1, cls: 'gems', art: 'gems' },
+    hall:     { kind: 'keep',     label: 'GREAT HALL', mat: 'stone', hp: 6, struct: true, hard: 2, cls: 'hall', art: 'hall' },
+    swall:    { kind: 'swall',    label: 'WALL',    mat: 'stone', hp: 2, struct: true, hard: 2, art: 'swall' },
+    gate:     { kind: 'gate',     label: 'GATE',    mat: 'iron',  hp: 3, struct: true, hard: 3, lock: true, art: 'gate' },
+    ballista: { kind: 'tower',    label: 'BALLISTA', mat: 'wood', hp: 2, struct: true, cls: 'ballista', art: 'ballista' },
+    vault:    { kind: 'loot',     label: 'VAULT',   mat: 'stone', hp: 2, struct: true, hard: 2, cls: 'vault', art: 'vault' },
+    gems:     { kind: 'chest',    label: '',        mat: 'stone', hp: 1, struct: true, cls: 'gems', art: 'gems' },
     keyp:     { kind: 'keyp',     label: 'KEY',     mat: 'other', hp: 1, art: 'keyp' },
     guard:    { kind: 'minion',   label: 'D',       mat: 'creature', hp: 2, cls: 'guard', art: 'guard' },
   };
@@ -141,6 +141,7 @@ window.Battle = (() => {
     else if (['fence', 'swall', 'tower', 'gate'].includes(sp.kind)) sp.hp += Math.floor((t - 1) / 2);
     else if (sp.kind === 'minion') {
       sp.hp += t - 1;
+      sp.armor = Data.ENEMY_ARMOR[run.enemy][t - 1];
       if (t >= 3) sp.art = cfg.minion === 'goblin' ? 'gbrute' : 'dgiant';
       sp.scale = [1, 1.12, 1.22, 1.38][t - 1];
     }
@@ -320,8 +321,10 @@ window.Battle = (() => {
       if (dmg <= 0) {
         if (!run.told[p.kind]) {
           run.told[p.kind] = true;
+          const eq = App.state.equip.weapon;
           board.toast(p.mat === 'creature'
-            ? `⚔️ Matches can't hurt a ${cfg.minionName} — only weapons can! It keeps repairing the keep.`
+            ? (eq ? `🛡️ This ${cfg.minionName} wears ${Data.TIER_LABEL[p.armor || 1]} armor — your ${Data.ITEMS[eq.id].name} bounces off!`
+              : `⚔️ Wield a weapon! Matches next to a ${cfg.minionName} only hurt it with a weapon in hand.`)
             : '🔒 Matches can\'t dent iron. Find the key in the fog — or use a Pickaxe, Sword or Sling.', '', 3000);
         }
         return;
@@ -333,10 +336,10 @@ window.Battle = (() => {
       const msg = {
         fog: 'Fog — match next to it to see what\'s there.',
         keep: `${p.label} (${p.mat}). Match next to it to damage it.`,
-        minion: `A ${cfg.minionName}! It repairs the keep — only weapons can hurt it.`,
+        minion: `A ${cfg.minionName} in ${Data.TIER_LABEL[p.armor || 1]} armor. It repairs the keep — tap it to swing your weapon.`,
         rubble: 'Rubble. Match next to it to clear it.',
-        gate: 'Iron gate. Needs the key from the fog, an Old key, or a Pickaxe/Sword/Sling.',
-        swall: 'Stone wall (2 hits). Pickaxes crack it in one.',
+        gate: 'Iron gate (hardness 3). Use the key from the fog, an Old key, or a Steel pick/hammer.',
+        swall: 'Stone wall (hardness 2). Matches chip it; an Iron pick or hammer breaks it fast.',
         keyp: 'The gate key! Match next to it.',
       }[p.kind] || `Match next to it to break it (${p.mat}).`;
       board.toast(msg, '', 2600);

@@ -101,14 +101,15 @@ window.Board = (() => {
       while (i < line.length) {
         const t = this.at(line[i]);
         if (!this.isTile(t)) { i++; continue; }
-        let type = isWild(t) ? null : t.type;
+        const fam = x => Data.family(x.type);
+        let type = isWild(t) ? null : fam(t);
         let j = i + 1;
         while (j < line.length) {
           const u = this.at(line[j]);
           if (!this.isTile(u)) break;
           if (isWild(u)) { j++; continue; }
-          if (type === null) { type = u.type; j++; continue; }
-          if (u.type === type) { j++; continue; }
+          if (type === null) { type = fam(u); j++; continue; }
+          if (fam(u) === type) { j++; continue; }
           break;
         }
         if (j - i >= 3) runs.push({ type: type || WILD, cells: line.slice(i, j) });
@@ -381,18 +382,53 @@ window.Board = (() => {
       setTimeout(() => s.remove(), 2300);
     }
 
-    // ---------- weapons ----------
+    // ---------- gear: equipped weapon & tool, plus one-shot specials ----------
     renderWeapons(tray) {
       if (tray) this.tray = tray;
       if (!this.tray) return;
-      const inv = App.state.inventory;
-      const keys = Object.keys(Data.ITEMS).filter(k => Data.ITEMS[k].weapon && inv[k] > 0);
-      this.tray.innerHTML = keys.length ? keys.map(k => {
+      const st = App.state, inv = st.inventory;
+      const slot = (key, emoji, label) => {
+        const g = st.equip[key];
+        if (!g) return `<button class="gslot empty" data-slot="${key}"><span class="gs-icon">${emoji}</span><span class="gs-text"><b>${label}</b><small>tap to equip</small></span></button>`;
+        const it = Data.ITEMS[g.id], pct = Math.round(g.dur / it.dur * 100);
+        return `<button class="gslot t${it.tier}" data-slot="${key}"><span class="gs-icon">${Art.piece(it.art)}</span>
+          <span class="gs-text"><b>${it.name.replace(/^(Goblin|Dwarven) /, '')}</b><span class="dur${pct <= 25 ? ' low' : ''}"><i style="width:${pct}%"></i></span></span></button>`;
+      };
+      const specials = Object.keys(Data.ITEMS).filter(k => Data.ITEMS[k].special && inv[k] > 0).map(k => {
         const it = Data.ITEMS[k];
-        return `<button class="weapon${this.armed === k ? ' armed' : ''}" data-w="${k}">
-          ${it.art ? `<span class="wicon">${Art.piece(it.art)}</span>` : it.icon} ${it.name.replace(/^(Goblin|Iron|Old|Dwarven) /, '')} <b>${inv[k]}</b></button>`;
-      }).join('') : '<span class="hint">None — craft some in the Workshop.</span>';
-      this.tray.querySelectorAll('.weapon').forEach(b => { b.onclick = () => this.arm(b.dataset.w); });
+        return `<button class="spec${this.armed === k ? ' armed' : ''}" data-w="${k}" title="${it.name}">${it.art ? Art.piece(it.art) : it.icon}<b>${inv[k]}</b></button>`;
+      }).join('');
+      this.tray.innerHTML = `<div class="gearbar">${slot('weapon', '⚔️', 'Weapon')}${slot('tool', '🛠️', 'Tool')}<div class="specials">${specials}</div></div>`;
+      this.tray.querySelectorAll('.gslot').forEach(b => { b.onclick = () => this.pickGear(b.dataset.slot); });
+      this.tray.querySelectorAll('.spec').forEach(b => { b.onclick = () => this.arm(b.dataset.w); });
+    }
+
+    // Choose which weapon / tool to wield.
+    async pickGear(slot) {
+      if (this.busy) return;
+      const st = App.state, cls = slot === 'weapon' ? 'weapon' : 'tool';
+      const owned = st.gear.map((g, i) => ({ g, i })).filter(({ g }) => Data.ITEMS[g.id].gear === cls)
+        .sort((a, b) => Data.ITEMS[b.g.id].tier - Data.ITEMS[a.g.id].tier);
+      const cur = st.equip[slot];
+      const buttons = owned.slice(0, 6).map(({ g, i }) => {
+        const it = Data.ITEMS[g.id];
+        return { id: String(i), label: `<span class="pick-icon">${Art.piece(it.art)}</span> ${it.name} <small>${g.dur}/${it.dur}</small>` };
+      });
+      if (cur) buttons.push({ id: 'off', label: 'Unequip', cls: 'alt' });
+      buttons.push({ id: 'cancel', label: 'Cancel', cls: 'alt' });
+      const help = cls === 'weapon'
+        ? 'Weapons only hurt monsters. Tap a monster to swing — matches next to monsters also strike with it.'
+        : 'Tools break obstacles & defenses: wood-axe (wood & plants), pick (stone), hammer (anything built).';
+      const choice = await App.choose({
+        title: slot === 'weapon' ? '⚔️ Wield a weapon' : '🛠️ Wield a tool',
+        html: `<p class="hint">${help}</p>${owned.length ? '' : `<p>You don't have any ${cls}s — craft some in the Workshop.</p>`}
+          ${cur ? `<p>Wielding: <b>${Data.ITEMS[cur.id].name}</b> (${cur.dur}/${Data.ITEMS[cur.id].dur})</p>` : ''}`,
+        buttons,
+      });
+      if (choice === 'off') App.unequip(slot);
+      else if (choice !== 'cancel') App.equip(slot, +choice);
+      this.renderWeapons();
+      this.hooks.onArm?.();
     }
 
     arm(k) {
@@ -406,7 +442,57 @@ window.Board = (() => {
     armedHint() {
       if (!this.armed) return '';
       const it = Data.ITEMS[this.armed];
-      return `${it.icon} ${it.name}: ${it.desc} Tap a target — tap the weapon again to cancel.`;
+      return `${it.icon} ${it.name}: ${it.desc} Tap a target — tap it again to cancel.`;
+    }
+
+    // Swing your equipped weapon (at a monster) or tool (at an obstacle or defense).
+    async strike(p) {
+      const slot = p.mat === 'creature' ? 'weapon' : 'tool';
+      const g = App.state.equip[slot];
+      if (!g) {
+        this.toast(slot === 'weapon' ? '⚔️ Equip a weapon to fight monsters — tap the ⚔️ slot below.' : '🛠️ Equip a tool to break that — tap the 🛠️ slot below.', '', 2600);
+        return;
+      }
+      const G = Data.ITEMS[g.id];
+      const dmg = Data.gearDamage(g.id, p);
+      if (dmg <= 0) { this.toast(Data.gearRefusal(g.id, p), '', 2600); window.Sound?.sfx('nope'); return; }
+      this.busy = true;
+      this.clearHint();
+      let targets = [[p, dmg]];
+      if (G.type === 'bow') {
+        targets = this.pieces.filter(x => !x.gone && x.mat === 'creature' && x.c === p.c)
+          .map(x => [x, Data.gearDamage(g.id, x)]).filter(([, d]) => d > 0);
+        if (targets.length > 1) this.toast('🏹 The arrow flies down the whole column!', 'win');
+      } else if (G.type === 'baxe') {
+        DIRS.forEach(([dr, dc]) => {
+          const x = this.inBounds(p.r + dr, p.c + dc) && this.grid[p.r + dr][p.c + dc];
+          if (this.isPiece(x) && x.piece !== p && x.piece.mat === 'creature') {
+            const d = Math.min(1, Data.gearDamage(g.id, x.piece));
+            if (d > 0 && !targets.some(([t]) => t === x.piece)) targets.push([x.piece, d]);
+          }
+        });
+        if (targets.length > 1) this.toast('🪓 Cleave! The axe bites the next one too.', 'win');
+      }
+      const el = this.pieceEls.get(p.id);
+      if (el) { el.classList.remove('struck'); void el.offsetWidth; el.classList.add('struck'); }
+      targets.forEach(([t, d]) => {
+        if (t.gone) return;
+        this.float([t.r, t.c + Math.floor(t.w / 2)], `−${Math.min(d, t.hp)}`, 'loss');
+        this.hooks.onPieceHit(t, d, slot, g.id);
+      });
+      window.Sound?.sfx(slot === 'weapon' ? 'slash' : 'hit');
+      const broke = App.wear(slot);
+      if (broke) { this.toast(`💥 Your ${broke} broke!`, 'alert', 2400); window.Sound?.sfx('break'); }
+      this.renderWeapons();
+      this.render();
+      await this.wait(220);
+      this.collapse(); this.render();
+      await this.wait(250);
+      await this.resolve();
+      await this.ensurePlayable();
+      await this.hooks.afterAction(false);
+      this.busy = false;
+      this.scheduleHint();
     }
 
     async useWeapon(r, c) {
@@ -417,11 +503,9 @@ window.Board = (() => {
       // Check the target is something this weapon can affect, so a wasted tap doesn't burn a use.
       if (this.isPiece(t) && !W.area) {
         const p = t.piece;
-        if (p.kind === 'fog' && !W.fog) { this.toast(`The ${name} can't reach into the fog — try a Sling or Firepot.`); return; }
+        if (p.kind === 'fog' && !W.fog) { this.toast(`The ${name} can't reach into the fog.`); return; }
         if (p.kind !== 'fog' && Data.weaponDamage(w, p) <= 0) {
           this.toast(W.unlock ? 'The key only opens locked chests and iron gates.'
-            : p.toolOnly === 'axe' ? `Only an axe can chop that — not a ${name}.`
-            : p.toolOnly === 'pick' ? `Only a pickaxe can break rock — not a ${name}.`
             : `The ${name} does nothing to ${Data.MAT_LABEL[p.mat] || 'that'}!`);
           window.Sound?.sfx('nope');
           return;
@@ -570,7 +654,27 @@ window.Board = (() => {
         if (step >= 2) this.combo(step);
         if (blasts.length) this.toast('💥 Line blast!', 'win');
         else if (stars.length) this.toast('★ Wild star created!', 'win');
-        hits.forEach((n, p) => { if (!p.gone) this.hooks.onPieceHit(p, n, 'match'); });
+        let swung = false;
+        hits.forEach((n, p) => {
+          if (p.gone) return;
+          if (p.mat === 'creature') {
+            const g = App.state.equip.weapon;
+            const d = g ? Data.gearDamage(g.id, p) : 0;
+            if (d > 0) {
+              swung = true;
+              this.float([p.r, p.c + Math.floor(p.w / 2)], `⚔️ −${Math.min(d, p.hp)}`, 'loss');
+              this.hooks.onPieceHit(p, d, 'weapon', g.id);
+              return;
+            }
+          }
+          this.hooks.onPieceHit(p, n, 'match');
+        });
+        if (swung) {
+          window.Sound?.sfx('slash');
+          const broke = App.wear('weapon');
+          if (broke) this.toast(`💥 Your ${broke} broke!`, 'alert', 2400);
+          this.renderWeapons();
+        }
         this.popCells(clear);
         await this.wait(170);
         this.clearCells(clear);
@@ -609,7 +713,7 @@ window.Board = (() => {
             const r2 = r + dr, c2 = c + dc;
             if (!this.inBounds(r2, c2)) continue;
             const a = this.grid[r][c], b = this.grid[r2][c2];
-            if (!this.isTile(a) || !this.isTile(b) || a.type === b.type) continue;
+            if (!this.isTile(a) || !this.isTile(b) || Data.family(a.type) === Data.family(b.type)) continue;
             this.swap([r, c], [r2, c2]);
             const ok = this.matchAt(r, c) || this.matchAt(r2, c2);
             this.swap([r, c], [r2, c2]);
@@ -700,7 +804,12 @@ window.Board = (() => {
       if (this.busy || !this.hooks.canPlay()) return;
       if (this.armed) { this.run(this.useWeapon(r, c)); return; }
       const t = this.grid[r][c];
-      if (this.isPiece(t)) { this.hooks.onPieceTap?.(t.piece); return; }
+      if (this.isPiece(t)) {
+        const p = t.piece;
+        if (p.kind === 'fog' || p.keyOnly || (p.mat === 'other' && !p.struct)) { this.hooks.onPieceTap?.(p); return; }
+        this.run(this.strike(p));
+        return;
+      }
       if (this.selected) {
         const [sr, sc] = this.selected;
         if (sr === r && sc === c) { this.selected = null; this.render(); return; }

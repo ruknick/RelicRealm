@@ -18,6 +18,9 @@ window.App = (() => {
       lands: { forest: { runs: 0 }, mine: { runs: 0 }, ocean: { runs: 0 } },
       enemyWins: { goblin: 0, dwarf: 0 },
       starterDef: false,
+      gear: [],                          // owned gear: [{ id, dur }]
+      equip: { weapon: null, tool: null },
+      seen: {},                          // rare materials already discovered
       debug: { discoverNow: false, eventNow: false },
     };
   }
@@ -41,10 +44,54 @@ window.App = (() => {
         lands: { ...base.lands, ...(s.lands || {}) },
         enemyWins: { ...base.enemyWins, ...(s.enemyWins || {}) },
         starterDef: !!s.starterDef,
+        gear: s.gear || [],
+        equip: { ...base.equip, ...(s.equip || {}) },
+        seen: s.seen || {},
+        starterGear: !!s.starterGear,
         debug: { ...base.debug, ...(s.debug || {}) },
         heroAt: s.heroAt || 'camp',
       };
+      migrateGear(s);
     } catch (e) { /* ignore broken saves */ }
+  }
+
+  // Old one-shot weapons become wieldable gear.
+  function migrateGear(s) {
+    if (s.gear) return;
+    const MAP = { club: 'baxe1', sling: 'bow1', stoneaxe: 'waxe1', stonepick: 'pick1', axe: 'waxe2', pickaxe: 'pick2', sword: 'sword2', shiv: 'shiv', dpick: 'dpick' };
+    const old = s.inventory || {};
+    Object.entries(MAP).forEach(([o, n]) => {
+      const count = Math.ceil((old[o] || 0) / ({ axe: 3, pickaxe: 3, sword: 3, shiv: 2, dpick: 3, stoneaxe: 2, stonepick: 2 }[o] || 1));
+      for (let i = 0; i < count; i++) addGear(n);
+    });
+  }
+
+  // ---------- gear ----------
+  function addGear(id) {
+    state.gear.push({ id, dur: Data.ITEMS[id].dur });
+    return Data.ITEMS[id];
+  }
+  const gearCount = id => state.gear.filter(g => g.id === id).length + Object.values(state.equip).filter(g => g && g.id === id).length;
+  // Equip gear from your pack (index into state.gear); the old item goes back in the pack.
+  function equip(slot, idx) {
+    const item = state.gear.splice(idx, 1)[0];
+    if (state.equip[slot]) state.gear.push(state.equip[slot]);
+    state.equip[slot] = item;
+    save();
+  }
+  function unequip(slot) {
+    if (state.equip[slot]) state.gear.push(state.equip[slot]);
+    state.equip[slot] = null;
+    save();
+  }
+  // Wear down the equipped item. Returns the item's name if it broke.
+  function wear(slot, n = 1) {
+    const g = state.equip[slot];
+    if (!g) return null;
+    g.dur -= n;
+    if (g.dur <= 0) { state.equip[slot] = null; save(); return Data.ITEMS[g.id].name; }
+    save();
+    return null;
   }
 
   function save() {
@@ -78,13 +125,14 @@ window.App = (() => {
     if (k === 'scraps') return '⛓️ Rusty iron scraps (+3 iron)';
     if (k === 'ingots') return '🧱 Dwarven ingots (+5 iron)';
     const it = Data.ITEMS[k];
-    return `${it.icon} ${it.name}${it.uses > 1 ? ` (${it.uses} uses)` : ''}`;
+    return `${it.gear ? '⚔️' : it.icon} ${it.name}`;
   }
   function grantSpoil(k) {
     if (k === 'scraps') state.stockpile.iron += 3;
     else if (k === 'ingots') state.stockpile.iron += 5;
+    else if (Data.ITEMS[k].gear) addGear(k);
     else {
-      state.inventory[k] += Data.ITEMS[k].uses || 1;
+      state.inventory[k] += 1;
       if (k === 'blueprint') state.unlocks.palisade = true;
       if (k === 'cartbp') state.unlocks.minecart = true;
     }
@@ -134,8 +182,11 @@ window.App = (() => {
     const cfg = Battle.CONFIG[enemy];
     const food = state.stockpile.food;
     const inv = state.inventory;
-    const weapons = Object.keys(Data.ITEMS).filter(k => Data.ITEMS[k].weapon && inv[k] > 0)
-      .map(k => `${Data.ITEMS[k].icon} ${Data.ITEMS[k].name} ${inv[k]}`);
+    const eq = state.equip;
+    const armor = Data.ENEMY_ARMOR[enemy][Data.enemyTier(state.enemyWins[enemy]) - 1];
+    const wTier = eq.weapon ? Data.ITEMS[eq.weapon.id].tier : 0;
+    const weapons = [eq.weapon ? `⚔️ ${Data.ITEMS[eq.weapon.id].name}` : '⚔️ no weapon equipped', eq.tool ? `🛠 ${Data.ITEMS[eq.tool.id].name}` : '🛠 no tool equipped'];
+    const armorNote = wTier >= armor ? '' : `<p class="warn-note">⚠️ Their troops wear <b>${Data.TIER_LABEL[armor]}</b> armor — your ${wTier ? Data.TIER_LABEL[wTier].toLowerCase() + ' weapon bounces off' : 'bare hands do nothing'}. Craft ${Data.TIER_LABEL[armor].toLowerCase()} weapons!</p>`;
     const canGo = food >= cfg.foodCost;
     const boosts = ['drum', 'ale'].filter(k => inv[k] > 0)
       .map(k => `<label class="check"><input type="checkbox" id="use-${k}"> ${Data.ITEMS[k].icon} Use ${Data.ITEMS[k].name} (they start 3 moves behind)</label>`).join('');
@@ -146,7 +197,7 @@ window.App = (() => {
         <p class="hint">Rank ${Data.enemyTier(state.enemyWins[enemy])}/4 — every 2 wins they send tougher troops (and better loot).</p>
         <p>${cfg.prep}</p>
         <p>Costs <b>${cfg.foodCost} food</b> — you have <b>${food}</b>.</p>
-        <p class="hint">Weapons: ${weapons.length ? weapons.join(', ') : 'none — craft some first!'}</p>
+        <p class="hint">Equipped: ${weapons.join(' · ')}</p>${armorNote}
         ${inv.crown > 0 ? '<p class="hint">👑 The Crown: they start 2 moves behind.</p>' : ''}
         ${boosts}`,
       buttons: [
@@ -202,6 +253,7 @@ window.App = (() => {
   }
 
   function boot() {
+    Art.injectDefs();
     load();
     renderStock();
     Gather.init();
@@ -225,11 +277,18 @@ window.App = (() => {
     document.getElementById('dbg-event').onchange = e => { state.debug.eventNow = e.target.checked; save(); };
     Sound.bind();
     Camp.giveStarterKit();
+    if (!state.starterGear) {
+      state.starterGear = true;
+      ['baxe1', 'waxe1', 'pick1'].forEach(addGear);
+      if (!state.equip.weapon) equip('weapon', state.gear.findIndex(g => Data.ITEMS[g.id].gear === 'weapon'));
+      if (!state.equip.tool) equip('tool', state.gear.findIndex(g => g.id === 'waxe1'));
+    }
     go('home');
   }
 
   return {
     ENEMY_NAME, grantSpecial, addXP, levelPerks, get level() { return level(); }, boot, go, save, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
+    addGear, gearCount, equip, unequip, wear,
     get state() { return state; },
   };
 })();

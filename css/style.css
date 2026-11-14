@@ -820,3 +820,39 @@ details.debug { margin-top: 12px; }
 .wicon svg { width: 100%; height: 100%; }
 .r-icon svg { width: 80%; height: 80%; }
 .forge-item svg { width: 90px; height: 90px; }
+
+/* ---------- Gear bar (equipped weapon & tool, specials) ---------- */
+.gearbar { display: flex; gap: 6px; align-items: stretch; overflow-x: auto; scrollbar-width: none; }
+.gearbar::-webkit-scrollbar { display: none; }
+.gslot { flex: none; display: flex; align-items: center; gap: 6px; border: 2px solid #4a5a46; border-radius: 10px; background: var(--panel-2); padding: 4px 8px 4px 4px; text-align: left; max-width: 46%; }
+.gslot.empty { border-style: dashed; opacity: .8; }
+.gslot.t2 { border-color: #7d8793; } .gslot.t3 { border-color: #d6dde5; box-shadow: 0 0 8px rgba(220,230,240,.35); }
+.gs-icon { width: 30px; height: 30px; display: grid; place-items: center; font-size: 1.2rem; flex: none; }
+.gs-icon svg, .pick-icon svg { width: 100%; height: 100%; }
+.gs-text { display: flex; flex-direction: column; min-width: 0; }
+.gs-text b { font-size: .75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gs-text small { font-size: .65rem; color: var(--muted); }
+.dur { display: block; width: 64px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.15); overflow: hidden; margin-top: 3px; }
+.dur i { display: block; height: 100%; background: linear-gradient(90deg, #6fcf6f, #b7f07a); }
+.dur.low i { background: linear-gradient(90deg, #e04b4b, #ff8a5a); }
+.dur.big { display: inline-block; width: 80px; vertical-align: middle; }
+.specials { display: flex; gap: 4px; }
+.spec { flex: none; width: 40px; border: 2px solid transparent; border-radius: 10px; background: var(--panel-2); position: relative; padding: 2px; }
+.spec svg { width: 100%; height: 30px; }
+.spec b { position: absolute; right: 2px; bottom: 0; font-size: .65rem; color: var(--accent); }
+.spec.armed { border-color: #fff; background: #5a3a14; }
+.pick-icon { display: inline-block; width: 24px; height: 24px; vertical-align: middle; }
+.piece.struck .pa { animation: struck .25s; }
+@keyframes struck { 40% { transform: translateX(6%) rotate(4deg); filter: brightness(1.6); } }
+.tag.t1 { background: #4a3a24; } .tag.t2 { background: #3d4652; color: #e3e8ee; } .tag.t3 { background: #c9d2db; color: #1a1f25; }
+.tier-h { font-size: .78rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin: 8px 0 4px; color: var(--muted); }
+.tier-h.t2 { color: #b9c3cf; } .tier-h.t3 { color: #eef3f8; }
+.cost-gem { position: relative; display: inline-grid; width: 16px; height: 16px; inset: auto; border-radius: 4px; }
+.cost-gem svg { width: 100%; height: 100%; }
+.fly-chip.gem { width: 22px; height: 22px; inset: auto; }
+.fly-chip.gem svg { width: 100%; height: 100%; }
+.warn-note { background: rgba(224,75,75,.15); border-radius: 8px; padding: 6px; }
+.mm.steel { background: #e3e8ee; }
+.g-oak, .g-ironwood, .g-elderwood { --g1: #4f8a3a; --g2: #24461c; }
+.g-silver, .g-starsilver { --g1: #c97a3c; --g2: #6e3a18; }
+.g-charcoal { --g1: #5a4a40; --g2: #2a201a; } .g-steel { --g1: #6d7a88; --g2: #37414c; }

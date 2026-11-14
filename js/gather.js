@@ -40,7 +40,7 @@ window.Gather = (() => {
       event: { piece: 'thief', msg: '🏃 A goblin thief grabbed a sack and is running! Catch it →', loot: ['wood', 'stone', 'hide', 'food'] },
       discover: { piece: 'tracks', enemy: 'goblin', spot: '🐾 Fresh goblin tracks! Match next to them to follow.' },
       finds: 'forest',
-      hint: 'Match 3+ to gather. Stumps & thornbushes need an axe — thornbushes hide finds.',
+      hint: 'Match 3+ to gather. Wield a wood-axe for stumps & thornbushes. Oak & rarer woods sparkle among the logs.',
     },
     mine: {
       name: 'Iron Hills', icon: '⛏️', music: 'mine',
@@ -53,7 +53,7 @@ window.Gather = (() => {
       event: { piece: 'cart', msg: '⛏️ A runaway ore cart! Stop it before it rolls off →', loot: ['iron', 'coal', 'stone'] },
       discover: { piece: 'rune', enemy: 'dwarf', spot: 'ᚱ A cracked rune stone… match next to it to read it.' },
       finds: 'mine',
-      hint: 'Match ore for iron and coal for the forge. Only pickaxes break boulders & mine veins.',
+      hint: 'Match ore for iron and coal. Wield a pick for boulders & veins. Silver glints among the ore.',
     },
   };
   LANDS.ocean = {
@@ -85,6 +85,16 @@ window.Gather = (() => {
   function addObstacle(kind, r, c, appear = false) {
     const spec = { ...P[kind] };
     if (SCALES.includes(kind)) spec.hp += run.lv.hpBonus;
+    // Tougher stumps and richer veins appear as the land levels up (they need better tools).
+    const L = run.landLv, roll2 = Math.random();
+    if (kind === 'stump') {
+      const t = L >= 6 && roll2 < 0.25 ? 3 : L >= 3 && roll2 < 0.4 ? 2 : 1;
+      Object.assign(spec, { hard: t, wood: ['wood', 'oak', 'ironwood'][t - 1], art: ['stump', 'stumpoak', 'stumpiron'][t - 1] });
+    }
+    if (kind === 'vein') {
+      const t = L >= 5 && roll2 < 0.25 ? 3 : L >= 3 && roll2 < 0.45 ? 2 : 1;
+      Object.assign(spec, { hard: t, ore: ['iron', 'silver', 'starsilver'][t - 1], art: ['vein', 'veinsilver', 'veinstar'][t - 1] });
+    }
     if (kind === 'locked') {
       // Higher land levels bring gold and crystal chests.
       const L = run.landLv, roll = Math.random();
@@ -115,9 +125,17 @@ window.Gather = (() => {
     if (roll < STAR_CHANCE + GOLD_CHANCE) return 'gold';
     const W = land.weights;
     const total = Object.values(W).reduce((a, b) => a + b, 0);
-    let x = Math.random() * total;
-    for (const [type, w] of Object.entries(W)) if ((x -= w) < 0) return type;
-    return Object.keys(W)[0];
+    let x = Math.random() * total, type = Object.keys(W)[0];
+    for (const [t, w] of Object.entries(W)) if ((x -= w) < 0) { type = t; break; }
+    // Rarer woods / ores sprinkle in, more often as the land levels up.
+    if (run && (type === 'wood' || type === 'ore')) {
+      let y = Math.random() * 100;
+      for (const [rare, fam] of Object.entries(Data.FAMILY)) {
+        if (fam !== type) continue;
+        if ((y -= Data.RARE[rare](run.landLv)) < 0) return rare;
+      }
+    }
+    return type;
   }
 
   // ---------- backpack ----------
@@ -152,8 +170,8 @@ window.Gather = (() => {
       case 'nugget': addToBackpack('gold', 3, cell, delay); break;
       case 'pearl': addToBackpack('gold', 4, cell, delay); break;
       case 'barrel': addToBackpack('water', 3, cell, delay); break;
-      case 'lostclub': st.inventory.club++; break;
-      case 'sling': st.inventory.sling++; break;
+      case 'lostclub': App.addGear('baxe1'); break;
+      case 'sling': App.addGear('bow1'); break;
       case 'key': st.inventory.key++; break;
       case 'scrap': {
         const enemy = land.discover ? land.discover.enemy : 'goblin';
@@ -206,6 +224,15 @@ window.Gather = (() => {
     document.getElementById('backpack').innerHTML =
       `<span class="bp-label">🎒 <b id="bp-total">0</b>/${Data.backpackSize(App.level)}</span>` +
       land.bag.map(t => `<span class="bp-item"><span class="chip c-${t}"></span><b id="bp-${t}">0</b></span>`).join('');
+  }
+
+  // First time you collect a rare material: a big reveal explaining what it's for.
+  function discover(type, cell) {
+    const st = App.state;
+    if (st.seen[type]) return;
+    st.seen[type] = true;
+    App.save();
+    board.celebrate(cell, { icon: Art.tile(type), title: `${Data.RESOURCES[type].label} discovered!`, sub: Data.RARE_INFO[type].use, rare: true, kicker: '✦ New material ✦' });
   }
 
   // ---------- events ----------
@@ -281,14 +308,21 @@ window.Gather = (() => {
         if (TOOL_BONUS[res] && has(TOOL_BONUS[res])) n += 1;
         addToBackpack(res, n, ri.cells[Math.floor(ri.cells.length / 2)]);
         xp(Data.XP.match);
+        // Each rare wood / ore tile in the match gives one of that material.
+        ri.cells.forEach(([r, c]) => {
+          const t = board.grid[r][c];
+          if (!t || !Data.FAMILY[t.type]) return;
+          addToBackpack(t.type, 1, [r, c], 150);
+          discover(t.type, [r, c]);
+        });
       }
     },
     onPieceHit(p, n, src, w) {
       const dmg = src === 'match' ? n * Data.matchDamage(p) : n;
       if (dmg <= 0) {
-        const tip = p.toolOnly === 'axe' ? '🪓 Only an axe can clear stumps & thornbushes — craft a Stone axe in the Workshop.'
-          : p.toolOnly === 'pick' ? '⛏️ Only a pickaxe can break rock — craft a Stone pick in the Workshop.'
-          : p.mat === 'creature' ? `🗡️ Only a weapon can stop the ${p.kind} — Club, Sling, Sword…`
+        const tip = p.toolOnly === 'axe' ? '🪓 Matches can\'t clear that — wield a wood-axe (🛠️ slot) and tap it.'
+          : p.toolOnly === 'pick' ? '⛏️ Matches can\'t break rock — wield a pick (🛠️ slot) and tap it.'
+          : p.mat === 'creature' ? `⚔️ Matches alone can't stop the ${p.kind} — wield a weapon strong enough for it.`
           : (p.lockTier || 1) > 1 ? `🔒 A ${Data.CHEST_TIERS[p.lockTier]} chest — bring a ${Data.CHEST_TIERS[p.lockTier]} key (upgrade keys in the Workshop).`
           : '🔒 Locked tight! Its key is buried somewhere on this board — dig it up.';
         if (!run.told[p.toolOnly || p.kind]) { run.told[p.toolOnly || p.kind] = true; board.toast(tip, '', 3000); }
@@ -296,15 +330,20 @@ window.Gather = (() => {
       }
       const cell = midOf(p);
       if (p.kind === 'vein') {
-        const mined = Math.min(dmg, p.hp) * (w === 'stonepick' ? 1 : 2);
-        addToBackpack('iron', mined, cell);
+        const mined = Math.min(dmg, p.hp) * ((Data.ITEMS[w]?.tier || 1) >= 2 ? 2 : 1);
+        addToBackpack(p.ore || 'iron', mined, cell);
+        if (p.ore && p.ore !== 'iron') discover(p.ore, cell);
       }
       if (!board.hurt(p, dmg)) return;
       xp(p.kind === 'thief' || p.kind === 'cart' || p.kind === 'crab' ? Data.XP.chase : p.kind === 'tracks' || p.kind === 'rune' ? Data.XP.discover : Data.XP.obstacle);
       switch (p.kind) {
         case 'stump':
-          addToBackpack('wood', w === 'axe' ? 5 : 3, cell);
-          board.toast(w === 'axe' ? '🪓 Clean chop! +5 wood' : '🪓 Stump chopped! +3 wood');
+          {
+            const big = (Data.ITEMS[w]?.tier || 1) >= 2, wood = p.wood || 'wood';
+            addToBackpack(wood, big ? 5 : 3, cell);
+            board.toast(`🪓 ${big ? 'Clean chop' : 'Stump chopped'}! +${big ? 5 : 3} ${Data.RESOURCES[wood].label}`);
+            if (wood !== 'wood') discover(wood, cell);
+          }
           break;
         case 'thorn':
         case 'kelp': applyFind(Data.rollFrom(Data.FINDS[land.finds]), cell, 150); break;
@@ -349,13 +388,13 @@ window.Gather = (() => {
     onFind(id, cell) { applyFind(id, cell); },
     onPieceTap(p) {
       const msg = {
-        stump: `Old stump (${p.hp} HP). Only an axe can chop it — Stone axe or Iron axe.`,
+        stump: `${Data.RESOURCES[p.wood || 'wood'].label} stump (${p.hp} HP, hardness ${p.hard || 1}). Needs a ${Data.TIER_LABEL[p.hard || 1]}+ wood-axe.`,
         thorn: `Thornbush (${p.hp} HP) — something's inside! Only an axe can cut it.`,
         locked: (p.lockTier || 1) > 1
           ? `${Data.CHEST_TIERS[p.lockTier]} chest — needs a ${Data.CHEST_TIERS[p.lockTier]} key or better. Upgrade keys in the Workshop.`
           : App.state.inventory.key > 0 ? 'Bronze chest — tap 🗝️ Old key, then tap the chest!' : 'Bronze chest. Its key is buried somewhere on this board — clear tiles to dig it up.',
         boulder: `Boulder (${p.hp} HP). Only a pickaxe can break it. Sometimes hides a find.`,
-        vein: 'Ore vein — only a pickaxe can mine it. Every hit gives iron (Iron pickaxe: double).',
+        vein: `${Data.RESOURCES[p.ore || 'iron'].label} vein (hardness ${p.hard || 1}). Needs a ${Data.TIER_LABEL[p.hard || 1]}+ pick. Every hit gives ore.`,
         thief: 'A goblin thief! Only a weapon can stop it — Club, Sling, Sword… before it escapes!',
         cart: 'A runaway cart full of ore! Stop it before it rolls off.',
         tracks: 'Goblin tracks — match next to them to follow.',

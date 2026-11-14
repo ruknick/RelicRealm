@@ -289,6 +289,7 @@ window.Sound = (() => {
       for (let i = 0; i < 6; i++) tone(2000 + Math.random() * 2000, t + 0.35 + i * 0.05, 0.12, { type: 'sine', vol: 0.03 });
     },
     tick: t => tone(1500, t, 0.03, { type: 'sine', vol: 0.04 }),
+    slash: t => { noise(t, 0.14, { filter: 'bandpass', freq: 2400, sweep: 700, vol: 0.22 }); tone(300, t + 0.05, 0.12, { type: 'sine', glide: 120, vol: 0.2 }); },
     found: t => {
       noise(t, 0.2, { filter: 'lowpass', freq: 900, vol: 0.18 });
       [72, 76, 79, 84].forEach((m, i) => tone(midi(m), t + 0.12 + i * 0.07, 0.45, { type: 'triangle', vol: 0.1 }));
