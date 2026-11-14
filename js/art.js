@@ -411,6 +411,26 @@ window.Art = (() => {
 
   // Wide keeps (3 tiles).
   const WIDE = {
+    warchief: `<ellipse cx="96" cy="60" rx="46" ry="4" fill="#000" opacity=".35"/>
+      <path d="M150 4l-26 54" stroke="#4a2a10" stroke-width="5" stroke-linecap="round"/><path d="M150 2c14 2 22 14 18 28-8-4-14-4-22 0 0-10 0-20 4-28z" fill="#8b939c" stroke="#2a2018" stroke-width="1.4"/>
+      <path d="M58 60c-2-14 6-26 16-30h44c10 4 18 16 16 30z" fill="#5a3a1e" stroke="#2a1608" stroke-width="1.4"/><path d="M70 40h52M68 50h56" stroke="#2a1608" stroke-width="1.2" opacity=".6"/>
+      <path d="M62 36l-10 10 6 6M130 36l10 10-6 6" stroke="#4f7d34" stroke-width="9" stroke-linecap="round"/>
+      <circle cx="96" cy="22" r="17" fill="#6aa84f" stroke="#2c4a1c" stroke-width="1.6"/>
+      <path d="M78 18c-8-2-14 2-16 8 6-2 12-2 16 0zM114 18c8-2 14 2 16 8-6-2-12-2-16 0z" fill="#5f9a44" stroke="#2c4a1c"/>
+      <path d="M78 12c4-12 32-12 36 0v4H78z" fill="#8b939c" stroke="#2a2018" stroke-width="1.2"/><path d="M80 6l-8-6 4 10M112 6l8-6-4 10" fill="#e8d2a2" stroke="#5a4210"/>
+      <ellipse cx="89" cy="22" rx="3.2" ry="3.6" fill="#ffe14a"/><ellipse cx="103" cy="22" rx="3.2" ry="3.6" fill="#ffe14a"/><circle cx="89" cy="23" r="1.5" fill="#1e1206"/><circle cx="103" cy="23" r="1.5" fill="#1e1206"/>
+      <path d="M86 32c6 4 14 4 20 0" stroke="#2c4a1c" stroke-width="2" fill="none"/><path d="M89 32l2 5 2-5M99 32l2 5 2-5" fill="#fff6d6"/>
+      <path d="M86 16l6 4M106 16l-6 4" stroke="#2c4a1c" stroke-width="2"/><circle cx="96" cy="44" r="4" fill="#c9a227" stroke="#5a4210"/>`,
+    golem: `<ellipse cx="96" cy="61" rx="54" ry="4" fill="#000" opacity=".35"/>
+      <path d="M44 60c-4-10 0-24 10-30l14 2-4 28zM148 60c4-10 0-24-10-30l-14 2 4 28z" fill="#6f6a62" stroke="#2a2622" stroke-width="1.4"/>
+      <path d="M38 60l6-14 16 4-2 10zM154 60l-6-14-16 4 2 10z" fill="#5d5651" stroke="#2a2622"/>
+      <path d="M64 60c-4-18 2-34 32-34s36 16 32 34z" fill="url(#rgRock)" stroke="#2a2622" stroke-width="1.6"/>
+      <path d="M78 36l8 10-4 10M110 34l-6 12 6 8M96 40v16" stroke="#2a2622" stroke-width="1.4" fill="none"/>
+      <path d="M86 44l4-2 4 4M104 46l4-3 3 3" stroke="#5fe39a" stroke-width="2" fill="none" opacity=".8" class="glow"/>
+      <path d="M74 26c0-16 10-24 22-24s22 8 22 24c-6 4-38 4-44 0z" fill="#7f7a72" stroke="#2a2622" stroke-width="1.6"/>
+      <path d="M80 18h12M100 18h12" stroke="#2a2622" stroke-width="3"/><path d="M82 19h8M102 19h8" stroke="#7fffd4" stroke-width="2.4" class="glow"/>
+      <path d="M88 26h16" stroke="#2a2622" stroke-width="2"/><path d="M80 8l6 6M112 8l-6 6" stroke="#5d5651" stroke-width="1.4"/>
+      <g fill="#5d8a2c" opacity=".85"><path d="M70 30c4-4 8-4 10 0z"/><path d="M112 28c4-4 8-4 10 0z"/></g>`,
     dragon: `<defs><linearGradient id="gWyrm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c0381e"/><stop offset=".6" stop-color="#7a1e14"/><stop offset="1" stop-color="#3a0a06"/></linearGradient></defs>
       <path d="M20 40C6 30 2 14 14 6c4 14 14 18 30 18z" fill="#5a1410" stroke="#1e0402" stroke-width="1.5"/><path d="M172 40c14-10 18-26 6-34-4 14-14 18-30 18z" fill="#5a1410" stroke="#1e0402" stroke-width="1.5"/>
       <path d="M18 10l10 14M30 8l6 16M178 10l-10 14M166 8l-6 16" stroke="#1e0402" stroke-width="1.2"/>

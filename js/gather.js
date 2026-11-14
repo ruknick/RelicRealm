@@ -266,6 +266,7 @@ window.Gather = (() => {
   // What each land's monsters carry: scrap iron (goblins), gems & rune scraps (cave goblins), shells & pearls (crabs).
   function monsterDrops(p, cell) {
     const M = land.monster, got = [];
+    App.bountyEvent(`kill:${land.key}`);
     const name = M.name[0].toUpperCase() + M.name.slice(1);
     const gain = (t, n, d) => { addToBackpack(t, n, cell, d); got.push(`${n} ${label(t)}`); };
     if (land.key === 'ocean') { gain('shell', 1 + Math.floor(Math.random() * 2), 0); if (Math.random() < 0.12) gain('pearl', 1, 200); }
@@ -567,6 +568,7 @@ window.Gather = (() => {
     if (reason === 'raid') { App.prepareRaid(land.discover.enemy, { fromField: true }); return; }
     const survivors = board.piecesOf('monster').length;
     const warn = App.tripDone(land.key, { survivors, monster: land.monster });
+    App.bountyEvent(`trip:${land.key}`);
     const rows = land.bag.map(t => `<tr><td>${label(t)}</td><td class="${run.backpack[t] ? 'pos' : ''}">+${run.backpack[t]}</td></tr>`).join('');
     const notes = [];
     if (run.marked) notes.push(`📍 You marked a ${App.ENEMY_NAME[land.discover.enemy]} on your map.`);

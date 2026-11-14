@@ -127,6 +127,9 @@ window.Data = (() => {
     helmet4: gear('Starsilver helm', 'helmet', 4),   body4: gear('Starsilver plate', 'body', 4),
     legs4:   gear('Starsilver greaves', 'legs', 4),  gloves4: gear('Starsilver gauntlets', 'gloves', 4),
     shield4: gear('Elderwood ward-shield', 'shield', 4, { desc: 'Mythic tier · armor (hardness 4) · elderwood never burns: catches dragonfire.' }),
+    grakaxe: gear('Grak\'s war-axe', 'baxe', 2, { art: 'gear:baxe:2', desc: 'Won from Grak the Warchief · iron-strong, no forge needed · cleaves half damage into monsters beside the target.' }),
+    golemheart: gear('Heart of Stone', 'amulet', 2, { gem: 'emerald', power: 'stone', art: 'gear:amulet:1',
+      desc: 'Pried from the Stone Golem · stone power: +8 max ❤️.' }),
     sirenpearl: gear('Siren\'s Pearl', 'amulet', 3, { gem: 'pearl', power: 'siren', art: 'gear:amulet:2',
       desc: 'Won from the Siren Queen · siren power: every match of 4 or more heals you 1 ❤️.' }),
     // Defenses

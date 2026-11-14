@@ -54,7 +54,8 @@ A hand-inked parchment map of Valdmoor, with a fogged southern edge: **Beyond th
 | `js/world.js` | World map home screen — tap a place to travel there |
 | `js/items.js` | Items screen: Special · Materials · Gear |
 | `js/hero.js` | Warrior screen: the full-body figure, gear slots, health & eating |
-| `js/boss.js` | Boss lairs: Emberwyrm (Dragon's Lair) and the Siren Queen (Siren's Grotto) |
+| `js/boss.js` | Boss lairs: Grak, the Stone Golem, the Siren Queen and Emberwyrm |
+| `js/bounty.js` | The bounty board: rotating jobs and rewards |
 | `js/story.js` | Title screen, character creation, the opening tale, Journal chapters, place stories |
 | `js/camp.js` | Your camp: Fortify editor, Storehouse, grudges and the live revenge raids |
 | `js/sound.js` | Music and sound effects, generated in the browser (home, forest, mine, battle themes) |
@@ -146,6 +147,20 @@ Both are open from the map whenever you like, and both can be fought again (smal
 - Her **song** drains your ⚡, the **tide** floods tiles, her trident strikes, and **shore crabs** fight for her.
 - Coral spears hit her harder.
 - **First win:** the **Siren's Pearl** amulet (matches of 4+ heal 1 ❤️), plus pearls, coral and shells.
+
+### 👺 Land bosses
+Each land has a boss whose lair shows up on the map (as a rumor until then) once the land grows:
+
+| Boss | Lair | Unlocks | Fight | First-win prize |
+|---|---|---|---|---|
+| **Grak the Goblin Warchief** (90 HP, wood-tough) | Warchief's Clearing | Forest Lv 6 | war-cries bring raiders, barricades, axe charges | **Grak's war-axe**: iron strength, no forge |
+| **The Stone Golem** (200 HP, iron-hard) | Golem's Deep | Iron Hills Lv 12 | quakes drop rocks, heavy slams, mends itself; cave goblins | **Heart of Stone**: amulet, +8 max ❤️ |
+| **Nerissa, the Siren Queen** (130 HP) | Siren's Grotto | Sunlit Coast Lv 8 | song drains ⚡, tide floods, crabs | **Siren's Pearl** |
+
+Bosses can be fought again for smaller rewards.
+
+### 📋 Bounty board
+The **Bounty board** (on the map under your quest) always has three jobs, such as "Slay 6 goblin raiders," "Smelt 5 iron bars," "Win a raid on a dwarf stronghold" or "Defeat the Golem." Finish one and claim gold, XP and sometimes a key, meal or flask, and a new job is posted. Jobs only ask for things you've unlocked.
 
 ### ✨ Mythic gear
 The **Star Anvil** (Lv 35) forges starsilver weapons and armor from **starsilver bars** (smelted at the Dwarven Forge). They are the only gear that cuts through dragon scale at full strength.

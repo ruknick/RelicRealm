@@ -1232,3 +1232,14 @@ body[data-scene] .sound-btn, .sound-btn { background: var(--paper); color: var(-
 .piece.p-boss .pa svg { transform-origin: 50% 50%; }
 #screen-boss .enemy, #screen-boss .moves { color: var(--cream); text-shadow: 0 1px 3px rgba(0,0,0,.8); }
 #screen-boss .enemy b { color: #ffb070; }
+
+/* ---------- bounty board ---------- */
+.bounty-banner { border-color: #5a3a14; background: rgba(28,19,11,.8); }
+.bounty-banner span { color: #e8c070; } .bounty-banner small { color: #e8d6b0; } .bounty-banner small b { color: #9fe07a; }
+.bounty { display: flex; gap: 8px; align-items: center; padding: 8px; margin: 6px 0; border: 1px solid var(--ink-faint); border-radius: 6px; background: rgba(255,250,235,.4); text-align: left; }
+.bounty.done { border-color: #4a6a20; background: rgba(160,200,110,.25); }
+.bt-icon { font-size: 1.5rem; flex: none; }
+.bt-body { flex: 1; display: grid; gap: 3px; font-size: .88rem; }
+.bt-body small { color: var(--ink-soft); font-size: .74rem; }
+.bt-bar { height: 6px; border-radius: 3px; background: rgba(43,27,13,.15); overflow: hidden; }
+.bt-bar i { display: block; height: 100%; background: linear-gradient(90deg, #7a5416, var(--brass)); }

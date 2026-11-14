@@ -4,6 +4,8 @@ window.World = (() => {
   const SPOTS = [
     { id: 'lair',   x: 80, y: 9.1, icon: '🐉', name: 'Dragon\'s Lair', sub: 'Emberwyrm', boss: 'dragon' },
     { id: 'siren',  x: 84, y: 34, icon: '🧜‍♀️', name: 'Siren\'s Grotto', sub: 'the Siren Queen', boss: 'siren' },
+    { id: 'warchief', x: 28, y: 60, icon: '👺', name: 'Warchief\'s Clearing', sub: 'Grak the Warchief', boss: 'warchief' },
+    { id: 'golem',  x: 27, y: 33, icon: '🗿', name: 'Golem\'s Deep', sub: 'the Stone Golem', boss: 'golem' },
     { id: 'mine',   x: 21, y: 15.7, icon: '⛏️', name: 'Iron Hills', sub: 'stone · iron · coal', land: 'mine' },
     { id: 'dwarf',  x: 41, y: 24.0, icon: '⚒️', name: 'Dwarf Stronghold', raid: 'dwarf', how: 'find a ᚱ rune stone in the Iron Hills' },
     { id: 'goblin', x: 47, y: 41.4, icon: '🔥', name: 'Goblin Village', raid: 'goblin', how: 'follow 🐾 tracks in the Forest' },
@@ -14,6 +16,13 @@ window.World = (() => {
     { id: 'beyond', x: 33, y: 93, icon: '❓', name: 'Beyond the Known Realm', sub: 'uncharted', locked: true },
   ];
   let travelling = false;
+  const LAND_NAME = { forest: 'Forest', mine: 'Iron Hills', ocean: 'Sunlit Coast' };
+  // Before a boss's lair is found, the map only has rumors.
+  const RUMOR = {
+    siren: { hint: 'a song on the wind…', title: 'A song on the wind', text: 'Fishers say a voice sings from the rocks at night, and crabs gather on the shore to listen. No one who rows out there comes back.' },
+    warchief: { hint: 'war drums in the trees…', title: 'War drums in the trees', text: 'Deep in the forest, drums beat every night. The goblin scouts all seem to answer to someone big.' },
+    golem: { hint: 'something moves in the deep…', title: 'Something moves in the deep', text: 'Miners whisper about a cave the dwarves walled up long ago — and about the grinding sound behind the wall.' },
+  };
 
   function render() {
     const st = App.state;
@@ -33,8 +42,8 @@ window.World = (() => {
       }
       if (s.boss) {
         const wins = (st.bossWins || {})[s.boss] || 0;
-        const lv = Data.landLevel(st.lands.ocean.runs);
-        if (s.boss === 'siren' && lv < Boss.SIREN_LV) { cls += ' unknown'; sub = `a song on the wind… (Coast Lv ${Boss.SIREN_LV})`; }
+        const U = Boss.CONFIG[s.boss].unlock;
+        if (!Boss.unlocked(s.boss)) { cls += ' unknown'; sub = `${RUMOR[s.boss].hint} (${LAND_NAME[U.land]} Lv ${U.lv})`; }
         else { cls += ' boss'; sub = wins ? `${s.sub} · beaten ×${wins}` : s.sub; }
       }
       if (s.locked) cls += ' locked';
@@ -54,6 +63,9 @@ window.World = (() => {
     document.getElementById('quest-slot').innerHTML = Story.banner();
     const qb = document.getElementById('quest-banner');
     if (qb) qb.onclick = () => App.go('journal');
+    document.getElementById('bounty-slot').innerHTML = Bounty.banner();
+    const bb = document.getElementById('bounty-banner');
+    if (bb) bb.onclick = () => Bounty.open();
   }
 
   function renderLevel() {
@@ -66,8 +78,9 @@ window.World = (() => {
     if (travelling) return;
     const s = SPOTS.find(x => x.id === id);
     const st = App.state;
-    if (s.boss === 'siren' && Data.landLevel(st.lands.ocean.runs) < Boss.SIREN_LV) {
-      App.choose({ title: '🧜‍♀️ A song on the wind', html: `<p class="story-text">Fishers say a voice sings from the rocks at night, and crabs gather on the shore to listen. No one who rows out there comes back.</p><p class="hint">Reach Sunlit Coast Lv ${Boss.SIREN_LV} to find the grotto.</p>`, buttons: [{ id: 'ok', label: 'Got it' }] });
+    if (s.boss && !Boss.unlocked(s.boss)) {
+      const U = Boss.CONFIG[s.boss].unlock, R = RUMOR[s.boss];
+      App.choose({ title: `${s.icon} ${R.title}`, html: `<p class="story-text">${R.text}</p><p class="hint">Reach ${LAND_NAME[U.land]} Lv ${U.lv} to find it.</p>`, buttons: [{ id: 'ok', label: 'Got it' }] });
       return;
     }
     if (s.locked && s.id === 'beyond') {

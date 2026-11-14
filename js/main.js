@@ -124,7 +124,7 @@ window.App = (() => {
   }
 
   // ---------- your health ----------
-  const maxHp = () => Data.maxHp(level());
+  const maxHp = () => Data.maxHp(level()) + (Data.amuletPower() === 'stone' ? 8 : 0);
   function heal(n) {
     const before = state.hp;
     state.hp = Math.min(maxHp(), state.hp + n);
@@ -431,7 +431,7 @@ window.App = (() => {
   }
 
   return {
-    ENEMY_NAME, grantSpecial, addXP, levelPerks, get level() { return level(); }, boot, go, save, newGame, tripDone, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
+    ENEMY_NAME, grantSpecial, addXP, bountyEvent: (id, n) => Bounty.event(id, n), levelPerks, get level() { return level(); }, boot, go, save, newGame, tripDone, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
     addGear, gearCount, equip, unequip, wear, captureWeapon, recoverWeapons, grantShard, heal, hurtPlayer, eatFood, eatMeal, get maxHp() { return maxHp(); },
     get state() { return state; },
   };

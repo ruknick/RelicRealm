@@ -178,7 +178,7 @@ window.Craft = (() => {
 
     // 3) The result appears.
     let label;
-    if (r.makes) { Object.entries(r.makes).forEach(([k, n]) => { st().stockpile[k] += n * times; }); label = `+${Object.entries(r.makes).map(([k, n]) => `${n * times} ${Data.RESOURCES[k].label}`).join(', ')}!`; }
+    if (r.makes) { Object.entries(r.makes).forEach(([k, n]) => { st().stockpile[k] += n * times; App.bountyEvent(`smelt:${k}`, n * times); }); label = `+${Object.entries(r.makes).map(([k, n]) => `${n * times} ${Data.RESOURCES[k].label}`).join(', ')}!`; }
     else if (it.gear) { App.addGear(id); label = `${it.name} forged!`; }
     else { st().inventory[id] += 1; label = `${it.name} ${isKit(r) ? 'made' : 'crafted'}!`; }
     // First weapon / tool? Wield it straight away.

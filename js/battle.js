@@ -393,6 +393,7 @@ window.Battle = (() => {
     let rankUp = '';
     if (won) {
       App.state.enemyWins[run.enemy]++;
+      App.bountyEvent(`raid:${run.enemy}`);
       const nt = Data.enemyTier(App.state.enemyWins[run.enemy]);
       if (nt > run.tier) rankUp = `⚠️ They'll send <b>${Data.TIER_NAMES[run.enemy][nt - 1]}</b> next time — tougher, bigger, richer loot.`;
     }
