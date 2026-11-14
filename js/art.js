@@ -145,6 +145,7 @@ window.Art = (() => {
   const HAFT = { 1: 'lgHaft1', 2: 'lgHaft2', 3: 'lgHaft3', 4: 'lgHaft3' };
   function gearArt(type, tier) {
     const head = type === 'baxe' && tier === 1 ? 'lgWoodHead' : HEAD[tier], haft = HAFT[tier];
+    const ah = tier === 1 ? 'rgLeather' : HEAD[tier];   // armor finish: leather, iron, steel
     const shine = tier >= 3 ? '<path d="M44 8l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z" fill="#fff"/>' : '';
     const handle = `<path d="M14 56L44 14" stroke="#1a0f08" stroke-width="7" stroke-linecap="round"/><path d="M14 56L44 14" stroke="url(#${haft})" stroke-width="5" stroke-linecap="round"/>
       <path d="M16 51l3-4M20 46l3-4" stroke="#2a1608" stroke-width="2" opacity=".6"/>`;
@@ -166,6 +167,19 @@ window.Art = (() => {
       psabre: `${sh}<path d="M52 6c-8 16-20 26-32 32l4 4c14-6 24-18 30-34z" fill="url(#lgSilver)" stroke="#3a4450" stroke-width="1.2"/><path d="M50 10c-7 13-17 22-27 28" stroke="#fff" stroke-width="1.2" opacity=".7" fill="none"/>
         <path d="M14 36c4 2 12 10 14 14" stroke="#2a3a44" stroke-width="5" stroke-linecap="round"/><path d="M14 36c4 2 12 10 14 14" stroke="#7ab0c0" stroke-width="3" stroke-linecap="round"/>
         <path d="M22 42L11 53" stroke="#1d2a30" stroke-width="5" stroke-linecap="round"/><circle cx="9" cy="55" r="4.5" fill="url(#rgPearl)" stroke="#6a7a8a" filter="url(#fGlow)"/>`,
+      helmet: `${sh}<path d="M12 40c0-18 9-30 20-30s20 12 20 30v6H12z" fill="url(#${ah})" stroke="#111" stroke-width="1.4"/>
+        <path d="M10 44h44v6H10z" fill="url(#${ah})" stroke="#111" stroke-width="1.2"/>${tier >= 2 ? '<path d="M30 30h4v18h-4z" fill="#222" opacity=".55"/>' : '<path d="M14 40h36" stroke="#3a2010" stroke-dasharray="3 3"/>'}
+        <path d="M20 22c4-6 9-8 12-8" stroke="#fff" stroke-width="2.4" opacity=".45" fill="none" stroke-linecap="round"/>`,
+      body: `${sh}<path d="M18 10h28l10 10-6 8v28H14V28l-6-8z" fill="url(#${ah})" stroke="#111" stroke-width="1.4"/>
+        <path d="M26 10c2 6 10 6 12 0" fill="#1a1a1a" opacity=".5"/>${tier === 2 ? '<g stroke="#222" stroke-opacity=".45" fill="none"><path d="M16 32h32M16 38h32M16 44h32M16 50h32"/></g>' : tier >= 3 ? '<path d="M32 16v40M16 34c10 4 22 4 32 0" stroke="#5a6672" stroke-width="2" fill="none"/>' : '<path d="M24 14v42M40 14v42" stroke="#3a2010" stroke-dasharray="3 3"/>'}
+        <path d="M20 18l4 12" stroke="#fff" stroke-width="2.4" opacity=".45" stroke-linecap="round"/>`,
+      legs: `${sh}<path d="M16 8h32v8l-4 42h-10l-2-30-2 30H20l-4-42z" fill="url(#${ah})" stroke="#111" stroke-width="1.4"/>
+        <path d="M16 14h32" stroke="#3a2010" stroke-width="3"/>${tier >= 2 ? '<path d="M20 34h10M34 34h10M21 44h9M34 44h9" stroke="#fff" stroke-opacity=".45" stroke-width="2"/>' : ''}`,
+      gloves: `${sh}<path d="M14 54V30c0-3 5-3 5 0v-8c0-3 5-3 5 0v-4c0-3 5-3 5 0v2c0-3 5-3 5 0v18l4-6c2-3 7-1 5 3l-8 15v4z" fill="url(#${ah})" stroke="#111" stroke-width="1.3" transform="translate(4 0)"/>
+        <path d="M18 54h20v4H18z" fill="#3a2010" transform="translate(4 0)"/>${tier >= 2 ? '<path d="M22 36h18M22 44h18" stroke="#fff" stroke-opacity=".4" stroke-width="2"/>' : ''}`,
+      shield: `${sh}<path d="M10 8h44v20c0 16-10 24-22 30C20 52 10 44 10 28z" fill="url(#${tier === 1 ? 'lgWoodHead' : ah})" stroke="#111" stroke-width="1.6"/>
+        <path d="M32 10v46M12 26h40" stroke="${tier === 1 ? '#5a3414' : '#3a4450'}" stroke-width="3"/><circle cx="32" cy="26" r="5" fill="url(#lgGold)" stroke="#5a4210"/>
+        <path d="M16 12l2 16" stroke="#fff" stroke-width="2.4" opacity=".4" stroke-linecap="round"/>`,
       hammer: `${sh}${handle}<path d="M32 6l18 12-8 12-18-12z" fill="url(#${head})" stroke="#111" stroke-width="1.2"/><path d="M33 9l14 9" stroke="#fff" stroke-width="1.4" opacity=".5"/>`,
     };
     return shapes[type] + (type === 'spear' || type === 'psabre' ? '' : shine);

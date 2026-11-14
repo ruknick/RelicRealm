@@ -128,7 +128,8 @@ window.Battle = (() => {
   function hudRace() {
     const a = run.race;
     document.getElementById('race-map').innerHTML = Camp.miniMap(a);
-    document.getElementById('race-keep').innerHTML = '♥'.repeat(a.keep.hp) + '<span class="lost">' + '♥'.repeat(a.keep.max - a.keep.hp) + '</span>';
+    const ward = a.keep.ward || [], wHp = ward.reduce((n, w) => n + w.hp, 0), wMax = ward.reduce((n, w) => n + w.max, 0);
+    document.getElementById('race-keep').innerHTML = (wMax ? `<span class="ward">${'🛡'.repeat(wHp)}</span><span class="lost">${'🛡'.repeat(wMax - wHp)}</span>` : '') + '♥'.repeat(a.keep.hp) + '<span class="lost">' + '♥'.repeat(a.keep.max - a.keep.hp) + '</span>';
     document.getElementById('race-log').textContent = a.log;
     document.getElementById('race-them').textContent = run.keep ? `Their ${run.keep.label.toLowerCase()}: ${run.keep.hp}/${run.keep.maxHp}` : 'Their keep: hidden';
   }

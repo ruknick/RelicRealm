@@ -901,3 +901,39 @@ details.debug { margin-top: 12px; }
 #g-level { flex: none; }
 #g-finds { flex: 1; text-align: right; }
 #g-level .xpbar { width: 40px; }
+
+/* ---------- Gear button & Warrior screen ---------- */
+.gearbtn { flex: none; display: flex; align-items: center; gap: 4px; border: 2px solid #c9a227; border-radius: 10px; background: var(--panel-2); padding: 3px 8px 3px 4px; color: var(--text); }
+.gb-item { width: 34px; height: 38px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.1rem; border-radius: 8px; background: rgba(0,0,0,.25); }
+.gb-item svg { width: 30px; height: 28px; }
+.gb-item .dur { width: 28px; height: 4px; margin-top: 1px; }
+.gb-item.empty { opacity: .5; }
+.gb-label { display: flex; flex-direction: column; font-weight: 800; font-size: .78rem; line-height: 1.15; white-space: nowrap; }
+.gb-label small { color: #bfe0ff; font-weight: 700; }
+.home-btns { display: flex; gap: 6px; }
+.hero-btn { font-weight: 700; background: #3d5a80 !important; color: #fff; }
+.hero-panel { position: fixed; inset: 0; z-index: 30; background: rgba(0,0,0,.7); display: flex; justify-content: center; overflow-y: auto; padding: 12px 10px; }
+.hero-card { width: 100%; max-width: 420px; background: var(--panel); border-radius: 16px; padding: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.5); align-self: flex-start; }
+.hero-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 1.1rem; }
+.doll { display: grid; gap: 6px; grid-template-columns: 1fr 1.25fr 1fr;
+  grid-template-areas: "weapon helmet shield" "weapon fig shield" "gloves fig body" "tool fig legs";
+  background: radial-gradient(ellipse at 50% 55%, #3a4a3a, #1a241c 75%); border-radius: 14px; padding: 8px; }
+.doll-fig { grid-area: fig; display: flex; align-items: center; justify-content: center; }
+.doll-fig .fig { width: 100%; max-height: 230px; }
+.hslot { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 74px; border: 2px solid #4a5a46; border-radius: 12px; background: rgba(20,28,22,.85); color: var(--text); padding: 4px; text-align: center; }
+.hslot.empty { border-style: dashed; opacity: .75; }
+.hslot.t2 { border-color: #7d8793; } .hslot.t3 { border-color: #d6dde5; box-shadow: 0 0 8px rgba(220,230,240,.35); }
+.hslot.sel { outline: 3px solid var(--accent); outline-offset: 1px; }
+.hslot small { font-size: .68rem; line-height: 1.1; }
+.hs-icon { width: 38px; height: 38px; display: grid; place-items: center; font-size: 1.5rem; }
+.hs-icon svg { width: 100%; height: 100%; }
+.hslot .dur { width: 54px; }
+.hero-stats { margin: 10px 2px; font-size: .85rem; display: grid; gap: 4px; }
+.h-est { display: grid; gap: 2px; color: var(--muted); }
+.h-est b { color: var(--accent); } .h-est em { font-style: normal; opacity: .75; }
+.hp-row { display: flex; align-items: center; gap: 8px; background: var(--panel-2); border-radius: 10px; padding: 6px; margin-bottom: 6px; }
+.hp-icon { width: 40px; height: 40px; flex: none; } .hp-icon svg { width: 100%; height: 100%; }
+.hp-body { flex: 1; min-width: 0; font-size: .85rem; }
+.hp-body small { display: block; color: var(--muted); font-size: .72rem; }
+.hp-row button { flex: none; }
+#race-keep .ward { color: #8ec5ff; }

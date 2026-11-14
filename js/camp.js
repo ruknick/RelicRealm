@@ -1,6 +1,7 @@
 // Your camp: fortify layout, the AI that attacks it during a Siege Race, and the Fortify editor.
 window.Camp = (() => {
   const ROWS = 9, COLS = 7, BASE_ROWS = 4, KEEP_HP = 6;
+  let GLANCE = 0.5;   // chance a too-weak weapon still finds a gap in your armor
   const KEEP_CELLS = [[0, 2], [0, 3], [0, 4]];
 
   // Defenses you can place. pts = fortify points; hp before runestone bonus.
@@ -36,7 +37,7 @@ window.Camp = (() => {
   const owned = kind => App.state.inventory[kind] || 0;
 
   // ---------- attack simulation ----------
-  function newAttack(enemy, dry = false, tier = Data.enemyTier(App.state.enemyWins[enemy])) {
+  function newAttack(enemy, dry = false, tier = Data.enemyTier(App.state.enemyWins[enemy]), noArmor = false) {
     const L = layout();
     const pieces = Object.entries(L.cells).map(([k, kind]) => {
       const [r, c] = k.split(',').map(Number);
@@ -49,7 +50,8 @@ window.Camp = (() => {
     pieces.forEach(p => { p.max = p.hp; });
     // Iron-banded loot chest: once opened it stays put and still blocks the way.
     const chest = { kind: 'chest', r: L.chest[0], c: L.chest[1], hp: 2, max: 2, mat: 'wood', hard: 1, alive: true, opened: false };
-    const keep = { kind: 'keep', hp: KEEP_HP, max: KEEP_HP, alive: true };
+    // Your worn armor stands guard: shield hearts they must break before the keep itself.
+    const keep = { kind: 'keep', hp: KEEP_HP, max: KEEP_HP, alive: true, ward: noArmor ? [] : App.wardLayers() };
     // Higher-ranked raiders hit harder and arrive sooner.
     const base = AI[enemy], t = tier - 1;
     const P = { ...base, name: `${enemy === 'dwarf' ? 'Dwarf' : 'Goblin'} ${Data.TIER_NAMES[enemy][tier - 1]}`,
@@ -131,6 +133,9 @@ window.Camp = (() => {
       t = targets.sort((x, y) => cost(x) - cost(y))[0];
     }
     // Hardness rule: their weapon tier vs your defense. Too hard = they barely scratch it.
+    // Hitting the keep? Your armor takes it first, layer by layer.
+    const layer = t === a.keep ? a.keep.ward.find(w => w.hp > 0) : null;
+    if (layer) return hitWard(a, layer);
     let dmg;
     const diff = P.gear - (t.hard || 1);
     if (diff < 0) dmg = Math.random() < 0.08 ? 1 : 0;
@@ -151,11 +156,27 @@ window.Camp = (() => {
     return say(msg, { rubble: dmg > 1 });
   }
 
+  // Armor is worn by people, not built: weaker weapons still find gaps now and then.
+  function hitWard(a, w) {
+    const P = a.P, diff = P.gear - w.hard;
+    let dmg;
+    if (diff < 0) dmg = Math.random() < GLANCE ? 1 : 0;
+    else { const x = Math.random(); dmg = x < P.miss ? 0 : x < 1 - P.big ? 1 : 2; if (diff > 0 && dmg) dmg++; }
+    dmg = Math.min(dmg, w.hp);
+    const say = msg => { a.log = msg; return { msg, rubble: dmg > 1 }; };
+    if (!dmg) return say(diff < 0 ? `🛡 Their ${Data.TIER_LABEL[P.gear].toLowerCase()} weapons glance off your ${w.name.toLowerCase()}!` : `${P.name} hammer at your ${w.name.toLowerCase()}…`);
+    w.hp -= dmg;
+    let broke = null;
+    if (!a.dry) broke = App.wear(w.slot, dmg);
+    if (broke) { w.hp = 0; return say(`💥 Your ${broke} broke!`); }
+    return say(w.hp > 0 ? `🛡 Your ${w.name.toLowerCase()} takes the blow!` : `🛡 They got past your ${w.name.toLowerCase()}!`);
+  }
+
   // How many moves this enemy needs on average to break your keep (for the editor).
-  function estimate(enemy, runs = 160) {
+  function estimate(enemy, runs = 160, noArmor = false) {
     let total = 0;
     for (let i = 0; i < runs; i++) {
-      const a = newAttack(enemy, true);
+      const a = newAttack(enemy, true, undefined, noArmor);
       while (!a.done && a.moves < 80) step(a);
       total += a.moves;
     }
@@ -225,9 +246,9 @@ window.Camp = (() => {
     grid.innerHTML = cells;
     grid.querySelectorAll('.fc').forEach(el => { el.onclick = () => tapCell(+el.dataset.r, +el.dataset.c); });
 
-    const g = estimate('goblin'), d = estimate('dwarf');
+    const g = estimate('goblin'), d = estimate('dwarf'), armored = App.wardLayers().length;
     document.getElementById('fort-test').innerHTML =
-      `🧪 Goblins need about <b>${g}</b> moves to break your keep · dwarves about <b>${d}</b>. <span class="hint">Beat them to it when you raid!</span>`;
+      `🧪 Goblins need about <b>${g}</b> moves to break your keep · dwarves about <b>${d}</b>${armored ? ' (with your armor)' : ''}. <span class="hint">Beat them to it when you raid! ${armored ? '' : 'Craft armor and wear it in 🧍 Warrior to add 🛡 hearts.'}</span>`;
     const sp = App.state;
     document.getElementById('fort-chest').innerHTML =
       `📦 Your loot chest holds your special items: 💎 ${sp.shards} shard${sp.shards === 1 ? '' : 's'} · 🗺️ ${sp.scraps.goblin + sp.scraps.dwarf} map scraps · 🗝️ ${sp.inventory.key} key${sp.inventory.key === 1 ? '' : 's'}. If raiders open it, they take some.`;
@@ -266,5 +287,5 @@ window.Camp = (() => {
     Sound.sfx('nope');
   }
 
-  return { giveStarterKit, DEF, budget, layout, newAttack, step, estimate, miniMap, render, KEEP_HP };
+  return { setGlance: g => { GLANCE = g; }, giveStarterKit, DEF, budget, layout, newAttack, step, estimate, miniMap, render, KEEP_HP };
 })();

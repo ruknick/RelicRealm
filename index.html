@@ -27,7 +27,7 @@
     <section id="screen-home" class="screen">
       <div class="home-top">
         <div class="home-level" id="home-level"></div>
-        <button class="small items-btn" id="btn-items">🎒 Items</button>
+        <span class="home-btns"><button class="small hero-btn" id="btn-hero">🧍 Warrior</button><button class="small items-btn" id="btn-items">🎒 Items</button></span>
       </div>
       <div class="world" id="world">
         <div class="world-map" id="world-map"></div>
@@ -150,6 +150,16 @@
     </div>
   </div>
 
+  <!-- Warrior: full-body equipment -->
+  <div id="hero-panel" class="hero-panel hidden">
+    <div class="hero-card">
+      <div class="hero-top"><b>🧍 Your warrior</b><button class="small" id="hero-close">Done</button></div>
+      <div class="doll" id="hero-doll"></div>
+      <div class="hero-stats" id="hero-stats"></div>
+      <div class="hero-pick" id="hero-pick"></div>
+    </div>
+  </div>
+
   <!-- Shared popup -->
   <div id="modal" class="modal hidden">
     <div class="card">
@@ -170,6 +180,7 @@
   <script src="js/craft.js"></script>
   <script src="js/world.js"></script>
   <script src="js/items.js"></script>
+  <script src="js/hero.js"></script>
   <script>App.boot();</script>
 </body>
 </html>

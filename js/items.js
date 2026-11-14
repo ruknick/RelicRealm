@@ -47,7 +47,7 @@ window.Items = (() => {
     const durBar = (g, it) => `<span class="dur big${g.dur / it.dur <= 0.25 ? ' low' : ''}"><i style="width:${Math.round(g.dur / it.dur * 100)}%"></i></span> ${g.dur}/${it.dur}`;
     const gearList = cls => {
       const rows = [];
-      ['weapon', 'tool'].forEach(slot => {
+      Data.SLOTS.forEach(slot => {
         const g = st.equip[slot];
         if (g && Data.ITEMS[g.id].gear === cls) rows.push(card(itemIcon(g.id), Data.ITEMS[g.id].name, '✓ wielding', `${durBar(g, Data.ITEMS[g.id])} · ${Data.ITEMS[g.id].desc}`));
       });
@@ -64,6 +64,7 @@ window.Items = (() => {
     const R = Data.RECIPES;
     return `<h3 class="craft-h">⚔️ Weapons <small>monsters only</small></h3>${gearList('weapon')}`
       + `<h3 class="craft-h">🛠️ Tools <small>obstacles & defenses only</small></h3>${gearList('tool')}`
+      + `<h3 class="craft-h">🛡️ Armor <small>wear it in 🧍 Warrior</small></h3>${gearList('armor')}`
       + group('🛡️ Defenses <small>place them in your camp</small>', R.filter(r => r.defense).map(r => r.id))
       + group('🍲 Provisions <small>use on raids</small>', R.filter(r => r.tier === 'food').map(r => r.id))
       + group('🎒 Kit <small>passive & permanent</small>', R.filter(r => r.tier === 'kit').map(r => r.id))

@@ -34,6 +34,22 @@ The tray under every board has three areas:
 
 **Durability:** wood 4 hits · iron 8 · steel 14 · elder 25. Gear breaks at 0, so repair it at the Workshop for half its materials.
 
+## 🧍 Your warrior: full-body gear
+Tap **🧍 Gear** under any board, or **🧍 Warrior** on the map. It opens a figure with seven slots: **helmet, body, gloves, legs, shield, weapon, tool**. Tap a slot to wear, swap or take off pieces; the figure updates to show what you wear.
+- **Armor** comes in **Leather** (hide), **Iron** (iron + hide/oak, quenched) and **Steel** tiers. Craft it in the Workshop's Armor section.
+- In a raid, worn armor adds **🛡 shield hearts** on your keep: shield +1 (the first layer they hit), helmet +1, body +2, legs +1. Raiders must break these before the keep's ♥.
+- Shield hearts use the hardness rule. Raiders whose weapons are weaker than your armor only get through half the time; stronger weapons hit harder.
+- Each 🛡 they break costs that piece 1 durability. Repair armor at the Workshop.
+- **Gloves** add starting ⚡ on every board (+1 leather, +2 iron, +3 steel).
+- The Warrior screen, raid prep and Fortify show how many moves each raider needs to break your camp, with and without armor:
+
+| Average moves to break your camp | Goblin Scouts | Goblin Raiders | Dwarf Miners | Dwarf Ironclads |
+|---|---|---|---|---|
+| No armor | 19 | 12 | 15 | 12 |
+| Full leather | 26 | 17 | 21 | 17 |
+| Full iron | 29 | 18 | 21 | 17 |
+| Full steel | 29 | 22 | 25 | 18 |
+
 ## Wood & ore tiers
 - **Wood:** Pine → **Oak** → **Ironwood** → **Elderwood**. **Ore:** iron → **silver** → **starsilver**.
 - Rare tiles appear rarely at first, then more often as the land's level rises. They match with their family (oak matches pine).

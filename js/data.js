@@ -33,11 +33,27 @@ window.Data = (() => {
     pick:   { cls: 'tool', what: 'Pick', trait: 'breaks rock, ore veins, coral & stone defenses' },
     hammer: { cls: 'tool', what: 'Hammer', trait: 'smashes any built defense: walls, gates, towers, keeps' },
     spear:  { cls: 'weapon', what: 'Spear', trait: 'pierces: also hits the monsters directly above & below' },
+    // Armor: worn, not swung. Helmet / body / legs / shield add shield hearts to your keep in a raid; gloves add energy.
+    helmet: { cls: 'armor', what: 'Helmet', trait: '+1 🛡 on your keep in raids' },
+    body:   { cls: 'armor', what: 'Body armor', trait: '+2 🛡 on your keep in raids' },
+    legs:   { cls: 'armor', what: 'Leg armor', trait: '+1 🛡 on your keep in raids' },
+    gloves: { cls: 'armor', what: 'Gloves', trait: 'start every board with extra ⚡' },
+    shield: { cls: 'armor', what: 'Shield', trait: '+1 🛡 on your keep in raids — the first layer they hit' },
   };
-  const gear = (name, type, tier, extra = {}) => ({
-    name, type, tier, gear: TYPE_INFO[type].cls, dur: DURABILITY[tier], art: `gear:${type}:${tier}`,
-    desc: `${TIER_LABEL[tier]} tier · ${TYPE_INFO[type].cls === 'weapon' ? 'monsters only' : 'obstacles & defenses only'} · ${TYPE_INFO[type].trait}.`, ...extra,
-  });
+  const ARMOR_LABEL = { 1: 'Leather', 2: 'Iron', 3: 'Steel', 4: 'Mythic' };
+  const WARD = { helmet: 1, body: 2, legs: 1, shield: 1, gloves: 0 };
+  const gloveEnergy = g => (g ? ITEMS[g.id].tier : 0);
+  const gear = (name, type, tier, extra = {}) => {
+    const cls = TYPE_INFO[type].cls;
+    const what = cls === 'weapon' ? 'monsters only' : cls === 'tool' ? 'obstacles & defenses only' : `armor (hardness ${tier})`;
+    const trait = type === 'gloves' ? `start every board with +${tier} ⚡` : TYPE_INFO[type].trait;
+    return { name, type, tier, gear: cls, dur: DURABILITY[tier], art: `gear:${type}:${tier}`,
+      desc: `${(cls === 'armor' ? ARMOR_LABEL : TIER_LABEL)[tier]} tier · ${what} · ${trait}.`, ...extra };
+  };
+  // Every slot on your warrior. Weapon & tool are swung; the rest are worn.
+  const SLOTS = ['helmet', 'body', 'gloves', 'legs', 'shield', 'weapon', 'tool'];
+  const slotOf = id => { const it = ITEMS[id]; return it.gear === 'armor' ? it.type : it.gear; };
+  const tierLabel = id => { const it = ITEMS[id]; return it.sea ? 'Sea' : (it.gear === 'armor' ? ARMOR_LABEL : TIER_LABEL)[it.tier]; };
 
   const ITEMS = {
     // Weapons (monsters only)
@@ -66,6 +82,16 @@ window.Data = (() => {
     pick3: gear('Steel pick', 'pick', 3),
     hammer3: gear('Steel hammer', 'hammer', 3),
     dpick: gear('Dwarven pick', 'pick', 3, { dur: 12, spoil: 'dwarf' }),
+    // Armor
+    helmet1: gear('Leather cap', 'helmet', 1),      body1: gear('Leather jerkin', 'body', 1),
+    legs1:   gear('Leather leggings', 'legs', 1),   gloves1: gear('Leather gloves', 'gloves', 1),
+    shield1: gear('Wooden buckler', 'shield', 1),
+    helmet2: gear('Iron helm', 'helmet', 2),        body2: gear('Iron mail', 'body', 2),
+    legs2:   gear('Iron greaves', 'legs', 2),       gloves2: gear('Iron gauntlets', 'gloves', 2),
+    shield2: gear('Iron-rimmed shield', 'shield', 2),
+    helmet3: gear('Steel helm', 'helmet', 3),       body3: gear('Steel plate', 'body', 3),
+    legs3:   gear('Steel greaves', 'legs', 3),      gloves3: gear('Steel gauntlets', 'gloves', 3),
+    shield3: gear('Steel tower shield', 'shield', 3),
     // Defenses
     fence:    { name: 'Wooden fence', icon: '🪵', desc: 'Defense: wood (hardness 1), 2 HP. 1 pt.' },
     trap:     { name: 'Pit trap', icon: '🕳️', desc: 'Defense: hidden — an attacker who finds it loses a move. 1 pt.' },
@@ -239,6 +265,21 @@ window.Data = (() => {
     { id: 'waxe3', tier: 'tool', cost: { steel: 2, ironwood: 1 } },
     { id: 'pick3', tier: 'tool', cost: { steel: 2, ironwood: 1 } },
     { id: 'hammer3', tier: 'tool', cost: { steel: 3, ironwood: 1 } },
+    { id: 'helmet1', tier: 'armor', cost: { hide: 3 } },
+    { id: 'body1',   tier: 'armor', cost: { hide: 5 } },
+    { id: 'legs1',   tier: 'armor', cost: { hide: 4 } },
+    { id: 'gloves1', tier: 'armor', cost: { hide: 2 } },
+    { id: 'shield1', tier: 'armor', cost: { wood: 4, hide: 1 } },
+    { id: 'helmet2', tier: 'armor', cost: { iron: 3, hide: 1, water: 1 } },
+    { id: 'body2',   tier: 'armor', cost: { iron: 6, hide: 2, water: 1 } },
+    { id: 'legs2',   tier: 'armor', cost: { iron: 4, hide: 1, water: 1 } },
+    { id: 'gloves2', tier: 'armor', cost: { iron: 2, hide: 1 } },
+    { id: 'shield2', tier: 'armor', cost: { iron: 3, oak: 2 } },
+    { id: 'helmet3', tier: 'armor', cost: { steel: 2, hide: 1 } },
+    { id: 'body3',   tier: 'armor', cost: { steel: 4, hide: 2 } },
+    { id: 'legs3',   tier: 'armor', cost: { steel: 3, hide: 1 } },
+    { id: 'gloves3', tier: 'armor', cost: { steel: 1, hide: 1 } },
+    { id: 'shield3', tier: 'armor', cost: { steel: 2, ironwood: 2 } },
     { id: 'fence', tier: 'def', cost: { wood: 6 }, defense: true },
     { id: 'trap',  tier: 'def', cost: { wood: 4, hide: 2 }, defense: true },
     { id: 'wall',  tier: 'def', cost: { stone: 12 }, defense: true },
@@ -297,7 +338,7 @@ window.Data = (() => {
   };
 
   return {
-    RESOURCES, ITEMS, TIER_LABEL, DURABILITY, TYPE_INFO, hardness, gearDamage, gearRefusal, matchDamage, MATCH_DMG,
+    RESOURCES, ITEMS, TIER_LABEL, ARMOR_LABEL, WARD, gloveEnergy, SLOTS, slotOf, tierLabel, DURABILITY, TYPE_INFO, hardness, gearDamage, gearRefusal, matchDamage, MATCH_DMG,
     WEAPONS, weaponDamage, MAT_LABEL, FAMILY, family, RARE, RARE_INFO, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES,
     backpackSize, landLevel, enemyTier, TIER_NAMES, ENEMY_GEAR, ENEMY_ARMOR, CHEST_TIERS, xpForLevel, levelFromXp, levelInfo, XP, MATERIAL_INFO,
   };

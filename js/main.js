@@ -19,7 +19,7 @@ window.App = (() => {
       enemyWins: { goblin: 0, dwarf: 0 },
       starterDef: false,
       gear: [],                          // owned gear: [{ id, dur }]
-      equip: { weapon: null, tool: null },
+      equip: { weapon: null, tool: null, helmet: null, body: null, gloves: null, legs: null, shield: null },
       seen: {},                          // rare materials already discovered
       debug: { discoverNow: false, eventNow: false },
     };
@@ -92,6 +92,14 @@ window.App = (() => {
     if (g.dur <= 0) { state.equip[slot] = null; save(); return Data.ITEMS[g.id].name; }
     save();
     return null;
+  }
+
+  // Worn armor as shield-heart layers on your keep, outermost first (shield, then helmet, body, legs).
+  function wardLayers() {
+    return ['shield', 'helmet', 'body', 'legs'].filter(s => state.equip[s]).map(s => {
+      const it = Data.ITEMS[state.equip[s].id];
+      return { slot: s, name: it.name, hard: it.tier, hp: Data.WARD[s], max: Data.WARD[s] };
+    });
   }
 
   function save() {
@@ -179,6 +187,7 @@ window.App = (() => {
 
   // ---------- raid prep ----------
   async function prepareRaid(enemy, { fromField = false } = {}) {
+    prepareRaid.last = [enemy, { fromField }];
     const cfg = Battle.CONFIG[enemy];
     const food = state.stockpile.food;
     const inv = state.inventory;
@@ -186,6 +195,8 @@ window.App = (() => {
     const armor = Data.ENEMY_ARMOR[enemy][Data.enemyTier(state.enemyWins[enemy]) - 1];
     const wTier = eq.weapon ? Data.ITEMS[eq.weapon.id].tier : 0;
     const weapons = [eq.weapon ? `⚔️ ${Data.ITEMS[eq.weapon.id].name}` : '⚔️ no weapon equipped', eq.tool ? `🛠 ${Data.ITEMS[eq.tool.id].name}` : '🛠 no tool equipped'];
+    const shields = wardLayers().reduce((n, w) => n + w.max, 0);
+    weapons.push(shields ? `🛡 armor +${shields} shield hearts` : '🛡 no armor');
     const armorNote = wTier >= armor ? '' : `<p class="warn-note">⚠️ Their troops wear <b>${Data.TIER_LABEL[armor]}</b> armor — your ${wTier ? Data.TIER_LABEL[wTier].toLowerCase() + ' weapon bounces off' : 'bare hands do nothing'}. Craft ${Data.TIER_LABEL[armor].toLowerCase()} weapons!</p>`;
     const canGo = food >= cfg.foodCost;
     const boosts = ['drum', 'ale'].filter(k => inv[k] > 0)
@@ -193,7 +204,7 @@ window.App = (() => {
     const choice = await choose({
       title: `${cfg.icon} ${cfg.name} · ${Data.TIER_NAMES[enemy][Data.enemyTier(state.enemyWins[enemy]) - 1]}`,
       html: `<p class="race-rules">🏁 <b>Siege Race:</b> you attack their base while they attack your camp. <b>Fewest moves to break the other keep wins.</b> Big combos throw rubble in their way.
-          Your camp: they need about <b>${Camp.estimate(enemy)}</b> moves. <a href="#" id="prep-fortify">Fortify it</a></p>
+          Your camp: they need about <b>${Camp.estimate(enemy)}</b> moves. <a href="#" id="prep-fortify">Fortify it</a> · <a href="#" id="prep-hero">Armor up</a></p>
         <p class="hint">Rank ${Data.enemyTier(state.enemyWins[enemy])}/4 — every 2 wins they send tougher troops (and better loot).</p>
         <p>${cfg.prep}</p>
         <p>Costs <b>${cfg.foodCost} food</b> — you have <b>${food}</b>.</p>
@@ -253,6 +264,7 @@ window.App = (() => {
   }
 
   function boot() {
+    Hero.init();
     Art.injectDefs();
     load();
     renderStock();
@@ -260,11 +272,13 @@ window.App = (() => {
     Battle.init();
     const on = (id, f) => { document.getElementById(id).onclick = f; };
     on('btn-items', () => go('items'));
+    on('btn-hero', () => Hero.open());
     on('items-back', () => go('home'));
     on('craft-back', () => go('home'));
     on('fort-back', () => go('home'));
     document.getElementById('modal').addEventListener('click', e => {
       if (e.target.id === 'prep-fortify') { e.preventDefault(); document.getElementById('modal').classList.add('hidden'); go('fortify'); }
+      if (e.target.id === 'prep-hero') { e.preventDefault(); document.getElementById('modal').classList.add('hidden'); Hero.open({ onClose: () => prepareRaid(...prepareRaid.last) }); }
     });
     on('btn-reset', () => { if (confirm('Reset all resources and items?')) { state = fresh(); save(); renderHome(); } });
     on('dbg-level', () => { state.xp = Data.xpForLevel(level() + 1); save(); renderHome(); });
@@ -288,7 +302,7 @@ window.App = (() => {
 
   return {
     ENEMY_NAME, grantSpecial, addXP, levelPerks, get level() { return level(); }, boot, go, save, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
-    addGear, gearCount, equip, unequip, wear,
+    addGear, gearCount, equip, unequip, wear, wardLayers,
     get state() { return state; },
   };
 })();

@@ -79,7 +79,7 @@ window.Board = (() => {
       this.pieces = [];
       this.buried = new Map();
       this.showBuried = false;
-      this.energy = 3;                 // ⚡ built by matching, spent on tap-swings
+      this.energy = 3 + Data.gloveEnergy(window.App?.state?.equip?.gloves);   // ⚡ built by matching, spent on tap-swings (gloves add more)
       this.grid = Array.from({ length: this.rows }, () => Array(this.cols).fill(null));
     }
 
@@ -391,21 +391,25 @@ window.Board = (() => {
       if (tray) this.tray = tray;
       if (!this.tray) return;
       const st = App.state, inv = st.inventory;
-      const slot = (key, emoji, label) => {
+      // One Gear button: shows what you're swinging; tap it for the full-body Warrior screen.
+      const mini = (key, emoji) => {
         const g = st.equip[key];
-        if (!g) return `<button class="gslot empty" data-slot="${key}"><span class="gs-icon">${emoji}</span><span class="gs-text"><b>${label}</b><small>tap to equip</small></span></button>`;
+        if (!g) return `<span class="gb-item empty">${emoji}</span>`;
         const it = Data.ITEMS[g.id], pct = Math.round(g.dur / it.dur * 100);
-        return `<button class="gslot t${it.tier}" data-slot="${key}"><span class="gs-icon">${Art.piece(it.art)}</span>
-          <span class="gs-text"><b>${it.name.replace(/^(Goblin|Dwarven) /, '')}</b><span class="dur${pct <= 25 ? ' low' : ''}"><i style="width:${pct}%"></i></span></span></button>`;
+        return `<span class="gb-item t${it.tier}">${Art.piece(it.art)}<span class="dur${pct <= 25 ? ' low' : ''}"><i style="width:${pct}%"></i></span></span>`;
       };
+      const shields = App.wardLayers().reduce((n, w) => n + w.max, 0);
       const specials = Object.keys(Data.ITEMS).filter(k => Data.ITEMS[k].special && inv[k] > 0).map(k => {
         const it = Data.ITEMS[k];
         return `<button class="spec${this.armed === k ? ' armed' : ''}" data-w="${k}" title="${it.name}">${it.art ? Art.piece(it.art) : it.icon}<b>${inv[k]}</b></button>`;
       }).join('');
       this.tray.innerHTML = `<div class="gearbar"><div class="energy" title="Energy: make matches to charge, tap a monster or obstacle to swing">
           <span class="en-bolt">⚡</span><b class="en-num">${this.energy}</b><span class="en-bar"><i style="height:${this.energy / ENERGY_MAX * 100}%"></i></span></div>
-        ${slot('weapon', '⚔️', 'Weapon')}${slot('tool', '🛠️', 'Tool')}<div class="specials">${specials}</div></div>`;
-      this.tray.querySelectorAll('.gslot').forEach(b => { b.onclick = () => this.pickGear(b.dataset.slot); });
+        <button class="gearbtn">${mini('weapon', '⚔️')}${mini('tool', '🛠️')}<span class="gb-label">🧍 Gear${shields ? `<small>🛡${shields}</small>` : ''}</span></button><div class="specials">${specials}</div></div>`;
+      this.tray.querySelector('.gearbtn').onclick = () => {
+        if (this.busy) return;
+        Hero.open({ onClose: () => { this.renderWeapons(); this.hooks.onArm?.(); } });
+      };
       this.tray.querySelectorAll('.spec').forEach(b => { b.onclick = () => this.arm(b.dataset.w); });
     }
 
@@ -421,34 +425,6 @@ window.Board = (() => {
       el.querySelector('.en-bar i').style.height = (this.energy / ENERGY_MAX * 100) + '%';
       el.classList.toggle('full', this.energy >= ENERGY_MAX);
       if (pulse) { el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
-    }
-
-    // Choose which weapon / tool to wield.
-    async pickGear(slot) {
-      if (this.busy) return;
-      const st = App.state, cls = slot === 'weapon' ? 'weapon' : 'tool';
-      const owned = st.gear.map((g, i) => ({ g, i })).filter(({ g }) => Data.ITEMS[g.id].gear === cls)
-        .sort((a, b) => Data.ITEMS[b.g.id].tier - Data.ITEMS[a.g.id].tier);
-      const cur = st.equip[slot];
-      const buttons = owned.slice(0, 6).map(({ g, i }) => {
-        const it = Data.ITEMS[g.id];
-        return { id: String(i), label: `<span class="pick-icon">${Art.piece(it.art)}</span> ${it.name} <small>${g.dur}/${it.dur}</small>` };
-      });
-      if (cur) buttons.push({ id: 'off', label: 'Unequip', cls: 'alt' });
-      buttons.push({ id: 'cancel', label: 'Cancel', cls: 'alt' });
-      const help = cls === 'weapon'
-        ? 'Weapons only hurt monsters. Tap a monster to swing — matches next to monsters also strike with it.'
-        : 'Tools break obstacles & defenses: wood-axe (wood & plants), pick (stone), hammer (anything built).';
-      const choice = await App.choose({
-        title: slot === 'weapon' ? '⚔️ Wield a weapon' : '🛠️ Wield a tool',
-        html: `<p class="hint">${help}</p>${owned.length ? '' : `<p>You don't have any ${cls}s — craft some in the Workshop.</p>`}
-          ${cur ? `<p>Wielding: <b>${Data.ITEMS[cur.id].name}</b> (${cur.dur}/${Data.ITEMS[cur.id].dur})</p>` : ''}`,
-        buttons,
-      });
-      if (choice === 'off') App.unequip(slot);
-      else if (choice !== 'cancel') App.equip(slot, +choice);
-      this.renderWeapons();
-      this.hooks.onArm?.();
     }
 
     arm(k) {
@@ -476,7 +452,7 @@ window.Board = (() => {
       const slot = p.mat === 'creature' ? 'weapon' : 'tool';
       const g = App.state.equip[slot];
       if (!g) {
-        this.toast(slot === 'weapon' ? '⚔️ Equip a weapon to fight monsters — tap the ⚔️ slot below.' : '🛠️ Equip a tool to break that — tap the 🛠️ slot below.', '', 2600);
+        this.toast(slot === 'weapon' ? '⚔️ Equip a weapon to fight monsters — tap 🧍 Gear below.' : '🛠️ Equip a tool to break that — tap 🧍 Gear below.', '', 2600);
         return;
       }
       const G = Data.ITEMS[g.id];

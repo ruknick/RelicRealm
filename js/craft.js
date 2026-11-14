@@ -27,7 +27,7 @@ window.Craft = (() => {
     const owned = r.makes ? null : it.gear ? App.gearCount(r.id) : st().inventory[r.id];
     const ownedTxt = r.makes ? `have ${Object.keys(r.makes).map(k => st().stockpile[k]).join('')}` : isKit(r) ? (owned ? '✓ Owned' : '') : owned ? `owned ×${owned}` : '';
     const ready = canAfford(r) && !ownedKit(r);
-    const tag = it.gear ? `<span class="tag t${it.tier}">${it.sea ? "Sea" : Data.TIER_LABEL[it.tier]} · ${it.dur} hits</span>` : '';
+    const tag = it.gear ? `<span class="tag t${it.tier}">${Data.tierLabel(r.id)} · ${it.dur} ${it.gear === 'armor' ? 'blocks' : 'hits'}</span>` : '';
     return `<div class="recipe ${ready ? 'ready' : ''}" data-id="${r.id}">
       <div class="r-icon">${r.makes ? `<div class="gem art g-${tileFor(Object.keys(r.makes)[0])}" style="position:relative;width:40px;height:40px">${Art.tile(tileFor(Object.keys(r.makes)[0]))}</div>` : iconOf(it)}</div>
       <div class="r-body">
@@ -47,7 +47,7 @@ window.Craft = (() => {
   }
   function repairList() {
     const out = [];
-    ['weapon', 'tool'].forEach(slot => { const g = st().equip[slot]; if (g && g.dur < Data.ITEMS[g.id].dur) out.push({ g, where: slot }); });
+    Data.SLOTS.forEach(slot => { const g = st().equip[slot]; if (g && g.dur < Data.ITEMS[g.id].dur) out.push({ g, where: slot }); });
     st().gear.forEach((g, i) => { if (g.dur < Data.ITEMS[g.id].dur) out.push({ g, where: i }); });
     return out;
   }
@@ -67,7 +67,7 @@ window.Craft = (() => {
     const sec = (title, sub, list) => list.length ? `<h3 class="craft-h">${title} <small>${sub}</small></h3>${list.join('')}` : '';
     const byTier = (cls) => [1, 2, 3].map(t => {
       const list = R.filter(r => Data.ITEMS[r.id] && Data.ITEMS[r.id].gear === cls && !Data.ITEMS[r.id].sea && Data.ITEMS[r.id].tier === t);
-      return list.length ? `<div class="tier-h t${t}">${Data.TIER_LABEL[t]}</div>${list.map(card).join('')}` : '';
+      return list.length ? `<div class="tier-h t${t}">${(cls === 'armor' ? Data.ARMOR_LABEL : Data.TIER_LABEL)[t]}</div>${list.map(card).join('')}` : '';
     }).join('');
     const reps = repairList();
     document.getElementById('craft-list').innerHTML =
@@ -75,6 +75,7 @@ window.Craft = (() => {
       `<h3 class="craft-h">⚔️ Weapons <small>monsters only · wield one at a time</small></h3>${byTier('weapon')}` +
       sec('🌊 Sea gear', 'coral & pearls from the Sunlit Coast · iron strength with a trick', R.filter(r => Data.ITEMS[r.id]?.sea).map(card)) +
       `<h3 class="craft-h">🛠️ Tools <small>obstacles & defenses only · wield one at a time</small></h3>${byTier('tool')}` +
+      `<h3 class="craft-h">🛡️ Armor <small>wear it in 🧍 Warrior · adds 🛡 hearts to your keep in raids</small></h3>${byTier('armor')}` +
       sec('🔥 Smelting', 'oak becomes charcoal; iron + charcoal becomes steel', R.filter(r => r.tier === 'smelt').map(card)) +
       sec('🔑 Key upgrades', 'gold & crystal chests need better keys', R.filter(r => r.tier === 'keys').map(card)) +
       sec('🛡️ Defenses', 'place them in 🏰 Fortify', R.filter(r => r.defense).map(card)) +
@@ -170,7 +171,7 @@ window.Craft = (() => {
     else { st().inventory[id] += 1; label = `${it.name} ${isKit(r) ? 'made' : 'crafted'}!`; }
     // First weapon / tool? Wield it straight away.
     if (it.gear) {
-      const slot = it.gear === 'weapon' ? 'weapon' : 'tool';
+      const slot = Data.slotOf(id);
       const cur = st().equip[slot];
       if (!cur || Data.ITEMS[cur.id].tier < it.tier) App.equip(slot, st().gear.length - 1);
     }
