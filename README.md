@@ -15,7 +15,10 @@ It's plain HTML/CSS/JS with no build step and no backend. Progress is saved in `
 | `js/gather.js` | Gathering boards: **Forest** and **Iron Hills** |
 | `js/battle.js` | Battle boards: **Goblin Village** and **Dwarf Stronghold** |
 | `js/craft.js` | Workshop (Tier 1, Tier 2, Tools) with the forge animation |
-| `js/main.js` | Save data, home screen, popups, raid prep, spoils |
+| `js/main.js` | Save data, navigation, popups, raid prep, spoils |
+| `js/world.js` | World map home screen — tap a place to travel there |
+| `js/items.js` | Items screen: Special · Materials · Gear |
+| `js/camp.js` | Your camp: Fortify editor + the AI that raids it |
 | `js/sound.js` | Music and sound effects, generated in the browser (home, forest, mine, battle themes) |
 | `js/art.js` | Vector art: tiles, obstacles (ore cart, stump, thornbush…), themed board frames, scene backgrounds |
 
@@ -43,13 +46,28 @@ Every obstacle and defense is made of something:
 
 Tapping a weapon on something it can't hurt tells you so and doesn't use it up.
 
+## World map
+The home screen is a map. Tap a place and your warrior token travels there:
+- 🌲 **Forest**, ⛏️ **Iron Hills**, 🌊 **Sunlit Coast**: gathering lands
+- 🏰 **Your Camp** (Fortify) and 🔨 **Workshop**
+- 🔥 **Goblin Village** and ⚒️ **Dwarf Stronghold**: they appear and pulse once marked
+- 🐉 **Dragon's Lair**: the volcano, coming next
+
+🎒 **Items** has three tabs:
+- **Special:** keys, maps, relic shards and the crown, goblin and dwarf spoils
+- **Materials:** what each one is for and where to find it
+- **Gear:** weapons, tools, defenses, dragon prep
+
 ## Gathering boards
-| | 🌲 Forest | ⛏️ Iron Hills |
-|---|---|---|
-| Tiles | wood, stone, hide, berries→food, leaves (filler) | stone, ore→iron, coal, gravel & bones (filler) |
-| Obstacles | stumps (wood), thornbushes (hide a find), sometimes a locked chest | boulders (stone), ore veins (each hit = iron), sometimes a locked chest |
-| Runaway event | 🏃 goblin thief with a sack | 🛒 runaway ore cart |
-| Discovery | 🐾 tracks → Goblin Village | ᚱ rune stone → Dwarf Stronghold |
+| | 🌲 Forest | ⛏️ Iron Hills | 🌊 Sunlit Coast |
+|---|---|---|---|
+| Tiles | wood, stone, hide, berries→food, leaves (filler) | stone, ore→iron, coal, gravel & bones (filler) | water, fish→food, driftwood→wood, sand & seaweed (filler) |
+| Obstacles | stumps & thornbushes (axe) | boulders & ore veins (pickaxe) | coral (pickaxe, +gold), kelp tangles (axe, hide a find) |
+| Runaway event | goblin thief (weapon) | runaway ore cart | giant crab with loot (weapon) |
+| Discovery | 🐾 tracks → Goblin Village | ᚱ rune stone → Dwarf Stronghold | — |
+| Finds | caches, food baskets, map scraps, keys, shards | ore pockets, coal seams, nuggets, map scraps, keys, shards | pearls, water barrels, nuggets, keys, shards |
+
+**Water** quenches forged iron (Tier 2 weapons and iron gates need 1–2) and makes **Water flasks** for the Dragon's Lair.
 
 **Locked chests open only with a key.** When one appears, its key is always buried somewhere on the same board. A goblin thief may also be carrying it. Dig it up, then tap 🗝️ and the chest.
 

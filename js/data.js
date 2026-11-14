@@ -8,6 +8,7 @@ window.Data = (() => {
     gold:  { label: 'Gold' },
     iron:  { label: 'Iron' },
     coal:  { label: 'Coal' },
+    water: { label: 'Water' },
   };
 
   // kind: weapon (tap to use; uses = charges per craft), tool (passive, permanent), defense, spoil, trinket
@@ -44,7 +45,9 @@ window.Data = (() => {
     runestone: { name: 'Runestone', icon: '🪨', spoil: 'dwarf', desc: 'Place in your camp: +1 HP to every defense touching it. 1 pt.' },
     cartbp:    { name: 'Mine-cart blueprint', icon: '🛤️', spoil: 'dwarf', desc: 'Unlocks the Mine-cart defense.' },
     // Relic
-    crown:     { name: 'Old King\'s Crown', icon: '👑', trinket: true, desc: 'Legendary. +2 moves in every raid.' },
+    crown:     { name: 'Old King\'s Crown', icon: '👑', trinket: true, desc: 'Legendary. Raiders start 2 moves behind.' },
+    // Prepared for the Dragon's Lair
+    flask:     { name: 'Water flask', icon: '💧', prep: true, desc: 'Douses lava and dragonfire in the Dragon\'s Lair (coming soon).' },
   };
 
   // How much a match does to each material (1 per match next to it).
@@ -86,6 +89,7 @@ window.Data = (() => {
   const FINDS = {
     forest: [['cache', 30], ['basket', 20], ['lostclub', 12], ['scrap', 15], ['key', 13], ['shard', 10]],
     mine:   [['orepocket', 30], ['coalseam', 20], ['nugget', 15], ['scrap', 15], ['key', 10], ['shard', 10]],
+    ocean:  [['pearl', 25], ['barrel', 25], ['nugget', 15], ['key', 15], ['shard', 12], ['basket', 8]],
   };
   const FIND_INFO = {   // desc is shown under the name when you dig it up
     cache:     { icon: '🎁', name: 'Hidden cache', desc: 'Someone\'s stash — +3 supplies' },
@@ -98,6 +102,8 @@ window.Data = (() => {
     coalseam:  { icon: '🪨', name: 'Coal seam', desc: '+3 coal' },
     nugget:    { icon: '✨', name: 'Gold nuggets', desc: '+3 gold', art: 'gold' },
     sling:     { icon: '🪃', name: 'Old sling', desc: 'Added to your weapons' },
+    pearl:     { icon: '🦪', name: 'Pearl', desc: '+4 gold' },
+    barrel:    { icon: '🛢️', name: 'Fresh-water barrel', desc: '+3 water' },
   };
 
   function rollFrom(list) {
@@ -122,10 +128,11 @@ window.Data = (() => {
     { id: 'trap',  tier: 1, cost: { wood: 4, hide: 2 }, defense: true },
     { id: 'tower', tier: 1, cost: { wood: 8, hide: 2 }, defense: true },
     { id: 'palisade', tier: 1, cost: { wood: 6, iron: 1 }, defense: true, needs: 'palisade' },
-    { id: 'gate', tier: 2, cost: { iron: 5, wood: 1 }, defense: true },
-    { id: 'axe',     tier: 2, cost: { wood: 4, iron: 3 } },
-    { id: 'pickaxe', tier: 2, cost: { wood: 3, iron: 4 } },
-    { id: 'sword',   tier: 2, cost: { hide: 2, iron: 5, coal: 2 } },
+    { id: 'gate', tier: 2, cost: { iron: 5, wood: 1, water: 1 }, defense: true },
+    { id: 'axe',     tier: 2, cost: { wood: 4, iron: 3, water: 2 } },
+    { id: 'pickaxe', tier: 2, cost: { wood: 3, iron: 4, water: 2 } },
+    { id: 'sword',   tier: 2, cost: { hide: 2, iron: 5, coal: 2, water: 2 } },
+    { id: 'flask',   tier: 'prep', cost: { water: 4, hide: 1 } },
     { id: 'hatchet', tier: 'tool', cost: { wood: 6, iron: 2 } },
     { id: 'knife',   tier: 'tool', cost: { wood: 2, iron: 3 } },
     { id: 'lamp',    tier: 'tool', cost: { coal: 4, iron: 2, gold: 2 } },
@@ -146,5 +153,16 @@ window.Data = (() => {
   }
   const XP = { match: 1, obstacle: 3, find: 5, chase: 8, discover: 5, craft: 5, craft2: 10, raidWin: 40, raidWinDwarf: 60, loot: 10, retreat: 10 };
 
-  return { matchDamage, TOOL_GROUPS, xpForLevel, levelFromXp, levelInfo, XP, RESOURCES, ITEMS, MATCH_DMG, WEAPONS, weaponDamage, MAT_LABEL, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES };
+  const MATERIAL_INFO = {
+    wood:  { from: 'Forest logs, Coast driftwood, stumps (axe)', use: 'Clubs, slings, axes, fences, towers' },
+    stone: { from: 'Forest & Iron Hills rocks, boulders (pickaxe)', use: 'Stone tools, stone walls' },
+    hide:  { from: 'Forest pelts', use: 'Slings, swords, pit traps, flasks' },
+    food:  { from: 'Forest berries, Coast fish', use: 'Marching to raids (3–4 per raid)' },
+    gold:  { from: 'Gold nuggets everywhere, pearls, chests', use: 'Miner\'s lamp — more to come' },
+    iron:  { from: 'Iron Hills ore, ore veins, spoils', use: 'Tier 2 weapons, iron gates, tools' },
+    coal:  { from: 'Iron Hills coal', use: 'Swords, the miner\'s lamp' },
+    water: { from: 'Sunlit Coast', use: 'Quenching forged iron, water flasks for the Dragon\'s Lair' },
+  };
+
+  return { MATERIAL_INFO, matchDamage, TOOL_GROUPS, xpForLevel, levelFromXp, levelInfo, XP, RESOURCES, ITEMS, MATCH_DMG, WEAPONS, weaponDamage, MAT_LABEL, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES };
 })();

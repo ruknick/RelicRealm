@@ -39,6 +39,21 @@ window.Art = (() => {
     star: `<path d="M32 8l7 14.4 15.8 2.2-11.5 11 2.8 15.7L32 43.8 17.9 51.3l2.8-15.7L9.2 24.6 25 22.4z" fill="#fff" stroke="rgba(255,255,255,.6)" stroke-width="2" stroke-linejoin="round"/>
       <path d="M32 16l3.5 7.4" stroke="#ffe9a8" stroke-width="2.4" stroke-linecap="round"/>`,
   };
+  Object.assign(TILES, {
+    water: `<path d="M32 6C24 20 14 30 14 41a18 18 0 0 0 36 0C50 30 40 20 32 6z" fill="#7fd6ff"/>
+      <path d="M32 6c8 14 18 24 18 35a18 18 0 0 1-18 18c8-6 12-14 10-24-1-8-6-16-10-29z" fill="#3fa9e8"/>
+      <path d="M22 40c0-6 3-10 6-13" stroke="#e8f8ff" stroke-width="3.2" fill="none" stroke-linecap="round"/>`,
+    fish: `<path d="M8 32c8-12 24-16 36-8l10-8v32l-10-8c-12 8-28 4-36-8z" fill="#ff9a4a"/>
+      <path d="M8 32c8 12 24 16 36 8-8 2-20 0-28-8z" fill="#e0702a"/>
+      <path d="M26 22c2 6 2 14 0 20" stroke="#ffd2a8" stroke-width="2" fill="none"/>
+      <circle cx="17" cy="29" r="3" fill="#fff"/><circle cx="17.5" cy="29.5" r="1.6" fill="#222"/>`,
+    driftwood: `<path d="M6 40c8-10 20-12 32-14 8-2 16-6 20-10l2 6c-6 6-14 9-22 11-10 2-20 6-28 13z" fill="#c9bfae"/>
+      <path d="M8 44c10-8 22-10 32-12M40 22l8-8M24 30l-4-8" stroke="#8f8576" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <ellipse cx="57" cy="19" rx="4" ry="5" fill="#e6dccb" transform="rotate(-40 57 19)"/>`,
+    sand: `<g fill="#c7a86a"><circle cx="18" cy="22" r="2"/><circle cx="34" cy="16" r="1.6"/><circle cx="46" cy="28" r="2.2"/><circle cx="24" cy="40" r="1.8"/><circle cx="40" cy="46" r="2"/><circle cx="14" cy="50" r="1.6"/><circle cx="50" cy="50" r="1.4"/></g>
+      <path d="M30 34c3-4 9-4 12 0-4 4-8 4-12 0z" fill="#f2e6cc"/><path d="M33 34h6M36 31v6" stroke="#d6b98a" stroke-width="1.2"/>`,
+    seaweed: `<g fill="none" stroke-linecap="round" stroke-width="5"><path d="M20 58c-6-10 6-16 0-26s6-16 2-24" stroke="#2f8a5a"/><path d="M34 58c6-12-6-18 2-30 5-8-2-14 2-20" stroke="#3fae6c"/><path d="M47 58c-4-8 5-14 0-22" stroke="#2a7a4e"/></g>`,
+  });
   TILES.mushroom = TILES.leaves;
   const tile = type => TILES[type] ? svg(TILES[type]) : '';
 
@@ -165,6 +180,19 @@ window.Art = (() => {
       <g fill="#c9ced6"><path d="M20 40l3-10 3 10z"/><path d="M29 42l3-12 3 12z"/><path d="M38 40l3-10 3 10z"/></g>
       <path d="M8 34c6-4 12-2 16-4M40 30c6 2 10 0 16 4" stroke="#7a9a3a" stroke-width="3" fill="none" stroke-linecap="round"/>`,
   });
+  Object.assign(PIECES, {
+    coral: `<path d="M8 54c2-8 10-12 24-12s22 4 24 12z" fill="#6f6a62"/>
+      <g fill="none" stroke-linecap="round" stroke-width="5"><path d="M24 46V30l-6-8M24 34l7-8M24 26v-8" stroke="#ff7a8a"/><path d="M40 46V24l6-8M40 30l-7-6M46 16l4-6" stroke="#ff9eb0"/><path d="M32 46V36" stroke="#e85d75"/></g>
+      <g fill="#ffd1d8"><circle cx="18" cy="21" r="2.4"/><circle cx="31" cy="25" r="2.4"/><circle cx="24" cy="17" r="2.4"/><circle cx="50" cy="9" r="2.4"/><circle cx="33" cy="23" r="2"/></g>`,
+    kelp: `<ellipse cx="32" cy="40" rx="26" ry="18" fill="#2a5a3a"/>
+      <g fill="none" stroke-linecap="round" stroke-width="4"><path d="M10 40c10-14 20 10 30-6s14 8 16 2" stroke="#4f8a3a"/><path d="M12 48c12-10 18 6 28-4s12 2 14-2" stroke="#6aa84f"/><path d="M16 30c8-6 14 4 22-2s10-4 12 0" stroke="#3d7a32"/></g>
+      <circle cx="34" cy="40" r="4" fill="#ffe680"/><path d="M34 34v-2M34 48v-2M28 40h-2M42 40h-2" stroke="#fff3b0" stroke-width="2" stroke-linecap="round"/>`,
+    crab: `<g stroke="#b8341f" stroke-width="3.2" stroke-linecap="round" fill="none"><path d="M18 40l-10 6M18 44l-8 10M46 40l10 6M46 44l8 10M20 30l-8-10M44 30l8-10"/></g>
+      <path d="M6 14c-4 4 0 10 6 8l2-4c-4 0-4-3-2-5z" fill="#e2452a"/><path d="M58 14c4 4 0 10-6 8l-2-4c4 0 4-3 2-5z" fill="#e2452a"/>
+      <ellipse cx="32" cy="38" rx="18" ry="12" fill="#e2452a"/><path d="M16 36c4-8 28-8 32 0-8-3-24-3-32 0z" fill="#ff6a4a"/>
+      <g fill="#fff"><circle cx="26" cy="26" r="3.6"/><circle cx="38" cy="26" r="3.6"/></g><g fill="#222"><circle cx="26" cy="26" r="1.8"/><circle cx="38" cy="26" r="1.8"/></g>
+      <path d="M24 31v-4M40 31v-4" stroke="#b8341f" stroke-width="2"/><circle cx="56" cy="16" r="5" fill="#f6cd45" stroke="#9c6f06" stroke-width="1.5"/>`,
+  });
   PIECES.runestone = PIECES.rune;
   PIECES.wall = PIECES.swall;
 
@@ -225,6 +253,11 @@ window.Art = (() => {
       <path d="M30 31c-3-3-2-7 0-10 2 3 3 7 0 10z" fill="#fff1b8"/><path d="M21 38h18l-3 4H24z" fill="#3b3b3b"/>`, '0 0 60 60'),
     rocks: svg(`<path d="M2 60c2-10 8-14 14-12 3-6 10-7 14-2 5-5 12-3 14 3 4-2 10 0 12 11z" fill="#5c544c"/>
       <path d="M16 48c3-6 10-7 14-2-6 2-10 6-12 12z" fill="#7a7168"/><path d="M42 52l4-3 3 4z" fill="#ef8a3c"/><path d="M8 56l3-2 2 3z" fill="#7fdcff"/>`, '0 0 60 60'),
+    starfish: svg(`<path d="M30 6l6 16 17 1-13 11 5 17-15-9-15 9 5-17L7 23l17-1z" fill="#ff8a5a"/><g fill="#ffd2b8"><circle cx="30" cy="16" r="1.6"/><circle cx="30" cy="26" r="1.6"/><circle cx="42" cy="26" r="1.4"/><circle cx="18" cy="26" r="1.4"/><circle cx="24" cy="38" r="1.4"/><circle cx="36" cy="38" r="1.4"/></g>`, '0 0 60 60'),
+    shells: svg(`<path d="M6 54c0-12 8-20 18-20s18 8 18 20z" fill="#f4d9c6"/><g stroke="#d9a98c" stroke-width="1.6"><path d="M24 34v20M14 38l6 16M34 38l-6 16M8 46l12 8M40 46l-12 8"/></g>
+      <path d="M40 58c2-8 8-12 14-10 4 2 4 8 0 10z" fill="#ffd6e0"/><path d="M44 56c1-3 4-5 7-4" stroke="#e8a8b8" stroke-width="1.4" fill="none"/>`, '0 0 60 60'),
+    anchor: svg(`<circle cx="30" cy="10" r="5" fill="none" stroke="#5a6470" stroke-width="3.5"/><path d="M30 15v38M20 24h20" stroke="#5a6470" stroke-width="4" stroke-linecap="round"/>
+      <path d="M10 38c2 10 10 15 20 15s18-5 20-15" stroke="#5a6470" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M6 40l6-4 2 7zM54 40l-6-4-2 7z" fill="#5a6470"/>`, '0 0 60 60'),
     crystals: svg(`<path d="M14 60l6-26 6 26z" fill="#6ec6ff"/><path d="M20 34l6 26h-6z" fill="#3a8fd0"/>
       <path d="M26 60l4-16 4 16z" fill="#a8e2ff"/><path d="M34 60l7-30 7 30z" fill="#58b4f0"/><path d="M41 30l7 30h-7z" fill="#2f7cc0"/>`, '0 0 60 60'),
   };
@@ -239,6 +272,10 @@ window.Art = (() => {
       return `<div class="beam top"></div><div class="beam left"></div><div class="beam right"></div>
         <div class="fr-deco lamp l">${A.lantern}</div><div class="fr-deco lamp r">${A.lantern}</div>
         <div class="fr-deco bl">${A.rocks}</div><div class="fr-deco br">${A.crystals}</div>`;
+    }
+    if (scene === 'ocean') {
+      return `<div class="fr-deco tl">${A.starfish}</div><div class="fr-deco tr">${A.anchor}</div>
+        <div class="fr-deco bl">${A.shells}</div><div class="fr-deco br">${A.starfish}</div>`;
     }
     if (scene === 'goblin') return `<div class="stakes">${'<i></i>'.repeat(18)}</div>`;
     if (scene === 'dwarf') return '<div class="arch"></div><div class="fr-deco lamp l">' + A.lantern + '</div><div class="fr-deco lamp r">' + A.lantern + '</div>';
@@ -262,16 +299,53 @@ window.Art = (() => {
     mine: enc(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMin slice">
       ${Array.from({ length: 16 }, (_, i) => `<path d="M${i * 26} 0 l12 ${30 + (i * 17) % 40} l12 ${-(30 + (i * 17) % 40)}z" fill="#1b1612"/>`).join('')}
       ${Array.from({ length: 10 }, (_, i) => `<circle cx="${(i * 47) % 400}" cy="${80 + (i * 61) % 200}" r="1.6" fill="#7fdcff" opacity=".5"/>`).join('')}</svg>`),
+    ocean: enc(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice">
+      <circle cx="320" cy="60" r="34" fill="#ffe9a8" opacity=".55"/>
+      <path d="M0 230 Q50 215 100 230 T200 230 T300 230 T400 230 V300 H0z" fill="#1d5f8a" opacity=".8"/>
+      <path d="M0 255 Q50 240 100 255 T200 255 T300 255 T400 255 V300 H0z" fill="#16486b"/>
+      <path d="M0 280 Q50 268 100 280 T200 280 T300 280 T400 280 V300 H0z" fill="#e8d3a2" opacity=".5"/></svg>`),
     goblin: enc(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice">
       ${Array.from({ length: 30 }, (_, i) => `<path d="M${i * 14} 300 v-${40 + (i * 13) % 25} l6 -10 l6 10 v${40 + (i * 13) % 25}z" fill="#1d120a"/>`).join('')}</svg>`),
     dwarf: enc(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice">
       ${Array.from({ length: 12 }, (_, r) => Array.from({ length: 9 }, (_, c) => `<rect x="${c * 46 + (r % 2) * 23 - 23}" y="${r * 26}" width="44" height="24" fill="#1c1d21" stroke="#141518"/>`).join('')).join('')}</svg>`),
   };
 
+  // ---------- world map ----------
+  const trees = (pts, c1, c2) => pts.map(([x, y, h]) => `<path d="M${x} ${y} l${h * 0.42} ${-h} l${h * 0.42} ${h}z" fill="${c1}"/><path d="M${x + h * 0.42} ${y - h} l${h * 0.42} ${h} h${-h * 0.42}z" fill="${c2}"/>`).join('');
+  const peaks = (pts, c1, c2, snow) => pts.map(([x, y, w, h]) => `<path d="M${x} ${y} l${w / 2} ${-h} l${w / 2} ${h}z" fill="${c1}"/><path d="M${x + w / 2} ${y - h} l${w / 2} ${h} h${-w / 2}z" fill="${c2}"/>${snow ? `<path d="M${x + w / 2} ${y - h} l${w * 0.12} ${h * 0.24} l${-w * 0.06} ${-h * 0.04} l${-w * 0.06} ${h * 0.06} l${-w * 0.06} ${-h * 0.06} l${-w * 0.04} ${h * 0.04}z" fill="#eef3f8"/>` : ''}`).join('');
+  const WORLD = svg(`
+    <defs>
+      <radialGradient id="wmLand" cx="40%" cy="55%" r="75%"><stop offset="0" stop-color="#7fa65a"/><stop offset="1" stop-color="#4d7438"/></radialGradient>
+      <linearGradient id="wmSea" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3d9ad6"/><stop offset="1" stop-color="#1f5c96"/></linearGradient>
+      <radialGradient id="wmLava" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#ffb347"/><stop offset=".5" stop-color="#e2452a"/><stop offset="1" stop-color="#5a1408"/></radialGradient>
+    </defs>
+    <rect width="360" height="480" fill="url(#wmSea)"/>
+    <g opacity=".35" stroke="#bfe6ff" stroke-width="1.6" fill="none">${Array.from({ length: 14 }, (_, i) => `<path d="M${250 + (i % 3) * 30} ${150 + i * 23} q6 -5 12 0 t12 0"/>`).join('')}</g>
+    <path d="M0 0H300C280 40 300 80 270 120C240 160 250 200 236 240C222 290 252 330 230 380C214 420 236 450 220 480H0z" fill="#e8d3a2"/>
+    <path d="M0 0H292C272 40 292 80 262 120C232 160 242 200 228 240C214 290 244 330 222 380C206 420 228 450 212 480H0z" fill="url(#wmLand)"/>
+    <path d="M200 0 C220 40 250 70 300 60 C330 55 350 70 360 90 V0z" fill="#3a2a24"/>
+    ${peaks([[214, 96, 70, 70], [262, 100, 80, 92]], '#4a2c22', '#2e1a14')}
+    <path d="M296 18 c-6 14 -2 30 6 40 c-12 4 -20 14 -22 26" stroke="url(#wmLava)" stroke-width="7" fill="none" stroke-linecap="round" class="wm-lava"/>
+    <circle cx="302" cy="14" r="10" fill="#ffb347" opacity=".6" class="wm-lava"/>
+    <path d="M318 70c10-8 22-6 28 2-6-2-12 0-14 4 6 0 10 4 10 8-8-4-16-4-24-2z" fill="#1a0d0a"/>
+    ${peaks([[10, 140, 70, 74], [50, 128, 80, 96], [110, 138, 64, 70], [150, 150, 56, 52]], '#7c818b', '#5a5f68', true)}
+    <rect x="132" y="112" width="18" height="24" rx="3" fill="#2a2c31" class="wm-site dwarf"/>
+    <g opacity=".95">${trees([[14, 300, 40], [40, 286, 46], [70, 300, 38], [96, 282, 44], [24, 330, 42], [56, 328, 48], [88, 330, 40], [120, 318, 42], [36, 360, 40], [72, 360, 44], [106, 356, 38], [140, 300, 36], [150, 340, 34]], '#2f6b32', '#1f5124')}</g>
+    <g class="wm-site goblin"><path d="M150 236 l14 -20 l14 20z" fill="#7a4d24"/><path d="M164 216v-12" stroke="#3b2410" stroke-width="2"/><path d="M164 204h10l-3 3 3 3h-10z" fill="#c0392b"/>
+      <path d="M140 240 l8 -12 l8 12z M176 240 l8 -12 l8 12z" fill="#6e4521"/></g>
+    <path d="M168 400 C150 360 120 340 100 300 M180 392 C190 330 160 250 168 232 M186 396 C200 300 150 200 140 140 M196 398 C230 380 250 360 290 330 M190 392 C230 300 260 180 290 110"
+      stroke="#f3e2b6" stroke-width="2.4" stroke-dasharray="4 6" fill="none" opacity=".75"/>
+    <g transform="translate(140 384)"><rect x="0" y="0" width="70" height="30" fill="#8a8f98"/><rect x="-6" y="-14" width="18" height="44" fill="#8a8f98"/><rect x="58" y="-14" width="18" height="44" fill="#8a8f98"/>
+      <path d="M-6 -14h4v-6h4v6h3v-6h4v6h3M58 -14h4v-6h4v6h3v-6h4v6h3" stroke="#8a8f98" stroke-width="0" fill="#8a8f98"/>
+      <rect x="10" y="6" width="50" height="24" fill="#a07a4a"/><path d="M28 30V18a7 7 0 0 1 14 0v12z" fill="#2a1d10"/><path d="M35 -8v18" stroke="#3b2410" stroke-width="2"/><path d="M35 -8h12l-3 3 3 3H35z" fill="#2f6fd0"/></g>
+    <g transform="translate(96 420)"><rect x="0" y="10" width="30" height="16" fill="#6b4423"/><path d="M-4 12l19-12 19 12z" fill="#8f5a2a"/><rect x="10" y="-4" width="6" height="10" fill="#4a4e57"/></g>
+    <g transform="translate(290 360)"><path d="M0 0h30l-6 10H6z" fill="#7a4d24"/><path d="M14 0v-26" stroke="#5a3616" stroke-width="2"/><path d="M15 -26l12 18H15z" fill="#f3ead2"/></g>
+  `, '0 0 360 480');
+
   function setScene(scene) {
     document.body.dataset.scene = scene || 'home';
     document.body.style.setProperty('--scene-art', SCENES[scene] || 'none');
   }
 
-  return { tile, piece, frame, setScene, hasPiece: k => !!PIECES[k] || !!WIDE[k] };
+  return { WORLD, tile, piece, frame, setScene, hasPiece: k => !!PIECES[k] || !!WIDE[k] };
 })();

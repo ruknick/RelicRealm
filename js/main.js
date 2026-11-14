@@ -38,6 +38,7 @@ window.App = (() => {
         camp: s.camp || { cells: {}, chest: [1, 3] },
         starterDef: !!s.starterDef,
         debug: { ...base.debug, ...(s.debug || {}) },
+        heroAt: s.heroAt || 'camp',
       };
     } catch (e) { /* ignore broken saves */ }
   }
@@ -178,37 +179,7 @@ window.App = (() => {
   }
 
   function renderHome() {
-    const inv = state.inventory;
-    const group = f => Object.keys(inv).filter(k => inv[k] > 0 && f(Data.ITEMS[k])).map(k => itemChip(k, inv[k])).join('');
-    const weapons = group(it => it.weapon && !it.spoil);
-    const tools = group(it => it.tool || it.trinket);
-    const defenses = group(it => !it.weapon && !it.tool && !it.trinket && !it.spoil);
-    let spoils = group(it => !!it.spoil);
-    if (state.unlocks.palisade) spoils += '<span class="item unlock">🔓 Spiked palisade</span>';
-    if (state.unlocks.minecart) spoils += '<span class="item unlock">🔓 Mine-cart defense</span>';
-    const empty = t => `<span class="empty">${t}</span>`;
-    const L = level(), a = Data.xpForLevel(L), b = Data.xpForLevel(L + 1), info = Data.levelInfo(L);
-    document.getElementById('home-level').innerHTML = `
-      <div class="lv-row"><b>⭐ Level ${L}</b><span>${state.xp - a} / ${b - a} XP</span></div>
-      <div class="xpbar big"><i style="width:${Math.round((state.xp - a) / (b - a) * 100)}%"></i></div>
-      <div class="lv-info">Gathering boards: ${info.startObstacles} obstacles${info.growEvery ? `, a new one every ${info.growEvery} moves` : ''}${info.hpBonus ? `, +${info.hpBonus} HP each` : ''} · ${info.buried} buried finds</div>`;
-    document.getElementById('home-inventory').innerHTML = `
-      <h3>Weapons</h3><div class="inv">${weapons || empty('Craft some in the Workshop.')}</div>
-      <h3 class="mt">Tools & treasures</h3><div class="inv">${tools || empty('Tools give passive bonuses while gathering.')}</div>
-      <h3 class="mt">Defenses</h3><div class="inv">${defenses || empty('For fortifying your base (coming soon).')}</div>
-      <h3 class="mt">Spoils <small>(can't be crafted)</small></h3><div class="inv">${spoils || empty('Raid goblins and dwarves to win these.')}</div>
-      <h3 class="mt">Quests</h3><div class="inv">
-        <span class="item">💎 Crown shards ${state.shards}/5</span>
-        <span class="item">🗺️ Goblin map ${state.scraps.goblin}/3</span>
-        <span class="item">🗺️ Dwarf map ${state.scraps.dwarf}/3</span>
-      </div>`;
-
-    [['goblin', 'btn-raid-goblin', '⚔️ Raid Goblin Village', 'follow 🐾 tracks in the Forest'],
-     ['dwarf', 'btn-raid-dwarf', '⚒️ Raid Dwarf Stronghold', 'find a ᚱ rune stone in the Iron Hills']].forEach(([e, id, lbl, how]) => {
-      const b = document.getElementById(id);
-      b.disabled = state.marked[e] < 1;
-      b.innerHTML = state.marked[e] > 0 ? `${lbl} <small>${state.marked[e]} marked</small>` : `${lbl} <small>${how}</small>`;
-    });
+    World.render();
     document.getElementById('dbg-discover').checked = state.debug.discoverNow;
     document.getElementById('dbg-event').checked = state.debug.eventNow;
   }
@@ -217,6 +188,7 @@ window.App = (() => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById('screen-' + screen).classList.remove('hidden');
     if (screen === 'home') { renderHome(); Sound.music('home'); Art.setScene('home'); }
+    if (screen === 'items') { Items.render(); Art.setScene('craft'); }
     if (screen === 'craft') { Craft.render(); Sound.music('home'); Art.setScene('craft'); }
     if (screen === 'fortify') { Camp.render(); Sound.music('home'); Art.setScene('craft'); }
     if (screen === 'gather') Gather.start(opts);
@@ -230,14 +202,10 @@ window.App = (() => {
     Gather.init();
     Battle.init();
     const on = (id, f) => { document.getElementById(id).onclick = f; };
-    on('btn-forest', () => go('gather', { land: 'forest' }));
-    on('btn-mine', () => go('gather', { land: 'mine' }));
-    on('btn-craft', () => go('craft'));
-    on('btn-raid-goblin', () => prepareRaid('goblin'));
-    on('btn-raid-dwarf', () => prepareRaid('dwarf'));
+    on('btn-items', () => go('items'));
+    on('items-back', () => go('home'));
     on('craft-back', () => go('home'));
     on('fort-back', () => go('home'));
-    on('btn-fortify', () => go('fortify'));
     document.getElementById('modal').addEventListener('click', e => {
       if (e.target.id === 'prep-fortify') { e.preventDefault(); document.getElementById('modal').classList.add('hidden'); go('fortify'); }
     });
@@ -245,7 +213,7 @@ window.App = (() => {
     on('dbg-level', () => { state.xp = Data.xpForLevel(level() + 1); save(); renderHome(); });
     on('dbg-raid', () => { state.marked.goblin++; state.marked.dwarf++; state.stockpile.food += 8; save(); renderHome(); });
     on('dbg-rich', () => {
-      ['wood', 'stone', 'hide', 'food', 'gold', 'iron', 'coal'].forEach(k => { state.stockpile[k] += 20; });
+      Object.keys(Data.RESOURCES).forEach(k => { state.stockpile[k] += 20; });
       save(); renderHome();
     });
     document.getElementById('dbg-discover').onchange = e => { state.debug.discoverNow = e.target.checked; save(); };

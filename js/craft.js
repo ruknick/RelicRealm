@@ -34,7 +34,8 @@ window.Craft = (() => {
       sec('🏕️ Tier 1 · Camp', 'wood, stone & hide', R.filter(r => r.tier === 1 && !r.defense)) +
       sec('🔥 Tier 2 · Forge', 'needs iron & coal from the Iron Hills — multi-use', R.filter(r => r.tier === 2 && !r.defense)) +
       sec('🧰 Tools', 'passive & permanent — they work every run', R.filter(isTool)) +
-      sec('🛡️ Defenses', 'place them in 🏰 Fortify to protect your camp', R.filter(r => r.defense));
+      sec('🛡️ Defenses', 'place them in 🏰 Fortify to protect your camp', R.filter(r => r.defense)) +
+      sec('🐉 Dragon prep', 'for the Dragon\'s Lair — coming soon', R.filter(r => r.tier === 'prep'));
     document.querySelectorAll('.craft-btn').forEach(b => { b.onclick = () => craft(b.dataset.id); });
   }
 

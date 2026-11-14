@@ -207,6 +207,30 @@ window.Sound = (() => {
       if (s === 5 && Math.random() < 0.3) bird(t, musicBus);
     },
   };
+  // Sunlit Coast: harp arpeggios over slow surf swells, with the odd gull.
+  const gull = (t, bus) => { [0, 0.22].forEach(o => tone(1700, t + o, 0.2, { type: 'sine', glide: 1150, vol: 0.03, bus })); };
+  TRACKS.ocean = {
+    bpm: 78,
+    chords: [[57, 61, 64, 69], [54, 57, 61, 66], [50, 54, 57, 62], [52, 56, 59, 64]],   // A, F#m, D, E
+    melody: [
+      76, _, _, 73, _, 71, 69, _,   73, _, _, 69, _, 66, _, _,
+      74, _, 73, _, 71, _, 69, 66,  68, _, _, 71, _, _, _, _,
+      81, _, _, 78, _, 76, 73, _,   78, _, 76, _, 73, _, _, _,
+      74, _, 76, _, 78, _, 76, 74,  73, _, 71, _, 69, _, _, _,
+    ],
+    play(i, t, d) {
+      const bar = Math.floor(i / 8) % 4, s = i % 8;
+      const ch = this.chords[bar];
+      if (s === 0) {
+        noise(t, d * 7, { filter: 'lowpass', freq: 250, sweep: 1400, vol: 0.05, bus: musicBus });
+        tone(midi(ch[0] - 24), t, d * 8, { type: 'sine', vol: 0.09, attack: 0.3, bus: musicBus });
+      }
+      pluck(ch[s % 4] + (s >= 4 ? 12 : 0), t, d * 2.5, 0.05, musicBus);
+      const m = this.melody[i % this.melody.length];
+      if (m) flute(m, t, d * 2.2, 0.07, musicBus);
+      if (s === 3 && Math.random() < 0.15) gull(t, musicBus);
+    },
+  };
   TRACKS.dwarf = TRACKS.battle;
   TRACKS.craft = TRACKS.home;
 

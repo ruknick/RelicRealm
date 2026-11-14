@@ -20,6 +20,9 @@ window.Gather = (() => {
     vein:    { kind: 'vein',    label: '', mat: 'stone',    hp: 3, art: 'vein', toolOnly: 'pick' },
     thief:   { kind: 'thief',   label: '', mat: 'creature', hp: 1, art: 'thief' },
     cart:    { kind: 'cart',    label: '', mat: 'wood',     hp: 1, art: 'cart' },
+    coral:   { kind: 'coral',   label: '', mat: 'stone',    hp: 2, art: 'coral', toolOnly: 'pick' },
+    kelp:    { kind: 'kelp',    label: '', mat: 'plant',    hp: 1, art: 'kelp', toolOnly: 'axe' },
+    crab:    { kind: 'crab',    label: '', mat: 'creature', hp: 1, art: 'crab' },
     tracks:  { kind: 'tracks',  label: '', mat: 'other',    hp: 1, art: 'tracks' },
     rune:    { kind: 'rune',    label: '', mat: 'other',    hp: 1, art: 'rune' },
   };
@@ -53,6 +56,19 @@ window.Gather = (() => {
       hint: 'Match ore for iron and coal for the forge. Only pickaxes break boulders & mine veins.',
     },
   };
+  LANDS.ocean = {
+    name: 'Sunlit Coast', icon: '🌊', music: 'ocean',
+    weights: { water: 18, fish: 17, driftwood: 15, sand: 28, seaweed: 22 },
+    gives: { water: 'water', fish: 'food', driftwood: 'wood', gold: 'gold' },
+    bag: ['water', 'food', 'wood', 'gold'],
+    obstacles: n => [...Array.from({ length: n }, (_, i) => (i % 2 ? 'kelp' : 'coral')), ...(Math.random() < 0.4 ? ['locked'] : [])],
+    grow: () => (Math.random() < 0.5 ? 'coral' : 'kelp'),
+    growMsg: { coral: '🪸 Coral grows over the rocks!', kelp: '🌿 A tangle of kelp washes ashore!' },
+    event: { piece: 'crab', msg: '🦀 A giant crab snatched some loot! Only a weapon can stop it →', loot: ['water', 'food', 'gold'] },
+    discover: null,
+    finds: 'ocean',
+    hint: 'Collect water to forge iron and fight dragonfire. Coral needs a pickaxe, kelp needs an axe.',
+  };
   const TOOL_BONUS = { wood: 'hatchet', hide: 'knife' };
 
   let board = null;
@@ -65,7 +81,7 @@ window.Gather = (() => {
   const has = k => App.state.inventory[k] > 0;
   const midOf = p => [p.r, p.c + Math.floor(p.w / 2)];
 
-  const SCALES = ['stump', 'thorn', 'boulder', 'vein'];
+  const SCALES = ['stump', 'thorn', 'boulder', 'vein', 'coral', 'kelp'];
   function addObstacle(kind, r, c, appear = false) {
     const spec = { ...P[kind] };
     if (SCALES.includes(kind)) spec.hp += run.lv.hpBonus;
@@ -128,11 +144,13 @@ window.Gather = (() => {
       case 'orepocket': addToBackpack('iron', 3, cell, delay); break;
       case 'coalseam': addToBackpack('coal', 3, cell, delay); break;
       case 'nugget': addToBackpack('gold', 3, cell, delay); break;
+      case 'pearl': addToBackpack('gold', 4, cell, delay); break;
+      case 'barrel': addToBackpack('water', 3, cell, delay); break;
       case 'lostclub': st.inventory.club++; break;
       case 'sling': st.inventory.sling++; break;
       case 'key': st.inventory.key++; break;
       case 'scrap': {
-        const enemy = land.discover.enemy;
+        const enemy = land.discover ? land.discover.enemy : 'goblin';
         st.scraps[enemy]++;
         detail = `${st.scraps[enemy]}/3 to a ${App.ENEMY_NAME[enemy]}`;
         if (st.scraps[enemy] >= 3) {
@@ -172,8 +190,8 @@ window.Gather = (() => {
       (board.piecesOf('locked').length ? (App.state.inventory.key > 0 ? ' · 🗝️ you have a key!' : keyHere ? ' · 🔒 its key is buried here' : '') : '');
     const ev = run.eventPiece && !run.eventPiece.gone;
     document.getElementById('gather-hint').textContent = board.armedHint() ||
-      (ev ? (land === LANDS.forest ? 'Catch the thief: only a weapon can stop it!' : 'Stop the cart: match next to it or hit it!')
-        : board.piecesOf(land.discover.piece).length ? land.discover.spot : land.hint);
+      (ev ? ({ forest: 'Catch the thief: only a weapon can stop it!', mine: 'Stop the cart: match next to it or hit it!', ocean: 'Stop the crab: only a weapon can!' }[land.key])
+        : land.discover && board.piecesOf(land.discover.piece).length ? land.discover.spot : land.hint);
   }
 
   function buildBackpack() {
@@ -228,7 +246,7 @@ window.Gather = (() => {
     if (!p || p.gone) return;
     if (p.c + 1 >= SIZE) {
       board.removePiece(p, 'fog-out');
-      board.toast(land === LANDS.forest ? 'The thief got away with the sack!' : 'The cart rolled off down the tunnel…', 'alert');
+      board.toast({ forest: 'The thief got away with the sack!', mine: 'The cart rolled off down the tunnel…', ocean: 'The crab scuttled into the sea!' }[land.key], 'alert');
       run.eventPiece = null;
       Sound.sfx('nope');
       return;
@@ -262,7 +280,7 @@ window.Gather = (() => {
       if (dmg <= 0) {
         const tip = p.toolOnly === 'axe' ? '🪓 Only an axe can clear stumps & thornbushes — craft a Stone axe in the Workshop.'
           : p.toolOnly === 'pick' ? '⛏️ Only a pickaxe can break rock — craft a Stone pick in the Workshop.'
-          : p.kind === 'thief' ? '🗡️ Only a weapon can stop the thief — Club, Sling, Sword…'
+          : p.mat === 'creature' ? `🗡️ Only a weapon can stop the ${p.kind} — Club, Sling, Sword…`
           : '🔒 Locked tight! Its key is buried somewhere on this board — dig it up.';
         if (!run.told[p.toolOnly || p.kind]) { run.told[p.toolOnly || p.kind] = true; board.toast(tip, '', 3000); }
         return;
@@ -273,13 +291,19 @@ window.Gather = (() => {
         addToBackpack('iron', mined, cell);
       }
       if (!board.hurt(p, dmg)) return;
-      xp(p.kind === 'thief' || p.kind === 'cart' ? Data.XP.chase : p.kind === 'tracks' || p.kind === 'rune' ? Data.XP.discover : Data.XP.obstacle);
+      xp(p.kind === 'thief' || p.kind === 'cart' || p.kind === 'crab' ? Data.XP.chase : p.kind === 'tracks' || p.kind === 'rune' ? Data.XP.discover : Data.XP.obstacle);
       switch (p.kind) {
         case 'stump':
           addToBackpack('wood', w === 'axe' ? 5 : 3, cell);
           board.toast(w === 'axe' ? '🪓 Clean chop! +5 wood' : '🪓 Stump chopped! +3 wood');
           break;
-        case 'thorn': applyFind(Data.rollFrom(Data.FINDS[land.finds]), cell, 150); break;
+        case 'thorn':
+        case 'kelp': applyFind(Data.rollFrom(Data.FINDS[land.finds]), cell, 150); break;
+        case 'coral':
+          addToBackpack('gold', 1, cell);
+          board.toast('🪸 Coral cracked! +1 gold');
+          if (Math.random() < 0.3) applyFind(Data.rollFrom(Data.FINDS[land.finds]), cell, 300);
+          break;
         case 'boulder':
           addToBackpack('stone', 2, cell);
           if (Math.random() < 0.35) applyFind(Data.rollFrom(Data.FINDS[land.finds]), cell, 300);
@@ -288,12 +312,13 @@ window.Gather = (() => {
         case 'locked':
           addToBackpack('gold', 6, cell);
           board.toast('🔓 The chest creaks open!', 'win');
-          applyFind(Data.rollFrom([['shard', 45], ['sling', 20], ['scrap', 20], ['lostclub', 15]]), cell);
+          applyFind(Data.rollFrom([['shard', 45], ['sling', 20], [land.discover ? 'scrap' : 'pearl', 20], ['lostclub', 15]]), cell);
           break;
         case 'thief':
+        case 'crab':
         case 'cart':
           for (let i = 0; i < 4; i++) addToBackpack(pick(land.event.loot), 1, cell, i * 180);
-          board.toast(p.kind === 'thief' ? 'Caught the thief! You take the sack.' : 'Cart stopped! You grab the ore.', 'win');
+          board.toast({ thief: 'Caught the thief! You take the sack.', cart: 'Cart stopped! You grab the ore.', crab: 'Crab defeated! You take its haul.' }[p.kind], 'win');
           if (needsKey() && Math.random() < 0.6) applyFind('key', cell);
           else if (Math.random() < 0.35) applyFind(pick(['lostclub', 'sling', 'scrap']), cell);
           run.eventPiece = null;
@@ -317,6 +342,9 @@ window.Gather = (() => {
         cart: 'A runaway cart full of ore! Stop it before it rolls off.',
         tracks: 'Goblin tracks — match next to them to follow.',
         rune: 'A cracked rune stone — match next to it to read it.',
+        coral: `Coral (${p.hp} HP). Only a pickaxe can break it — it hides gold.`,
+        kelp: `Kelp tangle (${p.hp} HP) — something's caught in it! Only an axe can cut it.`,
+        crab: 'A giant crab with stolen loot! Only a weapon can stop it before it reaches the sea.',
       }[p.kind];
       board.toast(msg || 'Match next to it.', '', 2800);
     },
@@ -347,7 +375,7 @@ window.Gather = (() => {
             await board.wait(450);
           }
         }
-        if (!run.discoverSpawned && run.movesMade >= DISCOVER_AFTER && Math.random() < DISCOVER_CHANCE) {
+        if (land.discover && !run.discoverSpawned && run.movesMade >= DISCOVER_AFTER && Math.random() < DISCOVER_CHANCE) {
           run.discoverSpawned = true;
           spawnOn(land.discover.piece, (r, c) => r >= 1 && r <= 4 && c >= 1 && c <= 5, land.discover.spot);
         }
@@ -434,7 +462,7 @@ window.Gather = (() => {
     hud();
     hudLevel();
     Sound.music(land.music);
-    if (App.state.debug.discoverNow) {
+    if (App.state.debug.discoverNow && land.discover) {
       run.discoverSpawned = true;
       spawnOn(land.discover.piece, (r, c) => r >= 1 && r <= 4 && c >= 1 && c <= 5, land.discover.spot);
     } else if (App.state.debug.eventNow) {
