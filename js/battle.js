@@ -114,9 +114,10 @@ window.Battle = (() => {
     document.getElementById('b-moves').textContent = run.moves;
     document.getElementById('b-cap').textContent = `/${CAP}`;
     document.querySelector('#screen-battle .moves').classList.toggle('low', CAP - run.moves <= 5);
-    const left = run.every - run.sinceEnemy;
+    // Combos, prisoners and drums can push their turn further off: show at most a full row of dots.
+    const left = Math.max(0, Math.min(run.every, run.every - run.sinceEnemy)), extra = Math.max(0, -run.sinceEnemy);
     const who = run.enemy === 'dwarf' ? 'Dwarves' : 'Goblins';
-    document.getElementById('enemy').innerHTML = `${who} act in <b>${'●'.repeat(left)}${'○'.repeat(run.every - left)}</b>`;
+    document.getElementById('enemy').innerHTML = `${who} act in <b>${'●'.repeat(left)}${'○'.repeat(run.every - left)}${extra ? `+${extra}` : ''}</b>`;
     document.getElementById('lootbar-text').textContent = lootText();
     document.getElementById('battle-hint').textContent = board.armedHint() || (run.keep
       ? `Break the ${run.keep.label}! Open their loot chest first for bonus loot. Their troops strike at you every turn — kill them or eat to heal.`

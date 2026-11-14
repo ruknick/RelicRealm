@@ -887,5 +887,19 @@ window.Board = (() => {
     }
   }
 
+  // Safety net: if anything throws mid-turn, don't leave the board frozen with holes in it.
+  ['trySwap', 'strike', 'useWeapon'].forEach(name => {
+    const f = Board.prototype[name];
+    Board.prototype[name] = async function (...args) {
+      try { return await f.apply(this, args); } catch (e) {
+        if (e === ABORT) throw e;
+        console.error(e);
+        try { this.collapse(); this.fillEmpty(); this.render(); } catch (e2) { /* ignore */ }
+        this.busy = false;
+        this.scheduleHint?.();
+      }
+    };
+  });
+
   return Board;
 })();
