@@ -3,6 +3,12 @@
 A browser prototype of the core loop: **gather → find → craft → raid**.
 It's plain HTML/CSS/JS with no build step and no backend. Progress is saved in `localStorage`.
 
+## Look & layout
+- **Old-world theme:** parchment cards with ink text, brass and red-wax buttons, serif lettering, on a dark wood background, matching the hand-inked map.
+- **No totals bar:** your banked resources live in the **🏦 Storehouse** at Your Camp (also in Items → Materials). Workshop costs show how many you have in brackets.
+- **🎒 Backpack button** on gathering boards shows the count (e.g. 3/40). Tap it to open your pack over the board.
+- The sound toggle sits on the map screen next to Journal, Warrior and Items.
+
 ## The story
 **Tile Realm: The Shattered Crown.** The Old King's Crown held the realm of Valdmoor together until the dragon **Emberwyrm** burned the king's hall and shattered it into five relic shards. Goblins raid, the dwarves have sealed their halls, and your village of Ashford burned. Rebuild, find the shards, forge the Crown and face the dragon.
 

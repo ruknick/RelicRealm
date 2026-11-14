@@ -199,9 +199,9 @@ window.Gather = (() => {
   function hud() {
     document.getElementById('g-moves').textContent = run.moves;
     document.querySelector('#screen-gather .moves').classList.toggle('low', run.moves <= 5);
-    land.bag.forEach(t => { const e = document.getElementById('bp-' + t); if (e) e.textContent = run.backpack[t]; });
     document.getElementById('bp-total').textContent = bagTotal();
-    document.getElementById('backpack').classList.toggle('full', bagTotal() >= run.cap);
+    document.getElementById('bp-btn').classList.toggle('full', bagTotal() >= run.cap);
+    if (!document.getElementById('bp-pop').classList.contains('hidden')) renderPack();
     document.getElementById('g-exit').classList.toggle('glow', run.fullWarned);
     const keyHere = [...board.buried.values()].includes('key');
     const chest = board.piecesOf('locked')[0];
@@ -215,9 +215,20 @@ window.Gather = (() => {
   }
 
   function buildBackpack() {
-    document.getElementById('backpack').innerHTML =
-      `<span class="bp-label">🎒 <b id="bp-total">0</b>/${Data.backpackSize(App.level)}</span>` +
-      land.bag.map(t => `<span class="bp-item"><span class="chip c-${t}"></span><b id="bp-${t}">0</b></span>`).join('');
+    document.getElementById('bp-cap').textContent = `/${Data.backpackSize(App.level)}`;
+    document.getElementById('bp-pop').classList.add('hidden');
+    document.getElementById('bp-btn').onclick = () => { const pop = document.getElementById('bp-pop'); pop.classList.toggle('hidden'); if (!pop.classList.contains('hidden')) renderPack(); };
+    document.getElementById('bp-pop').onclick = () => document.getElementById('bp-pop').classList.add('hidden');
+  }
+
+  // The backpack, opened over the board.
+  const TILE_OF = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water' };
+  function renderPack() {
+    const total = bagTotal(), pct = Math.min(100, Math.round(total / run.cap * 100));
+    document.getElementById('bp-pop').innerHTML = `<div class="bp-card"><div class="bp-head"><b>🎒 Backpack</b><span>${total}/${run.cap}</span></div>
+      <div class="bp-bar"><i style="width:${pct}%"></i></div>
+      <div class="bp-grid">${land.bag.map(t => `<div class="bp-slot${run.backpack[t] ? '' : ' empty'}"><span class="gem art g-${TILE_OF[t]}">${Art.tile(TILE_OF[t])}</span><b>${run.backpack[t]}</b><small>${label(t)}</small></div>`).join('')}</div>
+      <p class="bp-note">${run.overflow ? `${run.overflow} more didn't fit. ` : ''}Head home to bank it all in your Storehouse.${land.key ? '' : ''}</p><p class="bp-close">tap to close</p></div>`;
   }
 
   // First time you collect a rare material: a big reveal explaining what it's for.

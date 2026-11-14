@@ -15,7 +15,7 @@ window.Craft = (() => {
   function costHtml(cost, items = {}) {
     const sp = st().stockpile;
     return Object.entries(cost).map(([k, n]) =>
-      `<span class="cost ${sp[k] >= n ? '' : 'short'}"><span class="gem art g-${tileFor(k)} cost-gem">${Art.tile(tileFor(k))}</span>${n} ${Data.RESOURCES[k].label}</span>`).join('')
+      `<span class="cost ${sp[k] >= n ? '' : 'short'}"><span class="gem art g-${tileFor(k)} cost-gem">${Art.tile(tileFor(k))}</span>${n} ${Data.RESOURCES[k].label} <small class="have">(${sp[k]})</small></span>`).join('')
       + Object.entries(items).map(([k, n]) =>
       `<span class="cost ${has(k, n) ? '' : 'short'}"><span class="wicon">${iconOf(Data.ITEMS[k])}</span>${n} ${Data.ITEMS[k].name}</span>`).join('');
   }
@@ -27,7 +27,7 @@ window.Craft = (() => {
     const owned = r.makes ? null : it.gear ? App.gearCount(r.id) : st().inventory[r.id];
     const ownedTxt = r.makes ? `have ${Object.keys(r.makes).map(k => st().stockpile[k]).join('')}` : isKit(r) ? (owned ? '✓ Owned' : '') : owned ? `owned ×${owned}` : '';
     const ready = canAfford(r) && !ownedKit(r);
-    const tag = it.gear ? `<span class="tag t${it.tier}">${Data.tierLabel(r.id)} · ${it.dur ? `${it.dur} blocks` : '∞ never wears out'}</span>` : '';
+    const tag = it.gear ? `<span class="tag t${it.tier}">${Data.tierLabel(r.id)}${it.dur ? ` · ${it.dur} blocks` : ''}</span>` : '';
     return `<div class="recipe ${ready ? 'ready' : ''}" data-id="${r.id}">
       <div class="r-icon">${r.makes ? `<div class="gem art g-${tileFor(Object.keys(r.makes)[0])}" style="position:relative;width:40px;height:40px">${Art.tile(tileFor(Object.keys(r.makes)[0]))}</div>` : iconOf(it)}</div>
       <div class="r-body">

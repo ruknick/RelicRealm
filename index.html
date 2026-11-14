@@ -9,19 +9,6 @@
 </head>
 <body>
   <div id="app">
-    <!-- Stockpile bar (banked resources at home): visible on every screen -->
-    <header id="stockbar">
-      <div class="res" data-res="wood"><span class="chip c-wood"></span><b id="s-wood">0</b></div>
-      <div class="res" data-res="stone"><span class="chip c-stone"></span><b id="s-stone">0</b></div>
-      <div class="res" data-res="hide"><span class="chip c-hide"></span><b id="s-hide">0</b></div>
-      <div class="res" data-res="food"><span class="chip c-food"></span><b id="s-food">0</b></div>
-      <div class="res" data-res="gold"><span class="chip c-gold"></span><b id="s-gold">0</b></div>
-      <div class="res" data-res="iron"><span class="chip c-iron"></span><b id="s-iron">0</b></div>
-      <div class="res" data-res="coal"><span class="chip c-coal"></span><b id="s-coal">0</b></div>
-      <div class="res" data-res="water"><span class="chip c-water"></span><b id="s-water">0</b></div>
-      <button id="sound-btn" class="sound-btn" aria-label="Sound">🔊</button>
-      <div id="sound-toast" class="sound-toast"></div>
-    </header>
 
     <!-- TITLE & CHARACTER CREATION -->
     <section id="screen-title" class="screen hidden"></section>
@@ -40,7 +27,8 @@
     <section id="screen-home" class="screen">
       <div class="home-top">
         <div class="home-level" id="home-level"></div>
-        <span class="home-btns"><button class="small journal-btn" id="btn-journal">📜 Journal</button><button class="small hero-btn" id="btn-hero">🧍 Warrior</button><button class="small items-btn" id="btn-items">🎒 Items</button></span>
+        <span class="home-btns"><button class="small journal-btn" id="btn-journal">📜 Journal</button><button class="small hero-btn" id="btn-hero">🧍 Warrior</button><button class="small items-btn" id="btn-items">🎒 Items</button><button id="sound-btn" class="small sound-btn" aria-label="Sound">🔊</button></span>
+        <div id="sound-toast" class="sound-toast"></div>
       </div>
       <div id="quest-slot"></div>
       <div class="world" id="world">
@@ -82,13 +70,13 @@
         <div class="land-title" id="g-title"></div>
         <div class="moves">Moves <b id="g-moves">20</b></div>
       </div>
-      <div class="backpack" id="backpack"></div>
-      <div class="subbar"><span id="g-level"></span><span id="g-finds"></span></div>
+      <div class="subbar"><button class="bp-btn" id="bp-btn">🎒 <b id="bp-total">0</b><small id="bp-cap">/30</small></button><span id="g-level"></span><span id="g-finds"></span></div>
 
       <div class="board-wrap" id="gather-wrap">
         <div class="board"></div>
         <div class="board-fx"></div>
         <div class="toast"></div>
+        <div class="bp-pop hidden" id="bp-pop"></div>
       </div>
 
       <div class="weapons">
@@ -141,6 +129,7 @@
       <div class="fort-wrap"><div class="fort-grid" id="fort-grid"></div><div class="fort-arrow">⬆ raiders attack from here ⬆</div></div>
       <p class="hint" id="fort-hint"></p>
       <div class="panel fort-panel"><div id="fort-test"></div><div id="fort-chest" class="mt"></div></div>
+      <div class="panel store-panel"><h3 class="store-h">🏦 Storehouse <small>everything you've banked</small></h3><div id="fort-store" class="store"></div></div>
     </section>
 
     <!-- WORKSHOP -->

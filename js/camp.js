@@ -250,6 +250,11 @@ window.Camp = (() => {
     document.getElementById('fort-test').innerHTML =
       `🧪 Goblins need about <b>${g}</b> moves to break your keep · dwarves about <b>${d}</b>${armored ? ' (with your armor)' : ''}. <span class="hint">Beat them to it when you raid! ${armored ? '' : 'Craft armor and wear it in 🧍 Warrior to add 🛡 hearts.'}</span>`;
     const sp = App.state;
+    // The Storehouse: everything banked at camp.
+    const TILE = { food: 'berries', iron: 'ore' };
+    const keys = Object.keys(Data.RESOURCES).sort((x, y) => (sp.stockpile[y] > 0) - (sp.stockpile[x] > 0));
+    document.getElementById('fort-store').innerHTML = keys.map(k => `<div class="st-item${sp.stockpile[k] ? '' : ' none'}">
+      <span class="gem art g-${TILE[k] || k}">${Art.tile(TILE[k] || k)}</span><b>${sp.stockpile[k]}</b><small>${Data.RESOURCES[k].label}</small></div>`).join('');
     document.getElementById('fort-chest').innerHTML =
       `📦 Your loot chest holds your valuables: 🟨 ${sp.stockpile.goldbar} gold bar${sp.stockpile.goldbar === 1 ? '' : 's'} · 🗺️ ${sp.scraps.goblin + sp.scraps.dwarf} map scraps · 🗝️ ${sp.inventory.key} key${sp.inventory.key === 1 ? '' : 's'}. If raiders open it, they take some.`;
     document.getElementById('fort-hint').textContent = selected === 'chest' ? 'Tap an empty spot in your camp to move the loot chest.'
