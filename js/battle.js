@@ -277,7 +277,7 @@ window.Battle = (() => {
     const mins = board.piecesOf('minion').length;
     const keep = run.keep;
     if (mins && keep && !keep.gone && keep.hp < keep.maxHp) {
-      const heal = Math.min(mins, keep.maxHp - keep.hp);
+      const heal = 1;   // one repair per turn, however many are inside
       keep.hp += heal;
       board.renderPieces();
       board.float([0, 3], `+${heal} ♥`, 'loss');
@@ -302,11 +302,13 @@ window.Battle = (() => {
     },
     onPieceHit(p, n, src, w) {
       if (p.kind === 'fog') { reveal(p, src); hud(); return; }
-      const dmg = src === 'match' ? n * (Data.MATCH_DMG[p.mat] ?? 1) : n;
+      const dmg = src === 'match' ? n * Data.matchDamage(p) : n;
       if (dmg <= 0) {
         if (!run.told[p.kind]) {
           run.told[p.kind] = true;
-          board.toast('🔒 Matches can\'t dent iron. Find the key in the fog — or use a Pickaxe, Sword or Sling.', '', 3000);
+          board.toast(p.mat === 'creature'
+            ? `⚔️ Matches can't hurt a ${cfg.minionName} — only weapons can! It keeps repairing the keep.`
+            : '🔒 Matches can\'t dent iron. Find the key in the fog — or use a Pickaxe, Sword or Sling.', '', 3000);
         }
         return;
       }
@@ -317,7 +319,7 @@ window.Battle = (() => {
       const msg = {
         fog: 'Fog — match next to it to see what\'s there.',
         keep: `${p.label} (${p.mat}). Match next to it to damage it.`,
-        minion: `A ${cfg.minionName}! It repairs the keep. Match next to it.`,
+        minion: `A ${cfg.minionName}! It repairs the keep — only weapons can hurt it.`,
         rubble: 'Rubble. Match next to it to clear it.',
         gate: 'Iron gate. Needs the key from the fog, an Old key, or a Pickaxe/Sword/Sling.',
         swall: 'Stone wall (2 hits). Pickaxes crack it in one.',

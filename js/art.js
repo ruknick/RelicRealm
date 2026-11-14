@@ -30,10 +30,12 @@ window.Art = (() => {
       <path d="M26 24c3-2 7-2 9 0M15 38c3-2 7-2 9 0M36 40c3-2 7-2 9 0" stroke="#d2c6ad" stroke-width="1.6" fill="none" stroke-linecap="round"/>`,
     bones: `<g fill="#f1ead8"><g transform="rotate(38 32 32)"><rect x="15" y="29" width="34" height="6.5" rx="3"/><circle cx="15" cy="28" r="4.8"/><circle cx="15" cy="36.5" r="4.8"/><circle cx="49" cy="28" r="4.8"/><circle cx="49" cy="36.5" r="4.8"/></g></g>
       <g fill="#ddd3bc"><g transform="rotate(-38 32 32)"><rect x="15" y="29" width="34" height="6.5" rx="3"/><circle cx="15" cy="28" r="4.8"/><circle cx="15" cy="36.5" r="4.8"/><circle cx="49" cy="28" r="4.8"/><circle cx="49" cy="36.5" r="4.8"/></g></g>`,
-    gold: `<circle cx="32" cy="33" r="20" fill="#9c6f06"/><circle cx="32" cy="31" r="20" fill="#d9a520"/><circle cx="32" cy="31" r="16.5" fill="#f6cd45"/>
-      <circle cx="32" cy="31" r="12.5" fill="none" stroke="#c9970f" stroke-width="2"/>
-      <path d="M32 22.5l2.6 5.4 6 .9-4.4 4.1 1.1 5.9L32 36l-5.3 2.8 1.1-5.9-4.4-4.1 6-.9z" fill="#c9970f"/>
-      <path d="M21 23a14 14 0 0 1 9-7" stroke="#fff4c2" stroke-width="2.6" fill="none" stroke-linecap="round"/>`,
+    gold: `<path d="M9 40c-3-7 2-14 9-15 1-8 10-13 18-10 6-5 16-2 18 6 7 2 9 10 5 16 2 7-4 12-11 11-4 5-13 6-18 2-8 3-17 0-19-6-3-1-3-3-2-4z" fill="#8a5c05"/>
+      <path d="M10 37c-2-6 2-12 8-13 1-7 9-11 16-8 5-4 14-2 16 5 6 2 8 9 4 14 2 6-3 10-10 9-4 4-12 5-16 1-7 2-15 0-17-5-2-1-2-2-1-3z" fill="#e0a419"/>
+      <path d="M14 33c0-5 4-8 8-8 2-6 9-8 13-5 5-2 11 1 12 6 4 2 4 7 1 9-6-3-13-1-17 2-5-3-12-3-17-4z" fill="#f6cc43"/>
+      <path d="M22 27c2-3 6-4 9-3M38 22c3-1 6 0 7 3" stroke="#fff3b8" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <circle cx="30" cy="31" r="2.2" fill="#fff8d8"/><circle cx="45" cy="34" r="1.6" fill="#fff8d8"/>
+      <path d="M24 42c3 1 6 1 8-1M40 44c2-1 4-3 4-5" stroke="#9a6a08" stroke-width="1.8" fill="none" stroke-linecap="round"/>`,
     star: `<path d="M32 8l7 14.4 15.8 2.2-11.5 11 2.8 15.7L32 43.8 17.9 51.3l2.8-15.7L9.2 24.6 25 22.4z" fill="#fff" stroke="rgba(255,255,255,.6)" stroke-width="2" stroke-linejoin="round"/>
       <path d="M32 16l3.5 7.4" stroke="#ffe9a8" stroke-width="2.4" stroke-linecap="round"/>`,
   };

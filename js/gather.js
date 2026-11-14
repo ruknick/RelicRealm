@@ -13,11 +13,11 @@ window.Gather = (() => {
   const points = len => (len >= 5 ? 3 : len === 4 ? 2 : 1);   // +1 on chain reactions
 
   const P = {
-    stump:   { kind: 'stump',   label: '', mat: 'wood',     hp: 2, art: 'stump' },
-    thorn:   { kind: 'thorn',   label: '', mat: 'plant',    hp: 1, art: 'thorn' },
+    stump:   { kind: 'stump',   label: '', mat: 'wood',     hp: 2, art: 'stump', toolOnly: 'axe' },
+    thorn:   { kind: 'thorn',   label: '', mat: 'plant',    hp: 1, art: 'thorn', toolOnly: 'axe' },
     locked:  { kind: 'locked',  label: '', mat: 'iron',     hp: 1, lock: true, keyOnly: true, art: 'locked' },
-    boulder: { kind: 'boulder', label: '', mat: 'stone',    hp: 3, art: 'boulder' },
-    vein:    { kind: 'vein',    label: '', mat: 'stone',    hp: 3, art: 'vein' },
+    boulder: { kind: 'boulder', label: '', mat: 'stone',    hp: 3, art: 'boulder', toolOnly: 'pick' },
+    vein:    { kind: 'vein',    label: '', mat: 'stone',    hp: 3, art: 'vein', toolOnly: 'pick' },
     thief:   { kind: 'thief',   label: '', mat: 'creature', hp: 1, art: 'thief' },
     cart:    { kind: 'cart',    label: '', mat: 'wood',     hp: 1, art: 'cart' },
     tracks:  { kind: 'tracks',  label: '', mat: 'other',    hp: 1, art: 'tracks' },
@@ -37,7 +37,7 @@ window.Gather = (() => {
       event: { piece: 'thief', msg: '🏃 A goblin thief grabbed a sack and is running! Catch it →', loot: ['wood', 'stone', 'hide', 'food'] },
       discover: { piece: 'tracks', enemy: 'goblin', spot: '🐾 Fresh goblin tracks! Match next to them to follow.' },
       finds: 'forest',
-      hint: 'Match 3+ to gather. Thornbushes & stumps hide things — the right weapon helps.',
+      hint: 'Match 3+ to gather. Stumps & thornbushes need an axe — thornbushes hide finds.',
     },
     mine: {
       name: 'Iron Hills', icon: '⛏️', music: 'mine',
@@ -50,7 +50,7 @@ window.Gather = (() => {
       event: { piece: 'cart', msg: '⛏️ A runaway ore cart! Stop it before it rolls off →', loot: ['iron', 'coal', 'stone'] },
       discover: { piece: 'rune', enemy: 'dwarf', spot: 'ᚱ A cracked rune stone… match next to it to read it.' },
       finds: 'mine',
-      hint: 'Match ore for iron and coal for the forge. Pickaxes crack boulders and mine veins fast.',
+      hint: 'Match ore for iron and coal for the forge. Only pickaxes break boulders & mine veins.',
     },
   };
   const TOOL_BONUS = { wood: 'hatchet', hide: 'knife' };
@@ -153,7 +153,7 @@ window.Gather = (() => {
     App.save();
     run.finds.push(`${info.icon} ${info.name}`);
     if (id === 'key' && board.piecesOf('locked').length) detail = 'Now tap 🗝️ Old key, then the locked chest!';
-    board.celebrate(cell, { icon: info.icon, title: `${info.name}!`, sub: detail || info.desc, rare: id === 'shard' || id === 'key' });
+    board.celebrate(cell, { icon: info.art ? Art.tile(info.art) : info.icon, title: `${info.name}!`, sub: detail || info.desc, rare: id === 'shard' || id === 'key' });
     xp(Data.XP.find);
     board.renderWeapons();
     board.renderPieces();
@@ -172,7 +172,7 @@ window.Gather = (() => {
       (board.piecesOf('locked').length ? (App.state.inventory.key > 0 ? ' · 🗝️ you have a key!' : keyHere ? ' · 🔒 its key is buried here' : '') : '');
     const ev = run.eventPiece && !run.eventPiece.gone;
     document.getElementById('gather-hint').textContent = board.armedHint() ||
-      (ev ? (land === LANDS.forest ? 'Catch the thief: match next to it or hit it with a weapon!' : 'Stop the cart: match next to it or hit it!')
+      (ev ? (land === LANDS.forest ? 'Catch the thief: only a weapon can stop it!' : 'Stop the cart: match next to it or hit it!')
         : board.piecesOf(land.discover.piece).length ? land.discover.spot : land.hint);
   }
 
@@ -258,26 +258,26 @@ window.Gather = (() => {
       }
     },
     onPieceHit(p, n, src, w) {
-      const dmg = src === 'match' ? n * (Data.MATCH_DMG[p.mat] ?? 1) : n;
+      const dmg = src === 'match' ? n * Data.matchDamage(p) : n;
       if (dmg <= 0) {
-        if (!run.told[p.kind]) {
-          run.told[p.kind] = true;
-          board.toast(p.kind === 'thorn' ? '🌿 Matches can\'t cut thorns — use a Club, Axe, Sling or Firepot.'
-            : '🔒 Locked tight! Its key is buried somewhere on this board — dig it up.', '', 2800);
-        }
+        const tip = p.toolOnly === 'axe' ? '🪓 Only an axe can clear stumps & thornbushes — craft a Stone axe in the Workshop.'
+          : p.toolOnly === 'pick' ? '⛏️ Only a pickaxe can break rock — craft a Stone pick in the Workshop.'
+          : p.kind === 'thief' ? '🗡️ Only a weapon can stop the thief — Club, Sling, Sword…'
+          : '🔒 Locked tight! Its key is buried somewhere on this board — dig it up.';
+        if (!run.told[p.toolOnly || p.kind]) { run.told[p.toolOnly || p.kind] = true; board.toast(tip, '', 3000); }
         return;
       }
       const cell = midOf(p);
       if (p.kind === 'vein') {
-        const mined = Math.min(dmg, p.hp) * (w === 'pickaxe' || w === 'dpick' ? 2 : 1);
+        const mined = Math.min(dmg, p.hp) * (w === 'stonepick' ? 1 : 2);
         addToBackpack('iron', mined, cell);
       }
       if (!board.hurt(p, dmg)) return;
       xp(p.kind === 'thief' || p.kind === 'cart' ? Data.XP.chase : p.kind === 'tracks' || p.kind === 'rune' ? Data.XP.discover : Data.XP.obstacle);
       switch (p.kind) {
         case 'stump':
-          addToBackpack('wood', w === 'axe' ? 5 : 2, cell);
-          board.toast(w === 'axe' ? '🪓 Clean chop! +5 wood' : 'Stump cleared!');
+          addToBackpack('wood', w === 'axe' ? 5 : 3, cell);
+          board.toast(w === 'axe' ? '🪓 Clean chop! +5 wood' : '🪓 Stump chopped! +3 wood');
           break;
         case 'thorn': applyFind(Data.rollFrom(Data.FINDS[land.finds]), cell, 150); break;
         case 'boulder':
@@ -308,12 +308,12 @@ window.Gather = (() => {
     onFind(id, cell) { applyFind(id, cell); },
     onPieceTap(p) {
       const msg = {
-        stump: `Old stump (wood, ${p.hp} HP). An Axe chops it fast for bonus wood.`,
-        thorn: `Thornbush (${p.hp} HP) — something's inside. Cut it with a Club, Axe, Sling or Firepot.`,
+        stump: `Old stump (${p.hp} HP). Only an axe can chop it — Stone axe or Iron axe.`,
+        thorn: `Thornbush (${p.hp} HP) — something's inside! Only an axe can cut it.`,
         locked: App.state.inventory.key > 0 ? 'Locked chest — tap 🗝️ Old key, then tap the chest!' : 'Locked chest. Its key is buried somewhere on this board — clear tiles to dig it up.',
-        boulder: `Boulder (stone, ${p.hp} HP). A Pickaxe cracks it fast. Sometimes hides a find.`,
-        vein: 'Ore vein — every hit gives iron. Pickaxes mine double.',
-        thief: 'A goblin thief! Match next to it or hit it before it escapes.',
+        boulder: `Boulder (${p.hp} HP). Only a pickaxe can break it. Sometimes hides a find.`,
+        vein: 'Ore vein — only a pickaxe can mine it. Every hit gives iron (Iron pickaxe: double).',
+        thief: 'A goblin thief! Only a weapon can stop it — Club, Sling, Sword… before it escapes!',
         cart: 'A runaway cart full of ore! Stop it before it rolls off.',
         tracks: 'Goblin tracks — match next to them to follow.',
         rune: 'A cracked rune stone — match next to it to read it.',

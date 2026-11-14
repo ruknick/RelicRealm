@@ -13,8 +13,10 @@ window.Data = (() => {
   // kind: weapon (tap to use; uses = charges per craft), tool (passive, permanent), defense, spoil, trinket
   const ITEMS = {
     // Tier 1 — Camp
-    club:   { name: 'Club', icon: '🏏', weapon: true, uses: 1, desc: 'Strong vs wood & thornbushes. Useless on stone/iron.' },
-    sling:  { name: 'Sling', icon: '🪃', weapon: true, uses: 1, desc: 'Hits anything for 1, even through fog.' },
+    club:   { name: 'Club', icon: '🏏', weapon: true, uses: 1, desc: 'Clubs goblins & dwarves, smashes wooden defenses.' },
+    sling:  { name: 'Sling', icon: '🪃', weapon: true, uses: 1, desc: 'Hits any defense or creature for 1, even through fog.' },
+    stoneaxe:  { name: 'Stone axe', icon: '🪓', weapon: true, uses: 2, desc: 'Chops stumps & thornbushes (2 dmg). Only axes can.' },
+    stonepick: { name: 'Stone pick', icon: '⛏️', weapon: true, uses: 2, desc: 'Breaks boulders & ore veins (2 dmg). Only pickaxes can.' },
     fence:  { name: 'Wooden fence', icon: '🪵', desc: 'Defense: wood, 1 HP. Cheap blocker. 1 pt.' },
     wall:   { name: 'Stone wall', icon: '🧱', desc: 'Defense: stone, 2 HP. 2 pts.' },
     trap:   { name: 'Pit trap', icon: '🕳️', desc: 'Defense: hidden — an attacker who finds it loses a move. 1 pt.' },
@@ -51,6 +53,8 @@ window.Data = (() => {
   // Weapon damage by material. fog: can reach into fog. area: 3x3.
   const WEAPONS = {
     club:    { wood: 2, plant: 2, creature: 1, other: 1, stone: 0, iron: 0 },
+    stoneaxe:  { wood: 2, plant: 2, creature: 1, other: 1, stone: 0, iron: 0 },
+    stonepick: { stone: 2, iron: 1, wood: 1, plant: 1, creature: 0, other: 1 },
     sling:   { wood: 1, plant: 1, creature: 1, other: 1, stone: 1, iron: 1, fog: true },
     axe:     { wood: 4, plant: 4, creature: 1, other: 1, stone: 0, iron: 0, splash: 1 },
     pickaxe: { stone: 4, iron: 2, wood: 1, plant: 1, creature: 0, other: 1, splash: 1 },
@@ -60,11 +64,19 @@ window.Data = (() => {
     dpick:   { stone: 9, iron: 9, wood: 2, plant: 2, creature: 1, other: 2, splash: 2 },
     key:     { unlock: true },
   };
+  // Forest stumps & thornbushes need an axe; rock needs a pickaxe.
+  const TOOL_GROUPS = { axe: ['stoneaxe', 'axe'], pick: ['stonepick', 'pickaxe', 'dpick'] };
+  // What a match does to a piece: nothing to tool-only obstacles, creatures, thorns or iron.
+  function matchDamage(piece) {
+    if (piece.toolOnly || piece.mat === 'creature') return 0;
+    return MATCH_DMG[piece.mat] ?? 1;
+  }
   function weaponDamage(w, piece) {
     const W = WEAPONS[w];
     if (!W) return 0;
     if (W.unlock) return piece.lock ? 99 : 0;
     if (piece.keyOnly) return 0;          // locked chests open only with a key
+    if (piece.toolOnly && !TOOL_GROUPS[piece.toolOnly].includes(w)) return 0;   // right tool for the job
     if (piece.kind === 'keep' && W.keep) return Math.max(W.keep, W[piece.mat] || 0);
     return W[piece.mat] || 0;
   }
@@ -84,7 +96,7 @@ window.Data = (() => {
     shard:     { icon: '💎', name: 'Relic shard', desc: 'A piece of the Old King\'s Crown' },
     orepocket: { icon: '⛓️', name: 'Ore pocket', desc: '+3 iron' },
     coalseam:  { icon: '🪨', name: 'Coal seam', desc: '+3 coal' },
-    nugget:    { icon: '🪙', name: 'Gold nuggets', desc: '+3 gold' },
+    nugget:    { icon: '✨', name: 'Gold nuggets', desc: '+3 gold', art: 'gold' },
     sling:     { icon: '🪃', name: 'Old sling', desc: 'Added to your weapons' },
   };
 
@@ -103,6 +115,8 @@ window.Data = (() => {
   const RECIPES = [
     { id: 'club',  tier: 1, cost: { wood: 5 } },
     { id: 'sling', tier: 1, cost: { wood: 4, hide: 3 } },
+    { id: 'stoneaxe', tier: 1, cost: { wood: 4, stone: 3 } },
+    { id: 'stonepick', tier: 1, cost: { wood: 3, stone: 4 } },
     { id: 'fence', tier: 1, cost: { wood: 6 }, defense: true },
     { id: 'wall',  tier: 1, cost: { stone: 12 }, defense: true },
     { id: 'trap',  tier: 1, cost: { wood: 4, hide: 2 }, defense: true },
@@ -132,5 +146,5 @@ window.Data = (() => {
   }
   const XP = { match: 1, obstacle: 3, find: 5, chase: 8, discover: 5, craft: 5, craft2: 10, raidWin: 40, raidWinDwarf: 60, loot: 10, retreat: 10 };
 
-  return { xpForLevel, levelFromXp, levelInfo, XP, RESOURCES, ITEMS, MATCH_DMG, WEAPONS, weaponDamage, MAT_LABEL, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES };
+  return { matchDamage, TOOL_GROUPS, xpForLevel, levelFromXp, levelInfo, XP, RESOURCES, ITEMS, MATCH_DMG, WEAPONS, weaponDamage, MAT_LABEL, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES };
 })();

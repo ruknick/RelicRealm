@@ -19,6 +19,12 @@ It's plain HTML/CSS/JS with no build step and no backend. Progress is saved in `
 | `js/sound.js` | Music and sound effects, generated in the browser (home, forest, mine, battle themes) |
 | `js/art.js` | Vector art: tiles, obstacles (ore cart, stump, thornbush…), themed board frames, scene backgrounds |
 
+## Right tool for the job
+- **Forest stumps & thornbushes:** only **axes** (Stone axe, Iron axe). Matches and other weapons do nothing.
+- **Mine boulders & ore veins:** only **pickaxes** (Stone pick, Pickaxe, Dwarven pick).
+- **Goblins & dwarves** (the thief, raid goblins, dwarf guards): only **weapons** hurt them, not matches. A keep is repaired by at most +1 per enemy turn.
+- **Locked chests:** only a key.
+
 ## Materials: why weapons matter
 Every obstacle and defense is made of something:
 - **Matches** do 1 damage to wood, stone, creatures and other pieces, and **nothing to thorns or iron**.
@@ -115,7 +121,7 @@ New players get 2 fences and a pit trap, already placed. The screen shows how ma
 - Stars: ★ win · ★ open their chest · ★ your chest stays safe.
 
 ## Workshop
-- **Tier 1 · Camp:** Club 5 wood · Sling 4 wood, 3 hide
+- **Tier 1 · Camp:** Club 5 wood · Sling 4 wood, 3 hide · **Stone axe** 4 wood, 3 stone (2 uses, 2 dmg) · **Stone pick** 3 wood, 4 stone (2 uses, 2 dmg)
 - **Tier 2 · Forge:** Iron axe 4 wood, 3 iron · Pickaxe 3 wood, 4 iron · Iron sword 2 hide, 5 iron, 2 coal
 - **Tools (passive, permanent):** Hatchet (+1 wood per wood match) · Skinning knife (+1 hide) · Miner's lamp (buried finds glimmer)
 - **Defenses (for Fortify, later):** Wooden fence · Stone wall · Pit trap

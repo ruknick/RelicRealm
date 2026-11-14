@@ -419,6 +419,8 @@ window.Board = (() => {
         if (p.kind === 'fog' && !W.fog) { this.toast(`The ${name} can't reach into the fog — try a Sling or Firepot.`); return; }
         if (p.kind !== 'fog' && Data.weaponDamage(w, p) <= 0) {
           this.toast(W.unlock ? 'The key only opens locked chests and iron gates.'
+            : p.toolOnly === 'axe' ? `Only an axe can chop that — not a ${name}.`
+            : p.toolOnly === 'pick' ? `Only a pickaxe can break rock — not a ${name}.`
             : `The ${name} does nothing to ${Data.MAT_LABEL[p.mat] || 'that'}!`);
           window.Sound?.sfx('nope');
           return;
