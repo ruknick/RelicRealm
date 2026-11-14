@@ -193,7 +193,7 @@ window.Camp = (() => {
     document.getElementById('fort-palette').innerHTML = kinds.length ? kinds.map(k => {
       const d = DEF[k], left = owned(k) - placedCount(k);
       return `<button class="fort-item${selected === k ? ' sel' : ''}" data-k="${k}" ${left > 0 ? '' : 'disabled'}>
-        <span class="fi-icon">${d.icon}</span><span class="fi-name">${d.name}</span><span class="fi-meta">${left} left · ${d.pts}pt</span></button>`;
+        <span class="fi-icon">${Art.piece(k) || d.icon}</span><span class="fi-name">${d.name}</span><span class="fi-meta">${left} left · ${d.pts}pt</span></button>`;
     }).join('') : '<span class="hint">Craft defenses in the Workshop.</span>';
     document.querySelectorAll('.fort-item').forEach(b => { b.onclick = () => { selected = selected === b.dataset.k ? null : b.dataset.k; render(); }; });
 
@@ -202,9 +202,12 @@ window.Camp = (() => {
       const k = L.cells[key(r, c)];
       let cls = 'fc', content = '';
       if (r >= BASE_ROWS) cls += ' approach';
-      if (isKeep(r, c)) { cls += ' keep'; content = c === 3 ? '🏰' : ''; }
-      else if (L.chest[0] === r && L.chest[1] === c) { cls += ' chest'; content = '📦'; }
-      else if (k) { cls += ` def d-${k}`; content = DEF[k].icon; }
+      if (isKeep(r, c)) {
+        if (c !== 2) continue;                       // the keep is one 3-wide cell
+        cls += ' keep'; content = Art.piece('pkeep');
+      }
+      else if (L.chest[0] === r && L.chest[1] === c) { cls += ' chest'; content = Art.piece('chest'); }
+      else if (k) { cls += ` def d-${k}`; content = Art.piece(k) || DEF[k].icon; }
       cells += `<div class="${cls}" data-r="${r}" data-c="${c}">${content}</div>`;
     }
     const grid = document.getElementById('fort-grid');

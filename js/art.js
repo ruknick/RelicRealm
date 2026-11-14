@@ -89,7 +89,121 @@ window.Art = (() => {
     chest: `<path d="M8 26c0-11 9-15 24-15s24 4 24 15z" fill="#a8702f"/><rect x="8" y="25" width="48" height="29" rx="3" fill="#8f5a24"/>
       <rect x="8" y="25" width="48" height="4" fill="#5d3815"/><rect x="28" y="22" width="8" height="12" rx="1.5" fill="#f2c230"/>`,
   };
-  const piece = kind => PIECES[kind] ? svg(PIECES[kind]) : '';
+  // ---------- fortifications & battle pieces ----------
+  Object.assign(PIECES, {
+    fence: `<path d="M4 38h56M4 48h56" stroke="#5a3616" stroke-width="4" stroke-linecap="round"/>
+      <g fill="#9a6838" stroke="#5a3616" stroke-width="1.5"><path d="M8 58V20l5-8 5 8v38z"/><path d="M23 58V16l5-8 5 8v42z"/><path d="M38 58V18l5-8 5 8v40z"/><path d="M52 58V22l4-7 4 7v36z"/></g>
+      <path d="M13 30v20M28 26v24M43 28v22" stroke="#7a4d24" stroke-width="1.5"/>
+      <path d="M4 38h56" stroke="#3b2410" stroke-width="2" stroke-dasharray="3 9"/>`,
+    palisade: `<path d="M3 40h58" stroke="#5a3616" stroke-width="5" stroke-linecap="round"/>
+      <g fill="#8a5a2c" stroke="#4a2c12" stroke-width="1.5"><path d="M6 60V18l5-12 5 12v42z"/><path d="M20 60V14l5-12 5 12v46z"/><path d="M34 60V16l5-12 5 12v44z"/><path d="M48 60V18l5-12 5 12v42z"/></g>
+      <g fill="#d6dbe1"><path d="M8.5 12l2.5-6 2.5 6z"/><path d="M22.5 8l2.5-6 2.5 6z"/><path d="M36.5 10l2.5-6 2.5 6z"/><path d="M50.5 12l2.5-6 2.5 6z"/></g>
+      <g fill="#a32a1c"><circle cx="11" cy="13" r="1.4"/><circle cx="25" cy="9" r="1.4"/><circle cx="53" cy="13" r="1.4"/></g>
+      <path d="M2 30l14 6M62 30l-14 6" stroke="#c9ced6" stroke-width="2.5" stroke-linecap="round"/>`,
+    tower: `<g stroke="#4a2c12" stroke-width="3" stroke-linecap="round"><path d="M16 62L22 30M48 62L42 30M18 52h28M20 42h24M17 52l27-10M47 52L20 42"/></g>
+      <rect x="10" y="22" width="44" height="10" rx="2" fill="#7a4d24" stroke="#4a2c12" stroke-width="1.5"/>
+      <g fill="#9a6838"><rect x="12" y="14" width="4" height="10"/><rect x="48" y="14" width="4" height="10"/></g>
+      <path d="M6 16L32 2l26 14z" fill="#a6743d" stroke="#4a2c12" stroke-width="1.5"/>
+      <path d="M32 2v-2" stroke="#4a2c12" stroke-width="2"/><path d="M32 0h10l-3 3 3 3H32z" fill="#c0392b"/>
+      <circle cx="32" cy="19" r="3.5" fill="#ffb347"/>`,
+    ballista: `<rect x="10" y="44" width="44" height="8" rx="2" fill="#6b4423"/><g fill="#2a2c30"><circle cx="16" cy="54" r="6"/><circle cx="48" cy="54" r="6"/></g>
+      <g fill="none" stroke="#a5abb3" stroke-width="2"><circle cx="16" cy="54" r="3.4"/><circle cx="48" cy="54" r="3.4"/></g>
+      <path d="M32 44V30" stroke="#5a3616" stroke-width="5"/><rect x="14" y="26" width="36" height="6" rx="2" fill="#8a5a2c"/>
+      <path d="M8 14c8 10 16 14 24 14s16-4 24-14" stroke="#5a3616" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M8 14L32 24 56 14" stroke="#e8dcc0" stroke-width="1.2" fill="none"/>
+      <path d="M32 26V4" stroke="#7a4d24" stroke-width="3"/><path d="M28 8l4-7 4 7z" fill="#c9ced6"/>`,
+    swall: `<path d="M4 18h10v-8h10v8h16v-8h10v8h10v44H4z" fill="#8b9098"/>
+      <g fill="#a9aeb6"><rect x="6" y="20" width="16" height="10" rx="1"/><rect x="26" y="20" width="16" height="10" rx="1"/><rect x="46" y="20" width="12" height="10" rx="1"/>
+      <rect x="6" y="33" width="10" height="10" rx="1"/><rect x="19" y="33" width="18" height="10" rx="1"/><rect x="40" y="33" width="18" height="10" rx="1"/>
+      <rect x="6" y="46" width="16" height="13" rx="1"/><rect x="26" y="46" width="16" height="13" rx="1"/><rect x="46" y="46" width="12" height="13" rx="1"/></g>
+      <path d="M4 18h10v-8h10v8h16v-8h10v8h10" stroke="#5d6168" stroke-width="2" fill="none"/>
+      <path d="M30 22l3 4-2 3" stroke="#5d6168" stroke-width="1.2" fill="none"/>`,
+    gate: `<path d="M2 62V20C2 8 14 2 32 2s30 6 30 18v42h-9V22c0-8-9-12-21-12S11 14 11 22v40z" fill="#8b9098"/>
+      <g fill="#a9aeb6"><rect x="3" y="30" width="7" height="9"/><rect x="54" y="30" width="7" height="9"/><rect x="3" y="44" width="7" height="9"/><rect x="54" y="44" width="7" height="9"/></g>
+      <path d="M11 62V24c0-8 9-13 21-13s21 5 21 13v38z" fill="#1d1f24"/>
+      <g stroke="#7d8793" stroke-width="3"><path d="M18 62V16M26 62V12M34 62V12M42 62V14M50 62V20"/></g>
+      <g stroke="#5d6672" stroke-width="2.5"><path d="M11 30h42M11 44h42M11 56h42"/></g>
+      <g fill="#9aa3ad"><path d="M16 62l2 -4 2 4zM24 62l2-4 2 4zM32 62l2-4 2 4zM40 62l2-4 2 4zM48 62l2-4 2 4z"/></g>`,
+    loot: `<path d="M8 26c0-12 10-16 24-16s24 4 24 16z" fill="#6c3483"/><rect x="8" y="25" width="48" height="29" rx="3" fill="#5b2c6f"/>
+      <rect x="8" y="25" width="48" height="4" fill="#3b1a4d"/><g fill="#f2c230"><rect x="12" y="10" width="5" height="44"/><rect x="47" y="10" width="5" height="44"/></g>
+      <circle cx="32" cy="38" r="7" fill="#efe6d0"/><circle cx="29.5" cy="37" r="1.6" fill="#222"/><circle cx="34.5" cy="37" r="1.6" fill="#222"/><path d="M29 42h6" stroke="#222" stroke-width="1.2"/>
+      <path d="M14 8l4-6 4 6M42 8l4-6 4 6" fill="#ffe680"/><circle cx="32" cy="18" r="2.5" fill="#ffe680"/>`,
+    vault: `<rect x="4" y="6" width="56" height="54" rx="4" fill="#5b5f68"/><rect x="8" y="10" width="48" height="46" rx="3" fill="#7a808a"/>
+      <circle cx="32" cy="33" r="18" fill="#4a4f57" stroke="#c9a227" stroke-width="3"/><circle cx="32" cy="33" r="11" fill="#2f3339"/>
+      <g stroke="#c9a227" stroke-width="3" stroke-linecap="round"><path d="M32 22v22M21 33h22M24 25l16 16M40 25L24 41"/></g><circle cx="32" cy="33" r="4" fill="#f2c230"/>
+      <g class="glow" stroke="#7fdcff" stroke-width="1.6" fill="none"><path d="M12 14l3 4 3-4M46 14v5l4-2.5M12 50l3-4 3 4"/></g>`,
+    gems: `<path d="M8 28c0-12 10-16 24-16s24 4 24 16z" fill="#6b7079"/><rect x="8" y="27" width="48" height="27" rx="3" fill="#545962"/>
+      <rect x="8" y="27" width="48" height="4" fill="#3b3f46"/>
+      <path d="M16 22l5-8 6 8-6 6z" fill="#e74c8b"/><path d="M28 18l6-10 7 10-7 8z" fill="#5fd0ff"/><path d="M41 22l5-7 5 7-5 6z" fill="#7ee08a"/>
+      <rect x="28" y="34" width="8" height="10" rx="1.5" fill="#c9a227"/>`,
+    prisoner: `<rect x="6" y="8" width="52" height="6" rx="2" fill="#6b4423"/><rect x="6" y="54" width="52" height="6" rx="2" fill="#6b4423"/>
+      <circle cx="32" cy="30" r="8" fill="#e6b58c"/><path d="M24 54c0-10 4-14 8-14s8 4 8 14z" fill="#3e6aa3"/>
+      <path d="M26 26c2-6 10-6 12 0" fill="#7a4d24"/><circle cx="29" cy="30" r="1.2" fill="#222"/><circle cx="35" cy="30" r="1.2" fill="#222"/>
+      <g stroke="#4a2c12" stroke-width="3.5"><path d="M12 14v40M22 14v40M42 14v40M52 14v40"/></g>`,
+    goblin: `<path d="M48 6L40 58" stroke="#6b4423" stroke-width="3"/><path d="M45 2l6 2-2 8z" fill="#c9ced6"/>
+      <path d="M6 22l9 6M50 22l-9 6" stroke="#4f7d34" stroke-width="6" stroke-linecap="round"/>
+      <path d="M16 56c0-10 6-16 12-16s12 6 12 16z" fill="#7a4d24"/>
+      <circle cx="28" cy="30" r="13" fill="#6aa84f"/><path d="M15 26c3-11 23-13 27 0-8-5-19-5-27 0z" fill="#3b2410"/>
+      <ellipse cx="23" cy="30" rx="3" ry="3.4" fill="#fff36a"/><ellipse cx="33" cy="30" rx="3" ry="3.4" fill="#fff36a"/>
+      <circle cx="23.5" cy="31" r="1.4" fill="#222"/><circle cx="33.5" cy="31" r="1.4" fill="#222"/>
+      <path d="M22 37c4 2.5 8 2.5 12 0" stroke="#2c4a1c" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M25 38l1 2 1-2M30 38l1 2 1-2" fill="#fff"/>`,
+    guard: `<path d="M14 58c0-12 8-18 18-18s18 6 18 18z" fill="#5e6b7c"/>
+      <ellipse cx="32" cy="30" rx="12" ry="11" fill="#e6b58c"/>
+      <path d="M18 34c2 14 26 14 28 0-4 4-8 6-14 6s-10-2-14-6z" fill="#b5651d"/><path d="M26 36c2 6 10 6 12 0" fill="#9a531a"/>
+      <path d="M18 26c0-12 28-12 28 0z" fill="#9aa3ad"/><rect x="17" y="24" width="30" height="5" rx="2" fill="#7d8793"/>
+      <path d="M31 12h2v12h-2z" fill="#c9a227"/><path d="M18 22l-6-6M46 22l6-6" stroke="#d6dbe1" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="27.5" cy="30" r="1.4" fill="#222"/><circle cx="36.5" cy="30" r="1.4" fill="#222"/>
+      <path d="M48 40h10v12c0 4-5 7-5 7s-5-3-5-7z" fill="#c9a227" stroke="#7a5a10" stroke-width="1.5"/>`,
+    rubble: `<path d="M6 56c2-10 8-14 14-12 2-8 12-10 16-4 6-4 14-1 16 6 4 0 7 4 7 10z" fill="#6b665f"/>
+      <path d="M20 44c2-8 12-10 16-4-6 1-10 4-12 10z" fill="#8a847b"/><path d="M40 50l6-6 4 5z" fill="#57534d"/>
+      <path d="M34 50L44 10" stroke="#6b4423" stroke-width="3"/><path d="M41 12l5-10 1 11z" fill="#c9ced6"/>`,
+    keyp: `<ellipse cx="32" cy="48" rx="22" ry="8" fill="#7a1f2b"/><ellipse cx="32" cy="46" rx="20" ry="6.5" fill="#a32a3a"/>
+      <g class="glow"><circle cx="20" cy="34" r="9" fill="none" stroke="#f2c230" stroke-width="5"/><path d="M28 34h26M46 34v8M52 34v6" stroke="#f2c230" stroke-width="5" stroke-linecap="round"/></g>`,
+    trap: `<ellipse cx="32" cy="38" rx="26" ry="16" fill="#5a4428"/><ellipse cx="32" cy="38" rx="20" ry="11" fill="#0b0806"/>
+      <g fill="#c9ced6"><path d="M20 40l3-10 3 10z"/><path d="M29 42l3-12 3 12z"/><path d="M38 40l3-10 3 10z"/></g>
+      <path d="M8 34c6-4 12-2 16-4M40 30c6 2 10 0 16 4" stroke="#7a9a3a" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+  });
+  PIECES.runestone = PIECES.rune;
+  PIECES.wall = PIECES.swall;
+
+  // Wide keeps (3 tiles).
+  const WIDE = {
+    gkeep: `<rect x="8" y="52" width="176" height="10" rx="3" fill="#3b2410"/>
+      <g fill="#6e4521" stroke="#3b2410" stroke-width="1.5"><path d="M4 56V22l5-8 5 8v34z"/><path d="M15 56V26l5-8 5 8v30z"/><path d="M167 56V26l5-8 5 8v30z"/><path d="M178 56V22l5-8 5 8v34z"/></g>
+      <rect x="28" y="28" width="136" height="26" fill="#7a4d24"/><g stroke="#55331a" stroke-width="2"><path d="M28 34h136M28 41h136M28 48h136"/></g>
+      <path d="M16 31L96 4l80 27z" fill="#8f6a3a" stroke="#4a2c12" stroke-width="2"/><path d="M16 31L96 4v27z" fill="#a57c45"/>
+      <g stroke="#6b4c25" stroke-width="2" opacity=".75"><path d="M36 26L96 9M58 30L96 16M154 26L96 9M134 30L96 16"/></g>
+      <path d="M86 1l20 10M106 1L86 11" stroke="#3b2410" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M82 54V41a14 14 0 0 1 28 0v13z" fill="#1e1006"/><path d="M96 28v26" stroke="#3b2410" stroke-width="1.5"/>
+      <circle cx="96" cy="22" r="5.5" fill="#efe6d0"/><circle cx="94" cy="21.5" r="1.4" fill="#222"/><circle cx="98" cy="21.5" r="1.4" fill="#222"/><path d="M93.5 25h5" stroke="#222" stroke-width="1"/>
+      <g class="flame"><rect x="48" y="36" width="9" height="9" rx="1.5" fill="#ffb347"/><rect x="135" y="36" width="9" height="9" rx="1.5" fill="#ffb347"/></g>
+      <path d="M40 14v20" stroke="#3b2410" stroke-width="2"/><path d="M40 14h15l-4 5 4 5H40z" fill="#c0392b"/>
+      <path d="M152 14v20" stroke="#3b2410" stroke-width="2"/><path d="M152 14h-15l4 5-4 5h11z" fill="#c0392b"/>`,
+    hall: `<path d="M0 44L26 8l22 20L96 0l48 28 22-20 26 36v20H0z" fill="#3f434b"/>
+      <path d="M26 8l8 10-6 2zM166 8l-8 10 6 2zM96 0l10 10-8 2z" fill="#e9eef5" opacity=".7"/>
+      <rect x="18" y="24" width="156" height="36" fill="#8a8f98"/>
+      <g stroke="#6a6f78" stroke-width="1.5"><path d="M18 34h156M18 44h156M18 52h156M38 24v10M68 24v10M128 24v10M158 24v10M53 34v10M143 34v10M38 44v8M158 44v8"/></g>
+      <path d="M10 25L96 9l86 16z" fill="#646973"/><rect x="10" y="22" width="172" height="5" rx="1" fill="#c3c8cf"/>
+      <g fill="#c9ced6"><rect x="56" y="27" width="9" height="33"/><rect x="127" y="27" width="9" height="33"/></g>
+      <g fill="#a9aeb6"><rect x="54" y="26" width="13" height="3"/><rect x="125" y="26" width="13" height="3"/></g>
+      <path d="M74 60V42a22 22 0 0 1 44 0v18z" fill="#24262b"/>
+      <g stroke="#8a929c" stroke-width="2.5"><path d="M82 60V34M90 60V28M98 60V28M106 60V30M114 60V38M74 48h44"/></g>
+      <path d="M96 12l-6 6h12z" fill="#c9a227"/>
+      <g class="glow" stroke="#7fdcff" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M30 30l4 8 4-8M156 30v8l5-4M92 16h8"/></g>
+      <rect x="6" y="58" width="180" height="6" fill="#5b5f68"/>
+      <g class="flame"><circle cx="46" cy="40" r="3" fill="#ffb347"/><circle cx="146" cy="40" r="3" fill="#ffb347"/></g>`,
+    pkeep: `<rect x="6" y="54" width="180" height="8" rx="3" fill="#4a3a2a"/>
+      <g fill="#8a8f98"><rect x="10" y="20" width="30" height="36"/><rect x="152" y="20" width="30" height="36"/></g>
+      <g fill="#8a8f98"><rect x="10" y="12" width="8" height="10"/><rect x="21" y="12" width="8" height="10"/><rect x="32" y="12" width="8" height="10"/>
+      <rect x="152" y="12" width="8" height="10"/><rect x="163" y="12" width="8" height="10"/><rect x="174" y="12" width="8" height="10"/></g>
+      <rect x="40" y="28" width="112" height="28" fill="#a07a4a"/><g stroke="#7a5a32" stroke-width="2"><path d="M40 35h112M40 42h112M40 49h112"/></g>
+      <g fill="#a07a4a"><rect x="40" y="20" width="10" height="9"/><rect x="56" y="20" width="10" height="9"/><rect x="72" y="20" width="10" height="9"/><rect x="110" y="20" width="10" height="9"/><rect x="126" y="20" width="10" height="9"/><rect x="142" y="20" width="10" height="9"/></g>
+      <path d="M84 56V40a12 12 0 0 1 24 0v16z" fill="#2a1d10"/><path d="M84 46h24" stroke="#7d8793" stroke-width="2"/>
+      <path d="M96 4v20" stroke="#3b2410" stroke-width="2.5"/><path d="M96 4h18l-5 5 5 5H96z" fill="#2f6fd0"/><path d="M101 7l3 2-3 2" fill="#f2c230"/>
+      <g class="flame"><rect x="21" y="32" width="8" height="10" rx="4" fill="#ffb347"/><rect x="163" y="32" width="8" height="10" rx="4" fill="#ffb347"/></g>`,
+  };
+
+  const piece = kind => WIDE[kind] ? svg(WIDE[kind], '0 0 192 64') : PIECES[kind] ? svg(PIECES[kind]) : '';
 
   // ---------- board frames ----------
   const FRAME_ART = {
@@ -157,5 +271,5 @@ window.Art = (() => {
     document.body.style.setProperty('--scene-art', SCENES[scene] || 'none');
   }
 
-  return { tile, piece, frame, setScene, hasPiece: k => !!PIECES[k] };
+  return { tile, piece, frame, setScene, hasPiece: k => !!PIECES[k] || !!WIDE[k] };
 })();

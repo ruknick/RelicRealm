@@ -11,24 +11,24 @@ window.Battle = (() => {
 
   const P = {
     fog:      { kind: 'fog',      label: '',        mat: 'other', hp: 1 },
-    rubble:   { kind: 'rubble',   label: '',        mat: 'stone', hp: 1 },
+    rubble:   { kind: 'rubble',   label: '',        mat: 'stone', hp: 1, art: 'rubble' },
     // Goblins: mostly wood
-    gkeep:    { kind: 'keep',     label: 'KEEP',    mat: 'wood',  hp: 5 },
-    fence:    { kind: 'fence',    label: 'FENCE',   mat: 'wood',  hp: 1 },
-    tower:    { kind: 'tower',    label: 'TOWER',   mat: 'wood',  hp: 2 },
-    loot:     { kind: 'loot',     label: 'LOOT',    mat: 'wood',  hp: 1 },
-    chest:    { kind: 'chest',    label: '',        mat: 'wood',  hp: 1 },
-    prisoner: { kind: 'prisoner', label: 'PRISONER', mat: 'other', hp: 1 },
-    goblin:   { kind: 'minion',   label: 'G',       mat: 'creature', hp: 1, cls: 'goblin' },
+    gkeep:    { kind: 'keep',     label: 'KEEP',    mat: 'wood',  hp: 5, art: 'gkeep' },
+    fence:    { kind: 'fence',    label: 'FENCE',   mat: 'wood',  hp: 1, art: 'fence' },
+    tower:    { kind: 'tower',    label: 'TOWER',   mat: 'wood',  hp: 2, art: 'tower' },
+    loot:     { kind: 'loot',     label: 'LOOT',    mat: 'wood',  hp: 1, art: 'loot' },
+    chest:    { kind: 'chest',    label: '',        mat: 'wood',  hp: 1, art: 'chest' },
+    prisoner: { kind: 'prisoner', label: 'PRISONER', mat: 'other', hp: 1, art: 'prisoner' },
+    goblin:   { kind: 'minion',   label: 'G',       mat: 'creature', hp: 1, cls: 'goblin', art: 'goblin' },
     // Dwarves: stone and iron
-    hall:     { kind: 'keep',     label: 'GREAT HALL', mat: 'stone', hp: 6, cls: 'hall' },
-    swall:    { kind: 'swall',    label: 'WALL',    mat: 'stone', hp: 2 },
-    gate:     { kind: 'gate',     label: 'GATE',    mat: 'iron',  hp: 3, lock: true },
-    ballista: { kind: 'tower',    label: 'BALLISTA', mat: 'wood', hp: 2, cls: 'ballista' },
-    vault:    { kind: 'loot',     label: 'VAULT',   mat: 'stone', hp: 2, cls: 'vault' },
-    gems:     { kind: 'chest',    label: '',        mat: 'stone', hp: 1, cls: 'gems' },
-    keyp:     { kind: 'keyp',     label: '🗝️',      mat: 'other', hp: 1 },
-    guard:    { kind: 'minion',   label: 'D',       mat: 'creature', hp: 2, cls: 'guard' },
+    hall:     { kind: 'keep',     label: 'GREAT HALL', mat: 'stone', hp: 6, cls: 'hall', art: 'hall' },
+    swall:    { kind: 'swall',    label: 'WALL',    mat: 'stone', hp: 2, art: 'swall' },
+    gate:     { kind: 'gate',     label: 'GATE',    mat: 'iron',  hp: 3, lock: true, art: 'gate' },
+    ballista: { kind: 'tower',    label: 'BALLISTA', mat: 'wood', hp: 2, cls: 'ballista', art: 'ballista' },
+    vault:    { kind: 'loot',     label: 'VAULT',   mat: 'stone', hp: 2, cls: 'vault', art: 'vault' },
+    gems:     { kind: 'chest',    label: '',        mat: 'stone', hp: 1, cls: 'gems', art: 'gems' },
+    keyp:     { kind: 'keyp',     label: 'KEY',     mat: 'other', hp: 1, art: 'keyp' },
+    guard:    { kind: 'minion',   label: 'D',       mat: 'creature', hp: 2, cls: 'guard', art: 'guard' },
   };
 
   const rnd = n => Math.floor(Math.random() * n);

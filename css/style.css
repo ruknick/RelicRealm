@@ -718,3 +718,26 @@ body[data-scene] .res, body[data-scene] .sound-btn { background: rgba(10,14,11,.
 .race-top > span:first-child { flex: none; }
 #race-them { overflow: hidden; text-overflow: ellipsis; min-width: 0; text-align: right; }
 #race-keep { font-size: .75rem; letter-spacing: 0; }
+
+/* ---------- Art for battle pieces ---------- */
+.piece.art .pl { display: none; }
+.piece.art .pc::before, .piece.art .pc::after { content: none !important; }
+.piece.art .flame { animation: flicker 1.3s ease-in-out infinite; }
+.piece.art .glow { animation: veinGlow 1.8s ease-in-out infinite; }
+.piece.p-keep.art .pa svg { filter: drop-shadow(0 4px 3px rgba(0,0,0,.55)); }
+.piece.p-keep.art .hp { font-size: 3cqw; bottom: -2%; }
+.piece.p-minion.art .pa { animation: thiefBob .5s ease-in-out infinite alternate; }
+.piece.p-goblin.art .pc, .piece.p-guard.art .pc { box-shadow: none; }
+
+/* Fortify editor art */
+.fc svg, .fi-icon svg { width: 92%; height: 92%; filter: drop-shadow(0 2px 2px rgba(0,0,0,.45)); }
+.fi-icon { width: 30px; height: 30px; display: grid; place-items: center; }
+.fi-icon svg { width: 100%; height: 100%; }
+.fc.keep { grid-column: span 3; aspect-ratio: auto; background: linear-gradient(#5d7a8f, #34495a); }
+.fc.keep svg { width: 100%; height: 100%; }
+.fc.def { background: #3d5a36; }
+.fc.d-trap, .fc.d-wall, .fc.d-gate, .fc.d-fence, .fc.d-palisade, .fc.d-tower { background: #3d5a36; }
+.fc.keep { aspect-ratio: 3 / 1; overflow: hidden; display: block; padding: 0; }
+.fc.keep svg { display: block; width: 100%; height: 100%; }
+.fort-grid { grid-template-rows: repeat(9, 1fr); aspect-ratio: 7 / 9; }
+.fc, .fc.keep { aspect-ratio: auto; min-height: 0; }
