@@ -36,7 +36,7 @@ window.Items = (() => {
     const sp = App.state.stockpile;
     return '<h3 class="craft-h">🪵 Materials <small>banked at your camp</small></h3>' + Object.keys(Data.RESOURCES).map(k => {
       const info = Data.MATERIAL_INFO[k] || {};
-      const TILE = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water', oak: 'oak', ironwood: 'ironwood', elderwood: 'elderwood', silver: 'silver', starsilver: 'starsilver', charcoal: 'charcoal', steel: 'steel' };
+      const TILE = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water', oak: 'oak', ironwood: 'ironwood', elderwood: 'elderwood', silver: 'silver', starsilver: 'starsilver', charcoal: 'charcoal', steel: 'steel', pearl: 'pearl', coral: 'coral' };
       const icon = `<div class="gem art g-${TILE[k]} ic-gem">${Art.tile(TILE[k])}</div>`;
       return card(icon, Data.RESOURCES[k].label, sp[k], `<b>From:</b> ${info.from || '—'}<br><b>For:</b> ${info.use || '—'}`, sp[k] > 0);
     }).join('');
@@ -65,6 +65,7 @@ window.Items = (() => {
     return `<h3 class="craft-h">⚔️ Weapons <small>monsters only</small></h3>${gearList('weapon')}`
       + `<h3 class="craft-h">🛠️ Tools <small>obstacles & defenses only</small></h3>${gearList('tool')}`
       + group('🛡️ Defenses <small>place them in your camp</small>', R.filter(r => r.defense).map(r => r.id))
+      + group('🍲 Provisions <small>use on raids</small>', R.filter(r => r.tier === 'food').map(r => r.id))
       + group('🎒 Kit <small>passive & permanent</small>', R.filter(r => r.tier === 'kit').map(r => r.id))
       + group('🐉 Dragon prep', R.filter(r => r.tier === 'prep').map(r => r.id));
   }

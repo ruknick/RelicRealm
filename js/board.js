@@ -6,7 +6,7 @@ window.Board = (() => {
   const DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
   const ENERGY_MAX = 10;
   // Cost of a tap-swing: heavier steel and bows cost more.
-  const swingCost = it => (it.tier >= 3 ? 3 : 2) + (it.type === 'bow' ? 1 : 0);
+  const swingCost = it => (it.tier >= 3 ? 3 : 2) + (it.type === 'bow' ? 1 : 0) - (it.light ? 1 : 0);
   const WILD = 'star';
   let nextId = 1;
 
@@ -453,6 +453,12 @@ window.Board = (() => {
 
     arm(k) {
       if (this.busy || !this.hooks.canPlay()) return;
+      if (Data.ITEMS[k].instant) {   // no target: use it right away (e.g. chowder)
+        const msg = this.hooks.useInstant ? this.hooks.useInstant(k) : null;
+        if (msg === true) { App.state.inventory[k]--; App.save(); this.renderWeapons(); this.hooks.onArm?.(); }
+        else this.toast(msg || `${Data.ITEMS[k].icon} ${Data.ITEMS[k].desc}`, '', 2600);
+        return;
+      }
       this.armed = this.armed === k ? null : k;
       this.selected = null;
       this.renderWeapons(); this.render();
@@ -501,6 +507,15 @@ window.Board = (() => {
           }
         });
         if (targets.length > 1) this.toast('🪓 Cleave! The axe bites the next one too.', 'win');
+      } else if (G.type === 'spear') {
+        [-1, 1].forEach(dr => {
+          const x = this.inBounds(p.r + dr, p.c) && this.grid[p.r + dr][p.c];
+          if (this.isPiece(x) && x.piece !== p && x.piece.mat === 'creature') {
+            const d = Data.gearDamage(g.id, x.piece);
+            if (d > 0 && !targets.some(([t]) => t === x.piece)) targets.push([x.piece, d]);
+          }
+        });
+        if (targets.length > 1) this.toast('🔱 The spear runs them through!', 'win');
       }
       const el = this.pieceEls.get(p.id);
       if (el) { el.classList.remove('struck'); void el.offsetWidth; el.classList.add('struck'); }

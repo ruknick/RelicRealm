@@ -27,7 +27,7 @@ window.Craft = (() => {
     const owned = r.makes ? null : it.gear ? App.gearCount(r.id) : st().inventory[r.id];
     const ownedTxt = r.makes ? `have ${Object.keys(r.makes).map(k => st().stockpile[k]).join('')}` : isKit(r) ? (owned ? '✓ Owned' : '') : owned ? `owned ×${owned}` : '';
     const ready = canAfford(r) && !ownedKit(r);
-    const tag = it.gear ? `<span class="tag t${it.tier}">${Data.TIER_LABEL[it.tier]} · ${it.dur} hits</span>` : '';
+    const tag = it.gear ? `<span class="tag t${it.tier}">${it.sea ? "Sea" : Data.TIER_LABEL[it.tier]} · ${it.dur} hits</span>` : '';
     return `<div class="recipe ${ready ? 'ready' : ''}" data-id="${r.id}">
       <div class="r-icon">${r.makes ? `<div class="gem art g-${tileFor(Object.keys(r.makes)[0])}" style="position:relative;width:40px;height:40px">${Art.tile(tileFor(Object.keys(r.makes)[0]))}</div>` : iconOf(it)}</div>
       <div class="r-body">
@@ -66,17 +66,19 @@ window.Craft = (() => {
     const R = Data.RECIPES;
     const sec = (title, sub, list) => list.length ? `<h3 class="craft-h">${title} <small>${sub}</small></h3>${list.join('')}` : '';
     const byTier = (cls) => [1, 2, 3].map(t => {
-      const list = R.filter(r => Data.ITEMS[r.id] && Data.ITEMS[r.id].gear === cls && Data.ITEMS[r.id].tier === t);
+      const list = R.filter(r => Data.ITEMS[r.id] && Data.ITEMS[r.id].gear === cls && !Data.ITEMS[r.id].sea && Data.ITEMS[r.id].tier === t);
       return list.length ? `<div class="tier-h t${t}">${Data.TIER_LABEL[t]}</div>${list.map(card).join('')}` : '';
     }).join('');
     const reps = repairList();
     document.getElementById('craft-list').innerHTML =
       sec('🔧 Repair bench', 'restore worn gear for half its materials', reps.map(repairCard)) +
       `<h3 class="craft-h">⚔️ Weapons <small>monsters only · wield one at a time</small></h3>${byTier('weapon')}` +
+      sec('🌊 Sea gear', 'coral & pearls from the Sunlit Coast · iron strength with a trick', R.filter(r => Data.ITEMS[r.id]?.sea).map(card)) +
       `<h3 class="craft-h">🛠️ Tools <small>obstacles & defenses only · wield one at a time</small></h3>${byTier('tool')}` +
       sec('🔥 Smelting', 'oak becomes charcoal; iron + charcoal becomes steel', R.filter(r => r.tier === 'smelt').map(card)) +
       sec('🔑 Key upgrades', 'gold & crystal chests need better keys', R.filter(r => r.tier === 'keys').map(card)) +
       sec('🛡️ Defenses', 'place them in 🏰 Fortify', R.filter(r => r.defense).map(card)) +
+      sec('🍲 Provisions', 'bring them on raids', R.filter(r => r.tier === 'food').map(card)) +
       sec('🎒 Kit', 'passive & permanent', R.filter(isKit).map(card)) +
       sec('🐉 Dragon prep', 'for the Dragon\'s Lair — coming soon', R.filter(r => r.tier === 'prep').map(card));
     document.querySelectorAll('.craft-btn:not(.repair-btn)').forEach(b => { b.onclick = () => craft(b.dataset.id); });

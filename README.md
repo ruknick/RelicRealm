@@ -41,6 +41,14 @@ The tray under every board has three areas:
 - **Smelting:** 2 oak → 3 charcoal · 3 iron + 2 charcoal + 1 water → 1 steel.
 - Hafts need the right wood: iron gear uses oak, steel gear uses ironwood.
 
+## Sunlit Coast extras
+- **Pearls** shimmer among the fish (more often as the Coast levels up), and **oysters** hide in kelp and coral (+1 pearl, +2 gold).
+- **Coral:** break coral reefs with a pick (2 coral, or 3 with an iron pick).
+- **Sea gear** (Workshop), iron strength with a trick:
+  - **Coral spear** (5 coral, 2 pine, 1 hide), no forge needed. Pierces the monsters above and below the target, and is the bane of sea creatures (+1 tier vs crabs and future sea monsters).
+  - **Pearl sabre** (3 pearl, 3 iron, 1 oak, 1 water). Light, so swings cost 1 less ⚡. It's the bane of creatures of the dark (coming in the Deep Tunnels).
+- **Bottled chowder** (3 food, 2 water): drink it mid-raid from the specials row for +2 ♥ on your camp's keep. It's free and doesn't use a move.
+
 ## Enemies by rank
 - Goblins carry **wood** gear at low ranks and **iron** at high ranks. Dwarves carry **iron**, then **steel**. Their armor follows the same tiers.
 - Stone walls stop wood-armed goblins. The **steel bulwark** (hardness 4) stops almost everything.

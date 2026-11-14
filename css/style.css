@@ -891,6 +891,8 @@ details.debug { margin-top: 12px; }
 .g-seaweed   { --g1: #215055; --g2: #0c2427; }
 .g-charcoal  { --g1: #4a3e36; --g2: #1e1814; }
 .g-steel     { --g1: #5d6a78; --g2: #262d36; }
+.g-pearl     { --g1: #3a6a78; --g2: #142c34; }
+.g-coral     { --g1: #6a3a44; --g2: #2c141a; }
 .g-star.art  { background: radial-gradient(circle at 50% 40%, #fff3c4, #c9a227 45%, #5a3a10 100%); }
 .tile.sel .gem.art { box-shadow: 0 0 0 3px #ffe9a8, 0 0 14px rgba(255,230,150,.6), inset 0 -6px 10px rgba(0,0,0,.45); }
 /* Info line above the board stays on one line */

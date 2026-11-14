@@ -27,6 +27,9 @@ window.Art = (() => {
     <radialGradient id="rgWater" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#e6f8ff"/><stop offset=".35" stop-color="#6cc8f5"/><stop offset=".8" stop-color="#1f6fb0"/><stop offset="1" stop-color="#0f3f6e"/></radialGradient>
     <linearGradient id="lgFish" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb370"/><stop offset=".5" stop-color="#f07a2a"/><stop offset="1" stop-color="#ffe2c0"/></linearGradient>
     <linearGradient id="lgSteel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#c7cfd8"/><stop offset=".7" stop-color="#7d8896"/><stop offset="1" stop-color="#dfe5eb"/></linearGradient>
+    <radialGradient id="rgPearl" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#eef0f6"/><stop offset=".8" stop-color="#c9c3dc"/><stop offset="1" stop-color="#9fb4c6"/></radialGradient>
+    <linearGradient id="lgShell" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d8cdb8"/><stop offset=".6" stop-color="#a59680"/><stop offset="1" stop-color="#6e604e"/></linearGradient>
+    <linearGradient id="lgCoral" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#c2405a"/><stop offset=".6" stop-color="#ef6f84"/><stop offset="1" stop-color="#ffb3be"/></linearGradient>
     <linearGradient id="lgIron" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9aa3ad"/><stop offset=".45" stop-color="#5d6672"/><stop offset="1" stop-color="#2f353d"/></linearGradient>
     <linearGradient id="lgStoneHead" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c2c6cb"/><stop offset=".5" stop-color="#8a9097"/><stop offset="1" stop-color="#555b62"/></linearGradient>
     <linearGradient id="lgWoodHead" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9a868"/><stop offset=".5" stop-color="#a06a32"/><stop offset="1" stop-color="#5a3414"/></linearGradient>
@@ -126,6 +129,15 @@ window.Art = (() => {
     steel: `<ellipse cx="32" cy="52" rx="24" ry="3.5" fill="#000" opacity=".35"/><path d="M8 40l8-16h32l8 16z" fill="url(#lgSteel)" stroke="#4a5560" stroke-width="1"/>
       <path d="M16 24h32l8 16H8z" fill="none"/><path d="M8 40h48v6H8z" fill="#7d8896"/><path d="M18 28h20" stroke="#fff" stroke-width="2" opacity=".8"/>`,
   };
+  TILES.pearl = `<ellipse cx="32" cy="54" rx="22" ry="3.5" fill="#000" opacity=".3"/>
+      <path d="M6 40c2-14 14-24 26-24s24 10 26 24c-8 8-44 8-52 0z" fill="url(#lgShell)" stroke="#5e5446" stroke-width="1"/>
+      <g stroke="#7a6e5c" stroke-width="1.1" fill="none" opacity=".6"><path d="M32 18v26M20 22l6 22M44 22l-6 22M12 32l12 12M52 32 40 44"/></g>
+      <path d="M10 42c6 6 38 6 44 0-4 10-40 10-44 0z" fill="#3a3028"/>
+      <circle cx="32" cy="41" r="8.5" fill="url(#rgPearl)" filter="url(#fGlow)"/><circle cx="29" cy="38" r="2.4" fill="#fff" opacity=".9"/>`;
+  TILES.coral = `<ellipse cx="32" cy="56" rx="18" ry="3" fill="#000" opacity=".3"/>
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M32 56V36l-10-12-2-12M32 40l10-12 2-14M22 24l-8-4M42 28l10-4M32 36v-14" stroke="#8a2a3a" stroke-width="7"/>
+      <path d="M32 56V36l-10-12-2-12M32 40l10-12 2-14M22 24l-8-4M42 28l10-4M32 36v-14" stroke="url(#lgCoral)" stroke-width="5"/></g>
+      <g fill="#ffd9de" opacity=".8"><circle cx="20" cy="13" r="1.5"/><circle cx="44" cy="15" r="1.5"/><circle cx="14" cy="20" r="1.4"/><circle cx="52" cy="24" r="1.4"/><circle cx="32" cy="23" r="1.4"/></g>`;
   TILES.mushroom = TILES.leaves;
 
   // ---------- gear icons: shape by type, finish by tier ----------
@@ -148,9 +160,15 @@ window.Art = (() => {
         <path d="M12 54l-4 2 2-4zM14 52l-5 0 3-3z" fill="#c0392b"/>`,
       waxe: `${sh}${handle}<path d="M38 10c6-4 14-2 18 4l-6 10c-4-2-8-2-12 2z" fill="url(#${head})" stroke="#111" stroke-width="1.2"/><path d="M52 12l-4 10" stroke="#fff" stroke-width="1.4" opacity=".55"/>`,
       pick: `${sh}${handle}<path d="M22 10c10-6 26-4 36 6-10-4-20-4-30 2-2-2-4-6-6-8z" fill="url(#${head})" stroke="#111" stroke-width="1.2"/><path d="M28 12c8-3 18-2 26 4" stroke="#fff" stroke-width="1.2" opacity=".5" fill="none"/>`,
+      spear: `${sh}<path d="M10 58L46 18" stroke="#1a0f08" stroke-width="6" stroke-linecap="round"/><path d="M10 58L46 18" stroke="url(#lgDrift)" stroke-width="4" stroke-linecap="round"/>
+        <path d="M40 20l4 4M37 24l4 4" stroke="#3a6a5a" stroke-width="2.2"/>
+        <path d="M44 20l12-16-4 18-6 2z" fill="url(#lgCoral)" stroke="#6a1a2a" stroke-width="1.2" stroke-linejoin="round"/><path d="M48 14l5-7" stroke="#ffd9de" stroke-width="1.2" opacity=".8"/>`,
+      psabre: `${sh}<path d="M52 6c-8 16-20 26-32 32l4 4c14-6 24-18 30-34z" fill="url(#lgSilver)" stroke="#3a4450" stroke-width="1.2"/><path d="M50 10c-7 13-17 22-27 28" stroke="#fff" stroke-width="1.2" opacity=".7" fill="none"/>
+        <path d="M14 36c4 2 12 10 14 14" stroke="#2a3a44" stroke-width="5" stroke-linecap="round"/><path d="M14 36c4 2 12 10 14 14" stroke="#7ab0c0" stroke-width="3" stroke-linecap="round"/>
+        <path d="M22 42L11 53" stroke="#1d2a30" stroke-width="5" stroke-linecap="round"/><circle cx="9" cy="55" r="4.5" fill="url(#rgPearl)" stroke="#6a7a8a" filter="url(#fGlow)"/>`,
       hammer: `${sh}${handle}<path d="M32 6l18 12-8 12-18-12z" fill="url(#${head})" stroke="#111" stroke-width="1.2"/><path d="M33 9l14 9" stroke="#fff" stroke-width="1.4" opacity=".5"/>`,
     };
-    return shapes[type] + shine;
+    return shapes[type] + (type === 'spear' || type === 'psabre' ? '' : shine);
   }
 
   const tile = type => TILES[type] ? svg(TILES[type]) : '';
@@ -279,6 +297,11 @@ window.Art = (() => {
       <path d="M8 34c6-4 12-2 16-4M40 30c6 2 10 0 16 4" stroke="#7a9a3a" stroke-width="3" fill="none" stroke-linecap="round"/>`,
   });
   Object.assign(PIECES, {
+    chowder: `<ellipse cx="32" cy="58" rx="14" ry="3" fill="#000" opacity=".3"/>
+      <path d="M26 6h12v6l2 6c8 4 10 10 10 18v14c0 6-4 8-10 8H24c-6 0-10-2-10-8V36c0-8 2-14 10-18l2-6z" fill="#9fc8c0" opacity=".55" stroke="#3a5a54" stroke-width="1.4"/>
+      <path d="M16 36c0-2 4-4 16-4s16 2 16 4v14c0 4-3 6-8 6H24c-5 0-8-2-8-6z" fill="#d89a48"/><path d="M16 36c4 2 28 2 32 0" stroke="#f2c27a" stroke-width="2" fill="none"/>
+      <g fill="#f4e2c0"><circle cx="24" cy="42" r="2.2"/><circle cx="36" cy="45" r="2"/><circle cx="30" cy="49" r="1.6"/></g><circle cx="41" cy="40" r="1.8" fill="#6a9a3a"/>
+      <rect x="25" y="2" width="14" height="7" rx="2" fill="#8a5a2c" stroke="#4a2a10"/><path d="M20 22c-2 4-3 9-3 13" stroke="#fff" stroke-width="2.4" opacity=".6" fill="none" stroke-linecap="round"/>`,
     coral: `<path d="M8 54c2-8 10-12 24-12s22 4 24 12z" fill="#6f6a62"/>
       <g fill="none" stroke-linecap="round" stroke-width="5"><path d="M24 46V30l-6-8M24 34l7-8M24 26v-8" stroke="#ff7a8a"/><path d="M40 46V24l6-8M40 30l-7-6M46 16l4-6" stroke="#ff9eb0"/><path d="M32 46V36" stroke="#e85d75"/></g>
       <g fill="#ffd1d8"><circle cx="18" cy="21" r="2.4"/><circle cx="31" cy="25" r="2.4"/><circle cx="24" cy="17" r="2.4"/><circle cx="50" cy="9" r="2.4"/><circle cx="33" cy="23" r="2"/></g>`,

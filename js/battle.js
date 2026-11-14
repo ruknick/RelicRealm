@@ -345,6 +345,19 @@ window.Battle = (() => {
       board.toast(msg, '', 2600);
     },
     onWeaponUsed: () => { run.weaponsUsed++; },
+    // Bottled chowder: a quick meal mid-raid puts life back into your keep (free, no move).
+    useInstant(k) {
+      if (k !== 'chowder') return null;
+      const keep = run.race.keep;
+      if (!keep.alive || run.race.done) return 'Too late — your keep has fallen.';
+      if (keep.hp >= keep.max) return '🍲 Your keep is at full strength — save the chowder for when they break through.';
+      const heal = Math.min(2, keep.max - keep.hp);
+      keep.hp += heal;
+      Sound.sfx('found');
+      board.toast(`🍲 Your defenders eat — keep +${heal} ♥ (${keep.hp}/${keep.max})`, 'win', 2400);
+      hudRace();
+      return true;
+    },
     onArm: () => hud(),
     async afterAction(wasMove) {
       hud();

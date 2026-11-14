@@ -17,6 +17,8 @@ window.Data = (() => {
     starsilver:{ label: 'Starsilver' },
     charcoal:  { label: 'Charcoal' },
     steel:     { label: 'Steel' },
+    pearl:     { label: 'Pearl' },
+    coral:     { label: 'Coral' },
   };
 
   // ---------- gear: wield it, it wears down ----------
@@ -30,6 +32,7 @@ window.Data = (() => {
     waxe:   { cls: 'tool', what: 'Wood-axe', trait: 'chops stumps, bushes, kelp & wooden defenses' },
     pick:   { cls: 'tool', what: 'Pick', trait: 'breaks rock, ore veins, coral & stone defenses' },
     hammer: { cls: 'tool', what: 'Hammer', trait: 'smashes any built defense: walls, gates, towers, keeps' },
+    spear:  { cls: 'weapon', what: 'Spear', trait: 'pierces: also hits the monsters directly above & below' },
   };
   const gear = (name, type, tier, extra = {}) => ({
     name, type, tier, gear: TYPE_INFO[type].cls, dur: DURABILITY[tier], art: `gear:${type}:${tier}`,
@@ -47,6 +50,11 @@ window.Data = (() => {
     sword3: gear('Steel sword', 'sword', 3),
     bow3:  gear('Ironwood war bow', 'bow', 3),
     shiv:  gear('Goblin shiv', 'sword', 2, { dur: 6, spoil: 'goblin' }),
+    // Sea gear: iron-strength without a forge, each with a trick. Bane: hits its foes as one tier stronger.
+    coralspear: gear('Coral spear', 'spear', 2, { dur: 6, sea: true, bane: 'sea',
+      desc: 'Sea gear · iron strength, no forge needed · pierces the monsters above & below · bane of sea creatures (crabs now, worse things later).' }),
+    pearlsabre: gear('Pearl sabre', 'sword', 2, { dur: 10, sea: true, light: true, bane: 'shadow', art: 'gear:psabre:2',
+      desc: 'Sea gear · light: swings cost 1 less ⚡ · +1 damage · its pearl glows — bane of creatures of the dark (Deep Tunnels, coming).' }),
     // Tools (obstacles & defenses only)
     waxe1: gear('Stone wood-axe', 'waxe', 1),
     pick1: gear('Stone pick', 'pick', 1),
@@ -81,6 +89,8 @@ window.Data = (() => {
     runestone:  { name: 'Runestone', icon: '🪨', spoil: 'dwarf', desc: 'Place in your camp: +1 HP to every defense touching it. 1 pt.' },
     cartbp:     { name: 'Mine-cart blueprint', icon: '🛤️', spoil: 'dwarf', desc: 'Unlocks the Mine-cart defense.' },
     crown:      { name: 'Old King\'s Crown', icon: '👑', trinket: true, desc: 'Legendary. Raiders start 2 moves behind.' },
+    // Provisions
+    chowder:    { name: 'Bottled chowder', icon: '🍲', art: 'chowder', special: true, instant: true, desc: 'Drink it mid-raid: your camp\'s keep gets 2 ♥ back.' },
     // Dragon prep
     flask:      { name: 'Water flask', icon: '💧', prep: true, desc: 'Douses lava and dragonfire in the Dragon\'s Lair (coming soon).' },
     elderward:  { name: 'Elderwood ward', icon: '🛡️', prep: true, desc: 'Elderwood never burns. Shields you from dragonfire (coming soon).' },
@@ -104,7 +114,8 @@ window.Data = (() => {
         : !!p.struct;                                   // hammer: built defenses of any material
       if (!ok) return 0;
     }
-    const diff = G.tier - hardness(p);
+    const bane = G.bane && p.kin === G.bane ? 1 : 0;   // bane gear hits its foes a tier harder
+    const diff = G.tier + bane - hardness(p);
     if (diff < 0) return 0;
     return STEP_DMG[Math.min(diff, 4)] + (G.type === 'sword' ? 1 : 0);
   }
@@ -147,7 +158,7 @@ window.Data = (() => {
   const MAT_LABEL = { wood: 'wood', stone: 'stone', iron: 'iron', plant: 'thorns', creature: 'creatures', other: 'that' };
 
   // ---------- tile families: rarer woods & ores match with the common one ----------
-  const FAMILY = { oak: 'wood', ironwood: 'wood', elderwood: 'wood', silver: 'ore', starsilver: 'ore' };
+  const FAMILY = { oak: 'wood', ironwood: 'wood', elderwood: 'wood', silver: 'ore', starsilver: 'ore', pearl: 'fish' };
   const family = t => FAMILY[t] || t;
   // Spawn weight (per 100 of that family) for each rare type by land level: a teaser first, then common.
   const RARE = {
@@ -156,6 +167,7 @@ window.Data = (() => {
     elderwood:  L => (L <= 4 ? 0 : L <= 6 ? 3 : 12),
     silver:     L => (L <= 2 ? 3 : L <= 4 ? 18 : 28),
     starsilver: L => (L <= 4 ? 0 : L <= 6 ? 3 : 12),
+    pearl:      L => (L <= 2 ? 5 : L <= 4 ? 10 : 15),
   };
   const RARE_INFO = {
     oak:        { use: 'Oak hafts for iron gear, longbows — and burned into charcoal for steel.' },
@@ -163,6 +175,8 @@ window.Data = (() => {
     elderwood:  { use: 'Elderwood never burns — the key to surviving dragonfire.' },
     silver:     { use: 'Crystal keys today; silvered gear is coming.' },
     starsilver: { use: 'The mythic metal. After the dragon, it forges legends.' },
+    pearl:      { use: 'Pearls glow in the dark. Forge a Pearl sabre — light, quick, and deadly to creatures of the dark.' },
+    coral:      { use: 'Hard as iron, no forge needed. Carve a Coral spear — bane of sea creatures.' },
   };
 
   // ---------- finds ----------
@@ -182,7 +196,7 @@ window.Data = (() => {
     coalseam:  { icon: '🪨', name: 'Coal seam', desc: '+3 coal' },
     nugget:    { icon: '✨', name: 'Gold nuggets', desc: '+3 gold', art: 'gold' },
     sling:     { icon: '🏹', name: 'Old short bow', desc: 'A pine short bow — added to your gear' },
-    pearl:     { icon: '🦪', name: 'Pearl', desc: '+4 gold' },
+    pearl:     { icon: '🦪', name: 'Oyster', desc: '+1 pearl, +2 gold', art: 'pearl' },
     barrel:    { icon: '🛢️', name: 'Fresh-water barrel', desc: '+3 water' },
   };
 
@@ -214,6 +228,8 @@ window.Data = (() => {
     { id: 'baxe3', tier: 'weapon', cost: { steel: 3, ironwood: 2 } },
     { id: 'sword3', tier: 'weapon', cost: { steel: 3, ironwood: 1, hide: 1 } },
     { id: 'bow3',  tier: 'weapon', cost: { ironwood: 4, hide: 2, steel: 1 } },
+    { id: 'coralspear', tier: 'weapon', cost: { coral: 5, wood: 2, hide: 1 } },
+    { id: 'pearlsabre', tier: 'weapon', cost: { pearl: 3, iron: 3, oak: 1, water: 1 } },
     { id: 'waxe1', tier: 'tool', cost: { wood: 3, stone: 3 } },
     { id: 'pick1', tier: 'tool', cost: { wood: 3, stone: 4 } },
     { id: 'hammer1', tier: 'tool', cost: { wood: 2, stone: 5 } },
@@ -233,6 +249,7 @@ window.Data = (() => {
     { id: 'hatchet', tier: 'kit', cost: { wood: 6, iron: 2 } },
     { id: 'knife',   tier: 'kit', cost: { wood: 2, iron: 3 } },
     { id: 'lamp',    tier: 'kit', cost: { coal: 4, iron: 2, gold: 2 } },
+    { id: 'chowder', tier: 'food', cost: { food: 3, water: 2 } },
     { id: 'flask',   tier: 'prep', cost: { water: 4, hide: 1 } },
     { id: 'elderward', tier: 'prep', cost: { elderwood: 3, water: 2 } },
   ];
@@ -263,7 +280,7 @@ window.Data = (() => {
     wood:  { from: 'Forest pine logs, Coast driftwood, stumps (wood-axe)', use: 'Wooden weapons, stone tools, fences, towers' },
     stone: { from: 'Forest & Iron Hills rocks, boulders (pick)', use: 'Stone tools, stone walls, bulwarks' },
     hide:  { from: 'Forest pelts', use: 'Bows, swords, pit traps, flasks' },
-    food:  { from: 'Forest berries, Coast fish', use: 'Marching to raids (3–4 per raid)' },
+    food:  { from: 'Forest berries, Coast fish', use: 'Marching to raids (3–4 per raid), Bottled chowder (heals your keep mid-raid)' },
     gold:  { from: 'Gold nuggets everywhere, pearls, chests', use: 'Gold keys, the miner\'s lamp' },
     iron:  { from: 'Iron Hills ore, iron veins, spoils', use: 'Iron gear, iron gates, steel' },
     coal:  { from: 'Iron Hills coal', use: 'The miner\'s lamp' },
@@ -275,6 +292,8 @@ window.Data = (() => {
     starsilver: { from: 'Iron Hills Lv 5+', use: RARE_INFO.starsilver.use },
     charcoal:   { from: 'Burned oak (Workshop)', use: 'Forging steel' },
     steel:      { from: 'Forged at the Workshop', use: 'Steel gear and bulwarks' },
+    pearl:      { from: 'Sunlit Coast: pearl tiles among the fish, oysters in kelp & coral', use: RARE_INFO.pearl.use },
+    coral:      { from: 'Sunlit Coast: break coral with a pick', use: RARE_INFO.coral.use },
   };
 
   return {

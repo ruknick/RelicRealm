@@ -22,7 +22,7 @@ window.Gather = (() => {
     cart:    { kind: 'cart',    label: '', mat: 'wood',     hp: 1, art: 'cart' },
     coral:   { kind: 'coral',   label: '', mat: 'stone',    hp: 2, art: 'coral', toolOnly: 'pick' },
     kelp:    { kind: 'kelp',    label: '', mat: 'plant',    hp: 1, art: 'kelp', toolOnly: 'axe' },
-    crab:    { kind: 'crab',    label: '', mat: 'creature', hp: 1, art: 'crab' },
+    crab:    { kind: 'crab',    label: '', mat: 'creature', hp: 1, art: 'crab', kin: 'sea' },
     tracks:  { kind: 'tracks',  label: '', mat: 'other',    hp: 1, art: 'tracks' },
     rune:    { kind: 'rune',    label: '', mat: 'other',    hp: 1, art: 'rune' },
   };
@@ -67,7 +67,7 @@ window.Gather = (() => {
     event: { piece: 'crab', msg: '🦀 A giant crab snatched some loot! Only a weapon can stop it →', loot: ['water', 'food', 'gold'] },
     discover: null,
     finds: 'ocean',
-    hint: 'Collect water to forge iron and fight dragonfire. Coral needs a pickaxe, kelp needs an axe.',
+    hint: 'Water quenches iron; fish feed your raids. Pick coral for coral, cut kelp for oysters. Pearls shimmer among the fish.',
   };
   const TOOL_BONUS = { wood: 'hatchet', hide: 'knife' };
 
@@ -168,7 +168,7 @@ window.Gather = (() => {
       case 'orepocket': addToBackpack('iron', 3, cell, delay); break;
       case 'coalseam': addToBackpack('coal', 3, cell, delay); break;
       case 'nugget': addToBackpack('gold', 3, cell, delay); break;
-      case 'pearl': addToBackpack('gold', 4, cell, delay); break;
+      case 'pearl': addToBackpack('pearl', 1, cell, delay); addToBackpack('gold', 2, cell, delay + 200); discoverMaterial('pearl', cell); break;
       case 'barrel': addToBackpack('water', 3, cell, delay); break;
       case 'lostclub': App.addGear('baxe1'); break;
       case 'sling': App.addGear('bow1'); break;
@@ -348,8 +348,12 @@ window.Gather = (() => {
         case 'thorn':
         case 'kelp': applyFind(Data.rollFrom(Data.FINDS[land.finds]), cell, 150); break;
         case 'coral':
-          addToBackpack('gold', 1, cell);
-          board.toast('🪸 Coral cracked! +1 gold');
+          {
+            const n = (Data.ITEMS[w]?.tier || 1) >= 2 ? 3 : 2;
+            addToBackpack('coral', n, cell);
+            board.toast(`🪸 Coral cracked! +${n} coral`);
+            discoverMaterial('coral', cell);
+          }
           if (Math.random() < 0.3) applyFind(Data.rollFrom(Data.FINDS[land.finds]), cell, 300);
           break;
         case 'boulder':
@@ -399,13 +403,14 @@ window.Gather = (() => {
         cart: 'A runaway cart full of ore! Stop it before it rolls off.',
         tracks: 'Goblin tracks — match next to them to follow.',
         rune: 'A cracked rune stone — match next to it to read it.',
-        coral: `Coral (${p.hp} HP). Only a pickaxe can break it — it hides gold.`,
+        coral: `Coral (${p.hp} HP). Only a pick can break it — gives coral for sea gear, sometimes an oyster.`,
         kelp: `Kelp tangle (${p.hp} HP) — something's caught in it! Only an axe can cut it.`,
-        crab: 'A giant crab with stolen loot! Only a weapon can stop it before it reaches the sea.',
+        crab: 'A giant crab with stolen loot! Only a weapon can stop it before it reaches the sea. Coral spears hit it extra hard.',
       }[p.kind];
       board.toast(msg || 'Match next to it.', '', 2800);
     },
     onArm: () => hud(),
+    useInstant: k => (k === 'chowder' ? '🍲 Save the chowder for a raid — drink it to give your keep 2 ♥ back.' : null),
     async afterAction(wasMove) {
       if (run.followed && !run.discovered) {
         run.discovered = true;
