@@ -53,7 +53,7 @@ window.Gather = (() => {
       event: { piece: 'cart', msg: '⛏️ A runaway ore cart! Stop it before it rolls off →', loot: ['iron', 'coal', 'stone'] },
       discover: { piece: 'rune', enemy: 'dwarf', spot: 'ᚱ A cracked rune stone… match next to it to read it.' },
       finds: 'mine',
-      hint: 'Match ore for iron and coal. Wield a pick for boulders & veins. Silver glints among the ore.',
+      hint: 'Match ore for iron and coal. Wield a pick for boulders & veins. Silver glints in the ore, gems in the stone.',
     },
   };
   LANDS.ocean = {
@@ -128,10 +128,10 @@ window.Gather = (() => {
     let x = Math.random() * total, type = Object.keys(W)[0];
     for (const [t, w] of Object.entries(W)) if ((x -= w) < 0) { type = t; break; }
     // Rarer woods / ores sprinkle in, more often as the land levels up.
-    if (run && (type === 'wood' || type === 'ore')) {
+    if (run) {
       let y = Math.random() * 100;
       for (const [rare, fam] of Object.entries(Data.FAMILY)) {
-        if (fam !== type) continue;
+        if (fam !== type || (Data.RARE_LAND[rare] && Data.RARE_LAND[rare] !== land.key)) continue;
         if ((y -= Data.RARE[rare](run.landLv)) < 0) return rare;
       }
     }

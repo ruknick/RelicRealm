@@ -395,8 +395,8 @@ window.Board = (() => {
       const mini = (key, emoji) => {
         const g = st.equip[key];
         if (!g) return `<span class="gb-item empty">${emoji}</span>`;
-        const it = Data.ITEMS[g.id], pct = Math.round(g.dur / it.dur * 100);
-        return `<span class="gb-item t${it.tier}">${Art.piece(it.art)}<span class="dur${pct <= 25 ? ' low' : ''}"><i style="width:${pct}%"></i></span></span>`;
+        const it = Data.ITEMS[g.id];
+        return `<span class="gb-item t${it.tier}">${Art.piece(it.art)}</span>`;
       };
       const shields = App.wardLayers().reduce((n, w) => n + w.max, 0);
       const specials = Object.keys(Data.ITEMS).filter(k => Data.ITEMS[k].special && inv[k] > 0).map(k => {
@@ -670,7 +670,8 @@ window.Board = (() => {
           this.lineFlash(horiz, horiz ? ri.cells[0][0] : ri.cells[0][1]);
         }
         this.hooks.onMatch?.(runs, step);
-        this.gainEnergy(runs.reduce((n, ri) => n + 1 + (ri.cells.length >= 4 || step > 1 ? 1 : 0), 0) + blasts.length * 2);
+        const tide = Data.amuletPower() === 'tide' ? 1 : 0;   // Tidestone: big matches charge more
+        this.gainEnergy(runs.reduce((n, ri) => n + 1 + (ri.cells.length >= 4 || step > 1 ? 1 + tide : 0), 0) + blasts.length * (2 + tide));
         window.Sound?.sfx(blasts.length ? 'blast' : 'match', step);
         if (step >= 2) this.combo(step);
         if (blasts.length) this.toast('💥 Line blast!', 'win');
@@ -680,8 +681,9 @@ window.Board = (() => {
           if (p.gone) return;
           if (p.mat === 'creature') {
             const g = App.state.equip.weapon;
-            const d = g ? Data.gearDamage(g.id, p) : 0;
+            let d = g ? Data.gearDamage(g.id, p) : 0;
             if (d > 0) {
+              if (Data.amuletPower() === 'fury') d++;   // Emberstone: match-strikes hit harder
               swung = true;
               this.float([p.r, p.c + Math.floor(p.w / 2)], `⚔️ −${Math.min(d, p.hp)}`, 'loss');
               this.hooks.onPieceHit(p, d, 'weapon', g.id);

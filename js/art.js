@@ -30,6 +30,9 @@ window.Art = (() => {
     <radialGradient id="rgPearl" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#eef0f6"/><stop offset=".8" stop-color="#c9c3dc"/><stop offset="1" stop-color="#9fb4c6"/></radialGradient>
     <linearGradient id="lgShell" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d8cdb8"/><stop offset=".6" stop-color="#a59680"/><stop offset="1" stop-color="#6e604e"/></linearGradient>
     <linearGradient id="lgCoral" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#c2405a"/><stop offset=".6" stop-color="#ef6f84"/><stop offset="1" stop-color="#ffb3be"/></linearGradient>
+    <linearGradient id="lgEmerald" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c8ffd9"/><stop offset=".35" stop-color="#2fbf71"/><stop offset=".8" stop-color="#0b5a32"/><stop offset="1" stop-color="#5fe39a"/></linearGradient>
+    <linearGradient id="lgSapphire" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d6e6ff"/><stop offset=".35" stop-color="#3d7bff"/><stop offset=".8" stop-color="#132a7a"/><stop offset="1" stop-color="#7aa8ff"/></linearGradient>
+    <linearGradient id="lgRuby" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd6dc"/><stop offset=".35" stop-color="#e0324b"/><stop offset=".8" stop-color="#6a0a1a"/><stop offset="1" stop-color="#ff7a8c"/></linearGradient>
     <linearGradient id="lgIron" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9aa3ad"/><stop offset=".45" stop-color="#5d6672"/><stop offset="1" stop-color="#2f353d"/></linearGradient>
     <linearGradient id="lgStoneHead" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c2c6cb"/><stop offset=".5" stop-color="#8a9097"/><stop offset="1" stop-color="#555b62"/></linearGradient>
     <linearGradient id="lgWoodHead" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9a868"/><stop offset=".5" stop-color="#a06a32"/><stop offset="1" stop-color="#5a3414"/></linearGradient>
@@ -138,6 +141,13 @@ window.Art = (() => {
       <g fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M32 56V36l-10-12-2-12M32 40l10-12 2-14M22 24l-8-4M42 28l10-4M32 36v-14" stroke="#8a2a3a" stroke-width="7"/>
       <path d="M32 56V36l-10-12-2-12M32 40l10-12 2-14M22 24l-8-4M42 28l10-4M32 36v-14" stroke="url(#lgCoral)" stroke-width="5"/></g>
       <g fill="#ffd9de" opacity=".8"><circle cx="20" cy="13" r="1.5"/><circle cx="44" cy="15" r="1.5"/><circle cx="14" cy="20" r="1.4"/><circle cx="52" cy="24" r="1.4"/><circle cx="32" cy="23" r="1.4"/></g>`;
+  // Gems: a cut stone sitting in rough rock.
+  const gem = g => `<ellipse cx="32" cy="54" rx="20" ry="3.5" fill="#000" opacity=".35"/>
+      <path d="M8 50 14 36 26 32 40 33 52 38 56 50z" fill="url(#rgRock)"/>
+      <g filter="url(#fGlow)"><path d="M18 24 26 12h12l8 12-14 22z" fill="url(#${g})" stroke="#000" stroke-opacity=".45" stroke-width="1.2"/></g>
+      <path d="M18 24h28M26 12l-2 12 8 22 8-22-2-12M24 24l8-12 8 12" stroke="#fff" stroke-opacity=".45" stroke-width="1" fill="none"/>
+      <path d="M27 15l-3 6" stroke="#fff" stroke-width="2" opacity=".8" stroke-linecap="round"/>`;
+  TILES.emerald = gem('lgEmerald'); TILES.sapphire = gem('lgSapphire'); TILES.ruby = gem('lgRuby');
   TILES.mushroom = TILES.leaves;
 
   // ---------- gear icons: shape by type, finish by tier ----------
@@ -180,9 +190,12 @@ window.Art = (() => {
       shield: `${sh}<path d="M10 8h44v20c0 16-10 24-22 30C20 52 10 44 10 28z" fill="url(#${tier === 1 ? 'lgWoodHead' : ah})" stroke="#111" stroke-width="1.6"/>
         <path d="M32 10v46M12 26h40" stroke="${tier === 1 ? '#5a3414' : '#3a4450'}" stroke-width="3"/><circle cx="32" cy="26" r="5" fill="url(#lgGold)" stroke="#5a4210"/>
         <path d="M16 12l2 16" stroke="#fff" stroke-width="2.4" opacity=".4" stroke-linecap="round"/>`,
+      amulet: `${sh}<path d="M16 8c0 18 6 26 16 30M48 8c0 18-6 26-16 30" stroke="#c7cfd8" stroke-width="2.4" fill="none" stroke-dasharray="3 1.5"/>
+        <circle cx="32" cy="44" r="11" fill="url(#lgSilver)" stroke="#4a5560" stroke-width="1.4"/>
+        <g filter="url(#fGlow)"><path d="M32 36l6 7-6 9-6-9z" fill="url(#${['lgEmerald', 'lgSapphire', 'lgRuby', 'lgStar'][tier - 1]})" stroke="#fff" stroke-width=".8"/></g>`,
       hammer: `${sh}${handle}<path d="M32 6l18 12-8 12-18-12z" fill="url(#${head})" stroke="#111" stroke-width="1.2"/><path d="M33 9l14 9" stroke="#fff" stroke-width="1.4" opacity=".5"/>`,
     };
-    return shapes[type] + (type === 'spear' || type === 'psabre' ? '' : shine);
+    return shapes[type] + (['spear', 'psabre', 'amulet'].includes(type) ? '' : shine);
   }
 
   const tile = type => TILES[type] ? svg(TILES[type]) : '';

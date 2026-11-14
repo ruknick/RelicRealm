@@ -36,7 +36,7 @@ window.Items = (() => {
     const sp = App.state.stockpile;
     return '<h3 class="craft-h">🪵 Materials <small>banked at your camp</small></h3>' + Object.keys(Data.RESOURCES).map(k => {
       const info = Data.MATERIAL_INFO[k] || {};
-      const TILE = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water', oak: 'oak', ironwood: 'ironwood', elderwood: 'elderwood', silver: 'silver', starsilver: 'starsilver', charcoal: 'charcoal', steel: 'steel', pearl: 'pearl', coral: 'coral' };
+      const TILE = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water', oak: 'oak', ironwood: 'ironwood', elderwood: 'elderwood', silver: 'silver', starsilver: 'starsilver', charcoal: 'charcoal', steel: 'steel', pearl: 'pearl', coral: 'coral', emerald: 'emerald', sapphire: 'sapphire', ruby: 'ruby' };
       const icon = `<div class="gem art g-${TILE[k]} ic-gem">${Art.tile(TILE[k])}</div>`;
       return card(icon, Data.RESOURCES[k].label, sp[k], `<b>From:</b> ${info.from || '—'}<br><b>For:</b> ${info.use || '—'}`, sp[k] > 0);
     }).join('');
@@ -44,7 +44,7 @@ window.Items = (() => {
 
   function gear() {
     const st = App.state, inv = st.inventory, placed = Object.values((st.camp || {}).cells || {});
-    const durBar = (g, it) => `<span class="dur big${g.dur / it.dur <= 0.25 ? ' low' : ''}"><i style="width:${Math.round(g.dur / it.dur * 100)}%"></i></span> ${g.dur}/${it.dur}`;
+    const durBar = (g, it) => (it.dur ? `<span class="dur big${g.dur / it.dur <= 0.25 ? ' low' : ''}"><i style="width:${Math.round(g.dur / it.dur * 100)}%"></i></span> ${g.dur}/${it.dur}` : '∞');
     const gearList = cls => {
       const rows = [];
       Data.SLOTS.forEach(slot => {
@@ -65,6 +65,7 @@ window.Items = (() => {
     return `<h3 class="craft-h">⚔️ Weapons <small>monsters only</small></h3>${gearList('weapon')}`
       + `<h3 class="craft-h">🛠️ Tools <small>obstacles & defenses only</small></h3>${gearList('tool')}`
       + `<h3 class="craft-h">🛡️ Armor <small>wear it in 🧍 Warrior</small></h3>${gearList('armor')}`
+      + `<h3 class="craft-h">📿 Amulets <small>gem power for your matches</small></h3>${gearList('trinket')}`
       + group('🛡️ Defenses <small>place them in your camp</small>', R.filter(r => r.defense).map(r => r.id))
       + group('🍲 Provisions <small>use on raids</small>', R.filter(r => r.tier === 'food').map(r => r.id))
       + group('🎒 Kit <small>passive & permanent</small>', R.filter(r => r.tier === 'kit').map(r => r.id))

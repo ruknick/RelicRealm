@@ -27,7 +27,7 @@ window.Craft = (() => {
     const owned = r.makes ? null : it.gear ? App.gearCount(r.id) : st().inventory[r.id];
     const ownedTxt = r.makes ? `have ${Object.keys(r.makes).map(k => st().stockpile[k]).join('')}` : isKit(r) ? (owned ? '✓ Owned' : '') : owned ? `owned ×${owned}` : '';
     const ready = canAfford(r) && !ownedKit(r);
-    const tag = it.gear ? `<span class="tag t${it.tier}">${Data.tierLabel(r.id)} · ${it.dur} ${it.gear === 'armor' ? 'blocks' : 'hits'}</span>` : '';
+    const tag = it.gear ? `<span class="tag t${it.tier}">${Data.tierLabel(r.id)} · ${it.dur ? `${it.dur} blocks` : '∞ never wears out'}</span>` : '';
     return `<div class="recipe ${ready ? 'ready' : ''}" data-id="${r.id}">
       <div class="r-icon">${r.makes ? `<div class="gem art g-${tileFor(Object.keys(r.makes)[0])}" style="position:relative;width:40px;height:40px">${Art.tile(tileFor(Object.keys(r.makes)[0]))}</div>` : iconOf(it)}</div>
       <div class="r-body">
@@ -71,11 +71,12 @@ window.Craft = (() => {
     }).join('');
     const reps = repairList();
     document.getElementById('craft-list').innerHTML =
-      sec('🔧 Repair bench', 'restore worn gear for half its materials', reps.map(repairCard)) +
+      sec('🔧 Repair bench', 'mend battered armor for half its materials', reps.map(repairCard)) +
       `<h3 class="craft-h">⚔️ Weapons <small>monsters only · wield one at a time</small></h3>${byTier('weapon')}` +
       sec('🌊 Sea gear', 'coral & pearls from the Sunlit Coast · iron strength with a trick', R.filter(r => Data.ITEMS[r.id]?.sea).map(card)) +
       `<h3 class="craft-h">🛠️ Tools <small>obstacles & defenses only · wield one at a time</small></h3>${byTier('tool')}` +
       `<h3 class="craft-h">🛡️ Armor <small>wear it in 🧍 Warrior · adds 🛡 hearts to your keep in raids</small></h3>${byTier('armor')}` +
+      sec('📿 Amulets', 'gems from the Iron Hills set in silver · give your matches power', R.filter(r => r.tier === 'amulet').map(card)) +
       sec('🔥 Smelting', 'oak becomes charcoal; iron + charcoal becomes steel', R.filter(r => r.tier === 'smelt').map(card)) +
       sec('🔑 Key upgrades', 'gold & crystal chests need better keys', R.filter(r => r.tier === 'keys').map(card)) +
       sec('🛡️ Defenses', 'place them in 🏰 Fortify', R.filter(r => r.defense).map(card)) +
@@ -173,7 +174,7 @@ window.Craft = (() => {
     if (it.gear) {
       const slot = Data.slotOf(id);
       const cur = st().equip[slot];
-      if (!cur || Data.ITEMS[cur.id].tier < it.tier) App.equip(slot, st().gear.length - 1);
+      if (!cur || (slot !== 'amulet' && Data.ITEMS[cur.id].tier < it.tier)) App.equip(slot, st().gear.length - 1);
     }
     App.save();
     forge.classList.add('done');

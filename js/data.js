@@ -19,6 +19,9 @@ window.Data = (() => {
     steel:     { label: 'Steel' },
     pearl:     { label: 'Pearl' },
     coral:     { label: 'Coral' },
+    emerald:   { label: 'Emerald' },
+    sapphire:  { label: 'Sapphire' },
+    ruby:      { label: 'Ruby' },
   };
 
   // ---------- gear: wield it, it wears down ----------
@@ -39,6 +42,7 @@ window.Data = (() => {
     legs:   { cls: 'armor', what: 'Leg armor', trait: '+1 🛡 on your keep in raids' },
     gloves: { cls: 'armor', what: 'Gloves', trait: 'start every board with extra ⚡' },
     shield: { cls: 'armor', what: 'Shield', trait: '+1 🛡 on your keep in raids — the first layer they hit' },
+    amulet: { cls: 'trinket', what: 'Amulet', trait: '' },
   };
   const ARMOR_LABEL = { 1: 'Leather', 2: 'Iron', 3: 'Steel', 4: 'Mythic' };
   const WARD = { helmet: 1, body: 2, legs: 1, shield: 1, gloves: 0 };
@@ -47,13 +51,15 @@ window.Data = (() => {
     const cls = TYPE_INFO[type].cls;
     const what = cls === 'weapon' ? 'monsters only' : cls === 'tool' ? 'obstacles & defenses only' : `armor (hardness ${tier})`;
     const trait = type === 'gloves' ? `start every board with +${tier} ⚡` : TYPE_INFO[type].trait;
-    return { name, type, tier, gear: cls, dur: DURABILITY[tier], art: `gear:${type}:${tier}`,
+    return { name, type, tier, gear: cls, dur: cls === 'armor' ? DURABILITY[tier] : 0, art: `gear:${type}:${tier}`,
       desc: `${(cls === 'armor' ? ARMOR_LABEL : TIER_LABEL)[tier]} tier · ${what} · ${trait}.`, ...extra };
   };
   // Every slot on your warrior. Weapon & tool are swung; the rest are worn.
-  const SLOTS = ['helmet', 'body', 'gloves', 'legs', 'shield', 'weapon', 'tool'];
-  const slotOf = id => { const it = ITEMS[id]; return it.gear === 'armor' ? it.type : it.gear; };
-  const tierLabel = id => { const it = ITEMS[id]; return it.sea ? 'Sea' : (it.gear === 'armor' ? ARMOR_LABEL : TIER_LABEL)[it.tier]; };
+  const SLOTS = ['helmet', 'amulet', 'body', 'gloves', 'legs', 'shield', 'weapon', 'tool'];
+  const slotOf = id => { const it = ITEMS[id]; return it.gear === 'armor' ? it.type : it.gear === 'trinket' ? 'amulet' : it.gear; };
+  const tierLabel = id => { const it = ITEMS[id]; return it.gem ? RESOURCES[it.gem].label : it.sea ? 'Sea' : (it.gear === 'armor' ? ARMOR_LABEL : TIER_LABEL)[it.tier]; };
+  // The power of the amulet you wear ('earth' | 'tide' | 'fury'), or null.
+  const amuletPower = () => { const g = window.App?.state?.equip?.amulet; return g ? ITEMS[g.id].power : null; };
 
   const ITEMS = {
     // Weapons (monsters only)
@@ -65,11 +71,11 @@ window.Data = (() => {
     baxe3: gear('Steel battle-axe', 'baxe', 3),
     sword3: gear('Steel sword', 'sword', 3),
     bow3:  gear('Ironwood war bow', 'bow', 3),
-    shiv:  gear('Goblin shiv', 'sword', 2, { dur: 6, spoil: 'goblin' }),
+    shiv:  gear('Goblin shiv', 'sword', 2, { spoil: 'goblin' }),
     // Sea gear: iron-strength without a forge, each with a trick. Bane: hits its foes as one tier stronger.
-    coralspear: gear('Coral spear', 'spear', 2, { dur: 6, sea: true, bane: 'sea',
+    coralspear: gear('Coral spear', 'spear', 2, { sea: true, bane: 'sea',
       desc: 'Sea gear · iron strength, no forge needed · pierces the monsters above & below · bane of sea creatures (crabs now, worse things later).' }),
-    pearlsabre: gear('Pearl sabre', 'sword', 2, { dur: 10, sea: true, light: true, bane: 'shadow', art: 'gear:psabre:2',
+    pearlsabre: gear('Pearl sabre', 'sword', 2, { sea: true, light: true, bane: 'shadow', art: 'gear:psabre:2',
       desc: 'Sea gear · light: swings cost 1 less ⚡ · +1 damage · its pearl glows — bane of creatures of the dark (Deep Tunnels, coming).' }),
     // Tools (obstacles & defenses only)
     waxe1: gear('Stone wood-axe', 'waxe', 1),
@@ -81,7 +87,14 @@ window.Data = (() => {
     waxe3: gear('Steel wood-axe', 'waxe', 3),
     pick3: gear('Steel pick', 'pick', 3),
     hammer3: gear('Steel hammer', 'hammer', 3),
-    dpick: gear('Dwarven pick', 'pick', 3, { dur: 12, spoil: 'dwarf' }),
+    dpick: gear('Dwarven pick', 'pick', 3, { spoil: 'dwarf' }),
+    // Amulets: gemstones on a silver chain. Worn at the neck; they give your matches extra power.
+    amulet1: gear('Rootstone amulet', 'amulet', 1, { gem: 'emerald', power: 'earth',
+      desc: 'Emerald · earth power: your matches chip ANY obstacle or defense beside them — stumps, rocks, coral, even iron.' }),
+    amulet2: gear('Tidestone amulet', 'amulet', 2, { gem: 'sapphire', power: 'tide',
+      desc: 'Sapphire · tide power: matches of 4+ and chains give +1 more ⚡, blasts give +1 more.' }),
+    amulet3: gear('Emberstone amulet', 'amulet', 3, { gem: 'ruby', power: 'fury',
+      desc: 'Ruby · fury power: when a match strikes a monster beside it, your weapon hits for +1.' }),
     // Armor
     helmet1: gear('Leather cap', 'helmet', 1),      body1: gear('Leather jerkin', 'body', 1),
     legs1:   gear('Leather leggings', 'legs', 1),   gloves1: gear('Leather gloves', 'gloves', 1),
@@ -162,7 +175,9 @@ window.Data = (() => {
   // Matches still chip at built things; never at monsters, natural obstacles or iron.
   const MATCH_DMG = { wood: 1, stone: 1, other: 1, plant: 0, iron: 0, creature: 0 };
   function matchDamage(piece) {
-    if (piece.toolOnly || piece.mat === 'creature') return 0;
+    if (piece.mat === 'creature' || piece.keyOnly) return 0;
+    if (amuletPower() === 'earth') return Math.max(1, MATCH_DMG[piece.mat] ?? 1);   // Rootstone: matches chip anything
+    if (piece.toolOnly) return 0;
     if (hardness(piece) >= 4) return 0;
     return MATCH_DMG[piece.mat] ?? 1;
   }
@@ -184,7 +199,9 @@ window.Data = (() => {
   const MAT_LABEL = { wood: 'wood', stone: 'stone', iron: 'iron', plant: 'thorns', creature: 'creatures', other: 'that' };
 
   // ---------- tile families: rarer woods & ores match with the common one ----------
-  const FAMILY = { oak: 'wood', ironwood: 'wood', elderwood: 'wood', silver: 'ore', starsilver: 'ore', pearl: 'fish' };
+  const FAMILY = { oak: 'wood', ironwood: 'wood', elderwood: 'wood', silver: 'ore', starsilver: 'ore', pearl: 'fish', emerald: 'stone', sapphire: 'stone', ruby: 'stone' };
+  // Rares that only show up in one land (gems glint in Iron Hills rock, not forest stones).
+  const RARE_LAND = { emerald: 'mine', sapphire: 'mine', ruby: 'mine' };
   const family = t => FAMILY[t] || t;
   // Spawn weight (per 100 of that family) for each rare type by land level: a teaser first, then common.
   const RARE = {
@@ -194,15 +211,21 @@ window.Data = (() => {
     silver:     L => (L <= 2 ? 3 : L <= 4 ? 18 : 28),
     starsilver: L => (L <= 4 ? 0 : L <= 6 ? 3 : 12),
     pearl:      L => (L <= 2 ? 5 : L <= 4 ? 10 : 15),
+    emerald:    L => (L <= 2 ? 4 : L <= 4 ? 7 : 9),
+    sapphire:   L => (L <= 2 ? 1 : L <= 4 ? 4 : 7),
+    ruby:       L => (L <= 3 ? 0 : L <= 5 ? 2 : 5),
   };
   const RARE_INFO = {
     oak:        { use: 'Oak hafts for iron gear, longbows — and burned into charcoal for steel.' },
     ironwood:   { use: 'Hafts for steel gear and the ironwood war bow.' },
     elderwood:  { use: 'Elderwood never burns — the key to surviving dragonfire.' },
-    silver:     { use: 'Crystal keys today; silvered gear is coming.' },
+    silver:     { use: 'Crystal keys and silver amulet chains.' },
     starsilver: { use: 'The mythic metal. After the dragon, it forges legends.' },
     pearl:      { use: 'Pearls glow in the dark. Forge a Pearl sabre — light, quick, and deadly to creatures of the dark.' },
     coral:      { use: 'Hard as iron, no forge needed. Carve a Coral spear — bane of sea creatures.' },
+    emerald:    { use: 'Set it in silver for a Rootstone amulet: your matches chip any obstacle.' },
+    sapphire:   { use: 'Set it in silver for a Tidestone amulet: big matches charge more ⚡.' },
+    ruby:       { use: 'Set it in silver for an Emberstone amulet: match-strikes on monsters hit harder.' },
   };
 
   // ---------- finds ----------
@@ -280,6 +303,9 @@ window.Data = (() => {
     { id: 'legs3',   tier: 'armor', cost: { steel: 3, hide: 1 } },
     { id: 'gloves3', tier: 'armor', cost: { steel: 1, hide: 1 } },
     { id: 'shield3', tier: 'armor', cost: { steel: 2, ironwood: 2 } },
+    { id: 'amulet1', tier: 'amulet', cost: { emerald: 2, silver: 1, hide: 1 } },
+    { id: 'amulet2', tier: 'amulet', cost: { sapphire: 2, silver: 2, hide: 1 } },
+    { id: 'amulet3', tier: 'amulet', cost: { ruby: 2, silver: 2, gold: 3 } },
     { id: 'fence', tier: 'def', cost: { wood: 6 }, defense: true },
     { id: 'trap',  tier: 'def', cost: { wood: 4, hide: 2 }, defense: true },
     { id: 'wall',  tier: 'def', cost: { stone: 12 }, defense: true },
@@ -335,10 +361,13 @@ window.Data = (() => {
     steel:      { from: 'Forged at the Workshop', use: 'Steel gear and bulwarks' },
     pearl:      { from: 'Sunlit Coast: pearl tiles among the fish, oysters in kelp & coral', use: RARE_INFO.pearl.use },
     coral:      { from: 'Sunlit Coast: break coral with a pick', use: RARE_INFO.coral.use },
+    emerald:    { from: 'Iron Hills: glints among the stones (rare)', use: RARE_INFO.emerald.use },
+    sapphire:   { from: 'Iron Hills: glints among the stones (rarer)', use: RARE_INFO.sapphire.use },
+    ruby:       { from: 'Iron Hills Lv 4+: deep in the stones (rarest)', use: RARE_INFO.ruby.use },
   };
 
   return {
-    RESOURCES, ITEMS, TIER_LABEL, ARMOR_LABEL, WARD, gloveEnergy, SLOTS, slotOf, tierLabel, DURABILITY, TYPE_INFO, hardness, gearDamage, gearRefusal, matchDamage, MATCH_DMG,
+    RESOURCES, ITEMS, TIER_LABEL, ARMOR_LABEL, WARD, gloveEnergy, SLOTS, slotOf, tierLabel, amuletPower, RARE_LAND, DURABILITY, TYPE_INFO, hardness, gearDamage, gearRefusal, matchDamage, MATCH_DMG,
     WEAPONS, weaponDamage, MAT_LABEL, FAMILY, family, RARE, RARE_INFO, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES,
     backpackSize, landLevel, enemyTier, TIER_NAMES, ENEMY_GEAR, ENEMY_ARMOR, CHEST_TIERS, xpForLevel, levelFromXp, levelInfo, XP, MATERIAL_INFO,
   };

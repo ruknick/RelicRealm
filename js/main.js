@@ -19,7 +19,8 @@ window.App = (() => {
       enemyWins: { goblin: 0, dwarf: 0 },
       starterDef: false,
       gear: [],                          // owned gear: [{ id, dur }]
-      equip: { weapon: null, tool: null, helmet: null, body: null, gloves: null, legs: null, shield: null },
+      equip: { weapon: null, tool: null, helmet: null, amulet: null, body: null, gloves: null, legs: null, shield: null },
+      captured: { goblin: [], dwarf: [] },   // your weapons the enemy carried off
       seen: {},                          // rare materials already discovered
       debug: { discoverNow: false, eventNow: false },
     };
@@ -46,6 +47,7 @@ window.App = (() => {
         starterDef: !!s.starterDef,
         gear: s.gear || [],
         equip: { ...base.equip, ...(s.equip || {}) },
+        captured: { ...base.captured, ...(s.captured || {}) },
         seen: s.seen || {},
         starterGear: !!s.starterGear,
         debug: { ...base.debug, ...(s.debug || {}) },
@@ -87,7 +89,7 @@ window.App = (() => {
   // Wear down the equipped item. Returns the item's name if it broke.
   function wear(slot, n = 1) {
     const g = state.equip[slot];
-    if (!g) return null;
+    if (!g || !Data.ITEMS[g.id].dur) return null;   // weapons, tools & amulets never wear out
     g.dur -= n;
     if (g.dur <= 0) { state.equip[slot] = null; save(); return Data.ITEMS[g.id].name; }
     save();
@@ -100,6 +102,27 @@ window.App = (() => {
       const it = Data.ITEMS[state.equip[s].id];
       return { slot: s, name: it.name, hard: it.tier, hp: Data.WARD[s], max: Data.WARD[s] };
     });
+  }
+
+  // Lose a raid and they may carry off the weapon you were wielding. Next best weapon in your pack takes its place.
+  function captureWeapon(enemy) {
+    const g = state.equip.weapon;
+    if (!g) return null;
+    state.captured[enemy].push(g);
+    state.equip.weapon = null;
+    const next = state.gear.map((x, i) => ({ x, i })).filter(({ x }) => Data.ITEMS[x.id].gear === 'weapon')
+      .sort((a, b) => Data.ITEMS[b.x.id].tier - Data.ITEMS[a.x.id].tier)[0];
+    if (next) equip('weapon', next.i);
+    save();
+    return Data.ITEMS[g.id].name;
+  }
+  // Open their loot chest (and get home with it) to win your captured weapons back.
+  function recoverWeapons(enemy) {
+    const back = state.captured[enemy].splice(0);
+    back.forEach(g => state.gear.push(g));
+    if (back.length && !state.equip.weapon) equip('weapon', state.gear.length - 1);
+    save();
+    return back.map(g => Data.ITEMS[g.id].name);
   }
 
   function save() {
@@ -196,6 +219,7 @@ window.App = (() => {
     const wTier = eq.weapon ? Data.ITEMS[eq.weapon.id].tier : 0;
     const weapons = [eq.weapon ? `⚔️ ${Data.ITEMS[eq.weapon.id].name}` : '⚔️ no weapon equipped', eq.tool ? `🛠 ${Data.ITEMS[eq.tool.id].name}` : '🛠 no tool equipped'];
     const shields = wardLayers().reduce((n, w) => n + w.max, 0);
+    if (state.captured[enemy].length) weapons.push(`<br>🎯 They hold your <b>${state.captured[enemy].map(g => Data.ITEMS[g.id].name).join(', ')}</b> — open their loot chest to win it back!`);
     weapons.push(shields ? `🛡 armor +${shields} shield hearts` : '🛡 no armor');
     const armorNote = wTier >= armor ? '' : `<p class="warn-note">⚠️ Their troops wear <b>${Data.TIER_LABEL[armor]}</b> armor — your ${wTier ? Data.TIER_LABEL[wTier].toLowerCase() + ' weapon bounces off' : 'bare hands do nothing'}. Craft ${Data.TIER_LABEL[armor].toLowerCase()} weapons!</p>`;
     const canGo = food >= cfg.foodCost;
@@ -302,7 +326,7 @@ window.App = (() => {
 
   return {
     ENEMY_NAME, grantSpecial, addXP, levelPerks, get level() { return level(); }, boot, go, save, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
-    addGear, gearCount, equip, unequip, wear, wardLayers,
+    addGear, gearCount, equip, unequip, wear, wardLayers, captureWeapon, recoverWeapons,
     get state() { return state; },
   };
 })();

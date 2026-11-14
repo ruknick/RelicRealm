@@ -224,9 +224,10 @@ window.Battle = (() => {
         const got = [0, 1].map(() => Data.rollFrom([['scrap', 40], ['key', 32], ['shard', 28]]));
         run.bag.specials.push(...got);
         run.lootOpened = true;
+        const mine = App.state.captured[run.enemy].map(g => Data.ITEMS[g.id].name);
         board.celebrate(cell, {
           icon: '📦', title: `${p.cls === 'vault' ? 'Vault' : 'Loot chest'} opened!`,
-          sub: got.map(k => `${Data.FIND_INFO[k].icon} ${Data.FIND_INFO[k].name}`).join(' & '), rare: got.includes('shard'),
+          sub: got.filter(Boolean).map(k => `${Data.FIND_INFO[k].icon} ${Data.FIND_INFO[k].name}`).join(' & ') + (mine.length ? ` — and your ⚔️ ${mine.join(', ')}!` : ''), rare: got.includes('shard') || mine.length > 0,
         });
         break;
       }
@@ -415,6 +416,13 @@ window.Battle = (() => {
       });
       run.bag.spoils.forEach(k => gained.push(App.grantSpoil(k)));
       run.bag.specials.forEach(k => gained.push(App.grantSpecial(k, run.enemy)));
+      if (run.lootOpened) App.recoverWeapons(run.enemy).forEach(n => gained.push(`⚔️ Won back your ${n}!`));
+    }
+    // Lose (or flee) and they may carry off the weapon you were wielding.
+    const takeChance = won ? 0 : reason === 'lost' ? 0.6 : reason === 'cap' ? 0.4 : reason === 'retreat' ? 0.25 : 0;
+    if (Math.random() < takeChance) {
+      const n = App.captureWeapon(run.enemy);
+      if (n) lost.push(`⚔️ Your ${n} — they carried it off! Raid them again and open their loot chest to win it back.`);
     }
     // If they broke your keep, they plunder part of your storehouse.
     if (reason === 'lost') {

@@ -3,6 +3,7 @@
 window.Hero = (() => {
   const SLOT_INFO = {
     helmet: { icon: '⛑️', label: 'Helmet' },
+    amulet: { icon: '📿', label: 'Amulet' },
     body:   { icon: '🦺', label: 'Body' },
     gloves: { icon: '🧤', label: 'Gloves' },
     legs:   { icon: '👖', label: 'Legs' },
@@ -17,6 +18,13 @@ window.Hero = (() => {
   const st = () => App.state;
   const eq = s => st().equip[s];
   const tierOf = s => (eq(s) ? Data.ITEMS[eq(s).id].tier : 0);
+  // Only armor wears down (as it blocks raiders); weapons, tools & amulets last forever.
+  const durBar = (g, text = false) => {
+    const it = Data.ITEMS[g.id];
+    if (!it.dur) return text ? '<small>∞ never wears out</small>' : '';
+    const pct = Math.round(g.dur / it.dur * 100);
+    return `<span class="dur${pct <= 25 ? ' low' : ''}"><i style="width:${pct}%"></i></span>${text ? ` <small>${g.dur}/${it.dur} blocks left</small>` : ''}`;
+  };
 
   // The warrior figure: plain clothes, with each worn piece drawn over it.
   function figure() {
@@ -42,6 +50,7 @@ window.Hero = (() => {
       ${tierOf('body') >= 3 ? '<path d="M80 60v70M58 92c14 6 30 6 44 0" stroke="#7d8896" stroke-width="2.5" fill="none"/><path d="M62 66l6 20" stroke="#fff" stroke-width="3" opacity=".6"/>' : ''}
       ${tierOf('body') === 1 ? '<path d="M66 60v70M94 60v70" stroke="#3a2614" stroke-width="2" stroke-dasharray="4 4"/>' : ''}
       <path d="M56 126h48v8H56z" fill="#3a2614"/><rect x="76" y="125" width="8" height="10" fill="#c9a227"/>
+      ${eq('amulet') ? `<path d="M68 58c4 10 20 10 24 0" stroke="#d6dde5" stroke-width="1.6" fill="none"/><path d="M80 66l6 6-6 8-6-8z" fill="${{ emerald: '#2fbf71', sapphire: '#3d7bff', ruby: '#e0324b' }[Data.ITEMS[eq('amulet').id].gem]}" stroke="#fff" stroke-width="1" filter="url(#fGlow)"/>` : ''}
       <!-- head -->
       <rect x="74" y="44" width="12" height="14" fill="#d9a77c"/>
       <circle cx="80" cy="34" r="17" fill="#e0b089" stroke="#9a6a4a" stroke-width="2"/>
@@ -61,15 +70,16 @@ window.Hero = (() => {
   function slotBtn(s) {
     const g = eq(s), I = SLOT_INFO[s];
     if (!g) return `<button class="hslot empty${current === s ? ' sel' : ''}" data-s="${s}" style="grid-area:${s}"><span class="hs-icon">${I.icon}</span><small>${I.label}</small></button>`;
-    const it = Data.ITEMS[g.id], pct = Math.round(g.dur / it.dur * 100);
+    const it = Data.ITEMS[g.id];
     return `<button class="hslot t${it.tier}${current === s ? ' sel' : ''}" data-s="${s}" style="grid-area:${s}">
-      <span class="hs-icon">${Art.piece(it.art)}</span><small>${it.name}</small><span class="dur${pct <= 25 ? ' low' : ''}"><i style="width:${pct}%"></i></span></button>`;
+      <span class="hs-icon">${Art.piece(it.art)}</span><small>${it.name}</small>${durBar(g)}</button>`;
   }
 
   function stats() {
     const ward = App.wardLayers(), shields = ward.reduce((n, w) => n + w.max, 0);
     const lines = [
       `<div><b>🛡 Raid guard:</b> ${shields ? `+${shields} shield hearts on your keep` : 'no armor — raiders go straight for your keep'}</div>`,
+      `<div><b>💎 Amulet:</b> ${eq('amulet') ? Data.ITEMS[eq('amulet').id].desc : 'none — set a gem in silver at the Workshop'}</div>`,
       `<div><b>⚡ Start energy:</b> ${3 + Data.gloveEnergy(eq('gloves'))}${eq('gloves') ? ` (gloves +${Data.gloveEnergy(eq('gloves'))})` : ''}</div>`,
     ];
     if (!est) {
@@ -88,10 +98,10 @@ window.Hero = (() => {
       .sort((a, b) => Data.ITEMS[b.g.id].tier - Data.ITEMS[a.g.id].tier);
     const cur = eq(s);
     const row = (g, btn) => {
-      const it = Data.ITEMS[g.id], pct = Math.round(g.dur / it.dur * 100);
+      const it = Data.ITEMS[g.id];
       return `<div class="hp-row"><span class="hp-icon">${Art.piece(it.art)}</span>
         <span class="hp-body"><b>${it.name}</b> <span class="tag t${it.tier}">${Data.tierLabel(g.id)}</span><small>${it.desc}</small>
-        <span class="dur${pct <= 25 ? ' low' : ''}"><i style="width:${pct}%"></i></span> <small>${g.dur}/${it.dur}</small></span>${btn}</div>`;
+        ${durBar(g, true)}</span>${btn}</div>`;
     };
     let html = `<h3 class="craft-h">${I.icon} ${I.label}</h3>`;
     if (cur) html += row(cur, '<button class="small alt" data-off="1">Take off</button>');

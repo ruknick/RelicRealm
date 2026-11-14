@@ -32,7 +32,7 @@ The tray under every board has three areas:
 
 **Hardness rule:** every target has a hardness (wood 1 · iron 2 · steel 3 · bulwark 4). Damage = gear tier vs hardness: −1 → 1, equal → 2, +1 → 4, +2 → 6, +3 → 8 (swords +1). Gear 2+ tiers below the target bounces off. Matches only chip soft built things.
 
-**Durability:** wood 4 hits · iron 8 · steel 14 · elder 25. Gear breaks at 0, so repair it at the Workshop for half its materials.
+**Weapons & tools never wear out.** Energy is what limits them. But **lose a raid and they may carry off the weapon you were wielding**: 60% if they break your keep, 40% if time runs out, 25% if you retreat. Raid them again and open their loot chest to win it back. Only **armor** wears down (as it blocks raiders), and the Workshop repair bench mends it.
 
 ## 🧍 Your warrior: full-body gear
 Tap **🧍 Gear** under any board, or **🧍 Warrior** on the map. It opens a figure with seven slots: **helmet, body, gloves, legs, shield, weapon, tool**. Tap a slot to wear, swap or take off pieces; the figure updates to show what you wear.
@@ -49,6 +49,13 @@ Tap **🧍 Gear** under any board, or **🧍 Warrior** on the map. It opens a fi
 | Full leather | 26 | 17 | 21 | 17 |
 | Full iron | 29 | 18 | 21 | 17 |
 | Full steel | 29 | 22 | 25 | 18 |
+
+## 📿 Gems & amulets
+- **Emerald, sapphire and ruby** glint among the stones in the Iron Hills only. Ruby appears from Lv 4. They match with stone.
+- Set two gems in **silver** at the Workshop to make an amulet, and wear it in the 🧍 Warrior **amulet** slot:
+  - **Rootstone** (emerald, earth): matches chip ANY obstacle or defense beside them, even tool-only ones and iron.
+  - **Tidestone** (sapphire, tide): matches of 4+ and chains give +1 more ⚡; blasts +1 more.
+  - **Emberstone** (ruby, fury): when a match strikes a monster beside it, your weapon hits for +1.
 
 ## Wood & ore tiers
 - **Wood:** Pine → **Oak** → **Ironwood** → **Elderwood**. **Ore:** iron → **silver** → **starsilver**.
