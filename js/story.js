@@ -93,7 +93,7 @@ window.Story = (() => {
       goals: [
         { text: 'Carry 3 💧 Water flasks', done: () => st().inventory.flask >= 3 },
         { text: 'Craft an 🛡️ Elderwood ward', done: () => st().inventory.elderward > 0 },
-        { text: 'Defeat Emberwyrm in the 🐉 Dragon\'s Lair (coming in the next update)', done: () => false },
+        { text: 'Defeat Emberwyrm in the 🐉 Dragon\'s Lair', done: () => !!st().story.flags.dragonSlain },
       ],
       reward: null,
       outro: '',

@@ -1216,3 +1216,19 @@ body[data-scene] .sound-btn, .sound-btn { background: var(--paper); color: var(-
 .board-wrap.ouch::after { content: ''; position: absolute; inset: 0; border-radius: 12px; pointer-events: none; z-index: 9; animation: ouchFlash .55s forwards; }
 @keyframes ouchShake { 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
 @keyframes ouchFlash { 0% { box-shadow: inset 0 0 0 999px rgba(200,30,20,.35); } 100% { box-shadow: inset 0 0 0 999px rgba(200,30,20,0); } }
+
+/* ---------- boss lairs ---------- */
+.boss-bar { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; padding: 6px 10px; background: radial-gradient(ellipse at 30% 20%, rgba(255,250,235,.55), transparent 60%), var(--paper); color: var(--ink); border: 1.5px solid var(--ink); border-radius: 6px; font-family: Georgia, serif; }
+.boss-bar #boss-name { font-weight: 800; color: var(--wax); white-space: nowrap; }
+.boss-bar .bb { flex: 1; height: 10px; border-radius: 5px; background: rgba(43,27,13,.18); border: 1px solid var(--ink-faint); overflow: hidden; }
+.boss-bar .bb i { display: block; height: 100%; background: linear-gradient(90deg, #8e1e14, #e0603a); transition: width .3s; }
+.boss-bar b { font-size: .85rem; }
+.piece.p-boss .hp { display: none; }
+.piece.p-boss .pa svg { filter: drop-shadow(0 4px 6px rgba(0,0,0,.6)); }
+.spot.boss { border-color: #8e1e14; background: rgba(250,222,206,.95); }
+.spot.boss .sp-text small { color: #8e1e14; }
+.piece.p-boss { z-index: 3; overflow: visible; }
+.piece.p-boss .pc, .piece.p-boss .pa { height: 100%; }
+.piece.p-boss .pa svg { transform-origin: 50% 50%; }
+#screen-boss .enemy, #screen-boss .moves { color: var(--cream); text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+#screen-boss .enemy b { color: #ffb070; }

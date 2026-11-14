@@ -37,7 +37,7 @@ window.Items = (() => {
     const sp = App.state.stockpile;
     return '<h3 class="craft-h">🪵 Materials <small>banked at your camp</small></h3>' + Object.keys(Data.RESOURCES).map(k => {
       const info = Data.MATERIAL_INFO[k] || {};
-      const TILE = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water', oak: 'oak', ironwood: 'ironwood', elderwood: 'elderwood', silver: 'silver', starsilver: 'starsilver', charcoal: 'charcoal', steel: 'steel', pearl: 'pearl', coral: 'coral', goldbar: 'goldbar', ironbar: 'ironbar', silverbar: 'silverbar', leather: 'leather', scrapiron: 'scrapiron', shell: 'shell', emerald: 'emerald', sapphire: 'sapphire', ruby: 'ruby' };
+      const TILE = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water', oak: 'oak', ironwood: 'ironwood', elderwood: 'elderwood', silver: 'silver', starsilver: 'starsilver', charcoal: 'charcoal', steel: 'steel', pearl: 'pearl', coral: 'coral', goldbar: 'goldbar', starbar: 'starbar', dragonscale: 'dragonscale', ironbar: 'ironbar', silverbar: 'silverbar', leather: 'leather', scrapiron: 'scrapiron', shell: 'shell', emerald: 'emerald', sapphire: 'sapphire', ruby: 'ruby' };
       const icon = `<div class="gem art g-${TILE[k]} ic-gem">${Art.tile(TILE[k])}</div>`;
       return card(icon, Data.RESOURCES[k].label, sp[k], `<b>From:</b> ${info.from || '—'}<br><b>For:</b> ${info.use || '—'}`, sp[k] > 0);
     }).join('');

@@ -22,6 +22,8 @@ window.Data = (() => {
     leather:   { label: 'Leather' },
     scrapiron: { label: 'Scrap iron' },
     shell:     { label: 'Crab shell' },
+    starbar:   { label: 'Starsilver bar' },
+    dragonscale: { label: 'Dragon scale' },
     pearl:     { label: 'Pearl' },
     coral:     { label: 'Coral' },
     goldbar:   { label: 'Gold bar' },
@@ -84,6 +86,9 @@ window.Data = (() => {
     baxe3: gear('Steel battle-axe', 'baxe', 3),
     sword3: gear('Steel sword', 'sword', 3),
     bow3:  gear('Ironwood war bow', 'bow', 3),
+    // Mythic (Star Anvil, Lv 35): the only gear that bites through dragon scale
+    sword4: gear('Starsilver blade', 'sword', 4),
+    bow4:   gear('Elderwood greatbow', 'bow', 4),
     shiv:  gear('Goblin shiv', 'sword', 2, { spoil: 'goblin' }),
     // Sea gear: iron-strength without a forge, each with a trick. Bane: hits its foes as one tier stronger.
     coralspear: gear('Coral spear', 'spear', 2, { sea: true, bane: 'sea',
@@ -119,6 +124,11 @@ window.Data = (() => {
     helmet3: gear('Steel helm', 'helmet', 3),       body3: gear('Steel plate', 'body', 3),
     legs3:   gear('Steel greaves', 'legs', 3),      gloves3: gear('Steel gauntlets', 'gloves', 3),
     shield3: gear('Steel tower shield', 'shield', 3),
+    helmet4: gear('Starsilver helm', 'helmet', 4),   body4: gear('Starsilver plate', 'body', 4),
+    legs4:   gear('Starsilver greaves', 'legs', 4),  gloves4: gear('Starsilver gauntlets', 'gloves', 4),
+    shield4: gear('Elderwood ward-shield', 'shield', 4, { desc: 'Mythic tier · armor (hardness 4) · elderwood never burns: catches dragonfire.' }),
+    sirenpearl: gear('Siren\'s Pearl', 'amulet', 3, { gem: 'pearl', power: 'siren', art: 'gear:amulet:2',
+      desc: 'Won from the Siren Queen · siren power: every match of 4 or more heals you 1 ❤️.' }),
     // Defenses
     fence:    { name: 'Wooden fence', icon: '🪵', desc: 'Defense: wood (hardness 1), 2 HP. 1 pt.' },
     trap:     { name: 'Pit trap', icon: '🕳️', desc: 'Defense: hidden — an attacker who finds it loses a move. 1 pt.' },
@@ -146,8 +156,8 @@ window.Data = (() => {
     bread:      { name: 'Trail bread', icon: '🍞', special: true, instant: true, heal: 5, desc: 'Eat it anytime: +5 ❤️.' },
     chowder:    { name: 'Bottled chowder', icon: '🍲', art: 'chowder', special: true, instant: true, heal: 8, desc: 'A hearty meal in a bottle: +8 ❤️.' },
     // Dragon prep
-    flask:      { name: 'Water flask', icon: '💧', prep: true, desc: 'Douses lava and dragonfire in the Dragon\'s Lair (coming soon).' },
-    elderward:  { name: 'Elderwood ward', icon: '🛡️', prep: true, desc: 'Elderwood never burns. Shields you from dragonfire (coming soon).' },
+    flask:      { name: 'Water flask', icon: '💧', prep: true, special: true, desc: 'Throw it to douse lava and flood-water in a 3x3 area.' },
+    elderward:  { name: 'Elderwood ward', icon: '🛡️', prep: true, desc: 'Carry it into the Dragon\'s Lair: dragonfire burns you for half.' },
   };
 
   // ---------- the hardness rule ----------
@@ -211,6 +221,7 @@ window.Data = (() => {
   // Specials: firepots and keys.
   const WEAPONS = {
     firepot: { wood: 2, plant: 2, creature: 2, other: 1, stone: 0, iron: 0, fog: true, area: true },
+    flask:   { other: 9, area: true },
     key:        { unlock: 1 },
     goldkey:    { unlock: 2 },
     crystalkey: { unlock: 3 },
@@ -301,6 +312,7 @@ window.Data = (() => {
     { id: 'silverbar', tier: 'smelt', station: 'smelter', name: 'Smelt silver bars', icon: '▬', cost: { silver: 2, coal: 1 }, makes: { silverbar: 1 }, desc: 'For amulet chains and crystal keys.' },
     { id: 'goldbar',  tier: 'smelt', station: 'smelter', name: 'Smelt a gold bar', icon: '🟨', cost: { gold: 6, coal: 1 }, makes: { goldbar: 1 }, desc: 'Melt gold nuggets down into a bar fit for a crown.' },
     { id: 'charcoal', tier: 'smelt', station: 'smelter', name: 'Burn charcoal', icon: '⚫', cost: { oak: 2 }, makes: { charcoal: 3 }, desc: 'Slow-burn oak into charcoal for steel.' },
+    { id: 'starbar',  tier: 'smelt', station: 'dforge', name: 'Smelt starsilver bars', icon: '✨', cost: { starsilver: 3, charcoal: 2 }, makes: { starbar: 1 }, desc: 'The mythic metal — only a dwarven fire can melt it.' },
     { id: 'steel',    tier: 'smelt', station: 'dforge', name: 'Forge steel bars', icon: '🔩', cost: { ironbar: 2, charcoal: 2, water: 1 }, makes: { steel: 1 }, desc: 'Iron bars + charcoal, folded and quenched — the dwarven way.' },
     { id: 'goldkey',    tier: 'keys', station: 'workbench', cost: { gold: 6 }, items: { key: 2 } },
     { id: 'crystalkey', tier: 'keys', station: 'forge', cost: { silverbar: 1, water: 3 }, items: { goldkey: 2 } },
@@ -314,6 +326,8 @@ window.Data = (() => {
     { id: 'baxe3', tier: 'weapon', station: 'dforge', cost: { steel: 3, ironwood: 2 } },
     { id: 'sword3', tier: 'weapon', station: 'dforge', cost: { steel: 3, ironwood: 1, leather: 1 } },
     { id: 'bow3',  tier: 'weapon', station: 'dforge', cost: { ironwood: 4, leather: 1, steel: 1 } },
+    { id: 'sword4', tier: 'weapon', station: 'staranvil', cost: { starbar: 4, elderwood: 1, leather: 1 } },
+    { id: 'bow4',   tier: 'weapon', station: 'staranvil', cost: { elderwood: 5, starbar: 1, leather: 1 } },
     { id: 'coralspear', tier: 'weapon', station: 'workbench', cost: { coral: 5, wood: 2, leather: 1 } },
     { id: 'pearlsabre', tier: 'weapon', station: 'forge', cost: { pearl: 3, ironbar: 2, oak: 1 } },
     // Tools
@@ -343,6 +357,11 @@ window.Data = (() => {
     { id: 'legs3',   tier: 'armor', station: 'dforge', cost: { steel: 3, leather: 1 } },
     { id: 'gloves3', tier: 'armor', station: 'dforge', cost: { steel: 1, leather: 1 } },
     { id: 'shield3', tier: 'armor', station: 'dforge', cost: { steel: 2, ironwood: 2 } },
+    { id: 'helmet4', tier: 'armor', station: 'staranvil', cost: { starbar: 3, leather: 1 } },
+    { id: 'body4',   tier: 'armor', station: 'staranvil', cost: { starbar: 6, leather: 2 } },
+    { id: 'legs4',   tier: 'armor', station: 'staranvil', cost: { starbar: 4, leather: 1 } },
+    { id: 'gloves4', tier: 'armor', station: 'staranvil', cost: { starbar: 2, leather: 1 } },
+    { id: 'shield4', tier: 'armor', station: 'staranvil', cost: { elderwood: 4, starbar: 2 } },
     // Amulets
     { id: 'amulet1', tier: 'amulet', station: 'forge', cost: { emerald: 2, silverbar: 1, leather: 1 } },
     { id: 'amulet2', tier: 'amulet', station: 'forge', cost: { sapphire: 2, silverbar: 2, leather: 1 } },
@@ -372,8 +391,10 @@ window.Data = (() => {
     forge:     { icon: '⚒️', name: 'Forge', lv: 10, cost: { stone: 12, ironbar: 4, coal: 4 }, desc: 'Iron weapons, tools & armor, gates, amulets, the Crown.' },
     dforge:    { icon: '🏔️', name: 'Dwarven Forge', lv: 20, cost: { stone: 20, ironbar: 10, coal: 10 }, needs: 'dwarfwin',
       desc: 'Thrain Ironbeard teaches you the dwarven way: steel bars, steel gear, bulwarks.' },
+    staranvil: { icon: '✨', name: 'Star Anvil', lv: 35, cost: { stone: 30, starbar: 4, coal: 15 },
+      desc: 'Mythic starsilver & elderwood gear — the only metal that bites through dragon scale.' },
   };
-  const STATION_ORDER = ['workbench', 'smelter', 'forge', 'dforge'];
+  const STATION_ORDER = ['workbench', 'smelter', 'forge', 'dforge', 'staranvil'];
 
 
   // ---------- progression ----------
@@ -435,6 +456,8 @@ window.Data = (() => {
     leather: { from: 'Workbench: tanned from hide', use: 'Armor, bows, sword grips, flasks' },
     scrapiron: { from: 'Goblin raiders & cave goblins drop it', use: 'Smelts into iron bars' },
     shell: { from: 'Shore crabs drop it', use: 'The Shellback buckler (sea shield)' },
+    starbar: { from: 'Dwarven Forge: starsilver ore + charcoal', use: 'Mythic gear at the Star Anvil' },
+    dragonscale: { from: 'Slaying Emberwyrm', use: 'Beyond the Known Realm… (coming)' },
     water: { from: 'Sunlit Coast', use: 'Quenching iron & steel, water flasks' },
     oak:   { from: 'Forest (rare at first, common from Lv 3)', use: RARE_INFO.oak.use },
     ironwood:  { from: 'Forest Lv 3+ (rare), common from Lv 5', use: RARE_INFO.ironwood.use },

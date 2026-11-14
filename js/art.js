@@ -161,6 +161,9 @@ window.Art = (() => {
       <circle cx="44" cy="20" r="7" fill="none" stroke="#6e767f" stroke-width="3"/><path d="M20 22l14-8" stroke="#5d6672" stroke-width="3" stroke-linecap="round"/><g fill="#a0522d" opacity=".7"><circle cx="38" cy="36" r="1.5"/><circle cx="18" cy="34" r="1.2"/></g>`;
   TILES.shell = `<ellipse cx="32" cy="54" rx="22" ry="3" fill="#000" opacity=".3"/><path d="M8 44c0-18 12-30 24-30s24 12 24 30z" fill="#e0603a" stroke="#7a2a14" stroke-width="1.4"/>
       <path d="M32 14v30M20 18l6 26M44 18l-6 26M12 30l12 14M52 30 40 44" stroke="#7a2a14" stroke-width="1.1" opacity=".7"/><path d="M14 40c6-14 14-20 18-22" stroke="#ffc0a0" stroke-width="2" fill="none" opacity=".6"/>`;
+  TILES.starbar = bar('lgStar', '#3a2a7a', '#f3e8ff');
+  TILES.dragonscale = `<ellipse cx="32" cy="54" rx="20" ry="3" fill="#000" opacity=".3"/><path d="M32 8c12 8 20 18 20 30 0 9-9 15-20 15S12 47 12 38c0-12 8-22 20-30z" fill="#8e1e14" stroke="#3a0a06" stroke-width="1.4"/>
+      <path d="M32 14c8 7 13 15 13 24M20 30c6 6 18 6 24 0M18 40c8 5 20 5 28 0" stroke="#e0603a" stroke-width="1.4" fill="none" opacity=".8"/><path d="M26 18c-4 6-6 12-6 18" stroke="#ffc08a" stroke-width="2" fill="none" opacity=".6"/>`;
   TILES.mushroom = TILES.leaves;
 
   // ---------- gear icons: shape by type, finish by tier ----------
@@ -337,6 +340,21 @@ window.Art = (() => {
       <path d="M8 34c6-4 12-2 16-4M40 30c6 2 10 0 16 4" stroke="#7a9a3a" stroke-width="3" fill="none" stroke-linecap="round"/>`,
   });
   Object.assign(PIECES, {
+    whelp: `<path d="M8 30c-6-10 2-18 10-14l6 8z" fill="#7a1e14" stroke="#2a0806"/><path d="M56 30c6-10-2-18-10-14l-6 8z" fill="#7a1e14" stroke="#2a0806"/>
+      <ellipse cx="32" cy="40" rx="15" ry="13" fill="#b0301c" stroke="#2a0806" stroke-width="1.4"/><path d="M24 44c4 4 12 4 16 0" stroke="#ffb070" stroke-width="2" fill="none"/>
+      <circle cx="32" cy="24" r="11" fill="#c0381e" stroke="#2a0806" stroke-width="1.4"/><path d="M24 16l-3-8 7 5zM40 16l3-8-7 5z" fill="#3a0a06"/>
+      <ellipse cx="27.5" cy="23" rx="2.6" ry="2" fill="#ffd34a"/><ellipse cx="36.5" cy="23" rx="2.6" ry="2" fill="#ffd34a"/><path d="M27.5 22v2M36.5 22v2" stroke="#2a0806" stroke-width="1.2"/>
+      <path d="M28 30c2 2 6 2 8 0" stroke="#2a0806" stroke-width="1.2" fill="none"/><path d="M30 31c-1 4 1 6 2 7 1-1 3-3 2-7" fill="#ff8a3a" opacity=".85"/>`,
+    lava: `<rect x="2" y="2" width="60" height="60" rx="10" fill="#3a0a06"/><path d="M6 20c10-6 18 4 28-2s16 2 24-4v40c-8 6-16-4-26 2s-18-2-26 4z" fill="#e0402a"/>
+      <path d="M10 30c8-4 14 2 22-2s12 0 20-4M12 44c8-3 14 2 20-1s14 1 20-3" stroke="#ffcf5a" stroke-width="3" fill="none" stroke-linecap="round" class="glow"/>
+      <circle cx="20" cy="26" r="3" fill="#ffe08a"/><circle cx="44" cy="40" r="2.4" fill="#ffe08a"/>`,
+    tide: `<rect x="2" y="2" width="60" height="60" rx="12" fill="#1f5c7a" opacity=".9"/><path d="M6 24q8-6 16 0t16 0 16 0M6 38q8-6 16 0t16 0 16 0M6 52q8-6 16 0t16 0 16 0" stroke="#bfe6ff" stroke-width="2.4" fill="none" opacity=".75"/>`,
+    hoard: `<ellipse cx="32" cy="52" rx="26" ry="6" fill="#000" opacity=".3"/><path d="M6 50c4-14 14-22 26-22s22 8 26 22z" fill="url(#lgGold)" stroke="#7a5a10" stroke-width="1.2"/>
+      <g fill="#fff6c4" stroke="#b8860b" stroke-width=".8"><ellipse cx="20" cy="40" rx="5" ry="2.2"/><ellipse cx="34" cy="34" rx="5" ry="2.2"/><ellipse cx="44" cy="44" rx="5" ry="2.2"/></g>
+      <path d="M26 30l4-10 6 8z" fill="#e0324b" stroke="#6a0a1a"/><circle cx="48" cy="34" r="3.5" fill="#3d7bff" stroke="#132a7a"/>`,
+    clam: `<ellipse cx="32" cy="54" rx="22" ry="4" fill="#000" opacity=".3"/><path d="M8 40c2-16 14-24 24-24s22 8 24 24z" fill="url(#lgShell)" stroke="#5e5446" stroke-width="1.2"/>
+      <path d="M8 40c6 10 42 10 48 0" fill="#d8cdb8" stroke="#5e5446" stroke-width="1.2"/><path d="M32 18v20M20 22l6 18M44 22l-6 18" stroke="#7a6e5c" stroke-width="1" opacity=".6"/>
+      <circle cx="32" cy="40" r="5" fill="url(#rgPearl)" filter="url(#fGlow)"/>`,
     chowder: `<ellipse cx="32" cy="58" rx="14" ry="3" fill="#000" opacity=".3"/>
       <path d="M26 6h12v6l2 6c8 4 10 10 10 18v14c0 6-4 8-10 8H24c-6 0-10-2-10-8V36c0-8 2-14 10-18l2-6z" fill="#9fc8c0" opacity=".55" stroke="#3a5a54" stroke-width="1.4"/>
       <path d="M16 36c0-2 4-4 16-4s16 2 16 4v14c0 4-3 6-8 6H24c-5 0-8-2-8-6z" fill="#d89a48"/><path d="M16 36c4 2 28 2 32 0" stroke="#f2c27a" stroke-width="2" fill="none"/>
@@ -393,6 +411,28 @@ window.Art = (() => {
 
   // Wide keeps (3 tiles).
   const WIDE = {
+    dragon: `<defs><linearGradient id="gWyrm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c0381e"/><stop offset=".6" stop-color="#7a1e14"/><stop offset="1" stop-color="#3a0a06"/></linearGradient></defs>
+      <path d="M20 40C6 30 2 14 14 6c4 14 14 18 30 18z" fill="#5a1410" stroke="#1e0402" stroke-width="1.5"/><path d="M172 40c14-10 18-26 6-34-4 14-14 18-30 18z" fill="#5a1410" stroke="#1e0402" stroke-width="1.5"/>
+      <path d="M18 10l10 14M30 8l6 16M178 10l-10 14M166 8l-6 16" stroke="#1e0402" stroke-width="1.2"/>
+      <path d="M40 62c-4-18 14-34 56-34s60 16 56 34z" fill="url(#gWyrm)" stroke="#1e0402" stroke-width="1.6"/>
+      <g fill="none" stroke="#e0603a" stroke-width="1.2" opacity=".55"><path d="M56 50q8-6 16 0t16 0 16 0 16 0 16 0"/><path d="M64 58q8-6 16 0t16 0 16 0 16 0"/></g>
+      <path d="M96 2c-16 0-26 10-26 24 0 10 8 18 26 18s26-8 26-18c0-14-10-24-26-24z" fill="url(#gWyrm)" stroke="#1e0402" stroke-width="1.6"/>
+      <path d="M78 8l-8-8 2 12zM114 8l8-8-2 12z" fill="#2a0806" stroke="#1e0402"/><path d="M84 6l-4-6M108 6l4-6" stroke="#e8d2a2" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M82 20q4-4 8 0-4 3-8 0zM102 20q4-4 8 0-4 3-8 0z" fill="#ffd34a" class="glow"/><path d="M86 18v4M106 18v4" stroke="#1e0402" stroke-width="1.6"/>
+      <path d="M84 34q12 8 24 0" stroke="#1e0402" stroke-width="1.6" fill="none"/><path d="M88 36l2 4 2-4M100 36l2 4 2-4" fill="#e8d2a2"/>
+      <circle cx="90" cy="28" r="1.4" fill="#1e0402"/><circle cx="102" cy="28" r="1.4" fill="#1e0402"/><path d="M92 26c-2-4 0-6 4-8M100 26c2-4 0-6-4-8" stroke="#ff8a3a" stroke-width="1" fill="none" opacity=".7"/>`,
+    siren: `<defs><linearGradient id="gTail" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1f8a7a"/><stop offset="1" stop-color="#3fc1b0"/></linearGradient></defs>
+      <path d="M8 60c10-10 30-14 50-10s40 4 60-2 50-6 66 10z" fill="#4a7a8a" opacity=".6"/>
+      <path d="M100 44c18 6 34 6 48-2 10-6 20-4 26 2-8 0-14 4-16 10-6-4-12-6-20-4-14 4-28 4-40-2z" fill="url(#gTail)" stroke="#0c3a34" stroke-width="1.4"/>
+      <path d="M166 40c6-10 16-12 22-8-6 2-8 6-8 10 6-2 10 0 12 4-8-2-16 0-22 4z" fill="#3fc1b0" stroke="#0c3a34" stroke-width="1.2"/>
+      <g fill="none" stroke="#bff0e6" stroke-width=".8" opacity=".6"><path d="M108 46q4 3 8 0M120 48q4 3 8 0M132 48q4 3 8 0M144 46q4 3 8 0"/></g>
+      <path d="M82 54c0-14 6-26 14-30 8 4 12 14 10 28z" fill="#e8b48a" stroke="#5a3414" stroke-width="1.2"/>
+      <path d="M86 34c4 2 12 2 16 0" stroke="#3fc1b0" stroke-width="4" stroke-linecap="round"/><circle cx="94" cy="16" r="10" fill="#e8b48a" stroke="#5a3414" stroke-width="1.2"/>
+      <path d="M84 14c0-12 20-14 22 0 4 10 4 26 10 36-8-2-12-10-14-18-2 8-8 14-16 16 4-10 0-22-2-34z" fill="#1f6a8a" stroke="#0c2a3a" stroke-width="1.2"/>
+      <path d="M86 6l4-6 4 5 4-5 4 6z" fill="url(#lgGold)" stroke="#7a5a10"/><circle cx="94" cy="3" r="1.6" fill="url(#rgPearl)"/>
+      <path d="M90 15q2-1.5 4 0M96 15q2-1.5 4 0" stroke="#0c2a3a" stroke-width="1.2" fill="none"/><path d="M92 21q2 1 4 0" stroke="#7a2a1a" stroke-width="1" fill="none"/>
+      <path d="M62 8l10 56" stroke="#c9a227" stroke-width="2.6" stroke-linecap="round"/><path d="M56 4l6 10 6-10M62 2v12" stroke="#c9a227" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M70 34c6-2 12 0 14 4" stroke="#e8b48a" stroke-width="5" stroke-linecap="round"/>`,
     gkeep: `<rect x="8" y="52" width="176" height="10" rx="3" fill="#3b2410"/>
       <g fill="#6e4521" stroke="#3b2410" stroke-width="1.5"><path d="M4 56V22l5-8 5 8v34z"/><path d="M15 56V26l5-8 5 8v30z"/><path d="M167 56V26l5-8 5 8v30z"/><path d="M178 56V22l5-8 5 8v34z"/></g>
       <rect x="28" y="28" width="136" height="26" fill="#7a4d24"/><g stroke="#55331a" stroke-width="2"><path d="M28 34h136M28 41h136M28 48h136"/></g>

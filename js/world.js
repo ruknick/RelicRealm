@@ -2,7 +2,8 @@
 window.World = (() => {
   // x / y are % positions on the 360x480 map.
   const SPOTS = [
-    { id: 'lair',   x: 80, y: 9.1, icon: '🐉', name: 'Dragon\'s Lair', sub: 'coming soon', locked: true },
+    { id: 'lair',   x: 80, y: 9.1, icon: '🐉', name: 'Dragon\'s Lair', sub: 'Emberwyrm', boss: 'dragon' },
+    { id: 'siren',  x: 84, y: 34, icon: '🧜‍♀️', name: 'Siren\'s Grotto', sub: 'the Siren Queen', boss: 'siren' },
     { id: 'mine',   x: 21, y: 15.7, icon: '⛏️', name: 'Iron Hills', sub: 'stone · iron · coal', land: 'mine' },
     { id: 'dwarf',  x: 41, y: 24.0, icon: '⚒️', name: 'Dwarf Stronghold', raid: 'dwarf', how: 'find a ᚱ rune stone in the Iron Hills' },
     { id: 'goblin', x: 47, y: 41.4, icon: '🔥', name: 'Goblin Village', raid: 'goblin', how: 'follow 🐾 tracks in the Forest' },
@@ -29,6 +30,12 @@ window.World = (() => {
         const rank = Data.TIER_NAMES[s.raid][Data.enemyTier(st.enemyWins[s.raid]) - 1];
         if (n > 0) { badge = `<span class="badge">⚔️ ${n}</span>`; sub = `${rank} · raid!`; cls += ' raid'; }
         else { cls += ' unknown'; sub = 'not found yet'; }
+      }
+      if (s.boss) {
+        const wins = (st.bossWins || {})[s.boss] || 0;
+        const lv = Data.landLevel(st.lands.ocean.runs);
+        if (s.boss === 'siren' && lv < Boss.SIREN_LV) { cls += ' unknown'; sub = `a song on the wind… (Coast Lv ${Boss.SIREN_LV})`; }
+        else { cls += ' boss'; sub = wins ? `${s.sub} · beaten ×${wins}` : s.sub; }
       }
       if (s.locked) cls += ' locked';
       return `<button class="${cls}" data-id="${s.id}" style="left:${s.x}%;top:${s.y}%">
@@ -59,11 +66,15 @@ window.World = (() => {
     if (travelling) return;
     const s = SPOTS.find(x => x.id === id);
     const st = App.state;
+    if (s.boss === 'siren' && Data.landLevel(st.lands.ocean.runs) < Boss.SIREN_LV) {
+      App.choose({ title: '🧜‍♀️ A song on the wind', html: `<p class="story-text">Fishers say a voice sings from the rocks at night, and crabs gather on the shore to listen. No one who rows out there comes back.</p><p class="hint">Reach Sunlit Coast Lv ${Boss.SIREN_LV} to find the grotto.</p>`, buttons: [{ id: 'ok', label: 'Got it' }] });
+      return;
+    }
     if (s.locked && s.id === 'beyond') {
       App.choose({
         title: '❓ Beyond the Known Realm',
         html: `<p class="story-text">No map goes further than this. Travellers speak of a drowned swamp where giants wade, of tunnels choked with webs, of frozen peaks and haunted barrows.</p>
-          <p class="hint">Uncharted lands open after Emberwyrm falls.</p>`,
+          <p class="hint">${(App.state.bossWins || {}).dragon ? 'Emberwyrm has fallen. The way beyond is opening — coming in a future update.' : 'Uncharted lands open after Emberwyrm falls.'}</p>`,
         buttons: [{ id: 'ok', label: 'Someday…' }],
       });
       return;
@@ -96,6 +107,7 @@ window.World = (() => {
       travelling = false;
       if (s.land) App.go('gather', { land: s.land });
       else if (s.raid) App.prepareRaid(s.raid);
+      else if (s.boss) Boss.prepare(s.boss);
       else if (s.screen) App.go(s.screen);
     }, 750);
   }

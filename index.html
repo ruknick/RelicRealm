@@ -117,6 +117,24 @@
       <p class="hint" id="battle-hint"></p>
     </section>
 
+    <!-- BOSS LAIRS (Dragon's Lair, Siren's Grotto) -->
+    <section id="screen-boss" class="screen hidden">
+      <div class="forest-top">
+        <button class="small danger" id="boss-exit">🏳️ Flee</button>
+        <div class="enemy" id="boss-turn"></div>
+        <div class="moves">Move <b id="boss-moves">0</b><small>/45</small></div>
+      </div>
+      <div class="boss-bar"><span id="boss-name"></span><span class="bb"><i id="boss-hp"></i></span><b id="boss-hpn"></b></div>
+      <div class="lootbar"><span class="lb-label">Hoard</span><span id="boss-loot">nothing yet</span></div>
+      <div class="board-wrap" id="boss-wrap">
+        <div class="board"></div>
+        <div class="board-fx"></div>
+        <div class="toast"></div>
+      </div>
+      <div class="weapons"><div id="boss-weapons" class="weapon-tray"></div></div>
+      <p class="hint" id="boss-hint"></p>
+    </section>
+
     <!-- FORTIFY -->
     <section id="screen-fortify" class="screen hidden">
       <div class="forest-top">
@@ -197,6 +215,7 @@
   <script src="js/items.js"></script>
   <script src="js/hero.js"></script>
   <script src="js/story.js"></script>
+  <script src="js/boss.js"></script>
   <script>App.boot();</script>
 </body>
 </html>

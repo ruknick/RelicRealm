@@ -23,7 +23,7 @@ window.Craft = (() => {
       + Object.entries(items).map(([k, n]) =>
       `<span class="cost ${has(k, n) ? '' : 'short'}"><span class="wicon">${iconOf(Data.ITEMS[k])}</span>${n} ${Data.ITEMS[k].name}</span>`).join('');
   }
-  const TILE = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water', oak: 'oak', ironwood: 'ironwood', elderwood: 'elderwood', silver: 'silver', starsilver: 'starsilver', charcoal: 'charcoal', steel: 'steel', goldbar: 'goldbar', ironbar: 'ironbar', silverbar: 'silverbar', leather: 'leather', scrapiron: 'scrapiron', shell: 'shell' };
+  const TILE = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water', oak: 'oak', ironwood: 'ironwood', elderwood: 'elderwood', silver: 'silver', starsilver: 'starsilver', charcoal: 'charcoal', steel: 'steel', starbar: 'starbar', dragonscale: 'dragonscale', goldbar: 'goldbar', ironbar: 'ironbar', silverbar: 'silverbar', leather: 'leather', scrapiron: 'scrapiron', shell: 'shell' };
   const tileFor = k => TILE[k] || k;
 
   function card(r) {
@@ -71,7 +71,7 @@ window.Craft = (() => {
   function render() {
     const R = Data.RECIPES;
     const sec = (title, sub, list) => list.length ? `<h3 class="craft-h">${title} <small>${sub}</small></h3>${list.join('')}` : '';
-    const byTier = (cls) => [1, 2, 3].map(t => {
+    const byTier = (cls) => [1, 2, 3, 4].map(t => {
       const list = R.filter(r => Data.ITEMS[r.id] && Data.ITEMS[r.id].gear === cls && !Data.ITEMS[r.id].sea && Data.ITEMS[r.id].tier === t);
       return list.length ? `<div class="tier-h t${t}">${(cls === 'armor' ? Data.ARMOR_LABEL : Data.TIER_LABEL)[t]}</div>${list.map(card).join('')}` : '';
     }).join('');

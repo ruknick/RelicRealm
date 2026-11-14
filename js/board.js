@@ -207,8 +207,8 @@ window.Board = (() => {
 
     // ---------- pieces ----------
     addPiece(spec, r, c, w = 1, appear = false) {
-      const p = { id: nextId++, ...spec, maxHp: spec.hp, r, c, w, gone: false, appear };
-      for (let i = 0; i < w; i++) this.grid[r][c + i] = { type: 'piece', piece: p };
+      const p = { id: nextId++, h: 1, ...spec, maxHp: spec.hp, r, c, w, gone: false, appear };
+      for (let j = 0; j < p.h; j++) for (let i = 0; i < w; i++) this.grid[r + j][c + i] = { type: 'piece', piece: p };
       this.pieces.push(p);
       return p;
     }
@@ -217,9 +217,9 @@ window.Board = (() => {
       if (p.gone) return;
       p.gone = true;
       this.pieces = this.pieces.filter(x => x !== p);
-      for (let i = 0; i < p.w; i++) {
-        const cell = this.grid[p.r][p.c + i];
-        if (this.isPiece(cell) && cell.piece === p) this.grid[p.r][p.c + i] = null;
+      for (let j = 0; j < (p.h || 1); j++) for (let i = 0; i < p.w; i++) {
+        const cell = this.grid[p.r + j][p.c + i];
+        if (this.isPiece(cell) && cell.piece === p) this.grid[p.r + j][p.c + i] = null;
       }
       const el = this.pieceEls.get(p.id);
       if (el) { this.pieceEls.delete(p.id); el.classList.add(cls); setTimeout(() => el.remove(), 450); }
@@ -293,6 +293,7 @@ window.Board = (() => {
         el.style.left = (p.c / this.cols * 100) + '%';
         el.style.top = (p.r / this.rows * 100) + '%';
         el.style.width = (p.w / this.cols * 100) + '%';
+        if (p.h > 1) el.style.height = (p.h / this.rows * 100) + '%';
         el.querySelector('.pl').textContent = p.label || '';
         el.classList.toggle('readying', p.cls === 'readying');
         const hpEl = el.querySelector('.hp'), hpN = Math.ceil(p.hp);
@@ -714,6 +715,7 @@ window.Board = (() => {
           this.lineFlash(horiz, horiz ? ri.cells[0][0] : ri.cells[0][1]);
         }
         this.hooks.onMatch?.(runs, step);
+        if (Data.amuletPower() === 'siren' && runs.some(ri => ri.cells.length >= 4) && App.state.hp < App.maxHp) { App.heal(1); this.renderHealth(); }
         const tide = Data.amuletPower() === 'tide' ? 1 : 0;   // Tidestone: big matches charge more
         this.gainEnergy(runs.reduce((n, ri) => n + 1 + (ri.cells.length >= 4 || step > 1 ? 1 + tide : 0), 0) + blasts.length * (2 + tide));
         window.Sound?.sfx(blasts.length ? 'blast' : 'match', step);

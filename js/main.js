@@ -27,6 +27,7 @@ window.App = (() => {
       grudge: { goblin: 0, dwarf: 0 },       // how angry each enemy is; full = revenge raid
       revenge: null,                         // { enemy, trips } — a war party on its way
       sinceRevenge: 99,                      // trips since the last revenge raid
+      bossWins: {},                          // times each boss has been beaten
       seen: {},                          // rare materials already discovered
       profile: null,                     // { name, origin, look }
       story: { chapter: 0, flags: {}, places: {}, introSeen: false },
@@ -62,6 +63,7 @@ window.App = (() => {
         grudge: { ...base.grudge, ...(s.grudge || {}) },
         revenge: s.revenge || null,
         sinceRevenge: s.sinceRevenge ?? 99,
+        bossWins: s.bossWins || {},
         seen: s.seen || {},
         starterGear: !!s.starterGear,
         debug: { ...base.debug, ...(s.debug || {}) },
@@ -278,6 +280,7 @@ window.App = (() => {
   // ---------- raid prep ----------
   async function prepareRaid(enemy, { fromField = false } = {}) {
     prepareRaid.last = [enemy, { fromField }];
+    App.reprep = () => prepareRaid(enemy, { fromField });
     const cfg = Battle.CONFIG[enemy];
     const food = state.stockpile.food;
     const inv = state.inventory;
@@ -389,6 +392,7 @@ window.App = (() => {
     if (screen === 'fortify') { Camp.render(); Sound.music('home'); Art.setScene('craft'); }
     if (screen === 'gather') Gather.start(opts);
     if (screen === 'battle') Battle.start(opts);
+    if (screen === 'boss') Boss.start(opts);
     window.scrollTo(0, 0);
   }
 
@@ -399,6 +403,7 @@ window.App = (() => {
     renderStock();
     Gather.init();
     Battle.init();
+    Boss.init();
     const on = (id, f) => { document.getElementById(id).onclick = f; };
     on('btn-items', () => go('items'));
     on('btn-hero', () => Hero.open());
@@ -407,7 +412,7 @@ window.App = (() => {
     on('fort-back', () => go('home'));
     document.getElementById('modal').addEventListener('click', e => {
       if (e.target.id === 'prep-fortify') { e.preventDefault(); document.getElementById('modal').classList.add('hidden'); go('fortify'); }
-      if (e.target.id === 'prep-hero') { e.preventDefault(); document.getElementById('modal').classList.add('hidden'); Hero.open({ onClose: () => prepareRaid(...prepareRaid.last) }); }
+      if (e.target.id === 'prep-hero') { e.preventDefault(); document.getElementById('modal').classList.add('hidden'); Hero.open({ onClose: () => (App.reprep ? App.reprep() : go('home')) }); }
     });
     on('btn-reset', () => { if (confirm('Reset your whole save and start over?')) { state = fresh(); save(); Story.title(); } });
     on('dbg-level', () => { state.xp = Data.xpForLevel(level() + 1); save(); renderHome(); });
