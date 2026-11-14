@@ -1,0 +1,256 @@
+// Your camp: fortify layout, the AI that attacks it during a Siege Race, and the Fortify editor.
+window.Camp = (() => {
+  const ROWS = 9, COLS = 7, BASE_ROWS = 4, KEEP_HP = 6;
+  const KEEP_CELLS = [[0, 2], [0, 3], [0, 4]];
+
+  // Defenses you can place. pts = fortify points; hp before runestone bonus.
+  const DEF = {
+    fence:     { pts: 1, mat: 'wood',  hp: 2, icon: '🪵', name: 'Fence' },
+    trap:      { pts: 1, mat: 'other', hp: 1, icon: '🕳️', name: 'Pit trap', trap: true },
+    wall:      { pts: 2, mat: 'stone', hp: 4, icon: '🧱', name: 'Stone wall' },
+    palisade:  { pts: 2, mat: 'wood',  hp: 3, icon: '🔱', name: 'Spiked palisade', spiked: true },
+    tower:     { pts: 2, mat: 'wood',  hp: 3, icon: '🗼', name: 'Watchtower', tower: true },
+    gate:      { pts: 3, mat: 'iron',  hp: 4, icon: '🚪', name: 'Iron gate', max: 2 },
+    runestone: { pts: 1, mat: 'stone', hp: 1, icon: '🪨', name: 'Runestone', rune: true },
+  };
+  // How each attacker plays your board.
+  const AI = {
+    goblin: { name: 'Goblins', march: 5, miss: 0.25, big: 0.15, iron: 0.15 },
+    dwarf:  { name: 'Dwarves', march: 6, miss: 0.2, big: 0.3, iron: 0.5 },
+  };
+
+  const budget = L => Math.min(16, 5 + L);
+  const key = (r, c) => `${r},${c}`;
+  const isKeep = (r, c) => r === 0 && c >= 2 && c <= 4;
+  const inB = (r, c) => r >= 0 && r < ROWS && c >= 0 && c < COLS;
+  const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+  function layout() {
+    const st = App.state;
+    if (!st.camp) st.camp = { cells: {}, chest: [1, 3] };
+    return st.camp;
+  }
+  const placedCount = kind => Object.values(layout().cells).filter(k => k === kind).length;
+  const pointsUsed = () => Object.values(layout().cells).reduce((s, k) => s + DEF[k].pts, 0);
+  const owned = kind => App.state.inventory[kind] || 0;
+
+  // ---------- attack simulation ----------
+  function newAttack(enemy, dry = false) {
+    const L = layout();
+    const pieces = Object.entries(L.cells).map(([k, kind]) => {
+      const [r, c] = k.split(',').map(Number);
+      return { kind, ...DEF[kind], r, c, alive: true };
+    });
+    // Runestones strengthen every defense touching them.
+    pieces.filter(p => p.rune).forEach(rs => pieces.forEach(p => {
+      if (!p.trap && !p.rune && Math.abs(p.r - rs.r) + Math.abs(p.c - rs.c) === 1) p.hp++;
+    }));
+    pieces.forEach(p => { p.max = p.hp; });
+    const chest = { kind: 'chest', r: L.chest[0], c: L.chest[1], hp: 1, max: 1, mat: 'wood', alive: true };
+    const keep = { kind: 'keep', hp: KEEP_HP, max: KEEP_HP, alive: true };
+    return { enemy, P: AI[enemy], pieces, chest, keep, skip: 0, march: AI[enemy].march, towerTick: 0, moves: 0, done: false, stolen: [], dry, log: `${AI[enemy].name} are marching on your camp…` };
+  }
+
+  function blockerAt(a, r, c) {
+    if (isKeep(r, c)) return a.keep;
+    if (a.chest.alive && a.chest.r === r && a.chest.c === c) return a.chest;
+    return a.pieces.find(p => p.alive && !p.trap && p.r === r && p.c === c) || null;
+  }
+
+  // Cells the attackers can stand on: flood fill from the bottom row through open ground.
+  function reachable(a) {
+    const seen = new Set(), q = [];
+    for (let c = 0; c < COLS; c++) if (!blockerAt(a, ROWS - 1, c)) { seen.add(key(ROWS - 1, c)); q.push([ROWS - 1, c]); }
+    while (q.length) {
+      const [r, c] = q.shift();
+      for (const [dr, dc] of DIRS) {
+        const r2 = r + dr, c2 = c + dc;
+        if (!inB(r2, c2) || seen.has(key(r2, c2)) || blockerAt(a, r2, c2)) continue;
+        seen.add(key(r2, c2)); q.push([r2, c2]);
+      }
+    }
+    return seen;
+  }
+
+  function touches(reach, cells) {
+    return cells.some(([r, c]) => DIRS.some(([dr, dc]) => reach.has(key(r + dr, c + dc))));
+  }
+
+  function steal(a) {
+    const st = App.state, out = [];
+    for (let i = 0; i < 2; i++) {
+      if (st.shards > 0) { if (!a.dry) st.shards--; out.push('💎 Relic shard'); }
+      else if (st.scraps.goblin + st.scraps.dwarf > 0) {
+        const e = st.scraps.goblin > 0 ? 'goblin' : 'dwarf';
+        if (!a.dry) st.scraps[e]--; out.push('🗺️ Map scrap');
+      } else if (st.inventory.key > 0) { if (!a.dry) st.inventory.key--; out.push('🗝️ Old key'); }
+    }
+    if (!a.dry) App.save();
+    a.stolen.push(...out);
+    return out;
+  }
+
+  // One attacker move. Returns { msg, rubble } and sets a.done when your keep falls.
+  function step(a) {
+    const P = a.P;
+    a.moves++;
+    const say = (msg, extra = {}) => { a.log = msg; return { msg, ...extra }; };
+    if (a.skip > 0) { a.skip--; return say(`${P.name} are clearing rubble… (move lost)`); }
+    if (a.march > 0) {
+      a.march--;
+      return say(a.march ? `${P.name} are marching on your camp…` : `${P.name} reach your camp!`);
+    }
+    if (a.pieces.some(p => p.alive && p.tower) && ++a.towerTick >= 3) {
+      a.towerTick = 0;
+      if (Math.random() < 0.6) return say('🗼 Your watchtower drives them back! (move lost)');
+    }
+    const reach = reachable(a);
+    const trap = a.pieces.find(p => p.alive && p.trap && reach.has(key(p.r, p.c)));
+    if (trap) { trap.alive = false; a.skip++; return say(`🕳️ One fell into your pit trap! (−1 move)`); }
+
+    const targets = [];
+    if (touches(reach, KEEP_CELLS)) targets.push(a.keep);
+    if (a.chest.alive && touches(reach, [[a.chest.r, a.chest.c]])) targets.push(a.chest);
+    a.pieces.filter(p => p.alive && !p.trap && touches(reach, [[p.r, p.c]])).forEach(p => targets.push(p));
+    if (!targets.length) return say(`${P.name} search for a way in…`);
+
+    let t;
+    if (targets.includes(a.keep)) t = targets.includes(a.chest) && Math.random() < 0.5 ? a.chest : a.keep;
+    else {
+      // Pick the cheapest way through: low HP, not iron, closest to the keep.
+      const cost = p => p.hp / (p.mat === 'iron' ? P.iron : 0.7) + p.r * 0.6;
+      t = targets.sort((x, y) => cost(x) - cost(y))[0];
+    }
+    let dmg;
+    if (t.mat === 'iron') dmg = Math.random() < P.iron ? 2 : 0;
+    else { const x = Math.random(); dmg = x < P.miss ? 0 : x < 1 - P.big ? 1 : 2; }
+    const name = t === a.keep ? 'your keep' : t === a.chest ? 'your loot chest' : `your ${DEF[t.kind].name.toLowerCase()}`;
+    if (!dmg) return say(t.mat === 'iron' ? `${P.name} bang on your iron gate — it holds!` : `${P.name} are hacking at ${name}…`);
+    t.hp = Math.max(0, t.hp - dmg);
+    let msg = `${P.name} hit ${name}${dmg > 1 ? ' hard' : ''}!`;
+    if (t.spiked) { a.skip++; msg += ' 🔱 The spikes hurt them (−1 move).'; }
+    if (t.hp <= 0) {
+      t.alive = false;
+      if (t === a.keep) { a.done = true; msg = `💥 ${P.name} broke your keep!`; }
+      else if (t === a.chest) {
+        const got = steal(a);
+        msg = got.length ? `📦 ${P.name} opened your loot chest and took ${got.join(' & ')}!` : `📦 ${P.name} opened your loot chest — it was empty!`;
+      } else msg = `${P.name} smashed ${name}!`;
+    }
+    return say(msg, { rubble: dmg > 1 });
+  }
+
+  // How many moves this enemy needs on average to break your keep (for the editor).
+  function estimate(enemy, runs = 160) {
+    let total = 0;
+    for (let i = 0; i < runs; i++) {
+      const a = newAttack(enemy, true);
+      while (!a.done && a.moves < 80) step(a);
+      total += a.moves;
+    }
+    return Math.round(total / runs);
+  }
+
+  // Tiny map of your camp for the race HUD.
+  function miniMap(a) {
+    let html = '';
+    for (let r = 0; r < BASE_ROWS + 1; r++) for (let c = 0; c < COLS; c++) {
+      let cls = 'mm';
+      if (isKeep(r, c)) cls += a.keep.alive ? ' keep' : ' broken';
+      else if (a.chest.r === r && a.chest.c === c) cls += a.chest.alive ? ' chest' : ' broken';
+      else {
+        const p = a.pieces.find(x => x.r === r && x.c === c);
+        if (p) cls += p.alive ? (p.trap ? ' trap' : ` ${p.mat}`) : ' broken';
+      }
+      html += `<i class="${cls}"></i>`;
+    }
+    return html;
+  }
+
+  // ---------- Fortify editor ----------
+  let selected = null;
+
+  function giveStarterKit() {
+    const st = App.state;
+    if (st.starterDef) return;
+    st.starterDef = true;
+    st.inventory.fence += 2;
+    st.inventory.trap += 1;
+    const L = layout();
+    if (!Object.keys(L.cells).length) L.cells = { '1,2': 'fence', '1,4': 'fence', '2,3': 'trap' };
+    App.save();
+  }
+
+  function paletteKinds() {
+    return Object.keys(DEF).filter(k => owned(k) > 0);
+  }
+
+  function render() {
+    giveStarterKit();
+    const L = layout(), lv = App.level, max = budget(lv), used = pointsUsed();
+    document.getElementById('fort-points').innerHTML = `Points <b>${used}/${max}</b>`;
+    const kinds = paletteKinds();
+    document.getElementById('fort-palette').innerHTML = kinds.length ? kinds.map(k => {
+      const d = DEF[k], left = owned(k) - placedCount(k);
+      return `<button class="fort-item${selected === k ? ' sel' : ''}" data-k="${k}" ${left > 0 ? '' : 'disabled'}>
+        <span class="fi-icon">${d.icon}</span><span class="fi-name">${d.name}</span><span class="fi-meta">${left} left · ${d.pts}pt</span></button>`;
+    }).join('') : '<span class="hint">Craft defenses in the Workshop.</span>';
+    document.querySelectorAll('.fort-item').forEach(b => { b.onclick = () => { selected = selected === b.dataset.k ? null : b.dataset.k; render(); }; });
+
+    let cells = '';
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      const k = L.cells[key(r, c)];
+      let cls = 'fc', content = '';
+      if (r >= BASE_ROWS) cls += ' approach';
+      if (isKeep(r, c)) { cls += ' keep'; content = c === 3 ? '🏰' : ''; }
+      else if (L.chest[0] === r && L.chest[1] === c) { cls += ' chest'; content = '📦'; }
+      else if (k) { cls += ` def d-${k}`; content = DEF[k].icon; }
+      cells += `<div class="${cls}" data-r="${r}" data-c="${c}">${content}</div>`;
+    }
+    const grid = document.getElementById('fort-grid');
+    grid.innerHTML = cells;
+    grid.querySelectorAll('.fc').forEach(el => { el.onclick = () => tapCell(+el.dataset.r, +el.dataset.c); });
+
+    const g = estimate('goblin'), d = estimate('dwarf');
+    document.getElementById('fort-test').innerHTML =
+      `🧪 Goblins need about <b>${g}</b> moves to break your keep · dwarves about <b>${d}</b>. <span class="hint">Beat them to it when you raid!</span>`;
+    const sp = App.state;
+    document.getElementById('fort-chest').innerHTML =
+      `📦 Your loot chest holds your special items: 💎 ${sp.shards} shard${sp.shards === 1 ? '' : 's'} · 🗺️ ${sp.scraps.goblin + sp.scraps.dwarf} map scraps · 🗝️ ${sp.inventory.key} key${sp.inventory.key === 1 ? '' : 's'}. If raiders open it, they take some.`;
+    document.getElementById('fort-hint').textContent = selected === 'chest' ? 'Tap an empty spot in your camp to move the loot chest.'
+      : selected ? `Tap your camp (top 4 rows) to place a ${DEF[selected].name}. Tap a placed defense to remove it.`
+      : 'Pick a defense, then tap your camp. Tap the 📦 chest to move it. Raiders come from the bottom.';
+  }
+
+  function tapCell(r, c) {
+    const L = layout();
+    if (isKeep(r, c)) return;
+    if (r >= BASE_ROWS) { flash('You can only build in your camp (top 4 rows).'); return; }
+    const k = key(r, c);
+    const isChest = L.chest[0] === r && L.chest[1] === c;
+    if (isChest) { selected = selected === 'chest' ? null : 'chest'; render(); return; }
+    if (selected === 'chest') {
+      if (L.cells[k]) { flash('Pick an empty spot for the chest.'); return; }
+      L.chest = [r, c]; selected = null; App.save(); render(); return;
+    }
+    if (L.cells[k]) { delete L.cells[k]; App.save(); Sound.sfx('swap'); render(); return; }
+    if (!selected) { flash('Pick a defense first.'); return; }
+    const d = DEF[selected];
+    if (owned(selected) - placedCount(selected) <= 0) { flash(`No ${d.name}s left — craft more.`); return; }
+    if (pointsUsed() + d.pts > budget(App.level)) { flash(`Not enough points (level up for more).`); return; }
+    if (d.max && placedCount(selected) >= d.max) { flash(`At most ${d.max} ${d.name}s.`); return; }
+    L.cells[k] = selected;
+    App.save();
+    Sound.sfx('clank');
+    render();
+  }
+
+  function flash(msg) {
+    const h = document.getElementById('fort-hint');
+    h.textContent = msg;
+    h.classList.remove('warn'); void h.offsetWidth; h.classList.add('warn');
+    Sound.sfx('nope');
+  }
+
+  return { giveStarterKit, DEF, budget, layout, newAttack, step, estimate, miniMap, render, KEEP_HP };
+})();

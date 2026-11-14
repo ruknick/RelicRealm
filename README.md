@@ -89,6 +89,31 @@ Levels need 30, 90, 180, 300, 450… total XP. As you level up, the gathering bo
 
 Thornbushes sprout and trees fall in the forest. Rocks tumble from the ceiling and new ore veins appear in the mine. Tier 2 weapons hit harder (axe 4 vs wood, pickaxe 4 vs stone) and **cleave** 1 damage into neighbouring obstacles, so they clear crowded high-level boards much faster than a club.
 
+## 🏰 Your camp & the Siege Race
+**Fortify:** place your crafted defenses in the top 4 rows of your 7x9 camp, around your **Keep** (6 HP) and your **📦 loot chest**. Raiders come from the bottom. The point budget is 5 + your level, up to 16.
+
+| Defense | Pts | HP | Effect |
+|---|---|---|---|
+| 🪵 Fence | 1 | 2 | cheap blocker |
+| 🕳️ Pit trap | 1 | – | hidden; the attacker loses a move |
+| 🧱 Stone wall | 2 | 4 | sturdy |
+| 🔱 Spiked palisade | 2 | 3 | each hit costs the attacker a move (needs the goblin blueprint) |
+| 🗼 Watchtower | 2 | 3 | every 3 moves, 60% chance to drive attackers back |
+| 🚪 Iron gate | 3 | 4 | goblins rarely dent it (max 2) |
+| 🪨 Runestone | 1 | 1 | +1 HP to every defense touching it (dwarf spoil) |
+
+New players get 2 fences and a pit trap, already placed. The screen shows how many moves goblins and dwarves would need to break your keep.
+
+**Siege Race (every raid):**
+- You attack their base while their AI attacks your camp. There's no move budget: **fewest moves to break the other keep wins**.
+- After 40 moves, whoever did more keep damage wins.
+- Each of your moves (including weapon uses) gives them a move. Hidden traps on their side give them an extra one.
+- **Big combos and line blasts throw rubble** in their way (they lose a move). Their big hits throw rubble onto your board.
+- Freeing a prisoner sabotages them (−2 moves). War drum, dwarf ale and the Crown give you a head start.
+- **Loot chests hold special items** (keys, map scraps, relic shards). Open theirs before you break their keep to take some. If they open yours, they take some of yours.
+- **Lose** and they plunder 10% of your storehouse.
+- Stars: ★ win · ★ open their chest · ★ your chest stays safe.
+
 ## Workshop
 - **Tier 1 · Camp:** Club 5 wood · Sling 4 wood, 3 hide
 - **Tier 2 · Forge:** Iron axe 4 wood, 3 iron · Pickaxe 3 wood, 4 iron · Iron sword 2 hide, 5 iron, 2 coal
@@ -102,4 +127,4 @@ Thornbushes sprout and trees fall in the forest. Rocks tumble from the ceiling a
 - ⭐ +1 level.
 
 ## Not built yet
-Fortify editor, goblins and dwarves raiding your board, PvP, Tier 3+.
+Real PvP (needs a server), Volcano land, Tier 3+.

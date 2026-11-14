@@ -2,7 +2,8 @@
 window.Craft = (() => {
   let forging = false;
   const st = () => App.state;
-  const canAfford = r => Object.entries(r.cost).every(([k, n]) => st().stockpile[k] >= n);
+  const locked = r => !!r.needs && !st().unlocks[r.needs];
+  const canAfford = r => !locked(r) && Object.entries(r.cost).every(([k, n]) => st().stockpile[k] >= n);
   const isTool = r => r.tier === 'tool';
   const ownedTool = r => isTool(r) && st().inventory[r.id] > 0;
 
@@ -20,7 +21,7 @@ window.Craft = (() => {
       <div class="r-body">
         <div class="r-name">${it.name} ${usesTag} <span class="r-owned">${ownedTxt}</span></div>
         <div class="r-effect">${it.desc}</div>
-        <div class="r-cost">${cost}</div>
+        <div class="r-cost">${locked(r) ? '<span class="cost short">🔒 Needs the Palisade blueprint (goblin spoil)</span>' : cost}</div>
       </div>
       <button class="craft-btn" data-id="${r.id}" ${ready ? '' : 'disabled'}>${ownedTool(r) ? 'Owned' : 'Craft'}</button>
     </div>`;
@@ -31,9 +32,9 @@ window.Craft = (() => {
     const sec = (title, sub, list) => `<h3 class="craft-h">${title} <small>${sub}</small></h3>${list.map(card).join('')}`;
     document.getElementById('craft-list').innerHTML =
       sec('🏕️ Tier 1 · Camp', 'wood, stone & hide', R.filter(r => r.tier === 1 && !r.defense)) +
-      sec('🔥 Tier 2 · Forge', 'needs iron & coal from the Iron Hills — multi-use', R.filter(r => r.tier === 2)) +
+      sec('🔥 Tier 2 · Forge', 'needs iron & coal from the Iron Hills — multi-use', R.filter(r => r.tier === 2 && !r.defense)) +
       sec('🧰 Tools', 'passive & permanent — they work every run', R.filter(isTool)) +
-      sec('🛡️ Defenses', 'for fortifying your base — coming soon', R.filter(r => r.defense));
+      sec('🛡️ Defenses', 'place them in 🏰 Fortify to protect your camp', R.filter(r => r.defense));
     document.querySelectorAll('.craft-btn').forEach(b => { b.onclick = () => craft(b.dataset.id); });
   }
 

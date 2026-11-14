@@ -38,7 +38,7 @@
         <h3 class="menu-h">Raid</h3>
         <button class="big danger" id="btn-raid-goblin">⚔️ Raid Goblin Village</button>
         <button class="big danger" id="btn-raid-dwarf">⚒️ Raid Dwarf Stronghold</button>
-        <button class="big" disabled>🧱 Fortify <small>later</small></button>
+        <button class="big" id="btn-fortify">🏰 Fortify your camp</button>
       </nav>
 
       <div class="panel" id="home-inventory"></div>
@@ -82,11 +82,18 @@
       <div class="forest-top">
         <button class="small danger" id="battle-exit">🏳️ Retreat</button>
         <div class="enemy" id="enemy"></div>
-        <div class="moves">Moves <b id="b-moves">20</b></div>
+        <div class="moves">Move <b id="b-moves">0</b><small id="b-cap">/40</small></div>
       </div>
       <div class="lootbar">
         <span class="lb-label" id="b-title"></span>
         <span id="lootbar-text">nothing yet</span>
+      </div>
+      <div class="race" id="race">
+        <div class="mm-grid" id="race-map"></div>
+        <div class="race-info">
+          <div class="race-top"><span>🏰 Your camp <span id="race-keep"></span></span><span id="race-them"></span></div>
+          <div class="race-log" id="race-log"></div>
+        </div>
       </div>
 
       <div class="board-wrap" id="battle-wrap">
@@ -100,6 +107,19 @@
         <div id="battle-weapons" class="weapon-tray"></div>
       </div>
       <p class="hint" id="battle-hint"></p>
+    </section>
+
+    <!-- FORTIFY -->
+    <section id="screen-fortify" class="screen hidden">
+      <div class="forest-top">
+        <button class="small" id="fort-back">← Home</button>
+        <div class="craft-title">🏰 Your camp</div>
+        <div id="fort-points"></div>
+      </div>
+      <div class="fort-palette" id="fort-palette"></div>
+      <div class="fort-wrap"><div class="fort-grid" id="fort-grid"></div><div class="fort-arrow">⬆ raiders attack from here ⬆</div></div>
+      <p class="hint" id="fort-hint"></p>
+      <div class="panel fort-panel"><div id="fort-test"></div><div id="fort-chest" class="mt"></div></div>
     </section>
 
     <!-- WORKSHOP -->
@@ -138,6 +158,7 @@
   <script src="js/board.js"></script>
   <script src="js/main.js"></script>
   <script src="js/gather.js"></script>
+  <script src="js/camp.js"></script>
   <script src="js/battle.js"></script>
   <script src="js/craft.js"></script>
   <script>App.boot();</script>

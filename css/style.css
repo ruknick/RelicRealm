@@ -663,3 +663,58 @@ body[data-scene] .res, body[data-scene] .sound-btn { background: rgba(10,14,11,.
 .lv-info { color: var(--muted); font-size: .8rem; }
 .subbar { justify-content: space-between; align-items: center; }
 #g-level { color: #ffe08a; font-weight: 700; }
+
+/* ---------- Siege Race HUD ---------- */
+.moves small { color: var(--muted); font-size: .8rem; margin-left: 1px; }
+.race { display: flex; gap: 10px; align-items: center; background: rgba(10,14,11,.6); border: 1px solid #3a5242;
+  border-radius: 10px; padding: 6px 8px; margin: -2px 0 0; }
+.race.ping { animation: racePing .4s; }
+.race.hurt { animation: raceHurt .6s; }
+@keyframes racePing { 40% { border-color: #ffe08a; } }
+@keyframes raceHurt { 30% { background: rgba(140,20,20,.75); border-color: #ff8a8a; } }
+.mm-grid { display: grid; grid-template-columns: repeat(7, 7px); grid-auto-rows: 7px; gap: 1px; flex: none; }
+.mm { background: #2b3a2f; border-radius: 1px; }
+.mm.keep { background: #b9a7e0; } .mm.chest { background: #f2c230; } .mm.broken { background: #6b2a2a; }
+.mm.wood { background: #9a6634; } .mm.stone { background: #9aa0a8; } .mm.iron { background: #5d6b7c; } .mm.trap { background: #1a120b; }
+.race-info { flex: 1; min-width: 0; }
+.race-top { display: flex; justify-content: space-between; gap: 8px; font-size: .8rem; font-weight: 700; white-space: nowrap; }
+#race-keep { color: #ff7070; letter-spacing: 1px; }
+#race-keep .lost { color: #553; }
+#race-them { color: var(--muted); font-weight: 500; }
+.race-log { font-size: .78rem; color: #f3ead2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+#screen-battle .board-wrap { width: min(calc(100% - 28px), calc((100dvh - 350px) * var(--cols, 7) / var(--rows, 7))); }
+.sum-spoils.lost { background: #4a1c1c; }
+.race-rules { background: rgba(242,194,48,.12); border-radius: 10px; padding: 8px; text-align: left !important; font-size: .9rem; }
+.race-rules a { color: var(--accent); }
+
+/* ---------- Fortify ---------- */
+#fort-points { font-size: .9rem; color: var(--muted); white-space: nowrap; }
+#fort-points b { color: var(--accent); font-size: 1.05rem; }
+.fort-palette { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; }
+.fort-palette::-webkit-scrollbar { display: none; }
+.fort-item { flex: none; display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; column-gap: 6px; align-items: center;
+  background: var(--panel); border: 2px solid transparent; border-radius: 10px; padding: 6px 10px; text-align: left; }
+.fort-item.sel { border-color: var(--accent); background: #3d3510; }
+.fort-item:disabled { opacity: .4; }
+.fi-icon { grid-row: span 2; font-size: 1.4rem; }
+.fi-name { font-weight: 700; font-size: .85rem; white-space: nowrap; }
+.fi-meta { font-size: .72rem; color: var(--muted); white-space: nowrap; }
+.fort-wrap { width: min(100%, calc((100dvh - 330px) * 7 / 9)); margin: 0 auto; }
+.fort-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; padding: 6px; border-radius: 14px;
+  background: repeating-linear-gradient(100deg, #5b3a1e 0 5px, #6e4826 5px 9px, #4e3118 9px 12px); box-shadow: 0 8px 20px rgba(0,0,0,.5); }
+.fc { aspect-ratio: 1; border-radius: 8px; background: #3d5a36; display: grid; place-items: center; font-size: 1.35rem; cursor: pointer;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,.25); transition: transform .1s; }
+.fc:active { transform: scale(.94); }
+.fc.approach { background: #2a3a27; opacity: .6; cursor: default; }
+.fc.keep { background: linear-gradient(#8a83a0, #4d4760); cursor: default; }
+.fc.chest { background: #6b4a1e; box-shadow: 0 0 0 2px #f2c230 inset; }
+.fc.def { background: #2f4529; }
+.fc.d-wall { background: #6c7078; } .fc.d-gate { background: #3b4450; } .fc.d-trap { background: #1d1610; }
+.fc.d-fence, .fc.d-palisade, .fc.d-tower { background: #6e4826; }
+.fort-arrow { text-align: center; color: var(--muted); font-size: .75rem; margin-top: 4px; }
+.fort-panel { font-size: .85rem; margin-top: 8px; }
+.fort-panel .mt { margin-top: 8px; }
+#fort-hint.warn { color: #ff8a8a; animation: shake .3s; }
+.race-top > span:first-child { flex: none; }
+#race-them { overflow: hidden; text-overflow: ellipsis; min-width: 0; text-align: right; }
+#race-keep { font-size: .75rem; letter-spacing: 0; }

@@ -15,9 +15,12 @@ window.Data = (() => {
     // Tier 1 — Camp
     club:   { name: 'Club', icon: '🏏', weapon: true, uses: 1, desc: 'Strong vs wood & thornbushes. Useless on stone/iron.' },
     sling:  { name: 'Sling', icon: '🪃', weapon: true, uses: 1, desc: 'Hits anything for 1, even through fog.' },
-    fence:  { name: 'Wooden fence', icon: '🪵', desc: 'Defense: blocks a tile, 1 hit.' },
-    wall:   { name: 'Stone wall', icon: '🧱', desc: 'Defense: blocks a tile, 2 hits.' },
-    trap:   { name: 'Pit trap', icon: '🕳️', desc: 'Defense: attacker loses a move.' },
+    fence:  { name: 'Wooden fence', icon: '🪵', desc: 'Defense: wood, 1 HP. Cheap blocker. 1 pt.' },
+    wall:   { name: 'Stone wall', icon: '🧱', desc: 'Defense: stone, 2 HP. 2 pts.' },
+    trap:   { name: 'Pit trap', icon: '🕳️', desc: 'Defense: hidden — an attacker who finds it loses a move. 1 pt.' },
+    palisade: { name: 'Spiked palisade', icon: '🔱', desc: 'Defense: wood, 2 HP. Every hit costs the attacker a move. 2 pts.' },
+    tower:  { name: 'Watchtower', icon: '🗼', desc: 'Defense: wood, 2 HP. Every 3 moves it may drive attackers back. 2 pts.' },
+    gate:   { name: 'Iron gate', icon: '🚪', desc: 'Defense: iron, 3 HP. Goblins can barely dent it. 3 pts, max 2.' },
     // Tier 2 — Forge (multi-use)
     axe:     { name: 'Iron axe', icon: '🪓', weapon: true, uses: 3, desc: '4 dmg to wood & thorns, and cleaves 1 into anything next to it. Stumps give bonus wood.' },
     pickaxe: { name: 'Pickaxe', icon: '⛏️', weapon: true, uses: 3, desc: '4 dmg to stone, 2 to iron, and cracks 1 into neighbours. Mines double ore.' },
@@ -36,7 +39,7 @@ window.Data = (() => {
     // Dwarf spoils
     dpick:     { name: 'Dwarven pick', icon: '⚒️', weapon: true, uses: 3, spoil: 'dwarf', desc: 'Smashes stone & iron in one blow, and 2 into neighbours.' },
     ale:       { name: 'Dwarf ale', icon: '🍺', spoil: 'dwarf', desc: '+3 moves in a raid.' },
-    runestone: { name: 'Runestone', icon: '🪨', spoil: 'dwarf', desc: '+1 HP to your walls (for Fortify).' },
+    runestone: { name: 'Runestone', icon: '🪨', spoil: 'dwarf', desc: 'Place in your camp: +1 HP to every defense touching it. 1 pt.' },
     cartbp:    { name: 'Mine-cart blueprint', icon: '🛤️', spoil: 'dwarf', desc: 'Unlocks the Mine-cart defense.' },
     // Relic
     crown:     { name: 'Old King\'s Crown', icon: '👑', trinket: true, desc: 'Legendary. +2 moves in every raid.' },
@@ -103,6 +106,9 @@ window.Data = (() => {
     { id: 'fence', tier: 1, cost: { wood: 6 }, defense: true },
     { id: 'wall',  tier: 1, cost: { stone: 12 }, defense: true },
     { id: 'trap',  tier: 1, cost: { wood: 4, hide: 2 }, defense: true },
+    { id: 'tower', tier: 1, cost: { wood: 8, hide: 2 }, defense: true },
+    { id: 'palisade', tier: 1, cost: { wood: 6, iron: 1 }, defense: true, needs: 'palisade' },
+    { id: 'gate', tier: 2, cost: { iron: 5, wood: 1 }, defense: true },
     { id: 'axe',     tier: 2, cost: { wood: 4, iron: 3 } },
     { id: 'pickaxe', tier: 2, cost: { wood: 3, iron: 4 } },
     { id: 'sword',   tier: 2, cost: { hide: 2, iron: 5, coal: 2 } },

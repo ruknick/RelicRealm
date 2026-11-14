@@ -7,6 +7,7 @@ window.Battle = (() => {
   const ENEMY_EVERY = 3;
   const MAX_MINIONS = 3;
   const STAR_CHANCE = 0.02;
+  const CAP = 40;               // Siege Race soft cap: after this many moves, most damage wins
 
   const P = {
     fog:      { kind: 'fog',      label: '',        mat: 'other', hp: 1 },
@@ -65,7 +66,7 @@ window.Battle = (() => {
       reveal: {
         fence: 'A goblin fence (wood).', tower: 'A watchtower! It throws an extra spear every goblin turn.',
         chest: 'A buried chest! Match next to it to dig it up.', loot: 'The goblin loot chest! Open it for goblin spoils.',
-        prisoner: 'A prisoner! Free them for +3 moves.', keep: 'The goblin keep (wood)! Break it to win.',
+        prisoner: 'A prisoner! Free them and they\'ll sabotage the attack on your camp.', keep: 'The goblin keep (wood)! Break it to win.',
       },
     },
     dwarf: {
@@ -106,26 +107,30 @@ window.Battle = (() => {
     const b = run.bag;
     const parts = Object.keys(Data.RESOURCES).filter(t => b[t] > 0).map(t => `${b[t]} ${Data.RESOURCES[t].label}`);
     run.bag.spoils.forEach(k => parts.push(App.spoilName(k)));
+    run.bag.specials.forEach(k => parts.push(Data.FIND_INFO[k].icon));
     return parts.length ? parts.join(', ') : 'nothing yet';
   }
 
   function hud() {
     document.getElementById('b-moves').textContent = run.moves;
-    document.querySelector('#screen-battle .moves').classList.toggle('low', run.moves <= 5);
+    document.getElementById('b-cap').textContent = `/${CAP}`;
+    document.querySelector('#screen-battle .moves').classList.toggle('low', CAP - run.moves <= 5);
     const left = ENEMY_EVERY - run.sinceEnemy;
     const who = run.enemy === 'dwarf' ? 'Dwarves' : 'Goblins';
-    document.getElementById('enemy').innerHTML = run.won
-      ? `🏳️ ${who} fled`
-      : `${who} act in <b>${'●'.repeat(left)}${'○'.repeat(ENEMY_EVERY - left)}</b>`;
+    document.getElementById('enemy').innerHTML = `${who} act in <b>${'●'.repeat(left)}${'○'.repeat(ENEMY_EVERY - left)}</b>`;
     document.getElementById('lootbar-text').textContent = lootText();
-    const exit = document.getElementById('battle-exit');
-    exit.textContent = run.won ? '🏠 Head home' : '🏳️ Retreat';
-    exit.classList.toggle('danger', !run.won);
-    exit.classList.toggle('glow', run.won);
-    document.getElementById('battle-hint').textContent = board.armedHint() || (run.won
-      ? 'Victory! Grab any loot you can reach, then head home.'
-      : run.keep ? `Match next to the ${run.keep.label} to damage it. Knock out ${cfg.minionName}s — they repair it.`
-      : 'Match next to the fog (?) to scout. Find and break the keep to win.');
+    document.getElementById('battle-hint').textContent = board.armedHint() || (run.keep
+      ? `Break the ${run.keep.label} before they break yours! Open their loot chest first for bonus loot.`
+      : 'Siege Race! Scout the fog (?) and break their keep in fewer moves than they need for yours.');
+    hudRace();
+  }
+
+  function hudRace() {
+    const a = run.race;
+    document.getElementById('race-map').innerHTML = Camp.miniMap(a);
+    document.getElementById('race-keep').innerHTML = '♥'.repeat(a.keep.hp) + '<span class="lost">' + '♥'.repeat(a.keep.max - a.keep.hp) + '</span>';
+    document.getElementById('race-log').textContent = a.log;
+    document.getElementById('race-them').textContent = run.keep ? `Their ${run.keep.label.toLowerCase()}: ${run.keep.hp}/${run.keep.maxHp}` : 'Their keep: hidden';
   }
 
   // ---------- pieces ----------
@@ -147,9 +152,10 @@ window.Battle = (() => {
     }
     if (k === 'trap') {
       if (src === 'match') {
-        run.moves = Math.max(0, run.moves - 1);
-        board.float([r, c], '−1 move', 'loss');
-        board.toast(run.enemy === 'dwarf' ? 'Rockfall trap! You lose 1 move.' : 'Hidden pit trap! You lose 1 move.', 'alert');
+        run.moves++;
+        run.extraAi++;
+        board.float([r, c], '+1 move', 'loss');
+        board.toast(run.enemy === 'dwarf' ? 'Rockfall trap! +1 move on your count.' : 'Hidden pit trap! +1 move on your count.', 'alert');
       } else {
         board.float([r, c], 'Trap disarmed', 'bonus');
       }
@@ -178,9 +184,9 @@ window.Battle = (() => {
       case 'tower': board.toast(p.cls === 'ballista' ? 'Ballista wrecked!' : 'Watchtower down! No more extra spears.'); break;
       case 'minion': board.float(cell, `${cfg.minionName} down!`, 'bonus'); break;
       case 'prisoner':
-        run.moves += 3;
-        board.float(cell, '+3 moves', 'bonus');
-        board.toast('Prisoner freed! They show you a shortcut: +3 moves.', 'win');
+        run.race.skip += 2;
+        board.float(cell, 'Sabotage!', 'bonus');
+        board.toast('Prisoner freed! They sabotage the attack on your camp (−2 moves for them).', 'win');
         break;
       case 'keyp': {
         run.gateOpen = true;
@@ -199,12 +205,14 @@ window.Battle = (() => {
         }
         break;
       case 'loot': {
-        const k = App.rollSpoil(cfg.spoils);
-        run.bag.spoils.push(k);
+        // Their loot chest holds their special items: keys, map scraps, relic shards.
+        const got = [0, 1].map(() => Data.rollFrom([['scrap', 40], ['key', 32], ['shard', 28]]));
+        run.bag.specials.push(...got);
         run.lootOpened = true;
-        board.float(cell, 'Spoils!', 'gold');
-        board.toast(`${p.cls === 'vault' ? 'Vault' : 'Loot chest'}: ${App.spoilName(k)}!`, 'win', 2600);
-        Sound.sfx('victory');
+        board.celebrate(cell, {
+          icon: '📦', title: `${p.cls === 'vault' ? 'Vault' : 'Loot chest'} opened!`,
+          sub: got.map(k => `${Data.FIND_INFO[k].icon} ${Data.FIND_INFO[k].name}`).join(' & '), rare: got.includes('shard'),
+        });
         break;
       }
       default: break;
@@ -281,8 +289,17 @@ window.Battle = (() => {
 
   // ---------- board hooks ----------
   const hooks = {
-    canPlay: () => !!run && !run.ended && run.moves > 0,
-    onMove: () => { run.moves--; if (!run.won) run.sinceEnemy++; hud(); },
+    canPlay: () => !!run && !run.ended && !run.won && run.moves < CAP,
+    onMove: () => { run.moves++; run.sinceEnemy++; run.rubbleSent = false; hud(); },
+    onMatch(runs, step) {
+      // Big combos and line blasts throw rubble onto the attackers' path at your camp.
+      if (!run.rubbleSent && (step >= 2 || runs.some(r => r.cells.length >= 5))) {
+        run.rubbleSent = true;
+        run.race.skip++;
+        board.float([1, 3], '🪨 Rubble → them!', 'bonus');
+        hudRace();
+      }
+    },
     onPieceHit(p, n, src, w) {
       if (p.kind === 'fog') { reveal(p, src); hud(); return; }
       const dmg = src === 'match' ? n * (Data.MATCH_DMG[p.mat] ?? 1) : n;
@@ -312,51 +329,83 @@ window.Battle = (() => {
     onArm: () => hud(),
     async afterAction(wasMove) {
       hud();
-      if (wasMove && !run.won && run.sinceEnemy >= ENEMY_EVERY && run.moves > 0) {
+      if (run.won) { await board.wait(900); finish('win'); return; }
+      if (run.ended) return;
+      if (!wasMove) { run.moves++; run.sinceEnemy++; }   // using a weapon costs a move too
+      // The enemy takes their move(s) on your camp.
+      const steps = 1 + run.extraAi;
+      run.extraAi = 0;
+      for (let i = 0; i < steps; i++) {
+        const res = Camp.step(run.race);
+        hudRace();
+        flashRace(res.msg);
+        if (run.race.done) { await board.wait(700); finish('lost'); return; }
+        if (res.rubble) await act('missile');
+      }
+      // Their own village defenders act every few moves.
+      if (run.sinceEnemy >= ENEMY_EVERY) {
         run.sinceEnemy = 0;
         hud();
         await enemyTurn();
         hud();
       }
-      if (run.moves <= 0 && !run.ended) {
-        await board.wait(600);
-        finish(run.won ? 'home' : 'lose');
-      }
+      if (run.moves >= CAP && !run.ended) { await board.wait(600); finish('cap'); }
     },
   };
+
+  function flashRace(msg) {
+    const el = document.getElementById('race');
+    el.classList.remove('ping'); void el.offsetWidth; el.classList.add('ping');
+    if (/broke|opened|smashed/.test(msg)) { el.classList.remove('hurt'); void el.offsetWidth; el.classList.add('hurt'); Sound.sfx('hit'); }
+  }
 
   // ---------- end of raid ----------
   function finish(reason) {
     if (run.ended) return;
     run.ended = true;
     board.stop();
-    const keepLoot = run.won || reason === 'retreat';
-    const gained = [];
+    const a = run.race;
+    const theirDmg = run.keep ? 1 - run.keep.hp / run.keep.maxHp : 0;
+    const myDmg = 1 - a.keep.hp / a.keep.max;
+    const won = reason === 'win' || (reason === 'cap' && theirDmg > myDmg);
+    const keepLoot = won || reason === 'retreat';
+    const gained = [], lost = [];
     if (keepLoot) {
       Object.keys(Data.RESOURCES).forEach(t => {
         if (run.bag[t]) { App.state.stockpile[t] += run.bag[t]; gained.push(`+${run.bag[t]} ${Data.RESOURCES[t].label}`); }
       });
       run.bag.spoils.forEach(k => gained.push(App.grantSpoil(k)));
-      App.save();
+      run.bag.specials.forEach(k => gained.push(App.grantSpecial(k, run.enemy)));
     }
-    const gainXp = (run.won ? (run.enemy === 'dwarf' ? Data.XP.raidWinDwarf : Data.XP.raidWin) : reason === 'retreat' ? Data.XP.retreat : 0)
+    // If they broke your keep, they plunder part of your storehouse.
+    if (reason === 'lost') {
+      ['wood', 'stone', 'hide', 'iron', 'coal', 'gold'].forEach(t => {
+        const n = Math.floor(App.state.stockpile[t] * 0.1);
+        if (n > 0) { App.state.stockpile[t] -= n; lost.push(`−${n} ${Data.RESOURCES[t].label}`); }
+      });
+    }
+    a.stolen.forEach(x => lost.push(`${x} (from your loot chest)`));
+    App.save();
+    const gainXp = (won ? (run.enemy === 'dwarf' ? Data.XP.raidWinDwarf : Data.XP.raidWin) : reason === 'retreat' ? Data.XP.retreat : 0)
       + (run.lootOpened && keepLoot ? Data.XP.loot : 0);
     const newLv = gainXp ? App.addXP(gainXp) : 0;
     if (gainXp) gained.push(`⭐ +${gainXp} XP`);
     if (newLv) gained.push(`🎉 <b>Level ${newLv}!</b> ${App.levelPerks(newLv)}`);
-    const stars = [run.lootOpened, run.won, run.lootOpened && run.won && run.moves > 0];
-    const title = run.won ? 'Victory!' : reason === 'retreat' ? 'You retreated' : 'Defeated!';
-    const line = run.won ? `The ${cfg.name} has fallen.`
+    const stars = [won, run.lootOpened, a.chest.alive];
+    const title = won ? 'Victory!' : reason === 'retreat' ? 'You retreated' : 'Defeated!';
+    const line = reason === 'win' ? `You broke their keep in <b>${run.moves}</b> moves — they had only reached ${Math.round(myDmg * 100)}% of yours.`
+      : reason === 'lost' ? `${a.P.name} broke your keep after <b>${a.moves}</b> moves — before you broke theirs. They plundered your storehouse.`
       : reason === 'retreat' ? 'You slipped away with what you grabbed.'
-      : 'Out of moves. You were driven off — you lost what you grabbed.';
+      : `Time! You did ${Math.round(theirDmg * 100)}% damage to their keep, they did ${Math.round(myDmg * 100)}% to yours.`;
     App.choose({
       title,
       html: `<div class="stars">${stars.map(s => `<span class="${s ? '' : 'off'}">★</span>`).join('')}</div>
         <p>${line}</p>
         ${gained.length ? `<div class="sum-spoils"><b>Brought home</b><br>${gained.join('<br>')}</div>` : ''}
-        <p class="sum-notes">★ open the ${run.enemy === 'dwarf' ? 'vault' : 'loot chest'} · ★ break the keep · ★ both, with moves left<br>
+        ${lost.length ? `<div class="sum-spoils lost"><b>Lost</b><br>${lost.join('<br>')}</div>` : ''}
+        <p class="sum-notes">★ win the race · ★ open their loot chest · ★ keep your own chest safe<br>
         Food spent: ${cfg.foodCost}${run.weaponsUsed ? ` · Weapon uses: ${run.weaponsUsed}` : ''}</p>`,
-      buttons: [{ id: 'home', label: 'Home' }, { id: 'craft', label: '🔨 Workshop', cls: 'alt' }],
+      buttons: [{ id: 'fortify', label: '🏰 Fortify my camp' }, { id: 'home', label: 'Home', cls: 'alt' }],
     }).then(c => App.go(c));
   }
 
@@ -372,7 +421,7 @@ window.Battle = (() => {
     };
   }
 
-  function start({ enemy = 'goblin', bonusMoves = 0 } = {}) {
+  function start({ enemy = 'goblin', headStart = 0 } = {}) {
     cfg = CONFIG[enemy];
     document.getElementById('screen-battle').dataset.enemy = enemy;
     document.getElementById('b-title').textContent = `${cfg.icon} ${cfg.name}`;
@@ -380,8 +429,9 @@ window.Battle = (() => {
     board.setFrame(enemy);
     Art.setScene(enemy);
     run = {
-      enemy, moves: cfg.moves + bonusMoves, sinceEnemy: 0, keep: null, broken: [], gateOpen: false,
-      bag: { spoils: [] }, won: false, lootOpened: false, ended: false, weaponsUsed: 0, told: {},
+      enemy, moves: 0, extraAi: 0, sinceEnemy: 0, keep: null, broken: [], gateOpen: false, rubbleSent: false,
+      race: Camp.newAttack(enemy),
+      bag: { spoils: [], specials: [] }, won: false, lootOpened: false, ended: false, weaponsUsed: 0, told: {},
     };
     const hidden = cfg.layout();
     for (let r = 0; r < FOG_ROWS; r++)
@@ -393,7 +443,9 @@ window.Battle = (() => {
     board.scheduleHint();
     hud();
     Sound.music(enemy === 'dwarf' ? 'dwarf' : 'battle');
-    board.toast(bonusMoves ? `${cfg.intro} (+${bonusMoves} moves)` : cfg.intro, '', 2400);
+    run.race.skip += headStart;
+    hud();
+    board.toast(headStart ? `Siege Race! ${cfg.intro} (they start ${headStart} moves behind)` : `Siege Race! ${cfg.intro}`, '', 2600);
   }
 
   return { init, start, CONFIG, get board() { return board; }, get run() { return run; } };

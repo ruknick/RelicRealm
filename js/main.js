@@ -14,6 +14,8 @@ window.App = (() => {
       scraps: { goblin: 0, dwarf: 0 },
       shards: 0,
       xp: 0,
+      camp: { cells: {}, chest: [1, 3] },
+      starterDef: false,
       debug: { discoverNow: false, eventNow: false },
     };
   }
@@ -33,6 +35,8 @@ window.App = (() => {
         scraps: { ...base.scraps, ...s.scraps },
         shards: s.shards || 0,
         xp: s.xp || 0,
+        camp: s.camp || { cells: {}, chest: [1, 3] },
+        starterDef: !!s.starterDef,
         debug: { ...base.debug, ...(s.debug || {}) },
       };
     } catch (e) { /* ignore broken saves */ }
@@ -83,6 +87,21 @@ window.App = (() => {
     return spoilName(k);
   }
 
+  // Special items from an enemy loot chest: keys, map scraps, relic shards.
+  function grantSpecial(k, enemy) {
+    const info = Data.FIND_INFO[k];
+    if (k === 'key') state.inventory.key++;
+    else if (k === 'shard') {
+      state.shards++;
+      if (state.shards >= 5) { state.shards -= 5; state.inventory.crown++; save(); return `${info.icon} ${info.name} — 👑 the Old King's Crown is complete!`; }
+    } else if (k === 'scrap') {
+      state.scraps[enemy]++;
+      if (state.scraps[enemy] >= 3) { state.scraps[enemy] -= 3; state.marked[enemy]++; save(); return `${info.icon} ${info.name} — map complete, a new target is marked!`; }
+    }
+    save();
+    return `${info.icon} ${info.name}`;
+  }
+
   // ---------- popup ----------
   function choose({ title, html, buttons }) {
     const m = document.getElementById('modal');
@@ -114,13 +133,15 @@ window.App = (() => {
       .map(k => `${Data.ITEMS[k].icon} ${Data.ITEMS[k].name} ${inv[k]}`);
     const canGo = food >= cfg.foodCost;
     const boosts = ['drum', 'ale'].filter(k => inv[k] > 0)
-      .map(k => `<label class="check"><input type="checkbox" id="use-${k}"> ${Data.ITEMS[k].icon} Use ${Data.ITEMS[k].name} (+3 moves)</label>`).join('');
+      .map(k => `<label class="check"><input type="checkbox" id="use-${k}"> ${Data.ITEMS[k].icon} Use ${Data.ITEMS[k].name} (they start 3 moves behind)</label>`).join('');
     const choice = await choose({
       title: `${cfg.icon} ${cfg.name}`,
-      html: `<p>${cfg.prep}</p>
+      html: `<p class="race-rules">🏁 <b>Siege Race:</b> you attack their base while they attack your camp. <b>Fewest moves to break the other keep wins.</b> Big combos throw rubble in their way.
+          Your camp: they need about <b>${Camp.estimate(enemy)}</b> moves. <a href="#" id="prep-fortify">Fortify it</a></p>
+        <p>${cfg.prep}</p>
         <p>Costs <b>${cfg.foodCost} food</b> — you have <b>${food}</b>.</p>
         <p class="hint">Weapons: ${weapons.length ? weapons.join(', ') : 'none — craft some first!'}</p>
-        ${inv.crown > 0 ? '<p class="hint">👑 The Crown grants +2 moves.</p>' : ''}
+        ${inv.crown > 0 ? '<p class="hint">👑 The Crown: they start 2 moves behind.</p>' : ''}
         ${boosts}`,
       buttons: [
         { id: 'go', label: canGo ? '⚔️ Attack!' : `Need ${cfg.foodCost} food`, cls: 'danger', disabled: !canGo },
@@ -136,10 +157,10 @@ window.App = (() => {
     }
     state.stockpile.food -= cfg.foodCost;
     if (!fromField) state.marked[enemy] = Math.max(0, state.marked[enemy] - 1);
-    let bonusMoves = inv.crown > 0 ? 2 : 0;
-    ['drum', 'ale'].forEach(k => { if (extra['use-' + k] && inv[k] > 0) { inv[k]--; bonusMoves += 3; } });
+    let headStart = inv.crown > 0 ? 2 : 0;
+    ['drum', 'ale'].forEach(k => { if (extra['use-' + k] && inv[k] > 0) { inv[k]--; headStart += 3; } });
     save();
-    go('battle', { enemy, bonusMoves });
+    go('battle', { enemy, headStart });
   }
 
   // ---------- screens ----------
@@ -197,6 +218,7 @@ window.App = (() => {
     document.getElementById('screen-' + screen).classList.remove('hidden');
     if (screen === 'home') { renderHome(); Sound.music('home'); Art.setScene('home'); }
     if (screen === 'craft') { Craft.render(); Sound.music('home'); Art.setScene('craft'); }
+    if (screen === 'fortify') { Camp.render(); Sound.music('home'); Art.setScene('craft'); }
     if (screen === 'gather') Gather.start(opts);
     if (screen === 'battle') Battle.start(opts);
     window.scrollTo(0, 0);
@@ -214,6 +236,11 @@ window.App = (() => {
     on('btn-raid-goblin', () => prepareRaid('goblin'));
     on('btn-raid-dwarf', () => prepareRaid('dwarf'));
     on('craft-back', () => go('home'));
+    on('fort-back', () => go('home'));
+    on('btn-fortify', () => go('fortify'));
+    document.getElementById('modal').addEventListener('click', e => {
+      if (e.target.id === 'prep-fortify') { e.preventDefault(); document.getElementById('modal').classList.add('hidden'); go('fortify'); }
+    });
     on('btn-reset', () => { if (confirm('Reset all resources and items?')) { state = fresh(); save(); renderHome(); } });
     on('dbg-level', () => { state.xp = Data.xpForLevel(level() + 1); save(); renderHome(); });
     on('dbg-raid', () => { state.marked.goblin++; state.marked.dwarf++; state.stockpile.food += 8; save(); renderHome(); });
@@ -224,11 +251,12 @@ window.App = (() => {
     document.getElementById('dbg-discover').onchange = e => { state.debug.discoverNow = e.target.checked; save(); };
     document.getElementById('dbg-event').onchange = e => { state.debug.eventNow = e.target.checked; save(); };
     Sound.bind();
+    Camp.giveStarterKit();
     go('home');
   }
 
   return {
-    ENEMY_NAME, addXP, levelPerks, get level() { return level(); }, boot, go, save, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
+    ENEMY_NAME, grantSpecial, addXP, levelPerks, get level() { return level(); }, boot, go, save, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
     get state() { return state; },
   };
 })();
