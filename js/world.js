@@ -2,14 +2,15 @@
 window.World = (() => {
   // x / y are % positions on the 360x480 map.
   const SPOTS = [
-    { id: 'lair',   x: 80, y: 11, icon: '🐉', name: 'Dragon\'s Lair', sub: 'coming soon', locked: true },
-    { id: 'mine',   x: 21, y: 19, icon: '⛏️', name: 'Iron Hills', sub: 'stone · iron · coal', land: 'mine' },
-    { id: 'dwarf',  x: 41, y: 29, icon: '⚒️', name: 'Dwarf Stronghold', raid: 'dwarf', how: 'find a ᚱ rune stone in the Iron Hills' },
-    { id: 'goblin', x: 47, y: 50, icon: '🔥', name: 'Goblin Village', raid: 'goblin', how: 'follow 🐾 tracks in the Forest' },
-    { id: 'forest', x: 21, y: 64, icon: '🌲', name: 'Forest', sub: 'wood · hide · food', land: 'forest' },
-    { id: 'ocean',  x: 76, y: 58, icon: '🌊', name: 'Sunlit Coast', sub: 'water · fish · driftwood', land: 'ocean' },
-    { id: 'camp',   x: 56, y: 79, icon: '🏰', name: 'Your Camp', sub: 'fortify', screen: 'fortify' },
-    { id: 'craft',  x: 26, y: 93, icon: '🔨', name: 'Workshop', sub: 'craft', screen: 'craft' },
+    { id: 'lair',   x: 80, y: 9.1, icon: '🐉', name: 'Dragon\'s Lair', sub: 'coming soon', locked: true },
+    { id: 'mine',   x: 21, y: 15.7, icon: '⛏️', name: 'Iron Hills', sub: 'stone · iron · coal', land: 'mine' },
+    { id: 'dwarf',  x: 41, y: 24.0, icon: '⚒️', name: 'Dwarf Stronghold', raid: 'dwarf', how: 'find a ᚱ rune stone in the Iron Hills' },
+    { id: 'goblin', x: 47, y: 41.4, icon: '🔥', name: 'Goblin Village', raid: 'goblin', how: 'follow 🐾 tracks in the Forest' },
+    { id: 'forest', x: 21, y: 53.0, icon: '🌲', name: 'Forest', sub: 'wood · hide · food', land: 'forest' },
+    { id: 'ocean',  x: 76, y: 48.0, icon: '🌊', name: 'Sunlit Coast', sub: 'water · fish · driftwood', land: 'ocean' },
+    { id: 'camp',   x: 56, y: 65.4, icon: '🏰', name: 'Your Camp', sub: 'fortify', screen: 'fortify' },
+    { id: 'craft',  x: 26, y: 77.0, icon: '🔨', name: 'Workshop', sub: 'craft', screen: 'craft' },
+    { id: 'beyond', x: 33, y: 93, icon: '❓', name: 'Beyond the Known Realm', sub: 'uncharted', locked: true },
   ];
   let travelling = false;
 
@@ -35,7 +36,7 @@ window.World = (() => {
     }).join('');
     document.querySelectorAll('.spot').forEach(b => { b.onclick = () => travel(b.dataset.id); });
 
-    const at = SPOTS.find(s => s.id === (st.heroAt || 'camp')) || SPOTS[6];
+    const at = SPOTS.find(s => s.id === (st.heroAt || 'camp')) || SPOTS.find(x => x.id === 'camp');
     const hero = document.getElementById('hero');
     hero.style.transition = 'none';
     hero.style.left = at.x + '%';
@@ -58,6 +59,15 @@ window.World = (() => {
     if (travelling) return;
     const s = SPOTS.find(x => x.id === id);
     const st = App.state;
+    if (s.locked && s.id === 'beyond') {
+      App.choose({
+        title: '❓ Beyond the Known Realm',
+        html: `<p class="story-text">No map goes further than this. Travellers speak of a drowned swamp where giants wade, of tunnels choked with webs, of frozen peaks and haunted barrows.</p>
+          <p class="hint">Uncharted lands open after Emberwyrm falls.</p>`,
+        buttons: [{ id: 'ok', label: 'Someday…' }],
+      });
+      return;
+    }
     if (s.locked) {
       App.choose({
         title: '🐉 The Dragon\'s Lair',

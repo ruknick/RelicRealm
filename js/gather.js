@@ -184,12 +184,6 @@ window.Gather = (() => {
         }
         break;
       }
-      case 'shard': {
-        st.shards++;
-        detail = `${st.shards}/5 of the Old King's Crown`;
-        if (st.shards >= 5) { st.shards -= 5; st.inventory.crown++; detail = 'the Old King\'s Crown is complete! 👑'; }
-        break;
-      }
       default: break;
     }
     App.save();
@@ -365,8 +359,8 @@ window.Gather = (() => {
           const t = p.lockTier || 1;
           addToBackpack('gold', [6, 12, 20][t - 1], cell);
           board.toast(`🔓 The ${Data.CHEST_TIERS[t].toLowerCase()} chest creaks open!`, 'win');
-          applyFind(Data.rollFrom([['shard', 45], ['sling', 20], [land.discover ? 'scrap' : 'pearl', 20], ['lostclub', 15]]), cell);
-          if (t >= 2) applyFind(t === 3 ? 'shard' : Data.rollFrom([['shard', 50], ['key', 50]]), cell);
+          applyFind(Data.rollFrom([['nugget', 45], ['sling', 20], [land.discover ? 'scrap' : 'pearl', 20], ['lostclub', 15]]), cell);
+          if (t >= 2) applyFind(t === 3 ? 'nugget' : Data.rollFrom([['nugget', 50], ['key', 50]]), cell);
           if (t === 3) {
             const k = App.rollSpoil(Math.random() < 0.5 ? 'goblin' : 'dwarf');
             board.celebrate(cell, { icon: '💠', title: App.grantSpoil(k), sub: 'From the crystal chest!', rare: true });
@@ -470,6 +464,7 @@ window.Gather = (() => {
     rec.runs++;
     const newLv = Data.landLevel(rec.runs);
     if (newLv > run.landLv) notes.unshift(`${land.icon} <b>The ${land.name} grows wilder — now Lv ${newLv}!</b> More obstacles, tougher chests, richer finds.`);
+    if (newLv >= 10 && App.grantShard(land.key)) { notes.unshift(`💎 <b>Relic shard!</b> You've mastered the ${land.name} — its shard reveals itself to you (${App.state.shards}/5).`); Sound.sfx('rare'); }
     App.save();
     App.choose({
       title: reason === 'moves' ? 'Out of moves' : 'Back home safe',

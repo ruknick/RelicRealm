@@ -1,6 +1,6 @@
 // Story: title screen, character creation, the opening tale, chapter quests (Journal) and place introductions.
 window.Story = (() => {
-  const GAME = { title: 'Relic Realm', sub: 'The Shattered Crown', realm: 'Valdmoor' };
+  const GAME = { title: 'Tile Realm', sub: 'The Shattered Crown', realm: 'Valdmoor' };
 
   // ---------- characters ----------
   const ORIGINS = {
@@ -51,7 +51,7 @@ window.Story = (() => {
         { text: 'Win a raid on the Goblin Village', done: () => st().enemyWins.goblin >= 1 },
       ],
       reward: { label: '🗝️ Old key + 30 XP', give: () => { st().inventory.key++; App.addXP(30); } },
-      outro: 'Among the goblin loot you find a torn map with a dwarf rune scratched on it and a note: "the shiny shard went under the hills." The dwarves know something.',
+      outro: 'Among the goblin loot you find a torn map with a dwarf rune scratched on it and a note in goblin scrawl: "shards only show for the strongest." Whatever it means, the dwarves in the hills may know more.',
     },
     {
       id: 'dwarves', title: 'Chapter 2 · Iron in the Hills',
@@ -77,9 +77,10 @@ window.Story = (() => {
     },
     {
       id: 'crown', title: 'Chapter 4 · The Old King\'s Crown',
-      intro: 'The five relic shards are out there: buried in the forest, hidden in goblin chests, locked in dwarf vaults. Gather them all, and forge the steel you\'ll need to survive.',
+      intro: 'The relic shards are bound to the land itself. Each one reveals itself only to someone who has mastered its place: the deepest forest, the richest hills, the farthest coast, and the mightiest goblin and dwarf war-bands. Master them all, melt gold into bars, and forge the Crown anew.',
       goals: [
-        { text: 'Collect 5 💎 relic shards and forge the Old King\'s Crown', done: () => st().inventory.crown > 0 },
+        { text: 'Earn all 5 💎 relic shards (Lv 10 in each land, beat the goblin & dwarf top ranks)', done: () => Object.keys(st().shardFrom || {}).length >= 5 || st().inventory.crown > 0 },
+        { text: 'Forge the 👑 Old King\'s Crown (5 shards + 3 gold bars)', done: () => st().inventory.crown > 0 },
         { text: 'Forge any steel gear', done: () => ownsTier(3) },
         { text: 'Wear armor in every slot (helmet, body, gloves, legs, shield)', done: () => ['helmet', 'body', 'gloves', 'legs', 'shield'].every(s => st().equip[s]) },
       ],

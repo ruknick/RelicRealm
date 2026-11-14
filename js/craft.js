@@ -5,10 +5,10 @@ window.Craft = (() => {
   const locked = r => !!r.needs && !st().unlocks[r.needs];
   const has = (k, n) => (Data.ITEMS[k] && Data.ITEMS[k].gear ? App.gearCount(k) : st().inventory[k]) >= n;
   const canAfford = r => !locked(r) && Object.entries(r.cost).every(([k, n]) => st().stockpile[k] >= n)
-    && Object.entries(r.items || {}).every(([k, n]) => has(k, n));
+    && Object.entries(r.items || {}).every(([k, n]) => has(k, n)) && (!r.shards || st().shards >= r.shards);
   const info = r => (r.makes ? { name: r.name, icon: r.icon, desc: r.desc } : Data.ITEMS[r.id]);
   const isKit = r => r.tier === 'kit';
-  const ownedKit = r => isKit(r) && st().inventory[r.id] > 0;
+  const ownedKit = r => (isKit(r) || r.id === 'crown') && st().inventory[r.id] > 0;
   const tierOf = r => (Data.ITEMS[r.id] && Data.ITEMS[r.id].tier) || (r.id === 'steel' || r.id === 'bulwark' ? 3 : r.id === 'gate' ? 2 : 1);
   const iconOf = it => (it.art ? Art.piece(it.art) : it.icon);
 
@@ -19,7 +19,7 @@ window.Craft = (() => {
       + Object.entries(items).map(([k, n]) =>
       `<span class="cost ${has(k, n) ? '' : 'short'}"><span class="wicon">${iconOf(Data.ITEMS[k])}</span>${n} ${Data.ITEMS[k].name}</span>`).join('');
   }
-  const TILE = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water', oak: 'oak', ironwood: 'ironwood', elderwood: 'elderwood', silver: 'silver', starsilver: 'starsilver', charcoal: 'charcoal', steel: 'steel' };
+  const TILE = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water', oak: 'oak', ironwood: 'ironwood', elderwood: 'elderwood', silver: 'silver', starsilver: 'starsilver', charcoal: 'charcoal', steel: 'steel', goldbar: 'goldbar' };
   const tileFor = k => TILE[k] || k;
 
   function card(r) {
@@ -33,7 +33,7 @@ window.Craft = (() => {
       <div class="r-body">
         <div class="r-name">${it.name} ${tag} <span class="r-owned">${ownedTxt}</span></div>
         <div class="r-effect">${it.desc}</div>
-        <div class="r-cost">${locked(r) ? '<span class="cost short">🔒 Needs the Palisade blueprint (goblin spoil)</span>' : costHtml(r.cost, r.items)}</div>
+        <div class="r-cost">${locked(r) ? '<span class="cost short">🔒 Needs the Palisade blueprint (goblin spoil)</span>' : costHtml(r.cost, r.items)}${r.shards ? `<span class="cost ${st().shards >= r.shards ? '' : 'short'}">💎 ${st().shards}/${r.shards} Relic shards</span>` : ''}</div>
       </div>
       <button class="craft-btn" data-id="${r.id}" ${ready ? '' : 'disabled'}>${ownedKit(r) ? 'Owned' : r.makes ? 'Make' : 'Craft'}</button>
     </div>`;
@@ -77,7 +77,8 @@ window.Craft = (() => {
       `<h3 class="craft-h">🛠️ Tools <small>obstacles & defenses only · wield one at a time</small></h3>${byTier('tool')}` +
       `<h3 class="craft-h">🛡️ Armor <small>wear it in 🧍 Warrior · adds 🛡 hearts to your keep in raids</small></h3>${byTier('armor')}` +
       sec('📿 Amulets', 'gems from the Iron Hills set in silver · give your matches power', R.filter(r => r.tier === 'amulet').map(card)) +
-      sec('🔥 Smelting', 'oak becomes charcoal; iron + charcoal becomes steel', R.filter(r => r.tier === 'smelt').map(card)) +
+      sec('👑 The Old King\'s Crown', 'one shard from mastering each land · gold bars from the smelter', R.filter(r => r.tier === 'crown').map(card)) +
+      sec('🔥 Smelting', 'oak → charcoal · iron + charcoal → steel · nuggets → gold bars', R.filter(r => r.tier === 'smelt').map(card)) +
       sec('🔑 Key upgrades', 'gold & crystal chests need better keys', R.filter(r => r.tier === 'keys').map(card)) +
       sec('🛡️ Defenses', 'place them in 🏰 Fortify', R.filter(r => r.defense).map(card)) +
       sec('🍲 Provisions', 'bring them on raids', R.filter(r => r.tier === 'food').map(card)) +
@@ -145,6 +146,7 @@ window.Craft = (() => {
         setTimeout(() => { c.style.transform = `translate(${dx}px, ${dy}px) scale(1.3)`; Sound.sfx('tick'); }, 60 * i);
       }
     }
+    if (r.shards) st().shards -= r.shards;
     Object.entries(r.items || {}).forEach(([k, n]) => {
       if (Data.ITEMS[k].gear) for (let x = 0; x < n; x++) { const idx = st().gear.findIndex(g => g.id === k); if (idx >= 0) st().gear.splice(idx, 1); }
       else st().inventory[k] -= n;

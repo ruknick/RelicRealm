@@ -148,6 +148,8 @@ window.Art = (() => {
       <path d="M18 24h28M26 12l-2 12 8 22 8-22-2-12M24 24l8-12 8 12" stroke="#fff" stroke-opacity=".45" stroke-width="1" fill="none"/>
       <path d="M27 15l-3 6" stroke="#fff" stroke-width="2" opacity=".8" stroke-linecap="round"/>`;
   TILES.emerald = gem('lgEmerald'); TILES.sapphire = gem('lgSapphire'); TILES.ruby = gem('lgRuby');
+  TILES.goldbar = `<ellipse cx="32" cy="52" rx="24" ry="3.5" fill="#000" opacity=".35"/><path d="M8 42l8-16h32l8 16z" fill="url(#lgGold)" stroke="#7a5a10" stroke-width="1"/>
+      <path d="M8 42h48v6H8z" fill="#b8860b"/><path d="M18 30h20" stroke="#fff6c4" stroke-width="2" opacity=".9"/><path d="M24 36h16" stroke="#7a5a10" stroke-width="1" opacity=".5"/>`;
   TILES.mushroom = TILES.leaves;
 
   // ---------- gear icons: shape by type, finish by tier ----------
@@ -506,7 +508,7 @@ window.Art = (() => {
   const inkTree = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 0v4" stroke="${INK}" stroke-width="1"/><path d="M-5 0 0 -13 5 0z" fill="#a6b07a" fill-opacity=".75" stroke="${INK}" stroke-width=".9" stroke-linejoin="round"/><path d="M0 -13 3 -4" stroke="${INK}" stroke-width=".5" opacity=".6"/></g>`;
   const hill = (x, y, w) => `<path d="M${x} ${y} q${w / 2} ${-w * 0.5} ${w} 0" fill="none" stroke="${INK}" stroke-width="1" opacity=".75"/><path d="M${x + w * 0.55} ${y - w * 0.18} l${w * 0.12} ${w * 0.16}" stroke="${INK}" stroke-width=".6" opacity=".6"/>`;
   const wave = (x, y) => `<path d="M${x} ${y} q3 -3 6 0 t6 0" fill="none" stroke="${INK}" stroke-width=".8" opacity=".55"/>`;
-  const COAST = 'M300 0 C280 40 300 80 270 120 C240 160 250 200 236 240 C222 290 252 330 230 380 C214 420 236 450 220 480';
+  const COAST = 'M300 0 C280 40 300 80 270 120 C240 160 250 200 236 240 C222 290 252 330 230 380 C214 420 236 450 220 480 C206 520 236 550 214 580';
   const rnd = (seed => () => (seed = (seed * 9301 + 49297) % 233280) / 233280)(7);
   const forestTrees = [];
   for (let i = 0; i < 46; i++) {
@@ -522,12 +524,13 @@ window.Art = (() => {
       <filter id="wmBlot"><feTurbulence type="fractalNoise" baseFrequency=".02" numOctaves="2" seed="4"/><feColorMatrix type="matrix" values="0 0 0 0 .45  0 0 0 0 .3  0 0 0 0 .12  0 0 0 .9 -.35"/></filter>
       <radialGradient id="wmBurn" cx="50%" cy="50%" r="72%"><stop offset=".62" stop-color="#6b4a22" stop-opacity="0"/><stop offset=".9" stop-color="#6b4a22" stop-opacity=".45"/><stop offset="1" stop-color="#2a1608" stop-opacity=".9"/></radialGradient>
       <linearGradient id="wmSeaWash" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8fae9f" stop-opacity=".55"/><stop offset="1" stop-color="#6e9488" stop-opacity=".75"/></linearGradient>
+      <linearGradient id="wmFog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8d4a6" stop-opacity="0"/><stop offset=".5" stop-color="#d8c49a" stop-opacity=".55"/><stop offset="1" stop-color="#c8b48a" stop-opacity=".8"/></linearGradient>
       <radialGradient id="wmFire" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#c2502a" stop-opacity=".55"/><stop offset="1" stop-color="#7a2e1a" stop-opacity="0"/></radialGradient>
     </defs>
     <!-- aged paper -->
-    <rect width="360" height="480" fill="#e8d4a6"/>
-    <rect width="360" height="480" filter="url(#wmBlot)" opacity=".5"/>
-    <rect width="360" height="480" fill="#e8d4a6" filter="url(#wmPaper)"/>
+    <rect width="360" height="580" fill="#e8d4a6"/>
+    <rect width="360" height="580" filter="url(#wmBlot)" opacity=".5"/>
+    <rect width="360" height="580" fill="#e8d4a6" filter="url(#wmPaper)"/>
     <!-- sea -->
     <path d="${COAST} H360 V0z" fill="url(#wmSeaWash)"/>
     ${[6, 12, 19, 27].map((d, i) => `<path d="${COAST}" transform="translate(${d} 0)" fill="none" stroke="${INK}" stroke-width=".7" opacity="${0.5 - i * 0.1}"/>`).join('')}
@@ -579,12 +582,23 @@ window.Art = (() => {
       <path d="M26 0 4 4 0 0z" fill="${INK}"/><path d="M26 0 4 -4 0 0z" fill="#efe0bb"/><path d="M-26 0 -4 -4 0 0z" fill="${INK}"/><path d="M-26 0 -4 4 0 0z" fill="#efe0bb"/>
       <path d="M12 -12 3 -3M-12 12 -3 3M12 12 3 3M-12 -12 -3 -3" />
       <text y="-29" text-anchor="middle" font-family="Georgia, serif" font-size="9" font-weight="700" fill="${INK}" stroke="none">N</text></g>
+    <!-- beyond the known realm: the map fades into fog and rumor -->
+    <path d="M12 488 C60 478 110 498 160 486 C190 478 206 492 222 488" stroke="${INK}" stroke-width="1.2" stroke-dasharray="6 3 1 3" fill="none"/>
+    <rect x="0" y="490" width="360" height="90" fill="url(#wmFog)"/>
+    <g fill="none" stroke="${INK}" stroke-width="1" opacity=".55" stroke-linecap="round">
+      <path d="M20 520c6-8 18-8 22 0 4-6 14-6 16 2"/><path d="M120 540c6-8 18-8 22 0 4-6 14-6 16 2"/><path d="M240 512c6-8 18-8 22 0 4-6 14-6 16 2"/><path d="M60 560c6-6 14-6 18 0"/></g>
+    <g stroke="${INK}" stroke-width=".9" fill="none" opacity=".45">
+      <path d="M40 506v-6M44 506v-8M48 506v-5M38 506h12"/><path d="M152 508l8 8M160 508l-8 8M156 506v12M150 512h12"/><circle cx="156" cy="512" r="4"/>
+      <path d="M86 530c4 0 6 3 6 6s-3 5-6 5-6-2-6-5 2-6 6-6zM80 528a1.5 1.5 0 1 0 0 .1M84 525a1.5 1.5 0 1 0 0 .1M89 525a1.5 1.5 0 1 0 0 .1"/></g>
+    <text x="118" y="508" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="10" fill="${INK}" opacity=".8">Beyond the Known Realm</text>
+    <text x="300" y="560" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="7" fill="${INK}" opacity=".6">terra incognita</text>
+    ${[[30, 548], [196, 552], [260, 540]].map(([x, y]) => `<text x="${x}" y="${y}" font-family="Georgia, serif" font-size="11" fill="${INK}" opacity=".35">?</text>`).join('')}
     <!-- burned edges & ink border -->
-    <rect width="360" height="480" fill="url(#wmBurn)"/>
-    <rect x="7" y="7" width="346" height="466" fill="none" stroke="${INK}" stroke-width="1.6" opacity=".8"/>
-    <rect x="11" y="11" width="338" height="458" fill="none" stroke="${INK}" stroke-width=".6" opacity=".7"/>
-    ${[[9, 9], [351, 9], [9, 471], [351, 471]].map(([x, y]) => `<path d="M${x} ${y - 4}l4 4-4 4-4-4z" fill="${INK}" opacity=".8"/>`).join('')}
-  `, '0 0 360 480');
+    <rect width="360" height="580" fill="url(#wmBurn)"/>
+    <rect x="7" y="7" width="346" height="566" fill="none" stroke="${INK}" stroke-width="1.6" opacity=".8"/>
+    <rect x="11" y="11" width="338" height="558" fill="none" stroke="${INK}" stroke-width=".6" opacity=".7"/>
+    ${[[9, 9], [351, 9], [9, 571], [351, 571]].map(([x, y]) => `<path d="M${x} ${y - 4}l4 4-4 4-4-4z" fill="${INK}" opacity=".8"/>`).join('')}
+  `, '0 0 360 580');
 
   function setScene(scene) {
     document.body.dataset.scene = scene || 'home';

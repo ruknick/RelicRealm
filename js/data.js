@@ -19,6 +19,7 @@ window.Data = (() => {
     steel:     { label: 'Steel' },
     pearl:     { label: 'Pearl' },
     coral:     { label: 'Coral' },
+    goldbar:   { label: 'Gold bar' },
     emerald:   { label: 'Emerald' },
     sapphire:  { label: 'Sapphire' },
     ruby:      { label: 'Ruby' },
@@ -55,6 +56,14 @@ window.Data = (() => {
       desc: `${(cls === 'armor' ? ARMOR_LABEL : TIER_LABEL)[tier]} tier · ${what} · ${trait}.`, ...extra };
   };
   // Every slot on your warrior. Weapon & tool are swung; the rest are worn.
+  // Where the five relic shards come from: master each land, or beat each enemy's mightiest rank.
+  const SHARDS = [
+    { id: 'forest', icon: '🌲', name: 'Forest', how: 'Reach Lv 10 in the Forest' },
+    { id: 'mine',   icon: '⛏️', name: 'Iron Hills', how: 'Reach Lv 10 in the Iron Hills' },
+    { id: 'ocean',  icon: '🌊', name: 'Sunlit Coast', how: 'Reach Lv 10 on the Sunlit Coast' },
+    { id: 'goblin', icon: '🔥', name: 'Goblin Village', how: 'Beat the Goblin Warband (their top rank)' },
+    { id: 'dwarf',  icon: '⚒️', name: 'Dwarf Stronghold', how: 'Beat the Dwarf Lords (their top rank)' },
+  ];
   const SLOTS = ['helmet', 'amulet', 'body', 'gloves', 'legs', 'shield', 'weapon', 'tool'];
   const slotOf = id => { const it = ITEMS[id]; return it.gear === 'armor' ? it.type : it.gear === 'trinket' ? 'amulet' : it.gear; };
   const tierLabel = id => { const it = ITEMS[id]; return it.gem ? RESOURCES[it.gem].label : it.sea ? 'Sea' : (it.gear === 'armor' ? ARMOR_LABEL : TIER_LABEL)[it.tier]; };
@@ -127,7 +136,7 @@ window.Data = (() => {
     ale:        { name: 'Dwarf ale', icon: '🍺', spoil: 'dwarf', desc: 'Raiders start 3 moves behind.' },
     runestone:  { name: 'Runestone', icon: '🪨', spoil: 'dwarf', desc: 'Place in your camp: +1 HP to every defense touching it. 1 pt.' },
     cartbp:     { name: 'Mine-cart blueprint', icon: '🛤️', spoil: 'dwarf', desc: 'Unlocks the Mine-cart defense.' },
-    crown:      { name: 'Old King\'s Crown', icon: '👑', trinket: true, desc: 'Legendary. Raiders start 2 moves behind.' },
+    crown:      { name: 'Old King\'s Crown', icon: '👑', trinket: true, desc: 'Legendary. Forged from the five relic shards and gold. Raiders start 2 moves behind, and the way to Emberwyrm opens.' },
     // Provisions
     chowder:    { name: 'Bottled chowder', icon: '🍲', art: 'chowder', special: true, instant: true, desc: 'Drink it mid-raid: your camp\'s keep gets 2 ♥ back.' },
     // Dragon prep
@@ -230,9 +239,9 @@ window.Data = (() => {
 
   // ---------- finds ----------
   const FINDS = {
-    forest: [['cache', 30], ['basket', 20], ['lostclub', 12], ['scrap', 15], ['key', 13], ['shard', 10]],
-    mine:   [['orepocket', 30], ['coalseam', 20], ['nugget', 15], ['scrap', 15], ['key', 10], ['shard', 10]],
-    ocean:  [['pearl', 25], ['barrel', 25], ['nugget', 15], ['key', 15], ['shard', 12], ['basket', 8]],
+    forest: [['cache', 30], ['basket', 20], ['lostclub', 12], ['scrap', 15], ['key', 13], ['nugget', 10]],
+    mine:   [['orepocket', 30], ['coalseam', 20], ['nugget', 25], ['scrap', 15], ['key', 10]],
+    ocean:  [['pearl', 25], ['barrel', 25], ['nugget', 27], ['key', 15], ['basket', 8]],
   };
   const FIND_INFO = {
     cache:     { icon: '🎁', name: 'Hidden cache', desc: 'Someone\'s stash — +3 supplies' },
@@ -240,7 +249,7 @@ window.Data = (() => {
     lostclub:  { icon: '🪓', name: 'Lost battle-axe', desc: 'A wooden battle-axe — added to your gear' },
     scrap:     { icon: '🗺️', name: 'Map scrap', desc: 'Collect 3 to reveal a raid target' },
     key:       { icon: '🗝️', name: 'Old key', desc: 'Opens a locked chest or iron gate' },
-    shard:     { icon: '💎', name: 'Relic shard', desc: 'A piece of the Old King\'s Crown' },
+    shard:     { icon: '💎', name: 'Relic shard', desc: 'A piece of the Old King\'s Crown — earned by mastering a land' },
     orepocket: { icon: '⛓️', name: 'Ore pocket', desc: '+3 iron' },
     coalseam:  { icon: '🪨', name: 'Coal seam', desc: '+3 coal' },
     nugget:    { icon: '✨', name: 'Gold nuggets', desc: '+3 gold', art: 'gold' },
@@ -268,6 +277,8 @@ window.Data = (() => {
     { id: 'goldkey',    tier: 'keys', cost: { gold: 6 }, items: { key: 2 } },
     { id: 'crystalkey', tier: 'keys', cost: { silver: 2, water: 3 }, items: { goldkey: 2 } },
     { id: 'charcoal', tier: 'smelt', name: 'Burn charcoal', icon: '⚫', cost: { oak: 2 }, makes: { charcoal: 3 }, desc: 'Slow-burn oak into charcoal for the forge.' },
+    { id: 'goldbar',  tier: 'smelt', name: 'Smelt a gold bar', icon: '🟨', cost: { gold: 6, coal: 1 }, makes: { goldbar: 1 }, desc: 'Melt gold nuggets down into a bar fit for a crown.' },
+    { id: 'crown',    tier: 'crown', cost: { goldbar: 3 }, shards: 5 },
     { id: 'steel',    tier: 'smelt', name: 'Forge steel', icon: '🔩', cost: { iron: 3, charcoal: 2, water: 1 }, makes: { steel: 1 }, desc: 'Iron + charcoal, quenched in water.' },
     { id: 'baxe1', tier: 'weapon', cost: { wood: 4, hide: 1 } },
     { id: 'bow1',  tier: 'weapon', cost: { wood: 3, hide: 2 } },
@@ -348,7 +359,8 @@ window.Data = (() => {
     stone: { from: 'Forest & Iron Hills rocks, boulders (pick)', use: 'Stone tools, stone walls, bulwarks' },
     hide:  { from: 'Forest pelts', use: 'Bows, swords, pit traps, flasks' },
     food:  { from: 'Forest berries, Coast fish', use: 'Marching to raids (3–4 per raid), Bottled chowder (heals your keep mid-raid)' },
-    gold:  { from: 'Gold nuggets everywhere, pearls, chests', use: 'Gold keys, the miner\'s lamp' },
+    gold:  { from: 'Gold nuggets everywhere, oysters, chests', use: 'Gold bars, gold keys, the miner\'s lamp' },
+    goldbar: { from: 'Smelted from gold nuggets (Workshop)', use: 'The Old King\'s Crown' },
     iron:  { from: 'Iron Hills ore, iron veins, spoils', use: 'Iron gear, iron gates, steel' },
     coal:  { from: 'Iron Hills coal', use: 'The miner\'s lamp' },
     water: { from: 'Sunlit Coast', use: 'Quenching iron & steel, water flasks' },
@@ -367,7 +379,7 @@ window.Data = (() => {
   };
 
   return {
-    RESOURCES, ITEMS, TIER_LABEL, ARMOR_LABEL, WARD, gloveEnergy, SLOTS, slotOf, tierLabel, amuletPower, RARE_LAND, DURABILITY, TYPE_INFO, hardness, gearDamage, gearRefusal, matchDamage, MATCH_DMG,
+    RESOURCES, ITEMS, TIER_LABEL, ARMOR_LABEL, WARD, gloveEnergy, SHARDS, SLOTS, slotOf, tierLabel, amuletPower, RARE_LAND, DURABILITY, TYPE_INFO, hardness, gearDamage, gearRefusal, matchDamage, MATCH_DMG,
     WEAPONS, weaponDamage, MAT_LABEL, FAMILY, family, RARE, RARE_INFO, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES,
     backpackSize, landLevel, enemyTier, TIER_NAMES, ENEMY_GEAR, ENEMY_ARMOR, CHEST_TIERS, xpForLevel, levelFromXp, levelInfo, XP, MATERIAL_INFO,
   };

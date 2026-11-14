@@ -15,7 +15,8 @@ window.Items = (() => {
     });
     html += card('🗺️', 'Goblin map', `${st.scraps.goblin}/3`, '3 scraps reveal a goblin village on the world map.', st.scraps.goblin > 0);
     html += card('🗺️', 'Dwarf map', `${st.scraps.dwarf}/3`, '3 scraps reveal a dwarf stronghold on the world map.', st.scraps.dwarf > 0);
-    html += card('💎', 'Relic shards', `${st.shards}/5`, '5 shards forge the Old King\'s Crown.', st.shards > 0);
+    html += card('💎', 'Relic shards', `${Object.keys(st.shardFrom).length}/5`, 'Each shard reveals itself to one who masters its land. 5 shards + 3 gold bars forge the Old King\'s Crown.<br>'
+      + Data.SHARDS.map(x => `${st.shardFrom[x.id] ? '✅' : '⬜'} ${x.icon} ${x.how}`).join('<br>'), st.shards > 0 || st.inventory.crown > 0);
     html += card('👑', 'Old King\'s Crown', inv.crown ? '✓' : '', Data.ITEMS.crown.desc, inv.crown > 0);
     for (const [enemy, title] of [['goblin', '🔥 Goblin spoils'], ['dwarf', '⚒️ Dwarf spoils']]) {
       html += `<h3 class="craft-h">${title} <small>can't be crafted</small></h3>`;
@@ -36,7 +37,7 @@ window.Items = (() => {
     const sp = App.state.stockpile;
     return '<h3 class="craft-h">🪵 Materials <small>banked at your camp</small></h3>' + Object.keys(Data.RESOURCES).map(k => {
       const info = Data.MATERIAL_INFO[k] || {};
-      const TILE = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water', oak: 'oak', ironwood: 'ironwood', elderwood: 'elderwood', silver: 'silver', starsilver: 'starsilver', charcoal: 'charcoal', steel: 'steel', pearl: 'pearl', coral: 'coral', emerald: 'emerald', sapphire: 'sapphire', ruby: 'ruby' };
+      const TILE = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water', oak: 'oak', ironwood: 'ironwood', elderwood: 'elderwood', silver: 'silver', starsilver: 'starsilver', charcoal: 'charcoal', steel: 'steel', pearl: 'pearl', coral: 'coral', goldbar: 'goldbar', emerald: 'emerald', sapphire: 'sapphire', ruby: 'ruby' };
       const icon = `<div class="gem art g-${TILE[k]} ic-gem">${Art.tile(TILE[k])}</div>`;
       return card(icon, Data.RESOURCES[k].label, sp[k], `<b>From:</b> ${info.from || '—'}<br><b>For:</b> ${info.use || '—'}`, sp[k] > 0);
     }).join('');

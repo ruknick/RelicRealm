@@ -220,8 +220,8 @@ window.Battle = (() => {
         }
         break;
       case 'loot': {
-        // Their loot chest holds their special items: keys, map scraps, relic shards.
-        const got = [0, 1].map(() => Data.rollFrom([['scrap', 40], ['key', 32], ['shard', 28]]));
+        // Their loot chest holds their special items: keys, map scraps, gold.
+        const got = [0, 1].map(() => Data.rollFrom([['scrap', 40], ['key', 32], ['nugget', 28]]));
         run.bag.specials.push(...got);
         run.lootOpened = true;
         const mine = App.state.captured[run.enemy].map(g => Data.ITEMS[g.id].name);
@@ -407,6 +407,11 @@ window.Battle = (() => {
       App.state.enemyWins[run.enemy]++;
       const nt = Data.enemyTier(App.state.enemyWins[run.enemy]);
       if (nt > run.tier) rankUp = `⚠️ They'll send <b>${Data.TIER_NAMES[run.enemy][nt - 1]}</b> next time — tougher, bigger, richer loot.`;
+    }
+    // Beat their mightiest rank and their relic shard is yours.
+    if (won && run.tier >= 4 && App.grantShard(run.enemy)) {
+      rankUp = (rankUp ? rankUp + '<br>' : '') + `💎 <b>Relic shard!</b> The ${cfg.name}'s shard is yours (${App.state.shards}/5).`;
+      Sound.sfx('rare');
     }
     const keepLoot = won || reason === 'retreat';
     const gained = [], lost = [];

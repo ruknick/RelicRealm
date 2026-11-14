@@ -88,7 +88,7 @@ window.Camp = (() => {
   function steal(a) {
     const st = App.state, out = [];
     for (let i = 0; i < 2; i++) {
-      if (st.shards > 0) { if (!a.dry) st.shards--; out.push('💎 Relic shard'); }
+      if (st.stockpile.goldbar > 0) { if (!a.dry) st.stockpile.goldbar--; out.push('🟨 Gold bar'); }
       else if (st.scraps.goblin + st.scraps.dwarf > 0) {
         const e = st.scraps.goblin > 0 ? 'goblin' : 'dwarf';
         if (!a.dry) st.scraps[e]--; out.push('🗺️ Map scrap');
@@ -251,7 +251,7 @@ window.Camp = (() => {
       `🧪 Goblins need about <b>${g}</b> moves to break your keep · dwarves about <b>${d}</b>${armored ? ' (with your armor)' : ''}. <span class="hint">Beat them to it when you raid! ${armored ? '' : 'Craft armor and wear it in 🧍 Warrior to add 🛡 hearts.'}</span>`;
     const sp = App.state;
     document.getElementById('fort-chest').innerHTML =
-      `📦 Your loot chest holds your special items: 💎 ${sp.shards} shard${sp.shards === 1 ? '' : 's'} · 🗺️ ${sp.scraps.goblin + sp.scraps.dwarf} map scraps · 🗝️ ${sp.inventory.key} key${sp.inventory.key === 1 ? '' : 's'}. If raiders open it, they take some.`;
+      `📦 Your loot chest holds your valuables: 🟨 ${sp.stockpile.goldbar} gold bar${sp.stockpile.goldbar === 1 ? '' : 's'} · 🗺️ ${sp.scraps.goblin + sp.scraps.dwarf} map scraps · 🗝️ ${sp.inventory.key} key${sp.inventory.key === 1 ? '' : 's'}. If raiders open it, they take some.`;
     document.getElementById('fort-hint').textContent = selected === 'chest' ? 'Tap an empty spot in your camp to move the loot chest.'
       : selected ? `Tap your camp (top 4 rows) to place a ${DEF[selected].name}. Tap a placed defense to remove it.`
       : 'Pick a defense, then tap your camp. Tap the 📦 chest to move it. Raiders come from the bottom.';

@@ -1,10 +1,10 @@
-# Relic Realm: The Shattered Crown (match-3 prototype)
+# Tile Realm: The Shattered Crown (match-3 prototype)
 
 A browser prototype of the core loop: **gather → find → craft → raid**.
 It's plain HTML/CSS/JS with no build step and no backend. Progress is saved in `localStorage`.
 
 ## The story
-**Relic Realm: The Shattered Crown.** The Old King's Crown held the realm of Valdmoor together until the dragon **Emberwyrm** burned the king's hall and shattered it into five relic shards. Goblins raid, the dwarves have sealed their halls, and your village of Ashford burned. Rebuild, find the shards, forge the Crown and face the dragon.
+**Tile Realm: The Shattered Crown.** The Old King's Crown held the realm of Valdmoor together until the dragon **Emberwyrm** burned the king's hall and shattered it into five relic shards. Goblins raid, the dwarves have sealed their halls, and your village of Ashford burned. Rebuild, find the shards, forge the Crown and face the dragon.
 
 - **Title screen:** Continue or New game. Saves made before characters existed can continue and keep their progress.
 - **Create your warrior:** pick a name, skin, hair colour and style, beard, and an **origin** with a starting gift:
@@ -18,7 +18,17 @@ It's plain HTML/CSS/JS with no build step and no backend. Progress is saved in `
   - **Ch 1 · Goblin Trouble:** find and raid the goblin village.
   - **Ch 2 · Iron in the Hills:** mine, forge iron, beat the dwarves (meet Thrain Ironbeard).
   - **Ch 3 · Salt and Pearls:** coast, pearls, water flasks.
-  - **Ch 4 · The Old King's Crown:** 5 shards, steel, full armor.
+  - **Ch 4 · The Old King's Crown:** earn 5 shards, forge the Crown, forge steel, wear full armor.
+
+### 💎 Relic shards & the Crown
+Shards are never random drops. Each one reveals itself when you **master** an environment:
+- **Forest, Iron Hills, Sunlit Coast:** reach land Lv 10 (about 18 trips each).
+- **Goblin Village, Dwarf Stronghold:** beat their top rank (Warband / Lords).
+
+The Workshop smelts **gold bars** (6 gold + 1 coal) and forges the **Old King's Crown** from **5 shards + 3 gold bars**. Raiders who open your loot chest can steal gold bars (never shards). The Items screen tracks which shards you've earned.
+
+### 🗺️ The map
+A hand-inked parchment map of Valdmoor, with a fogged southern edge: **Beyond the Known Realm**. That's where post-dragon regions (swamp giants, spider tunnels, frost, barrows) will appear.
   - **Ch 5 · Emberwyrm:** flasks, an elderwood ward, the Dragon's Lair (next update).
 - **Places introduce themselves** with a short story the first time you travel there.
 

@@ -13,6 +13,7 @@ window.App = (() => {
       marked: { goblin: 0, dwarf: 0 },
       scraps: { goblin: 0, dwarf: 0 },
       shards: 0,
+      shardFrom: {},                     // which lands / enemies have given their relic shard
       xp: 0,
       camp: { cells: {}, chest: [1, 3] },
       lands: { forest: { runs: 0 }, mine: { runs: 0 }, ocean: { runs: 0 } },
@@ -42,6 +43,7 @@ window.App = (() => {
         marked: typeof s.marked === 'number' ? { goblin: s.marked, dwarf: 0 } : { ...base.marked, ...s.marked },
         scraps: { ...base.scraps, ...s.scraps },
         shards: s.shards || 0,
+        shardFrom: s.shardFrom || {},
         xp: s.xp || 0,
         camp: s.camp || { cells: {}, chest: [1, 3] },
         lands: { ...base.lands, ...(s.lands || {}) },
@@ -179,15 +181,22 @@ window.App = (() => {
   function grantSpecial(k, enemy) {
     const info = Data.FIND_INFO[k];
     if (k === 'key') state.inventory.key++;
-    else if (k === 'shard') {
-      state.shards++;
-      if (state.shards >= 5) { state.shards -= 5; state.inventory.crown++; save(); return `${info.icon} ${info.name} — 👑 the Old King's Crown is complete!`; }
-    } else if (k === 'scrap') {
+    else if (k === 'nugget') state.stockpile.gold += 3;
+    else if (k === 'scrap') {
       state.scraps[enemy]++;
       if (state.scraps[enemy] >= 3) { state.scraps[enemy] -= 3; state.marked[enemy]++; save(); return `${info.icon} ${info.name} — map complete, a new target is marked!`; }
     }
     save();
     return `${info.icon} ${info.name}`;
+  }
+
+  // Mastering a land (or an enemy's top rank) reveals its relic shard, once.
+  function grantShard(src) {
+    if (state.shardFrom[src]) return false;
+    state.shardFrom[src] = true;
+    state.shards++;
+    save();
+    return true;
   }
 
   // ---------- popup ----------
@@ -347,7 +356,7 @@ window.App = (() => {
 
   return {
     ENEMY_NAME, grantSpecial, addXP, levelPerks, get level() { return level(); }, boot, go, save, newGame, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
-    addGear, gearCount, equip, unequip, wear, wardLayers, captureWeapon, recoverWeapons,
+    addGear, gearCount, equip, unequip, wear, wardLayers, captureWeapon, recoverWeapons, grantShard,
     get state() { return state; },
   };
 })();
