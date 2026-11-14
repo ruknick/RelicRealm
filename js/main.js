@@ -15,6 +15,8 @@ window.App = (() => {
       shards: 0,
       xp: 0,
       camp: { cells: {}, chest: [1, 3] },
+      lands: { forest: { runs: 0 }, mine: { runs: 0 }, ocean: { runs: 0 } },
+      enemyWins: { goblin: 0, dwarf: 0 },
       starterDef: false,
       debug: { discoverNow: false, eventNow: false },
     };
@@ -36,6 +38,8 @@ window.App = (() => {
         shards: s.shards || 0,
         xp: s.xp || 0,
         camp: s.camp || { cells: {}, chest: [1, 3] },
+        lands: { ...base.lands, ...(s.lands || {}) },
+        enemyWins: { ...base.enemyWins, ...(s.enemyWins || {}) },
         starterDef: !!s.starterDef,
         debug: { ...base.debug, ...(s.debug || {}) },
         heroAt: s.heroAt || 'camp',
@@ -136,9 +140,10 @@ window.App = (() => {
     const boosts = ['drum', 'ale'].filter(k => inv[k] > 0)
       .map(k => `<label class="check"><input type="checkbox" id="use-${k}"> ${Data.ITEMS[k].icon} Use ${Data.ITEMS[k].name} (they start 3 moves behind)</label>`).join('');
     const choice = await choose({
-      title: `${cfg.icon} ${cfg.name}`,
+      title: `${cfg.icon} ${cfg.name} · ${Data.TIER_NAMES[enemy][Data.enemyTier(state.enemyWins[enemy]) - 1]}`,
       html: `<p class="race-rules">🏁 <b>Siege Race:</b> you attack their base while they attack your camp. <b>Fewest moves to break the other keep wins.</b> Big combos throw rubble in their way.
           Your camp: they need about <b>${Camp.estimate(enemy)}</b> moves. <a href="#" id="prep-fortify">Fortify it</a></p>
+        <p class="hint">Rank ${Data.enemyTier(state.enemyWins[enemy])}/4 — every 2 wins they send tougher troops (and better loot).</p>
         <p>${cfg.prep}</p>
         <p>Costs <b>${cfg.foodCost} food</b> — you have <b>${food}</b>.</p>
         <p class="hint">Weapons: ${weapons.length ? weapons.join(', ') : 'none — craft some first!'}</p>

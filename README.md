@@ -91,6 +91,24 @@ Both lands also have:
 
 War drum and dwarf ale each give +3 moves when used at raid prep.
 
+## Progression
+- **Backpack** grows with your player level: 30, then +5 per level (max 80).
+- **Each land has its own level.** It goes up every 2 runs there (max 10) and drives the obstacle count, regrowth, toughness and buried finds. It's shown on the map.
+- **Chest tiers** at higher land levels:
+
+| Land level | Chests | Loot |
+|---|---|---|
+| any | 🟫 Bronze | 6 gold + a find. Its Old key is always buried on the board |
+| 3+ | 🟨 Gold (about 55%) | 12 gold + 2 finds |
+| 6+ | 🟦 Crystal (about 30%) | 20 gold + a relic shard + a spoil |
+
+  Gold and crystal chests need keys you bring. In the Workshop, upgrade **2 Old keys + 6 gold → Gold key**, and **2 Gold keys + 5 water + 3 coal → Crystal key**. A better key opens any lower chest.
+- **Enemy ranks** go up every 2 wins against them:
+  - Goblins: Scouts → Warriors → Raiders → Warband
+  - Dwarves: Miners → Guards → Ironclads → Lords
+
+  Each rank adds keep HP, minion HP and wall HP, and makes the camp attackers hit harder and arrive faster. Troops get bigger, and from rank 3 they become goblin brutes and gold-armored dwarf lords. Win gold scales with rank, and rank 3+ adds an extra spoil.
+
 ## Levels
 You earn XP from:
 - resource matches (1)

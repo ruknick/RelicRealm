@@ -814,3 +814,9 @@ details.debug { margin-top: 12px; }
 .hero { transform: translate(-50%, -150%); }
 .subbar span:not(:empty) { background: rgba(10,14,11,.6); padding: 2px 8px; border-radius: 8px; }
 .ic-gem { position: relative; inset: auto; width: 40px; height: 40px; display: grid; place-items: center; }
+.piece.art .pa svg { transform: scale(var(--scale, 1)); transform-origin: 50% 70%; }
+.piece.p-minion.art { z-index: 3; }
+.wicon { display: inline-block; width: 20px; height: 20px; vertical-align: -4px; }
+.wicon svg { width: 100%; height: 100%; }
+.r-icon svg { width: 80%; height: 80%; }
+.forge-item svg { width: 90px; height: 90px; }

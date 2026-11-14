@@ -5,12 +5,14 @@ window.Items = (() => {
   const card = (icon, name, count, desc, owned = true) =>
     `<div class="icard${owned ? '' : ' none'}"><div class="ic-icon">${icon}</div>
       <div class="ic-body"><div class="ic-name">${name}${count !== '' ? ` <b>${count}</b>` : ''}</div><div class="ic-desc">${desc}</div></div></div>`;
-  const itemIcon = k => (Art.hasPiece(k) && Data.ITEMS[k] && !Data.ITEMS[k].weapon ? Art.piece(k) : Data.ITEMS[k].icon);
+  const itemIcon = k => (Data.ITEMS[k].art ? Art.piece(Data.ITEMS[k].art) : Art.hasPiece(k) && !Data.ITEMS[k].weapon ? Art.piece(k) : Data.ITEMS[k].icon);
 
   function special() {
     const st = App.state, inv = st.inventory;
     let html = '<h3 class="craft-h">🧭 Quest items</h3>';
-    html += card('🗝️', 'Old keys', `×${inv.key}`, 'Open locked chests and iron gates. Kept in your loot chest — raiders can steal them.', inv.key > 0);
+    [['key', 'Old keys'], ['goldkey', 'Gold keys'], ['crystalkey', 'Crystal keys']].forEach(([k, n]) => {
+      html += card(itemIcon(k), n, `×${inv[k]}`, Data.ITEMS[k].desc + (k === 'key' ? ' Upgrade 2 Old keys + 6 gold → Gold key in the Workshop.' : k === 'goldkey' ? ' Upgrade 2 Gold keys + water & coal → Crystal key.' : ''), inv[k] > 0);
+    });
     html += card('🗺️', 'Goblin map', `${st.scraps.goblin}/3`, '3 scraps reveal a goblin village on the world map.', st.scraps.goblin > 0);
     html += card('🗺️', 'Dwarf map', `${st.scraps.dwarf}/3`, '3 scraps reveal a dwarf stronghold on the world map.', st.scraps.dwarf > 0);
     html += card('💎', 'Relic shards', `${st.shards}/5`, '5 shards forge the Old King\'s Crown.', st.shards > 0);

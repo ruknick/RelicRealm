@@ -4,7 +4,7 @@ window.Gather = (() => {
   // ---------- tuning knobs ----------
   const SIZE = 7;
   const MOVES = 20;
-  const BACKPACK = 30;
+  // Backpack size grows with your level (Data.backpackSize).
   const STAR_CHANCE = 0.03;          // wild tile (4-matches also make one)
   const GOLD_CHANCE = 0.04;          // coin tile
   const BURIED = 3;                  // hidden finds per board
@@ -85,6 +85,12 @@ window.Gather = (() => {
   function addObstacle(kind, r, c, appear = false) {
     const spec = { ...P[kind] };
     if (SCALES.includes(kind)) spec.hp += run.lv.hpBonus;
+    if (kind === 'locked') {
+      // Higher land levels bring gold and crystal chests.
+      const L = run.landLv, roll = Math.random();
+      spec.lockTier = L >= 6 && roll < 0.3 ? 3 : L >= 3 && roll < 0.55 ? 2 : 1;
+      spec.art = ['locked', 'lockedgold', 'lockedcrystal'][spec.lockTier - 1];
+    }
     return board.addPiece(spec, r, c, 1, appear);
   }
   function xp(n, why) {
@@ -98,7 +104,7 @@ window.Gather = (() => {
   function hudLevel() {
     const st = App.state, L = App.level;
     const a = Data.xpForLevel(L), b = Data.xpForLevel(L + 1);
-    document.getElementById('g-level').innerHTML = `⭐ Lv ${L} <span class="xpbar"><i style="width:${Math.round((st.xp - a) / (b - a) * 100)}%"></i></span>`;
+    document.getElementById('g-level').innerHTML = `⭐ ${L} <span class="xpbar"><i style="width:${Math.round((st.xp - a) / (b - a) * 100)}%"></i></span> · ${land.icon} Lv ${run.landLv}`;
   }
 
   const needsKey = () => board.piecesOf('locked').length > 0 && App.state.inventory.key < 1;
@@ -117,7 +123,7 @@ window.Gather = (() => {
   // ---------- backpack ----------
   function addToBackpack(type, n, cell, delay = 0) {
     if (!(type in run.backpack)) { App.state.stockpile[type] += n; App.save(); board.float(cell, `+${n} ${label(type)}`, 'gain', delay); return; }
-    const add = Math.min(n, BACKPACK - bagTotal());
+    const add = Math.min(n, run.cap - bagTotal());
     if (add > 0) {
       run.backpack[type] += add;
       board.float(cell, `+${add} ${label(type)}`, type === 'gold' ? 'gold' : 'gain', delay);
@@ -126,7 +132,7 @@ window.Gather = (() => {
       run.overflow += n - add;
       if (add === 0) board.float(cell, 'Full!', 'loss', delay);
     }
-    if (bagTotal() >= BACKPACK && !run.fullWarned) {
+    if (bagTotal() >= run.cap && !run.fullWarned) {
       run.fullWarned = true;
       board.toast('Backpack full! Head home when you\'re ready.', 'win', 2600);
     }
@@ -170,7 +176,7 @@ window.Gather = (() => {
     }
     App.save();
     run.finds.push(`${info.icon} ${info.name}`);
-    if (id === 'key' && board.piecesOf('locked').length) detail = 'Now tap 🗝️ Old key, then the locked chest!';
+    if (id === 'key' && board.piecesOf('locked').some(c => c.lockTier === 1)) detail = 'Now tap 🗝️ Old key, then the locked chest!';
     board.celebrate(cell, { icon: info.art ? Art.tile(info.art) : info.icon, title: `${info.name}!`, sub: detail || info.desc, rare: id === 'shard' || id === 'key' });
     xp(Data.XP.find);
     board.renderWeapons();
@@ -183,11 +189,13 @@ window.Gather = (() => {
     document.querySelector('#screen-gather .moves').classList.toggle('low', run.moves <= 5);
     land.bag.forEach(t => { const e = document.getElementById('bp-' + t); if (e) e.textContent = run.backpack[t]; });
     document.getElementById('bp-total').textContent = bagTotal();
-    document.getElementById('backpack').classList.toggle('full', bagTotal() >= BACKPACK);
+    document.getElementById('backpack').classList.toggle('full', bagTotal() >= run.cap);
     document.getElementById('g-exit').classList.toggle('glow', run.fullWarned);
     const keyHere = [...board.buried.values()].includes('key');
+    const chest = board.piecesOf('locked')[0];
+    const canOpen = chest && ['key', 'goldkey', 'crystalkey'].some(k => App.state.inventory[k] > 0 && Data.WEAPONS[k].unlock >= chest.lockTier);
     document.getElementById('g-finds').textContent = `🔍 ${board.buried.size} buried` +
-      (board.piecesOf('locked').length ? (App.state.inventory.key > 0 ? ' · 🗝️ you have a key!' : keyHere ? ' · 🔒 its key is buried here' : '') : '');
+      (chest ? (canOpen ? ' · 🔑 you can open the chest!' : chest.lockTier > 1 ? ` · 🔒 needs a ${Data.CHEST_TIERS[chest.lockTier]} key` : keyHere ? ' · 🔒 its key is buried here' : '') : '');
     const ev = run.eventPiece && !run.eventPiece.gone;
     document.getElementById('gather-hint').textContent = board.armedHint() ||
       (ev ? ({ forest: 'Catch the thief: only a weapon can stop it!', mine: 'Stop the cart: match next to it or hit it!', ocean: 'Stop the crab: only a weapon can!' }[land.key])
@@ -196,7 +204,7 @@ window.Gather = (() => {
 
   function buildBackpack() {
     document.getElementById('backpack').innerHTML =
-      `<span class="bp-label">🎒 <b id="bp-total">0</b>/${BACKPACK}</span>` +
+      `<span class="bp-label">🎒 <b id="bp-total">0</b>/${Data.backpackSize(App.level)}</span>` +
       land.bag.map(t => `<span class="bp-item"><span class="chip c-${t}"></span><b id="bp-${t}">0</b></span>`).join('');
   }
 
@@ -281,6 +289,7 @@ window.Gather = (() => {
         const tip = p.toolOnly === 'axe' ? '🪓 Only an axe can clear stumps & thornbushes — craft a Stone axe in the Workshop.'
           : p.toolOnly === 'pick' ? '⛏️ Only a pickaxe can break rock — craft a Stone pick in the Workshop.'
           : p.mat === 'creature' ? `🗡️ Only a weapon can stop the ${p.kind} — Club, Sling, Sword…`
+          : (p.lockTier || 1) > 1 ? `🔒 A ${Data.CHEST_TIERS[p.lockTier]} chest — bring a ${Data.CHEST_TIERS[p.lockTier]} key (upgrade keys in the Workshop).`
           : '🔒 Locked tight! Its key is buried somewhere on this board — dig it up.';
         if (!run.told[p.toolOnly || p.kind]) { run.told[p.toolOnly || p.kind] = true; board.toast(tip, '', 3000); }
         return;
@@ -309,11 +318,18 @@ window.Gather = (() => {
           if (Math.random() < 0.35) applyFind(Data.rollFrom(Data.FINDS[land.finds]), cell, 300);
           break;
         case 'vein': board.toast('Vein mined out!'); break;
-        case 'locked':
-          addToBackpack('gold', 6, cell);
-          board.toast('🔓 The chest creaks open!', 'win');
+        case 'locked': {
+          const t = p.lockTier || 1;
+          addToBackpack('gold', [6, 12, 20][t - 1], cell);
+          board.toast(`🔓 The ${Data.CHEST_TIERS[t].toLowerCase()} chest creaks open!`, 'win');
           applyFind(Data.rollFrom([['shard', 45], ['sling', 20], [land.discover ? 'scrap' : 'pearl', 20], ['lostclub', 15]]), cell);
+          if (t >= 2) applyFind(t === 3 ? 'shard' : Data.rollFrom([['shard', 50], ['key', 50]]), cell);
+          if (t === 3) {
+            const k = App.rollSpoil(Math.random() < 0.5 ? 'goblin' : 'dwarf');
+            board.celebrate(cell, { icon: '💠', title: App.grantSpoil(k), sub: 'From the crystal chest!', rare: true });
+          }
           break;
+        }
         case 'thief':
         case 'crab':
         case 'cart':
@@ -335,7 +351,9 @@ window.Gather = (() => {
       const msg = {
         stump: `Old stump (${p.hp} HP). Only an axe can chop it — Stone axe or Iron axe.`,
         thorn: `Thornbush (${p.hp} HP) — something's inside! Only an axe can cut it.`,
-        locked: App.state.inventory.key > 0 ? 'Locked chest — tap 🗝️ Old key, then tap the chest!' : 'Locked chest. Its key is buried somewhere on this board — clear tiles to dig it up.',
+        locked: (p.lockTier || 1) > 1
+          ? `${Data.CHEST_TIERS[p.lockTier]} chest — needs a ${Data.CHEST_TIERS[p.lockTier]} key or better. Upgrade keys in the Workshop.`
+          : App.state.inventory.key > 0 ? 'Bronze chest — tap 🗝️ Old key, then tap the chest!' : 'Bronze chest. Its key is buried somewhere on this board — clear tiles to dig it up.',
         boulder: `Boulder (${p.hp} HP). Only a pickaxe can break it. Sometimes hides a find.`,
         vein: 'Ore vein — only a pickaxe can mine it. Every hit gives iron (Iron pickaxe: double).',
         thief: 'A goblin thief! Only a weapon can stop it — Club, Sling, Sword… before it escapes!',
@@ -404,6 +422,11 @@ window.Gather = (() => {
     if (board.buried.size) notes.push(`${board.buried.size} find${board.buried.size > 1 ? 's' : ''} stayed buried.`);
     if (run.overflow) notes.push(`${run.overflow} more didn't fit in your backpack.`);
     notes.unshift(`⭐ +${run.xp} XP · Level ${App.level}`);
+    const rec = App.state.lands[land.key];
+    rec.runs++;
+    const newLv = Data.landLevel(rec.runs);
+    if (newLv > run.landLv) notes.unshift(`${land.icon} <b>The ${land.name} grows wilder — now Lv ${newLv}!</b> More obstacles, tougher chests, richer finds.`);
+    App.save();
     App.choose({
       title: reason === 'moves' ? 'Out of moves' : 'Back home safe',
       html: `<table class="sum-table"><thead><tr><th></th><th>Banked</th></tr></thead><tbody>${rows}</tbody></table>
@@ -429,9 +452,10 @@ window.Gather = (() => {
     document.getElementById('g-title').textContent = `${land.icon} ${land.name}`;
     buildBackpack();
     board.reset();
-    const lv = Data.levelInfo(App.level);
+    const landLv = Data.landLevel(App.state.lands[key].runs);
+    const lv = Data.levelInfo(landLv);
     run = {
-      lv, xp: 0, sinceGrow: 0,
+      lv, landLv, cap: Data.backpackSize(App.level), xp: 0, sinceGrow: 0,
       moves: MOVES, movesMade: 0, backpack: Object.fromEntries(land.bag.map(t => [t, 0])), overflow: 0, fullWarned: false,
       finds: [], told: {}, eventPiece: null, eventSpawned: false,
       discoverSpawned: false, followed: false, discovered: false, marked: false, ended: false,
@@ -447,8 +471,9 @@ window.Gather = (() => {
     board.fillEmpty();
     const spots = board.tileCells().sort(() => Math.random() - 0.5).slice(0, lv.buried);
     spots.forEach(([r, c]) => board.buried.set(`${r},${c}`, Data.rollFrom(Data.FINDS[land.finds])));
-    // A locked chest always has its key buried somewhere on the same board.
-    if (board.piecesOf('locked').length && ![...board.buried.values()].includes('key')) {
+    // A bronze chest always has its Old key buried somewhere on the same board.
+    const chest = board.piecesOf('locked')[0];
+    if (chest && chest.lockTier === 1 && ![...board.buried.values()].includes('key')) {
       const [r, c] = spots[0];
       board.buried.set(`${r},${c}`, 'key');
     }
@@ -468,8 +493,8 @@ window.Gather = (() => {
     } else if (App.state.debug.eventNow) {
       run.eventSpawned = true;
       run.eventPiece = spawnOn(land.event.piece, (r, c) => c === 0 && r >= 1, land.event.msg);
-    } else if (board.piecesOf('locked').length) {
-      board.toast('🔒 A locked chest! Its key is buried somewhere here…', 'alert', 2800);
+    } else if (chest) {
+      board.toast(chest.lockTier > 1 ? `✨ A ${Data.CHEST_TIERS[chest.lockTier]} chest! It needs a ${Data.CHEST_TIERS[chest.lockTier]} key…` : '🔒 A locked chest! Its key is buried somewhere here…', 'alert', 2800);
     } else {
       board.toast(`${land.icon} ${land.name}: ${lv.buried} finds are buried somewhere…`, '', 2400);
     }

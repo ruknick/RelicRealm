@@ -35,7 +35,7 @@ window.Camp = (() => {
   const owned = kind => App.state.inventory[kind] || 0;
 
   // ---------- attack simulation ----------
-  function newAttack(enemy, dry = false) {
+  function newAttack(enemy, dry = false, tier = Data.enemyTier(App.state.enemyWins[enemy])) {
     const L = layout();
     const pieces = Object.entries(L.cells).map(([k, kind]) => {
       const [r, c] = k.split(',').map(Number);
@@ -48,7 +48,11 @@ window.Camp = (() => {
     pieces.forEach(p => { p.max = p.hp; });
     const chest = { kind: 'chest', r: L.chest[0], c: L.chest[1], hp: 1, max: 1, mat: 'wood', alive: true };
     const keep = { kind: 'keep', hp: KEEP_HP, max: KEEP_HP, alive: true };
-    return { enemy, P: AI[enemy], pieces, chest, keep, skip: 0, march: AI[enemy].march, towerTick: 0, moves: 0, done: false, stolen: [], dry, log: `${AI[enemy].name} are marching on your camp…` };
+    // Higher-ranked raiders hit harder and arrive sooner.
+    const base = AI[enemy], t = tier - 1;
+    const P = { ...base, name: `${enemy === 'dwarf' ? 'Dwarf' : 'Goblin'} ${Data.TIER_NAMES[enemy][tier - 1]}`,
+      miss: Math.max(0.08, base.miss - 0.05 * t), big: base.big + 0.06 * t, iron: Math.min(0.8, base.iron + 0.1 * t), march: Math.max(2, base.march - t) };
+    return { enemy, P, pieces, chest, keep, skip: 0, march: P.march, towerTick: 0, moves: 0, done: false, stolen: [], dry, log: `${AI[enemy].name} are marching on your camp…` };
   }
 
   function blockerAt(a, r, c) {

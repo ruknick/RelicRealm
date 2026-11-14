@@ -134,8 +134,21 @@ window.Battle = (() => {
   }
 
   // ---------- pieces ----------
+  // Higher ranks: tougher keeps, walls and troops — and bigger troops.
+  function spec(k) {
+    const t = run.tier, sp = { ...P[k] };
+    if (sp.kind === 'keep') sp.hp += t - 1;
+    else if (['fence', 'swall', 'tower', 'gate'].includes(sp.kind)) sp.hp += Math.floor((t - 1) / 2);
+    else if (sp.kind === 'minion') {
+      sp.hp += t - 1;
+      if (t >= 3) sp.art = cfg.minion === 'goblin' ? 'gbrute' : 'dgiant';
+      sp.scale = [1, 1.12, 1.22, 1.38][t - 1];
+    }
+    return sp;
+  }
+
   function addKeep() {
-    run.keep = board.addPiece(P[cfg.keep], 0, 2, cfg.keepW, true);
+    run.keep = board.addPiece(spec(cfg.keep), 0, 2, cfg.keepW, true);
     board.toast(cfg.reveal.keep, 'alert', 2600);
   }
 
@@ -162,7 +175,7 @@ window.Battle = (() => {
       return;
     }
     if (k === 'gate' && run.gateOpen) return;
-    board.addPiece(P[k], r, c, 1, true);
+    board.addPiece(spec(k), r, c, 1, true);
     board.toast(cfg.reveal[k] || 'Something in the fog…', k === 'tower' || k === 'ballista' || k === 'gate' ? 'alert' : '', 2600);
   }
 
@@ -224,7 +237,8 @@ window.Battle = (() => {
     Sound.sfx('victory');
     const k = App.rollSpoil(cfg.spoils);
     run.bag.spoils.push(k);
-    Object.entries(cfg.winBonus).forEach(([res, n], i) => addLoot(res, n, cell, i * 250));
+    Object.entries(cfg.winBonus).forEach(([res, n], i) => addLoot(res, n * run.tier, cell, i * 250));
+    if (run.tier >= 3) run.bag.spoils.push(App.rollSpoil(cfg.spoils));   // elite troops guard extra spoils
     board.piecesOf('minion').forEach(g => board.removePiece(g));
     board.toast(`${run.keep.label} destroyed! ${App.spoilName(k)}`, 'win', 3000);
   }
@@ -236,7 +250,7 @@ window.Battle = (() => {
       if (!spots.length) return;
       const [r, c] = pick(spots);
       run.broken = run.broken.filter(([a2, b2]) => a2 !== r || b2 !== c);
-      board.addPiece(P[cfg.rebuild], r, c, 1, true);
+      board.addPiece(spec(cfg.rebuild), r, c, 1, true);
       board.toast(cfg.turnMsgs.rebuild, 'alert');
     } else if (a === 'shore') {
       const hurt = board.pieces.filter(p => (p.kind === 'swall' || p.kind === 'gate') && p.hp < p.maxHp);
@@ -255,7 +269,7 @@ window.Battle = (() => {
         board.float([r, c], run.enemy === 'dwarf' ? '🏹 Bolt!' : '🗡️ Spear!', 'loss');
         board.toast(cfg.turnMsgs.missile, 'alert');
       } else {
-        board.addPiece(P[cfg.minion], r, c, 1, true);
+        board.addPiece(spec(cfg.minion), r, c, 1, true);
         board.toast(cfg.turnMsgs.minion, 'alert', 2400);
       }
     }
@@ -370,6 +384,12 @@ window.Battle = (() => {
     const theirDmg = run.keep ? 1 - run.keep.hp / run.keep.maxHp : 0;
     const myDmg = 1 - a.keep.hp / a.keep.max;
     const won = reason === 'win' || (reason === 'cap' && theirDmg > myDmg);
+    let rankUp = '';
+    if (won) {
+      App.state.enemyWins[run.enemy]++;
+      const nt = Data.enemyTier(App.state.enemyWins[run.enemy]);
+      if (nt > run.tier) rankUp = `⚠️ They'll send <b>${Data.TIER_NAMES[run.enemy][nt - 1]}</b> next time — tougher, bigger, richer loot.`;
+    }
     const keepLoot = won || reason === 'retreat';
     const gained = [], lost = [];
     if (keepLoot) {
@@ -392,6 +412,7 @@ window.Battle = (() => {
       + (run.lootOpened && keepLoot ? Data.XP.loot : 0);
     const newLv = gainXp ? App.addXP(gainXp) : 0;
     if (gainXp) gained.push(`⭐ +${gainXp} XP`);
+    if (rankUp) gained.push(rankUp);
     if (newLv) gained.push(`🎉 <b>Level ${newLv}!</b> ${App.levelPerks(newLv)}`);
     const stars = [won, run.lootOpened, a.chest.alive];
     const title = won ? 'Victory!' : reason === 'retreat' ? 'You retreated' : 'Defeated!';
@@ -426,13 +447,15 @@ window.Battle = (() => {
   function start({ enemy = 'goblin', headStart = 0 } = {}) {
     cfg = CONFIG[enemy];
     document.getElementById('screen-battle').dataset.enemy = enemy;
-    document.getElementById('b-title').textContent = `${cfg.icon} ${cfg.name}`;
+    const tier = Data.enemyTier(App.state.enemyWins[enemy]);
+    document.getElementById('b-title').textContent = `${cfg.icon} ${cfg.name.split(' ')[0]} ${Data.TIER_NAMES[enemy][tier - 1]}`;
     board.reset();
     board.setFrame(enemy);
     Art.setScene(enemy);
     run = {
       enemy, moves: 0, extraAi: 0, sinceEnemy: 0, keep: null, broken: [], gateOpen: false, rubbleSent: false,
-      race: Camp.newAttack(enemy),
+      tier,
+      race: Camp.newAttack(enemy, false, tier),
       bag: { spoils: [], specials: [] }, won: false, lootOpened: false, ended: false, weaponsUsed: 0, told: {},
     };
     const hidden = cfg.layout();

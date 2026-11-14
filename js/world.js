@@ -22,9 +22,11 @@ window.World = (() => {
 
     document.getElementById('world-spots').innerHTML = SPOTS.map(s => {
       let cls = 'spot', badge = '', sub = s.sub || '';
+      if (s.land) sub = `Lv ${Data.landLevel(st.lands[s.land].runs)} · ${s.sub}`;
       if (s.raid) {
         const n = st.marked[s.raid];
-        if (n > 0) { badge = `<span class="badge">⚔️ ${n}</span>`; sub = 'raid!'; cls += ' raid'; }
+        const rank = Data.TIER_NAMES[s.raid][Data.enemyTier(st.enemyWins[s.raid]) - 1];
+        if (n > 0) { badge = `<span class="badge">⚔️ ${n}</span>`; sub = `${rank} · raid!`; cls += ' raid'; }
         else { cls += ' unknown'; sub = 'not found yet'; }
       }
       if (s.locked) cls += ' locked';

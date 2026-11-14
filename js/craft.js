@@ -3,7 +3,8 @@ window.Craft = (() => {
   let forging = false;
   const st = () => App.state;
   const locked = r => !!r.needs && !st().unlocks[r.needs];
-  const canAfford = r => !locked(r) && Object.entries(r.cost).every(([k, n]) => st().stockpile[k] >= n);
+  const canAfford = r => !locked(r) && Object.entries(r.cost).every(([k, n]) => st().stockpile[k] >= n)
+    && Object.entries(r.items || {}).every(([k, n]) => st().inventory[k] >= n);
   const isTool = r => r.tier === 'tool';
   const ownedTool = r => isTool(r) && st().inventory[r.id] > 0;
 
@@ -11,13 +12,15 @@ window.Craft = (() => {
     const it = Data.ITEMS[r.id];
     const sp = st().stockpile;
     const cost = Object.entries(r.cost).map(([k, n]) =>
-      `<span class="cost ${sp[k] >= n ? '' : 'short'}"><span class="chip c-${k}"></span>${n} ${Data.RESOURCES[k].label}</span>`).join('');
+      `<span class="cost ${sp[k] >= n ? '' : 'short'}"><span class="chip c-${k}"></span>${n} ${Data.RESOURCES[k].label}</span>`).join('')
+      + Object.entries(r.items || {}).map(([k, n]) =>
+      `<span class="cost ${st().inventory[k] >= n ? '' : 'short'}"><span class="wicon">${Art.piece(Data.ITEMS[k].art) || Data.ITEMS[k].icon}</span>${n} ${Data.ITEMS[k].name}</span>`).join('');
     const owned = st().inventory[r.id];
     const ownedTxt = isTool(r) ? (owned ? '✓ Owned' : '') : owned ? (it.uses > 1 ? `${owned} uses` : `Owned ×${owned}`) : '';
     const ready = canAfford(r) && !ownedTool(r);
     const usesTag = it.uses > 1 ? `<span class="tag">${it.uses} uses</span>` : it.weapon ? '<span class="tag">1 use</span>' : '';
     return `<div class="recipe ${ready ? 'ready' : ''}" data-id="${r.id}">
-      <div class="r-icon">${it.icon}</div>
+      <div class="r-icon">${it.art ? Art.piece(it.art) : it.icon}</div>
       <div class="r-body">
         <div class="r-name">${it.name} ${usesTag} <span class="r-owned">${ownedTxt}</span></div>
         <div class="r-effect">${it.desc}</div>
@@ -31,6 +34,7 @@ window.Craft = (() => {
     const R = Data.RECIPES;
     const sec = (title, sub, list) => `<h3 class="craft-h">${title} <small>${sub}</small></h3>${list.map(card).join('')}`;
     document.getElementById('craft-list').innerHTML =
+      sec('🔑 Key upgrades', 'gold & crystal chests need better keys', R.filter(r => r.tier === 'keys')) +
       sec('🏕️ Tier 1 · Camp', 'wood, stone & hide', R.filter(r => r.tier === 1 && !r.defense)) +
       sec('🔥 Tier 2 · Forge', 'needs iron & coal from the Iron Hills — multi-use', R.filter(r => r.tier === 2 && !r.defense)) +
       sec('🧰 Tools', 'passive & permanent — they work every run', R.filter(isTool)) +
@@ -52,7 +56,7 @@ window.Craft = (() => {
     const hammer = forge.querySelector('.hammer');
     const item = forge.querySelector('.forge-item');
     const text = forge.querySelector('.forge-text');
-    item.textContent = it.icon;
+    item.innerHTML = it.art ? Art.piece(it.art) : it.icon;
     item.className = 'forge-item';
     text.textContent = '';
     text.className = 'forge-text';
@@ -83,6 +87,7 @@ window.Craft = (() => {
         setTimeout(() => { c.style.transform = `translate(${dx}px, ${dy}px) scale(1.3)`; Sound.sfx('tick'); }, 60 * i);
       }
     }
+    Object.entries(r.items || {}).forEach(([k, n]) => { st().inventory[k] -= n; });
     App.save();
     await sleep(60 * i + 450);
 

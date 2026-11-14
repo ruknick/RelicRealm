@@ -33,7 +33,9 @@ window.Data = (() => {
     knife:   { name: 'Skinning knife', icon: '🔪', tool: true, desc: '+1 hide on every hide match.' },
     lamp:    { name: 'Miner\'s lamp', icon: '🏮', tool: true, desc: 'Buried finds glimmer so you can dig them up.' },
     // Found while gathering
-    key:     { name: 'Old key', icon: '🗝️', weapon: true, uses: 1, desc: 'Opens a locked chest or iron gate.' },
+    key:        { name: 'Old key', icon: '🗝️', art: 'key1', weapon: true, uses: 1, desc: 'Opens bronze chests and iron gates.' },
+    goldkey:    { name: 'Gold key', icon: '🔑', art: 'key2', weapon: true, uses: 1, desc: 'Opens gold & bronze chests and iron gates.' },
+    crystalkey: { name: 'Crystal key', icon: '💠', art: 'key3', weapon: true, uses: 1, desc: 'Opens any chest — crystal chests hold the rarest loot.' },
     // Goblin spoils
     firepot:   { name: 'Goblin firepot', icon: '🔥', weapon: true, uses: 1, spoil: 'goblin', desc: 'Burns a 3x3 area: 2 dmg to wood & plants, clears fog.' },
     shiv:      { name: 'Goblin shiv', icon: '🗡️', weapon: true, uses: 2, spoil: 'goblin', desc: '2 dmg to creatures.' },
@@ -65,7 +67,9 @@ window.Data = (() => {
     firepot: { wood: 2, plant: 2, creature: 1, other: 1, stone: 0, iron: 0, fog: true, area: true },
     shiv:    { creature: 2, wood: 1, plant: 1, other: 0, stone: 0, iron: 0 },
     dpick:   { stone: 9, iron: 9, wood: 2, plant: 2, creature: 1, other: 2, splash: 2 },
-    key:     { unlock: true },
+    key:        { unlock: 1 },
+    goldkey:    { unlock: 2 },
+    crystalkey: { unlock: 3 },
   };
   // Forest stumps & thornbushes need an axe; rock needs a pickaxe.
   const TOOL_GROUPS = { axe: ['stoneaxe', 'axe'], pick: ['stonepick', 'pickaxe', 'dpick'] };
@@ -77,7 +81,7 @@ window.Data = (() => {
   function weaponDamage(w, piece) {
     const W = WEAPONS[w];
     if (!W) return 0;
-    if (W.unlock) return piece.lock ? 99 : 0;
+    if (W.unlock) return piece.lock && W.unlock >= (piece.lockTier || 1) ? 99 : 0;
     if (piece.keyOnly) return 0;          // locked chests open only with a key
     if (piece.toolOnly && !TOOL_GROUPS[piece.toolOnly].includes(w)) return 0;   // right tool for the job
     if (piece.kind === 'keep' && W.keep) return Math.max(W.keep, W[piece.mat] || 0);
@@ -119,6 +123,9 @@ window.Data = (() => {
   };
 
   const RECIPES = [
+    // Key upgrades: combine keys (items) with materials.
+    { id: 'goldkey',    tier: 'keys', cost: { gold: 6 }, items: { key: 2 } },
+    { id: 'crystalkey', tier: 'keys', cost: { water: 5, coal: 3 }, items: { goldkey: 2 } },
     { id: 'club',  tier: 1, cost: { wood: 5 } },
     { id: 'sling', tier: 1, cost: { wood: 4, hide: 3 } },
     { id: 'stoneaxe', tier: 1, cost: { wood: 4, stone: 3 } },
@@ -137,6 +144,15 @@ window.Data = (() => {
     { id: 'knife',   tier: 'tool', cost: { wood: 2, iron: 3 } },
     { id: 'lamp',    tier: 'tool', cost: { coal: 4, iron: 2, gold: 2 } },
   ];
+
+  // ---------- progression ----------
+  const backpackSize = L => Math.min(80, 30 + 5 * (L - 1));
+  // Each land levels up every 2 runs you finish there.
+  const landLevel = runs => Math.min(10, 1 + Math.floor(runs / 2));
+  // Enemies rank up every 2 raids you win against them.
+  const enemyTier = wins => Math.min(4, 1 + Math.floor(wins / 2));
+  const TIER_NAMES = { goblin: ['Scouts', 'Warriors', 'Raiders', 'Warband'], dwarf: ['Miners', 'Guards', 'Ironclads', 'Lords'] };
+  const CHEST_TIERS = { 1: 'Bronze', 2: 'Gold', 3: 'Crystal' };
 
   // ---------- player levels ----------
   // Total XP needed to reach level L: 30, 90, 180, 300, 450, 630, ...
@@ -164,5 +180,5 @@ window.Data = (() => {
     water: { from: 'Sunlit Coast', use: 'Quenching forged iron, water flasks for the Dragon\'s Lair' },
   };
 
-  return { MATERIAL_INFO, matchDamage, TOOL_GROUPS, xpForLevel, levelFromXp, levelInfo, XP, RESOURCES, ITEMS, MATCH_DMG, WEAPONS, weaponDamage, MAT_LABEL, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES };
+  return { backpackSize, landLevel, enemyTier, TIER_NAMES, CHEST_TIERS, MATERIAL_INFO, matchDamage, TOOL_GROUPS, xpForLevel, levelFromXp, levelInfo, XP, RESOURCES, ITEMS, MATCH_DMG, WEAPONS, weaponDamage, MAT_LABEL, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES };
 })();

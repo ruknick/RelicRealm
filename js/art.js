@@ -194,6 +194,33 @@ window.Art = (() => {
       <path d="M24 31v-4M40 31v-4" stroke="#b8341f" stroke-width="2"/><circle cx="56" cy="16" r="5" fill="#f6cd45" stroke="#9c6f06" stroke-width="1.5"/>`,
   });
   PIECES.runestone = PIECES.rune;
+  // Chest tiers: recolour the locked chest.
+  PIECES.lockedgold = PIECES.locked.replace(/#98a1ab/g, '#f2c230').replace(/#6f7882/g, '#a87b0c').replace(/#7a4b22/g, '#5a2a14').replace(/#8f5a2a/g, '#6e3418').replace(/#e8c34a/g, '#fff3b0')
+    + '<g fill="#fff6c0"><path d="M10 14l2-4 2 4-2 4z"/><path d="M52 10l2-4 2 4-2 4z"/></g>';
+  PIECES.lockedcrystal = PIECES.locked.replace(/#98a1ab/g, '#7fdcff').replace(/#6f7882/g, '#3a8fd0').replace(/#7a4b22/g, '#3a2a6a').replace(/#8f5a2a/g, '#4b3a8a').replace(/#4b2d12/g, '#241a48').replace(/#5d3815/g, '#2e2260').replace(/#e8c34a/g, '#c9f3ff')
+    + '<g fill="#bff0ff"><path d="M6 20l3-7 3 7-3 4z"/><path d="M52 14l3-7 3 7-3 4z"/><path d="M30 6l2-5 2 5-2 3z"/></g>';
+  // Key tiers.
+  const keyArt = (c1, c2, extra = '') => `<g transform="rotate(-35 32 32)"><circle cx="19" cy="32" r="11" fill="none" stroke="${c2}" stroke-width="7.5"/><circle cx="19" cy="32" r="11" fill="none" stroke="${c1}" stroke-width="5"/>
+      <path d="M30 32h27M50 32v10M56 32v8" stroke="${c2}" stroke-width="7.5" stroke-linecap="round"/><path d="M30 32h27M50 32v10M56 32v8" stroke="${c1}" stroke-width="5" stroke-linecap="round"/>
+      <path d="M12 27a8 8 0 0 1 8-5" stroke="#fff" stroke-width="2" fill="none" opacity=".7" stroke-linecap="round"/></g>${extra}`;
+  PIECES.key1 = keyArt('#c98a4a', '#6e4520');
+  PIECES.key2 = keyArt('#f6cd45', '#9c6f06', '<g fill="#fff6c0"><path d="M50 8l2-5 2 5-2 4z"/><path d="M8 48l2-4 2 4-2 3z"/></g>');
+  PIECES.key3 = keyArt('#a8e6ff', '#3a8fd0', '<g fill="#e8fbff"><path d="M48 6l3-6 3 6-3 5z"/><path d="M6 46l2-5 2 5-2 4z"/><path d="M56 50l2-4 2 4-2 3z"/></g>');
+  // Higher-rank enemies.
+  PIECES.gbrute = `<path d="M54 8L44 40" stroke="#5a3616" stroke-width="5" stroke-linecap="round"/><circle cx="54" cy="8" r="7" fill="#6b4423"/>
+      <g fill="#c9ced6"><path d="M54 0l2 4-4 0z"/><path d="M61 8l-4 2 0-4z"/><path d="M47 8l4-2 0 4z"/></g>
+      <path d="M8 60c0-14 10-22 24-22s24 8 24 22z" fill="#3e6b2c"/><path d="M14 52h36" stroke="#6b4423" stroke-width="5"/>
+      <circle cx="32" cy="30" r="15" fill="#4f8a36"/>
+      <path d="M15 24c2-12 32-12 34 0-6-4-28-4-34 0z" fill="#5d6672"/><path d="M15 22c-6-4-10-12-8-18 4 4 8 8 12 12zM49 22c6-4 10-12 8-18-4 4-8 8-12 12z" fill="#e6dcc8"/>
+      <ellipse cx="25" cy="31" rx="3.4" ry="3" fill="#ffdf3a"/><ellipse cx="39" cy="31" rx="3.4" ry="3" fill="#ffdf3a"/><circle cx="25" cy="31.5" r="1.5" fill="#300"/><circle cx="39" cy="31.5" r="1.5" fill="#300"/>
+      <path d="M24 39c5 3 11 3 16 0" stroke="#1d3312" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M26 39l2 4 2-3M34 39l2 3 2-4" fill="#fff"/>`;
+  PIECES.dgiant = `<path d="M54 4L46 56" stroke="#5a3616" stroke-width="4"/><path d="M54 4c8 2 10 10 6 16-4-2-8-6-8-10z M54 4c-8 2-10 10-6 16 4-2 8-6 8-10z" fill="#c9ced6" stroke="#7d8793" stroke-width="1.5"/>
+      <path d="M8 62c0-16 10-24 24-24s24 8 24 24z" fill="#c9a227"/><path d="M20 44h24l-4 16H24z" fill="#e8c34a"/><circle cx="32" cy="50" r="4" fill="#7fdcff"/>
+      <ellipse cx="32" cy="28" rx="14" ry="12" fill="#e6b58c"/>
+      <path d="M16 32c2 18 30 18 32 0-5 5-10 8-16 8s-11-3-16-8z" fill="#8a3a12"/><path d="M24 36c3 10 13 10 16 0" fill="#6e2c0c"/>
+      <path d="M16 24c0-16 32-16 32 0z" fill="#d6b03a"/><rect x="15" y="22" width="34" height="5" rx="2" fill="#a87b0c"/>
+      <path d="M16 20c-8-4-12-12-10-18 4 6 9 10 14 12zM48 20c8-4 12-12 10-18-4 6-9 10-14 12z" fill="#f1ead8"/>
+      <circle cx="26.5" cy="29" r="1.6" fill="#222"/><circle cx="37.5" cy="29" r="1.6" fill="#222"/>`;
   PIECES.wall = PIECES.swall;
 
   // Wide keeps (3 tiles).

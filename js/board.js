@@ -290,7 +290,8 @@ window.Board = (() => {
         el.querySelector('.hp').textContent = p.maxHp > 1 ? '♥'.repeat(p.hp) + '♡'.repeat(p.maxHp - p.hp) : '';
         el.classList.toggle('target', canHit(p));
         el.classList.toggle('locked', !!p.lock);
-        el.classList.toggle('wants-key', !!p.keyOnly && App.state.inventory.key > 0);
+        el.classList.toggle('wants-key', !!p.keyOnly && ['key', 'goldkey', 'crystalkey'].some(k => App.state.inventory[k] > 0 && Data.WEAPONS[k].unlock >= (p.lockTier || 1)));
+        if (p.scale) el.style.setProperty('--scale', p.scale);
       }
     }
 
@@ -389,7 +390,7 @@ window.Board = (() => {
       this.tray.innerHTML = keys.length ? keys.map(k => {
         const it = Data.ITEMS[k];
         return `<button class="weapon${this.armed === k ? ' armed' : ''}" data-w="${k}">
-          ${it.icon} ${it.name.replace(/^(Goblin|Iron|Old|Dwarven) /, '')} <b>${inv[k]}</b></button>`;
+          ${it.art ? `<span class="wicon">${Art.piece(it.art)}</span>` : it.icon} ${it.name.replace(/^(Goblin|Iron|Old|Dwarven) /, '')} <b>${inv[k]}</b></button>`;
       }).join('') : '<span class="hint">None — craft some in the Workshop.</span>';
       this.tray.querySelectorAll('.weapon').forEach(b => { b.onclick = () => this.arm(b.dataset.w); });
     }
