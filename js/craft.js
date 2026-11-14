@@ -4,11 +4,15 @@ window.Craft = (() => {
   const st = () => App.state;
   const locked = r => !!r.needs && !st().unlocks[r.needs];
   const has = (k, n) => (Data.ITEMS[k] && Data.ITEMS[k].gear ? App.gearCount(k) : st().inventory[k]) >= n;
-  const canAfford = r => !locked(r) && Object.entries(r.cost).every(([k, n]) => st().stockpile[k] >= n)
+  const stationOk = r => !r.station || !!st().stations[r.station];
+  // How many times a smelting recipe could run with what's in the Storehouse.
+  const maxTimes = r => Math.min(...Object.entries(r.cost).map(([k, n]) => Math.floor(st().stockpile[k] / n)));
+  const canAfford = r => stationOk(r) && !locked(r) && Object.entries(r.cost).every(([k, n]) => st().stockpile[k] >= n)
     && Object.entries(r.items || {}).every(([k, n]) => has(k, n)) && (!r.shards || st().shards >= r.shards);
   const info = r => (r.makes ? { name: r.name, icon: r.icon, desc: r.desc } : Data.ITEMS[r.id]);
   const isKit = r => r.tier === 'kit';
   const ownedKit = r => (isKit(r) || r.id === 'crown') && st().inventory[r.id] > 0;
+  const stationName = id => `${Data.STATIONS[id].icon} ${Data.STATIONS[id].name}`;
   const tierOf = r => (Data.ITEMS[r.id] && Data.ITEMS[r.id].tier) || (r.id === 'steel' || r.id === 'bulwark' ? 3 : r.id === 'gate' ? 2 : 1);
   const iconOf = it => (it.art ? Art.piece(it.art) : it.icon);
 
@@ -19,7 +23,7 @@ window.Craft = (() => {
       + Object.entries(items).map(([k, n]) =>
       `<span class="cost ${has(k, n) ? '' : 'short'}"><span class="wicon">${iconOf(Data.ITEMS[k])}</span>${n} ${Data.ITEMS[k].name}</span>`).join('');
   }
-  const TILE = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water', oak: 'oak', ironwood: 'ironwood', elderwood: 'elderwood', silver: 'silver', starsilver: 'starsilver', charcoal: 'charcoal', steel: 'steel', goldbar: 'goldbar' };
+  const TILE = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water', oak: 'oak', ironwood: 'ironwood', elderwood: 'elderwood', silver: 'silver', starsilver: 'starsilver', charcoal: 'charcoal', steel: 'steel', goldbar: 'goldbar', ironbar: 'ironbar', silverbar: 'silverbar', leather: 'leather', scrapiron: 'scrapiron', shell: 'shell' };
   const tileFor = k => TILE[k] || k;
 
   function card(r) {
@@ -33,9 +37,11 @@ window.Craft = (() => {
       <div class="r-body">
         <div class="r-name">${it.name} ${tag} <span class="r-owned">${ownedTxt}</span></div>
         <div class="r-effect">${it.desc}</div>
-        <div class="r-cost">${locked(r) ? '<span class="cost short">🔒 Needs the Palisade blueprint (goblin spoil)</span>' : costHtml(r.cost, r.items)}${r.shards ? `<span class="cost ${st().shards >= r.shards ? '' : 'short'}">💎 ${st().shards}/${r.shards} Relic shards</span>` : ''}</div>
+        <div class="r-cost">${!stationOk(r) ? `<span class="cost short">🔒 Requires the ${stationName(r.station)} (Lv ${Data.STATIONS[r.station].lv})</span>`
+          : locked(r) ? '<span class="cost short">🔒 Needs the Palisade blueprint (goblin spoil)</span>' : costHtml(r.cost, r.items)}${r.shards ? `<span class="cost ${st().shards >= r.shards ? '' : 'short'}">💎 ${st().shards}/${r.shards} Relic shards</span>` : ''}</div>
       </div>
-      <button class="craft-btn" data-id="${r.id}" ${ready ? '' : 'disabled'}>${ownedKit(r) ? 'Owned' : r.makes ? 'Make' : 'Craft'}</button>
+      <div class="r-btns"><button class="craft-btn" data-id="${r.id}" ${ready ? '' : 'disabled'}>${ownedKit(r) ? 'Owned' : r.makes ? 'Make' : 'Craft'}</button>
+      ${r.makes && ready && maxTimes(r) >= 2 ? `<button class="craft-btn craft-all" data-id="${r.id}" data-n="${maxTimes(r)}">All ×${maxTimes(r)}</button>` : ''}</div>
     </div>`;
   }
 
@@ -70,21 +76,22 @@ window.Craft = (() => {
       return list.length ? `<div class="tier-h t${t}">${(cls === 'armor' ? Data.ARMOR_LABEL : Data.TIER_LABEL)[t]}</div>${list.map(card).join('')}` : '';
     }).join('');
     const reps = repairList();
-    document.getElementById('craft-list').innerHTML =
+    document.getElementById('craft-list').innerHTML = stationsHtml() +
+      sec('🔥 Smelting & tanning', 'ore → bars · hide → leather · every metal recipe needs bars', R.filter(r => r.tier === 'smelt').map(card)) +
       sec('🔧 Repair bench', 'mend battered armor for half its materials', reps.map(repairCard)) +
       `<h3 class="craft-h">⚔️ Weapons <small>monsters only · wield one at a time</small></h3>${byTier('weapon')}` +
       sec('🌊 Sea gear', 'coral & pearls from the Sunlit Coast · iron strength with a trick', R.filter(r => Data.ITEMS[r.id]?.sea).map(card)) +
       `<h3 class="craft-h">🛠️ Tools <small>obstacles & defenses only · wield one at a time</small></h3>${byTier('tool')}` +
-      `<h3 class="craft-h">🛡️ Armor <small>wear it in 🧍 Warrior · adds 🛡 hearts to your keep in raids</small></h3>${byTier('armor')}` +
+      `<h3 class="craft-h">🛡️ Armor <small>wear it in 🧍 Warrior · takes the blows monsters aim at you</small></h3>${byTier('armor')}` +
       sec('📿 Amulets', 'gems from the Iron Hills set in silver · give your matches power', R.filter(r => r.tier === 'amulet').map(card)) +
       sec('👑 The Old King\'s Crown', 'one shard from mastering each land · gold bars from the smelter', R.filter(r => r.tier === 'crown').map(card)) +
-      sec('🔥 Smelting', 'oak → charcoal · iron + charcoal → steel · nuggets → gold bars', R.filter(r => r.tier === 'smelt').map(card)) +
       sec('🔑 Key upgrades', 'gold & crystal chests need better keys', R.filter(r => r.tier === 'keys').map(card)) +
       sec('🛡️ Defenses', 'place them in 🏰 Fortify', R.filter(r => r.defense).map(card)) +
-      sec('🍲 Provisions', 'bring them on raids', R.filter(r => r.tier === 'food').map(card)) +
+      sec('🍲 Provisions', 'eat them anywhere to heal ❤️', R.filter(r => r.tier === 'food').map(card)) +
       sec('🎒 Kit', 'passive & permanent', R.filter(isKit).map(card)) +
       sec('🐉 Dragon prep', 'for the Dragon\'s Lair — coming soon', R.filter(r => r.tier === 'prep').map(card));
-    document.querySelectorAll('.craft-btn:not(.repair-btn)').forEach(b => { b.onclick = () => craft(b.dataset.id); });
+    document.querySelectorAll('.craft-btn:not(.repair-btn):not(.build-btn)').forEach(b => { b.onclick = () => craft(b.dataset.id, +(b.dataset.n || 1)); });
+    document.querySelectorAll('.build-btn').forEach(b => { b.onclick = () => build(b.dataset.id); });
     document.querySelectorAll('.repair-btn').forEach(b => { b.onclick = () => repair(reps[+b.dataset.r]); });
   }
 
@@ -100,9 +107,10 @@ window.Craft = (() => {
 
   const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-  async function craft(id) {
+  async function craft(id, times = 1) {
     const r = Data.RECIPES.find(x => x.id === id);
     if (forging || !canAfford(r) || ownedKit(r)) return;
+    times = r.makes ? Math.max(1, Math.min(times, maxTimes(r))) : 1;
     forging = true;
     const it = info(r);
     const tier = tierOf(r);
@@ -130,7 +138,8 @@ window.Craft = (() => {
     const tx = target.left + target.width / 2, ty = target.top + 6;
     const chips = [];
     let i = 0;
-    for (const [k, n] of Object.entries(r.cost)) {
+    for (const [k, n0] of Object.entries(r.cost)) {
+      const n = n0 * times;
       st().stockpile[k] -= n;
       const src = document.querySelector(`.res[data-res="${k}"]`) || cardEl;
       const from = src ? src.getBoundingClientRect() : { left: tx, top: ty + 200 };
@@ -169,7 +178,7 @@ window.Craft = (() => {
 
     // 3) The result appears.
     let label;
-    if (r.makes) { Object.entries(r.makes).forEach(([k, n]) => { st().stockpile[k] += n; }); label = `+${Object.entries(r.makes).map(([k, n]) => `${n} ${Data.RESOURCES[k].label}`).join(', ')}!`; }
+    if (r.makes) { Object.entries(r.makes).forEach(([k, n]) => { st().stockpile[k] += n * times; }); label = `+${Object.entries(r.makes).map(([k, n]) => `${n * times} ${Data.RESOURCES[k].label}`).join(', ')}!`; }
     else if (it.gear) { App.addGear(id); label = `${it.name} forged!`; }
     else { st().inventory[id] += 1; label = `${it.name} ${isKit(r) ? 'made' : 'crafted'}!`; }
     // First weapon / tool? Wield it straight away.
@@ -194,6 +203,40 @@ window.Craft = (() => {
     render();
     const fresh = document.querySelector(`.recipe[data-id="${id}"]`);
     if (fresh) fresh.classList.add('flash');
+  }
+
+  // ---------- crafting stations ----------
+  const stationReady = id => {
+    const S = Data.STATIONS[id];
+    return App.level >= S.lv && (!S.needs || st().enemyWins.dwarf > 0) && Object.entries(S.cost).every(([k, n]) => st().stockpile[k] >= n);
+  };
+  function stationsHtml() {
+    const rows = Data.STATION_ORDER.map(id => {
+      const S = Data.STATIONS[id], built = !!st().stations[id];
+      const req = [];
+      if (!built) {
+        req.push(`<span class="cost ${App.level >= S.lv ? '' : 'short'}">⭐ Level ${S.lv}</span>`);
+        if (S.needs) req.push(`<span class="cost ${st().enemyWins.dwarf > 0 ? '' : 'short'}">⚒️ Beat the dwarves once (Thrain teaches you)</span>`);
+      }
+      return `<div class="recipe station${built ? ' built' : stationReady(id) ? ' ready' : ''}">
+        <div class="r-icon">${S.icon}</div>
+        <div class="r-body"><div class="r-name">${S.name} ${built ? '<span class="r-owned">✓ built</span>' : ''}</div>
+          <div class="r-effect">${S.desc}</div>
+          ${built ? '' : `<div class="r-cost">${req.join('')}${costHtml(S.cost)}</div>`}</div>
+        ${built ? '' : `<button class="craft-btn build-btn" data-id="${id}" ${stationReady(id) ? '' : 'disabled'}>Build</button>`}
+      </div>`;
+    }).join('');
+    return `<h3 class="craft-h">🏗️ Your stations <small>build them to unlock new crafts</small></h3>${rows}`;
+  }
+  function build(id) {
+    if (!stationReady(id) || st().stations[id]) return;
+    Object.entries(Data.STATIONS[id].cost).forEach(([k, n]) => { st().stockpile[k] -= n; });
+    st().stations[id] = true;
+    App.save();
+    Sound.sfx('crafted');
+    const S = Data.STATIONS[id];
+    App.choose({ title: `${S.icon} ${S.name} built!`, html: `<p>${id === 'dforge' ? 'Thrain Ironbeard shows you how the dwarves fold iron and charcoal into steel. "Don\'t waste it, surface-dweller."' : S.desc}</p>`, buttons: [{ id: 'ok', label: 'To work' }] })
+      .then(() => render());
   }
 
   function sparks(stage, anvil, count) {

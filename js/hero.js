@@ -13,7 +13,7 @@ window.Hero = (() => {
   };
   // Colours the figure wears for each armor tier.
   const TINT = { 1: ['#9a6a3c', '#5e3c1e'], 2: ['#8d97a3', '#4a525c'], 3: ['#e3e9ef', '#8a96a3'], 4: ['#c4b5fd', '#6d5bd0'] };
-  let current = 'body', onClose = null, est = null;
+  let current = 'body', onClose = null;
 
   const st = () => App.state;
   const eq = s => st().equip[s];
@@ -30,7 +30,7 @@ window.Hero = (() => {
   // The look comes from character creation; `bare` draws it without any gear (for the creation screen).
   // Drawn like an ink illustration: inked outlines, muted dyes, hatched shadow on the right side.
   function figure(opts = {}) {
-    const look = opts.look || App.state.profile?.look || { skin: '#e0b089', hair: '#5a3a1e', style: 'short', beard: 'none' };
+    const look = { skin: '#e0b089', hair: '#5a3a1e', style: 'short', beard: 'none', ...(opts.look || App.state.profile?.look || {}) };
     const eq = s => (opts.bare ? null : App.state.equip[s]);
     const tierOf = s => (eq(s) ? Data.ITEMS[eq(s).id].tier : 0);
     const K = '#2b1b0d', skin = look.skin, hairC = look.hair;
@@ -162,20 +162,16 @@ window.Hero = (() => {
   }
 
   function stats() {
-    const ward = App.wardLayers(), shields = ward.reduce((n, w) => n + w.max, 0);
-    const lines = [
-      `<div><b>🛡 Raid guard:</b> ${shields ? `+${shields} shield hearts on your keep` : 'no armor — raiders go straight for your keep'}</div>`,
-      `<div><b>💎 Amulet:</b> ${eq('amulet') ? Data.ITEMS[eq('amulet').id].desc : 'none — set a gem in silver at the Workshop'}</div>`,
-      `<div><b>⚡ Start energy:</b> ${3 + Data.gloveEnergy(eq('gloves'))}${eq('gloves') ? ` (gloves +${Data.gloveEnergy(eq('gloves'))})` : ''}</div>`,
-    ];
-    if (!est) {
-      est = ['goblin', 'dwarf'].map(e => {
-        const rank = Data.TIER_NAMES[e][Data.enemyTier(st().enemyWins[e]) - 1];
-        return { e, rank, base: Camp.estimate(e, 120, true), now: Camp.estimate(e, 120) };
-      });
-    }
-    lines.push(`<div class="h-est">${est.map(x => `<span>${x.e === 'goblin' ? '🔥' : '⚒️'} ${x.rank} need <b>~${x.now}</b> moves to break your camp${x.now > x.base ? ` <em>(${x.base} without armor)</em>` : ''}</span>`).join('')}</div>`);
-    return lines.join('');
+    const S = st(), mx = App.maxHp, L = App.level;
+    const worn = ['helmet', 'body', 'legs', 'shield'].filter(k => eq(k));
+    const meals = ['bread', 'chowder'].filter(k => S.inventory[k] > 0)
+      .map(k => `<button class="small eat-btn" data-meal="${k}">${Data.ITEMS[k].icon} ${Data.ITEMS[k].name} ×${S.inventory[k]} (+${Data.ITEMS[k].heal})</button>`).join('');
+    return `<div class="hp-line"><b>❤️ Health ${S.hp}/${mx}</b><span class="hp-wide"><i style="width:${S.hp / mx * 100}%"></i></span></div>
+      <div class="eat-row"><button class="small eat-btn" data-food="1" ${S.stockpile.food && S.hp < mx ? '' : 'disabled'}>🍖 Eat a ration (1 food → +2) · ${S.stockpile.food} left</button>${meals}</div>
+      <div><b>🛡 Armor:</b> ${worn.length ? `${worn.length} piece${worn.length > 1 ? 's' : ''} — blows that land on armored spots are softened, or turned aside by better metal` : 'none — every blow lands in full'}</div>
+      <div><b>💪 Strength:</b> +${Data.strength(L)} weapon damage (grows every 5 levels) · <b>⚡ Start energy:</b> ${3 + Data.gloveEnergy(eq('gloves'))}</div>
+      <div><b>💎 Amulet:</b> ${eq('amulet') ? Data.ITEMS[eq('amulet').id].desc : 'none — set a gem in silver at the Workshop'}</div>
+      <div class="h-est">⭐ Level ${L} · ${Data.ERA_NAME[Data.ERA(L)]} era</div>`;
   }
 
   function picker() {
@@ -203,14 +199,15 @@ window.Hero = (() => {
     document.getElementById('hero-pick').innerHTML = picker();
     document.querySelectorAll('.hslot').forEach(b => { b.onclick = () => { current = b.dataset.s; render(); }; });
     document.querySelectorAll('#hero-pick [data-i]').forEach(b => { b.onclick = () => { App.equip(current, +b.dataset.i); changed(); }; });
+    document.querySelectorAll('#hero-stats [data-food]').forEach(b => { b.onclick = () => { if (App.eatFood()) Sound.sfx('found'); render(); }; });
+    document.querySelectorAll('#hero-stats [data-meal]').forEach(b => { b.onclick = () => { if (App.eatMeal(b.dataset.meal)) Sound.sfx('found'); render(); }; });
     document.querySelectorAll('#hero-pick [data-off]').forEach(b => { b.onclick = () => { App.unequip(current); changed(); }; });
   }
-  function changed() { est = null; Sound.sfx('clank'); render(); }
+  function changed() { Sound.sfx('clank'); render(); }
 
   function open(opts = {}) {
     onClose = opts.onClose || null;
     if (opts.slot) current = opts.slot;
-    est = null;
     document.getElementById('hero-panel').classList.remove('hidden');
     render();
   }

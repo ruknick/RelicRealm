@@ -1162,3 +1162,47 @@ details.debug summary { color: #c9b48a; }
 body[data-scene] .sound-btn, .sound-btn { background: var(--paper); color: var(--ink); border: 1.5px solid var(--ink); }
 .home-level .xpbar { background: rgba(242,228,194,.2); }
 .card a, .panel a { color: var(--wax); }
+
+/* ---------- health meter & creature HP bars ---------- */
+.health { flex: none; display: grid; grid-template-columns: auto 8px; grid-template-rows: auto auto; align-items: center; column-gap: 4px;
+  background: rgba(28,19,11,.85); border: 2px solid #b0432a; border-radius: 10px; padding: 2px 6px; min-width: 46px; }
+.hp-ico { font-size: .8rem; line-height: 1; }
+.hp-num { grid-column: 1; font-size: 1rem; color: #ffb0a0; line-height: 1; text-align: center; }
+.hp-bar { grid-row: 1 / span 2; grid-column: 2; width: 8px; height: 32px; border-radius: 4px; background: rgba(255,255,255,.12); display: flex; align-items: flex-end; overflow: hidden; }
+.hp-bar i { display: block; width: 100%; background: linear-gradient(0deg, #8e2a1a, #e0604a); transition: height .25s; }
+.health.low { animation: raidPulse 1.2s ease-in-out infinite; }
+.health.hurt { animation: shake .3s; }
+.spec.eat { font-size: 1.2rem; }
+.piece .hp .hpbar { display: block; width: 70%; height: 5px; margin: 0 auto; border-radius: 3px; background: rgba(0,0,0,.55); overflow: hidden; border: 1px solid rgba(0,0,0,.6); }
+.piece .hp .hpbar i { display: block; height: 100%; background: linear-gradient(90deg, #c0392b, #ff7a5a); }
+.piece .hp .hpn { display: block; font-size: 2.2cqw; color: #ffe0d8; font-weight: 800; line-height: 1.1; }
+.g-ironbar { --g1: #4a525c; --g2: #1e2328; } .g-silverbar { --g1: #5d6a78; --g2: #262d36; } .g-leather { --g1: #6a4228; --g2: #2e1a0c; } .g-scrapiron { --g1: #5a4a40; --g2: #241c16; } .g-shell { --g1: #6a2a1a; --g2: #2c0e06; }
+
+/* ---------- revenge raid: live view ---------- */
+.siege { position: fixed; inset: 0; z-index: 35; background: rgba(14,8,3,.82); display: flex; align-items: center; justify-content: center; padding: 12px; }
+.siege-card { width: 100%; max-width: 380px; background: radial-gradient(ellipse at 30% 20%, rgba(255,250,235,.55), transparent 60%), var(--paper); color: var(--ink); border: 2px solid var(--ink); border-radius: 6px; padding: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.6); display: grid; gap: 8px; }
+.siege-card h2 { margin: 0; font-family: Georgia, serif; color: var(--wax); text-align: center; font-size: 1.1rem; }
+.siege-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: #6a5a3a; padding: 3px; border-radius: 4px; border: 1.5px solid var(--ink); }
+.sc { position: relative; aspect-ratio: 1; background: #a8b07a; border-radius: 2px; display: grid; place-items: center; overflow: hidden; }
+.sc.approach { background: #c9b07a; }
+.sc.keep { grid-column: span 3; aspect-ratio: auto; background: #8a9a6a; }
+.sc svg { width: 92%; height: 92%; }
+.sc.keep svg { width: 60%; }
+.sc.foe { background: #b9a06a; box-shadow: inset 0 0 0 1px rgba(142,42,26,.25); }
+.sc .raider { font-size: 1.1rem; animation: raidBob .5s ease-in-out infinite alternate; }
+@keyframes raidBob { to { transform: translateY(-2px) rotate(-6deg); } }
+.sc.down { opacity: .3; filter: grayscale(1); }
+.sc.struck { animation: siegeHit .4s; box-shadow: inset 0 0 0 3px #e0402a; }
+@keyframes siegeHit { 30% { transform: translateX(-3px) scale(1.05); } 60% { transform: translateX(3px); } }
+.sc .sh { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; font-size: .5rem; color: #c0392b; text-shadow: 0 0 2px #fff; }
+.siege-log { min-height: 2.6em; font-size: .9rem; text-align: center; }
+.grudge { margin-top: 6px; font-size: .85rem; } .grudge span { color: var(--wax); letter-spacing: 1px; }
+.r-btns { display: grid; gap: 4px; flex: none; }
+.craft-all { font-size: .8rem; padding: 4px 8px; }
+.recipe.station .r-icon { font-size: 1.8rem; }
+.recipe.station.built { opacity: .8; }
+.hp-line { display: flex; align-items: center; gap: 8px; }
+.hp-wide { flex: 1; height: 10px; border-radius: 5px; background: rgba(43,27,13,.15); border: 1px solid var(--ink-faint); overflow: hidden; }
+.hp-wide i { display: block; height: 100%; background: linear-gradient(90deg, #8e2a1a, #e0604a); }
+.eat-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 4px; }
+.eat-btn { font-size: .8rem; padding: 6px 8px; }

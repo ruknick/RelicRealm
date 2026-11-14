@@ -79,7 +79,7 @@ window.Story = (() => {
       id: 'crown', title: 'Chapter 4 · The Old King\'s Crown',
       intro: 'The relic shards are bound to the land itself. Each one reveals itself only to someone who has mastered its place: the deepest forest, the richest hills, the farthest coast, and the mightiest goblin and dwarf war-bands. Master them all, melt gold into bars, and forge the Crown anew.',
       goals: [
-        { text: 'Earn all 5 💎 relic shards (Lv 10 in each land, beat the goblin & dwarf top ranks)', done: () => Object.keys(st().shardFrom || {}).length >= 5 || st().inventory.crown > 0 },
+        { text: 'Earn all 5 💎 relic shards (Lv 35 in each land, beat the goblin & dwarf top ranks)', done: () => Object.keys(st().shardFrom || {}).length >= 5 || st().inventory.crown > 0 },
         { text: 'Forge the 👑 Old King\'s Crown (5 shards + 3 gold bars)', done: () => st().inventory.crown > 0 },
         { text: 'Forge any steel gear', done: () => ownsTier(3) },
         { text: 'Wear armor in every slot (helmet, body, gloves, legs, shield)', done: () => ['helmet', 'body', 'gloves', 'legs', 'shield'].every(s => st().equip[s]) },

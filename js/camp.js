@@ -1,7 +1,6 @@
 // Your camp: fortify layout, the AI that attacks it during a Siege Race, and the Fortify editor.
 window.Camp = (() => {
   const ROWS = 9, COLS = 7, BASE_ROWS = 4, KEEP_HP = 6;
-  let GLANCE = 0.5;   // chance a too-weak weapon still finds a gap in your armor
   const KEEP_CELLS = [[0, 2], [0, 3], [0, 4]];
 
   // Defenses you can place. pts = fortify points; hp before runestone bonus.
@@ -37,7 +36,7 @@ window.Camp = (() => {
   const owned = kind => App.state.inventory[kind] || 0;
 
   // ---------- attack simulation ----------
-  function newAttack(enemy, dry = false, tier = Data.enemyTier(App.state.enemyWins[enemy]), noArmor = false) {
+  function newAttack(enemy, dry = false, tier = Data.enemyTier(App.state.enemyWins[enemy])) {
     const L = layout();
     const pieces = Object.entries(L.cells).map(([k, kind]) => {
       const [r, c] = k.split(',').map(Number);
@@ -50,14 +49,14 @@ window.Camp = (() => {
     pieces.forEach(p => { p.max = p.hp; });
     // Iron-banded loot chest: once opened it stays put and still blocks the way.
     const chest = { kind: 'chest', r: L.chest[0], c: L.chest[1], hp: 2, max: 2, mat: 'wood', hard: 1, alive: true, opened: false };
-    // Your worn armor stands guard: shield hearts they must break before the keep itself.
-    const keep = { kind: 'keep', hp: KEEP_HP, max: KEEP_HP, alive: true, ward: noArmor ? [] : App.wardLayers() };
+    // The keep is your Storehouse: break it and they carry off a share of everything you've banked.
+    const keep = { kind: 'keep', hp: KEEP_HP, max: KEEP_HP, alive: true };
     // Higher-ranked raiders hit harder and arrive sooner.
     const base = AI[enemy], t = tier - 1;
     const P = { ...base, name: `${enemy === 'dwarf' ? 'Dwarf' : 'Goblin'} ${Data.TIER_NAMES[enemy][tier - 1]}`,
       miss: Math.max(0.08, base.miss - 0.05 * t), big: base.big + 0.06 * t, march: Math.max(2, base.march - t),
       gear: Data.ENEMY_GEAR[enemy][tier - 1] };
-    return { enemy, P, pieces, chest, keep, skip: 0, march: P.march, towerTick: 0, moves: 0, done: false, stolen: [], dry, log: `${AI[enemy].name} are marching on your camp…` };
+    return { enemy, tier, P, pieces, chest, keep, skip: 0, march: P.march, towerTick: 0, moves: 0, done: false, stolen: [], dry, hit: null, log: `${AI[enemy].name} are marching on your camp…` };
   }
 
   function blockerAt(a, r, c) {
@@ -103,6 +102,7 @@ window.Camp = (() => {
   function step(a) {
     const P = a.P;
     a.moves++;
+    a.hit = null;
     const say = (msg, extra = {}) => { a.log = msg; return { msg, ...extra }; };
     if (a.skip > 0) { a.skip--; return say(`${P.name} are clearing rubble… (move lost)`); }
     if (a.march > 0) {
@@ -128,26 +128,25 @@ window.Camp = (() => {
     else {
       // Pick the cheapest way through: low HP, not iron, closest to the keep.
       // Cheapest way through: things their weapons can actually break, low HP, close to the keep.
-      const rate = p => { const d = P.gear - (p.hard || 1); return d < 0 ? 0.08 : d === 0 ? 0.7 : 1.2; };
+      const rate = p => { const d = P.gear - (p.hard || 1); return d < -1 ? 0.06 : d < 0 ? 0.15 : d === 0 ? 0.7 : 1.2; };
       const cost = p => p.hp / rate(p) + p.r * 0.6;
       t = targets.sort((x, y) => cost(x) - cost(y))[0];
     }
     // Hardness rule: their weapon tier vs your defense. Too hard = they barely scratch it.
-    // Hitting the keep? Your armor takes it first, layer by layer.
-    const layer = t === a.keep ? a.keep.ward.find(w => w.hp > 0) : null;
-    if (layer) return hitWard(a, layer);
+    // Weaker weapons still wear strong walls down — just slowly.
     let dmg;
     const diff = P.gear - (t.hard || 1);
-    if (diff < 0) dmg = Math.random() < 0.08 ? 1 : 0;
+    a.hit = t;
+    if (diff < 0) dmg = Math.random() < (diff === -1 ? 0.3 : 0.12) ? 1 : 0;
     else { const x = Math.random(); dmg = x < P.miss ? 0 : x < 1 - P.big ? 1 : 2; if (diff > 0 && dmg) dmg++; }
-    const name = t === a.keep ? 'your keep' : t === a.chest ? 'your loot chest' : `your ${DEF[t.kind].name.toLowerCase()}`;
+    const name = t === a.keep ? 'your Storehouse' : t === a.chest ? 'your loot chest' : `your ${DEF[t.kind].name.toLowerCase()}`;
     if (!dmg) return say(diff < 0 ? `${P.name}' ${Data.TIER_LABEL[P.gear].toLowerCase()} weapons bounce off ${name}!` : `${P.name} are hacking at ${name}…`);
     t.hp = Math.max(0, t.hp - dmg);
     let msg = `${P.name} hit ${name}${dmg > 1 ? ' hard' : ''}!`;
     if (t.spiked) { a.skip++; msg += ' 🔱 The spikes hurt them (−1 move).'; }
     if (t.hp <= 0) {
       if (t === a.chest) t.opened = true; else t.alive = false;
-      if (t === a.keep) { a.done = true; msg = `💥 ${P.name} broke your keep!`; }
+      if (t === a.keep) { a.done = true; msg = `💥 ${P.name} broke into your Storehouse!`; }
       else if (t === a.chest) {
         const got = steal(a);
         msg = got.length ? `📦 ${P.name} opened your loot chest and took ${got.join(' & ')}!` : `📦 ${P.name} opened your loot chest — it was empty!`;
@@ -156,31 +155,145 @@ window.Camp = (() => {
     return say(msg, { rubble: dmg > 1 });
   }
 
-  // Armor is worn by people, not built: weaker weapons still find gaps now and then.
-  function hitWard(a, w) {
-    const P = a.P, diff = P.gear - w.hard;
-    let dmg;
-    if (diff < 0) dmg = Math.random() < GLANCE ? 1 : 0;
-    else { const x = Math.random(); dmg = x < P.miss ? 0 : x < 1 - P.big ? 1 : 2; if (diff > 0 && dmg) dmg++; }
-    dmg = Math.min(dmg, w.hp);
-    const say = msg => { a.log = msg; return { msg, rubble: dmg > 1 }; };
-    if (!dmg) return say(diff < 0 ? `🛡 Their ${Data.TIER_LABEL[P.gear].toLowerCase()} weapons glance off your ${w.name.toLowerCase()}!` : `${P.name} hammer at your ${w.name.toLowerCase()}…`);
-    w.hp -= dmg;
-    let broke = null;
-    if (!a.dry) broke = App.wear(w.slot, dmg);
-    if (broke) { w.hp = 0; return say(`💥 Your ${broke} broke!`); }
-    return say(w.hp > 0 ? `🛡 Your ${w.name.toLowerCase()} takes the blow!` : `🛡 They got past your ${w.name.toLowerCase()}!`);
+  // How often your camp holds against this enemy right now (they give up after REVENGE_MOVES).
+  function holdChance(enemy, runs = 160) {
+    let held = 0;
+    for (let i = 0; i < runs; i++) {
+      const a = newAttack(enemy, true);
+      while (!a.done && a.moves < Data.REVENGE_MOVES) step(a);
+      if (!a.done) held++;
+    }
+    return Math.round(held / runs * 100);
   }
 
-  // How many moves this enemy needs on average to break your keep (for the editor).
-  function estimate(enemy, runs = 160, noArmor = false) {
-    let total = 0;
-    for (let i = 0; i < runs; i++) {
-      const a = newAttack(enemy, true, undefined, noArmor);
-      while (!a.done && a.moves < 80) step(a);
-      total += a.moves;
+  // ---------- revenge ----------
+  const NAME = { goblin: 'goblin', dwarf: 'dwarf' };
+  // After every trip: grudges grow, war parties form and march. Returns a warning line (or '').
+  function tickTrip(kind, info = {}) {
+    const st = App.state;
+    st.sinceRevenge++;
+    if (info.raid) st.grudge[info.enemy] += info.won ? 3 : 1;
+    if (info.survivors && (kind === 'forest' || kind === 'mine')) st.grudge.goblin += 0.34 * info.survivors;
+    if (st.revenge) {
+      st.revenge.trips--;
+      App.save();
+      return st.revenge.trips > 0
+        ? `😠 The ${NAME[st.revenge.enemy]} war party is ${st.revenge.trips} trip${st.revenge.trips > 1 ? 's' : ''} away from your camp!`
+        : `⚔️ The ${NAME[st.revenge.enemy]} war party has reached your camp!`;
     }
-    return Math.round(total / runs);
+    const angry = ['dwarf', 'goblin'].find(e => st.grudge[e] >= Data.GRUDGE_FULL);
+    if (angry && st.sinceRevenge >= Data.REVENGE_COOLDOWN) {
+      st.revenge = { enemy: angry, trips: Data.REVENGE_WARN_TRIPS };
+      App.save();
+      return `😠 <b>The ${NAME[angry]}s want revenge!</b> A war party is gathering — it will strike your camp in ${Data.REVENGE_WARN_TRIPS} trips. Fortify!`;
+    }
+    App.save();
+    return '';
+  }
+
+  // On the map: if a war party has arrived, the attack plays out while you watch.
+  async function revengeIfDue() {
+    const st = App.state;
+    if (!st.revenge || st.revenge.trips > 0) return;
+    const enemy = st.revenge.enemy, tier = Data.enemyTier(st.enemyWins[enemy]);
+    const who = `${enemy === 'dwarf' ? 'Dwarf' : 'Goblin'} ${Data.TIER_NAMES[enemy][tier - 1]}`;
+    Sound.sfx('drums');
+    await App.choose({
+      title: '⚔️ Your camp is under attack!',
+      html: `<p class="story-text">${who} have come for revenge. They're after your Storehouse. All you can do is watch your defenses hold — or not.</p>`,
+      buttons: [{ id: 'watch', label: '👁️ Watch the attack' }],
+    });
+    const a = newAttack(enemy, false, tier);
+    const res = await watch(a, who);
+    // Aftermath: lost defenses, plunder.
+    const lost = [];
+    const L = layout();
+    a.pieces.filter(p => !p.alive && !p.trap).forEach(p => {
+      delete L.cells[key(p.r, p.c)];
+      st.inventory[p.kind] = Math.max(0, (st.inventory[p.kind] || 0) - 1);
+      lost.push(`${DEF[p.kind].icon} ${DEF[p.kind].name} destroyed`);
+    });
+    a.pieces.filter(p => !p.alive && p.trap).forEach(p => { delete L.cells[key(p.r, p.c)]; st.inventory.trap = Math.max(0, st.inventory.trap - 1); lost.push('🕳️ Pit trap sprung'); });
+    if (a.done) {
+      const pct = (enemy === 'dwarf' ? 0.12 : 0.1) + 0.03 * (tier - 1), taken = [];
+      Object.keys(Data.RESOURCES).forEach(k => {
+        const n = Math.floor(st.stockpile[k] * pct);
+        if (n > 0) { st.stockpile[k] -= n; taken.push(`${n} ${Data.RESOURCES[k].label}`); }
+      });
+      if (taken.length) lost.push(`🏦 From your Storehouse: ${taken.join(', ')}`);
+    }
+    a.stolen.forEach(x => lost.push(`${x} (from your loot chest)`));
+    st.grudge[enemy] = 0;
+    st.revenge = null;
+    st.sinceRevenge = 0;
+    App.save();
+    await App.choose({
+      title: a.done ? '💥 They broke into your Storehouse' : '🛡️ Your camp held!',
+      html: `<p>${a.done ? `${who} smashed their way in after ${a.moves} moves and carried off ${Math.round(((enemy === 'dwarf' ? 0.12 : 0.1) + 0.03 * (tier - 1)) * 100)}% of everything you'd banked.`
+        : `${who} hammered at your walls for ${a.moves} moves and gave up. Their grudge is spent — for now.`}</p>
+        ${lost.length ? `<div class="sum-spoils lost"><b>Lost</b><br>${lost.join('<br>')}</div>` : '<p>Nothing lost!</p>'}
+        <p class="hint">Stronger walls, gates and traps make them give up sooner.</p>`,
+      buttons: [{ id: 'fortify', label: '🏰 Rebuild & fortify' }, { id: 'home', label: 'Back to the map', cls: 'alt' }],
+    }).then(c => { if (c === 'fortify') App.go('fortify'); });
+    return res;
+  }
+
+  // The live view: your camp, the raiders swarming the open ground, each blow as it lands.
+  function watch(a, who) {
+    const el = document.getElementById('siege');
+    document.getElementById('siege-title').textContent = `${a.enemy === 'dwarf' ? '⚒️' : '🔥'} ${who} attack your camp`;
+    el.classList.remove('hidden');
+    Sound.music(a.enemy === 'dwarf' ? 'dwarf' : 'battle');
+    return new Promise(done => {
+      let fast = false, timer = null;
+      const end = () => { clearTimeout(timer); el.classList.add('hidden'); Sound.music('home'); done(a.done); };
+      document.getElementById('siege-skip').onclick = () => { fast = true; };
+      const tick = () => {
+        const res = step(a);
+        drawSiege(a, res.msg);
+        if (/hit|broke|smashed|opened|trap|tower/.test(res.msg)) Sound.sfx(/broke|smashed/.test(res.msg) ? 'break' : 'hit');
+        if (a.done || a.moves >= Data.REVENGE_MOVES) {
+          if (!a.done) { a.log = `${who} give up and slink away!`; drawSiege(a, a.log); Sound.sfx('victory'); }
+          timer = setTimeout(end, fast ? 200 : 1600);
+          return;
+        }
+        timer = setTimeout(tick, fast ? 30 : a.march > 0 ? 350 : 650);
+      };
+      drawSiege(a, a.log);
+      timer = setTimeout(tick, 700);
+    });
+  }
+  function drawSiege(a, msg) {
+    const reach = a.march > 0 ? new Set() : reachable(a);
+    const icon = a.enemy === 'dwarf' ? '🧔' : '👺';
+    let cells = '';
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      let cls = 'sc' + (r >= BASE_ROWS ? ' approach' : ''), content = '', hp = '';
+      if (isKeep(r, c)) {
+        if (c !== 2) continue;
+        cls += ' keep' + (a.keep.alive && !a.done ? '' : ' down') + (a.hit === a.keep ? ' struck' : '');
+        content = Art.piece('pkeep'); hp = `<span class="sh">${'♥'.repeat(a.keep.hp)}</span>`;
+      } else if (a.chest.r === r && a.chest.c === c) {
+        cls += ' chest' + (a.chest.opened ? ' down' : '') + (a.hit === a.chest ? ' struck' : '');
+        content = Art.piece('chest');
+      } else {
+        const p = a.pieces.find(x => x.r === r && x.c === c);
+        if (p && (p.alive || !p.trap)) {
+          cls += ' def' + (p.alive ? '' : ' down') + (a.hit === p ? ' struck' : '');
+          content = Art.piece(p.kind) || DEF[p.kind].icon;
+          if (p.alive && !p.trap) hp = `<span class="sh">${'♥'.repeat(Math.max(0, p.hp))}</span>`;
+        } else if (reach.has(key(r, c))) {
+          cls += ' foe';
+          // Raiders crowd the front line: cells touching something they can attack.
+          const front = DIRS.some(([dr, dc]) => { const r2 = r + dr, c2 = c + dc; return inB(r2, c2) && blockerAt(a, r2, c2); });
+          if (front || r === ROWS - 1) content = `<span class="raider">${icon}</span>`;
+        }
+      }
+      cells += `<div class="${cls}">${content}${hp}</div>`;
+    }
+    document.getElementById('siege-grid').innerHTML = cells;
+    const log = document.getElementById('siege-log');
+    log.innerHTML = `<b>Move ${a.moves}/${Data.REVENGE_MOVES}</b> · ${msg || ''}` ;
   }
 
   // Tiny map of your camp for the race HUD.
@@ -246,9 +359,14 @@ window.Camp = (() => {
     grid.innerHTML = cells;
     grid.querySelectorAll('.fc').forEach(el => { el.onclick = () => tapCell(+el.dataset.r, +el.dataset.c); });
 
-    const g = estimate('goblin'), d = estimate('dwarf'), armored = App.wardLayers().length;
+    const st = App.state;
+    const rank = e => Data.TIER_NAMES[e][Data.enemyTier(st.enemyWins[e]) - 1];
+    const meter = e => { const n = Math.min(Data.GRUDGE_FULL, Math.floor(st.grudge[e])); return '■'.repeat(n) + '□'.repeat(Data.GRUDGE_FULL - n); };
     document.getElementById('fort-test').innerHTML =
-      `🧪 Goblins need about <b>${g}</b> moves to break your keep · dwarves about <b>${d}</b>${armored ? ' (with your armor)' : ''}. <span class="hint">Beat them to it when you raid! ${armored ? '' : 'Craft armor and wear it in 🧍 Warrior to add 🛡 hearts.'}</span>`;
+      `🧪 If they attacked now, your camp would hold <b>${holdChance('goblin')}%</b> of the time against Goblin ${rank('goblin')} and <b>${holdChance('dwarf')}%</b> against Dwarf ${rank('dwarf')}.
+      <div class="grudge">😠 Goblin grudge <span>${meter('goblin')}</span> · Dwarf grudge <span>${meter('dwarf')}</span></div>
+      ${st.revenge ? `<p class="warn-note">⚔️ A ${st.revenge.enemy} war party is ${st.revenge.trips > 0 ? `${st.revenge.trips} trip${st.revenge.trips > 1 ? 's' : ''} away` : 'at the gates'}!</p>` : ''}
+      <span class="hint">Win raids (or leave goblins alive) and their grudge grows. When it's full, they come for your Storehouse — you'll get a warning a couple of trips ahead.</span>`;
     const sp = App.state;
     // The Storehouse: everything banked at camp.
     const TILE = { food: 'berries', iron: 'ore' };
@@ -292,5 +410,5 @@ window.Camp = (() => {
     Sound.sfx('nope');
   }
 
-  return { setGlance: g => { GLANCE = g; }, giveStarterKit, DEF, budget, layout, newAttack, step, estimate, miniMap, render, KEEP_HP };
+  return { giveStarterKit, DEF, budget, layout, newAttack, step, holdChance, tickTrip, revengeIfDue, miniMap, render, KEEP_HP };
 })();

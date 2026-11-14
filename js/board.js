@@ -6,7 +6,9 @@ window.Board = (() => {
   const DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
   const ENERGY_MAX = 10;
   // Cost of a tap-swing: heavier steel and bows cost more.
-  const swingCost = it => (it.tier >= 3 ? 3 : 2) + (it.type === 'bow' ? 1 : 0) - (it.light ? 1 : 0);
+  // Cost of a swing: wood gear is quick (1 ⚡), iron & steel take 2; bows +1, light blades −1.
+  const swingCost = it => Math.max(1, (it.tier >= 2 ? 2 : 1) + (it.type === 'bow' ? 1 : 0) - (it.light ? 1 : 0));
+  const fmt = d => (d < 1 ? 'chip' : `−${Math.round(d)}`);
   const WILD = 'star';
   let nextId = 1;
 
@@ -292,7 +294,9 @@ window.Board = (() => {
         el.style.top = (p.r / this.rows * 100) + '%';
         el.style.width = (p.w / this.cols * 100) + '%';
         el.querySelector('.pl').textContent = p.label || '';
-        el.querySelector('.hp').textContent = p.maxHp > 1 ? '♥'.repeat(p.hp) + '♡'.repeat(p.maxHp - p.hp) : '';
+        const hpEl = el.querySelector('.hp'), hpN = Math.ceil(p.hp);
+        if (p.maxHp > 6) hpEl.innerHTML = `<span class="hpbar"><i style="width:${Math.max(0, p.hp / p.maxHp * 100)}%"></i></span><span class="hpn">${hpN}</span>`;
+        else hpEl.textContent = p.maxHp > 1 ? '♥'.repeat(hpN) + '♡'.repeat(Math.max(0, p.maxHp - hpN)) : '';
         el.classList.toggle('target', canHit(p));
         el.classList.toggle('locked', !!p.lock);
         el.classList.toggle('wants-key', !!p.keyOnly && ['key', 'goldkey', 'crystalkey'].some(k => App.state.inventory[k] > 0 && Data.WEAPONS[k].unlock >= (p.lockTier || 1)));
@@ -398,19 +402,40 @@ window.Board = (() => {
         const it = Data.ITEMS[g.id];
         return `<span class="gb-item t${it.tier}">${Art.piece(it.art)}</span>`;
       };
-      const shields = App.wardLayers().reduce((n, w) => n + w.max, 0);
+      const hp = st.hp, mx = App.maxHp, food = st.stockpile.food;
       const specials = Object.keys(Data.ITEMS).filter(k => Data.ITEMS[k].special && inv[k] > 0).map(k => {
         const it = Data.ITEMS[k];
         return `<button class="spec${this.armed === k ? ' armed' : ''}" data-w="${k}" title="${it.name}">${it.art ? Art.piece(it.art) : it.icon}<b>${inv[k]}</b></button>`;
       }).join('');
       this.tray.innerHTML = `<div class="gearbar"><div class="energy" title="Energy: make matches to charge, tap a monster or obstacle to swing">
           <span class="en-bolt">⚡</span><b class="en-num">${this.energy}</b><span class="en-bar"><i style="height:${this.energy / ENERGY_MAX * 100}%"></i></span></div>
-        <button class="gearbtn">${mini('weapon', '⚔️')}${mini('tool', '🛠️')}<span class="gb-label">🧍 Gear${shields ? `<small>🛡${shields}</small>` : ''}</span></button><div class="specials">${specials}</div></div>`;
+        <div class="health${hp <= mx * 0.3 ? ' low' : ''}" title="Your health: monsters wear it down, food heals it"><span class="hp-ico">❤️</span><b class="hp-num">${hp}</b><span class="hp-bar"><i style="height:${hp / mx * 100}%"></i></span></div>
+        <button class="gearbtn">${mini('weapon', '⚔️')}${mini('tool', '🛠️')}<span class="gb-label">🧍 Gear</span></button>
+        <div class="specials"><button class="spec eat" title="Eat a ration: 1 food → +2 ❤️">🍖<b>${food}</b></button>${specials}</div></div>`;
+      this.tray.querySelector('.spec.eat').onclick = () => {
+        if (this.busy) return;
+        const got = App.eatFood();
+        if (got) { this.float(this.centerCell(), `+${got} ❤️`, 'gain'); window.Sound?.sfx('found'); }
+        else this.toast(App.state.stockpile.food < 1 ? '🍖 No food left in your Storehouse.' : '❤️ You\'re already at full health.', '', 1800);
+        this.renderWeapons();
+      };
       this.tray.querySelector('.gearbtn').onclick = () => {
         if (this.busy) return;
         Hero.open({ onClose: () => { this.renderWeapons(); this.hooks.onArm?.(); } });
       };
-      this.tray.querySelectorAll('.spec').forEach(b => { b.onclick = () => this.arm(b.dataset.w); });
+      this.tray.querySelectorAll('.spec:not(.eat)').forEach(b => { b.onclick = () => this.arm(b.dataset.w); });
+    }
+
+    centerCell() { return [Math.floor(this.rows / 2), Math.floor(this.cols / 2)]; }
+    // Refresh just the health meter (after a monster hits you).
+    renderHealth(flash = false) {
+      const el = this.tray && this.tray.querySelector('.health');
+      if (!el) return;
+      const hp = App.state.hp, mx = App.maxHp;
+      el.querySelector('.hp-num').textContent = hp;
+      el.querySelector('.hp-bar i').style.height = (hp / mx * 100) + '%';
+      el.classList.toggle('low', hp <= mx * 0.3);
+      if (flash) { el.classList.remove('hurt'); void el.offsetWidth; el.classList.add('hurt'); }
     }
 
     gainEnergy(n) {
@@ -429,7 +454,14 @@ window.Board = (() => {
 
     arm(k) {
       if (this.busy || !this.hooks.canPlay()) return;
-      if (Data.ITEMS[k].instant) {   // no target: use it right away (e.g. chowder)
+      if (Data.ITEMS[k].heal) {      // meals: eat right away
+        const got = App.eatMeal(k);
+        if (got) { this.float(this.centerCell(), `+${got} ❤️`, 'gain'); window.Sound?.sfx('found'); }
+        else this.toast('❤️ You\'re already at full health.', '', 1600);
+        this.renderWeapons();
+        return;
+      }
+      if (Data.ITEMS[k].instant) {   // no target: use it right away
         const msg = this.hooks.useInstant ? this.hooks.useInstant(k) : null;
         if (msg === true) { App.state.inventory[k]--; App.save(); this.renderWeapons(); this.hooks.onArm?.(); }
         else this.toast(msg || `${Data.ITEMS[k].icon} ${Data.ITEMS[k].desc}`, '', 2600);
@@ -469,7 +501,17 @@ window.Board = (() => {
       this.energy -= cost;
       this.busy = true;
       this.clearHint();
-      let targets = [[p, dmg]];
+      // Weapon swings vary a little, and now and then land a critical hit.
+      let first = dmg, crit = false;
+      if (slot === 'weapon') {
+        if (dmg >= 3) first += Math.floor(Math.random() * 3) - 1;
+        if (Math.random() < 0.1) { first *= 2; crit = true; }
+        if (Data.underGeared(g.id, p) && !this.toldUnder) {
+          this.toldUnder = true;
+          this.toast(`🛡️ Its ${Data.TIER_LABEL[Data.hardness(p)].toLowerCase()} armor turns most of your blow — better weapons hit far harder.`, '', 2600);
+        }
+      }
+      let targets = [[p, first]];
       if (G.type === 'bow') {
         targets = this.pieces.filter(x => !x.gone && x.mat === 'creature' && x.c === p.c)
           .map(x => [x, Data.gearDamage(g.id, x)]).filter(([, d]) => d > 0);
@@ -478,7 +520,7 @@ window.Board = (() => {
         DIRS.forEach(([dr, dc]) => {
           const x = this.inBounds(p.r + dr, p.c + dc) && this.grid[p.r + dr][p.c + dc];
           if (this.isPiece(x) && x.piece !== p && x.piece.mat === 'creature') {
-            const d = Math.min(1, Data.gearDamage(g.id, x.piece));
+            const d = Math.ceil(Data.gearDamage(g.id, x.piece) / 2);
             if (d > 0 && !targets.some(([t]) => t === x.piece)) targets.push([x.piece, d]);
           }
         });
@@ -497,9 +539,10 @@ window.Board = (() => {
       if (el) { el.classList.remove('struck'); void el.offsetWidth; el.classList.add('struck'); }
       targets.forEach(([t, d]) => {
         if (t.gone) return;
-        this.float([t.r, t.c + Math.floor(t.w / 2)], `−${Math.min(d, t.hp)}`, 'loss');
+        this.float([t.r, t.c + Math.floor(t.w / 2)], t === p && crit ? `💥 ${fmt(Math.min(d, t.hp))}!` : fmt(Math.min(d, t.hp)), t === p && crit ? 'bonus' : 'loss');
         this.hooks.onPieceHit(t, d, slot, g.id);
       });
+      if (crit) this.toast('💥 Critical hit!', 'win', 1000);
       window.Sound?.sfx(slot === 'weapon' ? 'slash' : 'hit');
       const broke = App.wear(slot);
       if (broke) { this.toast(`💥 Your ${broke} broke!`, 'alert', 2400); window.Sound?.sfx('break'); }
@@ -681,11 +724,11 @@ window.Board = (() => {
           if (p.gone) return;
           if (p.mat === 'creature') {
             const g = App.state.equip.weapon;
-            let d = g ? Data.gearDamage(g.id, p) : 0;
+            let d = g ? Math.max(1, Math.round(Data.gearDamage(g.id, p) / 2)) : 0;   // a match beside it: a free half-strength strike
             if (d > 0) {
-              if (Data.amuletPower() === 'fury') d++;   // Emberstone: match-strikes hit harder
+              if (Data.amuletPower() === 'fury') d += 2;   // Emberstone: match-strikes hit harder
               swung = true;
-              this.float([p.r, p.c + Math.floor(p.w / 2)], `⚔️ −${Math.min(d, p.hp)}`, 'loss');
+              this.float([p.r, p.c + Math.floor(p.w / 2)], `⚔️ ${fmt(Math.min(d, p.hp))}`, 'loss');
               this.hooks.onPieceHit(p, d, 'weapon', g.id);
               return;
             }

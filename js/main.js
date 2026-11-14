@@ -22,6 +22,11 @@ window.App = (() => {
       gear: [],                          // owned gear: [{ id, dur }]
       equip: { weapon: null, tool: null, helmet: null, amulet: null, body: null, gloves: null, legs: null, shield: null },
       captured: { goblin: [], dwarf: [] },   // your weapons the enemy carried off
+      hp: 10,                                // your warrior's health (carries between trips)
+      stations: { workbench: true },         // crafting stations built at camp
+      grudge: { goblin: 0, dwarf: 0 },       // how angry each enemy is; full = revenge raid
+      revenge: null,                         // { enemy, trips } — a war party on its way
+      sinceRevenge: 99,                      // trips since the last revenge raid
       seen: {},                          // rare materials already discovered
       profile: null,                     // { name, origin, look }
       story: { chapter: 0, flags: {}, places: {}, introSeen: false },
@@ -52,6 +57,11 @@ window.App = (() => {
         gear: s.gear || [],
         equip: { ...base.equip, ...(s.equip || {}) },
         captured: { ...base.captured, ...(s.captured || {}) },
+        hp: s.hp ?? null,
+        stations: s.stations || null,
+        grudge: { ...base.grudge, ...(s.grudge || {}) },
+        revenge: s.revenge || null,
+        sinceRevenge: s.sinceRevenge ?? 99,
         seen: s.seen || {},
         starterGear: !!s.starterGear,
         debug: { ...base.debug, ...(s.debug || {}) },
@@ -60,6 +70,15 @@ window.App = (() => {
         story: s.story || { chapter: 0, flags: {}, places: {}, introSeen: false },
       };
       migrateGear(s);
+      // Saves from before stations: grant what your level already earned.
+      if (!state.stations) {
+        state.stations = { workbench: true };
+        const L = Data.levelFromXp(state.xp);
+        if (L >= Data.STATIONS.smelter.lv) state.stations.smelter = true;
+        if (L >= Data.STATIONS.forge.lv) state.stations.forge = true;
+        if (L >= Data.STATIONS.dforge.lv && state.enemyWins.dwarf > 0) state.stations.dforge = true;
+      }
+      if (state.hp == null) state.hp = Data.maxHp(Data.levelFromXp(state.xp));
     } catch (e) { /* ignore broken saves */ }
   }
 
@@ -102,12 +121,44 @@ window.App = (() => {
     return null;
   }
 
-  // Worn armor as shield-heart layers on your keep, outermost first (shield, then helmet, body, legs).
-  function wardLayers() {
-    return ['shield', 'helmet', 'body', 'legs'].filter(s => state.equip[s]).map(s => {
-      const it = Data.ITEMS[state.equip[s].id];
-      return { slot: s, name: it.name, hard: it.tier, hp: Data.WARD[s], max: Data.WARD[s] };
-    });
+  // ---------- your health ----------
+  const maxHp = () => Data.maxHp(level());
+  function heal(n) {
+    const before = state.hp;
+    state.hp = Math.min(maxHp(), state.hp + n);
+    save();
+    return state.hp - before;
+  }
+  // A blow from an attacker with this weapon tier. It lands on a random part of you; armor there softens it
+  // (better armor than their weapon turns it aside) and takes a little wear.
+  function hurtPlayer(weaponTier, extra = 0) {
+    const base = Data.ATTACK[weaponTier] + extra;
+    const slots = [['body', 40], ['helmet', 20], ['legs', 20], [state.equip.shield ? 'shield' : 'body', 20]];
+    const slot = Data.rollFrom(slots), g = state.equip[slot];
+    let dmg = base, note = '';
+    if (g) {
+      const diff = Data.ITEMS[g.id].tier - weaponTier;
+      dmg = diff >= 1 ? 0 : diff === 0 ? Math.ceil(base * 0.4) : diff === -1 ? Math.ceil(base * 0.75) : base;
+      note = dmg === 0 ? `your ${Data.ITEMS[g.id].name.toLowerCase()} turns it aside` : `your ${Data.ITEMS[g.id].name.toLowerCase()} softens it`;
+      const broke = wear(slot);
+      if (broke) note += ` — your ${broke} broke!`;
+    }
+    state.hp = Math.max(0, state.hp - dmg);
+    save();
+    return { dmg, note, down: state.hp <= 0 };
+  }
+  // Eat a plain ration from the Storehouse: 1 food → +2 ❤️.
+  function eatFood() {
+    if (state.stockpile.food < 1 || state.hp >= maxHp()) return 0;
+    state.stockpile.food--;
+    return heal(2);
+  }
+  // Use a meal (bread, chowder): heals by its own amount.
+  function eatMeal(k) {
+    const it = Data.ITEMS[k];
+    if (!it || !it.heal || state.inventory[k] < 1 || state.hp >= maxHp()) return 0;
+    state.inventory[k]--;
+    return heal(it.heal);
   }
 
   // Lose a raid and they may carry off the weapon you were wielding. Next best weapon in your pack takes its place.
@@ -146,14 +197,17 @@ window.App = (() => {
     const after = level();
     return after > before ? after : 0;
   }
+  // What each new level brings: small boosts every level, big unlocks at era thresholds.
   function levelPerks(L) {
-    const a = Data.levelInfo(L - 1), b = Data.levelInfo(L);
     const out = [];
-    if (b.startObstacles > a.startObstacles) out.push('more obstacles');
-    if (b.growEvery && b.growEvery !== a.growEvery) out.push(`new ones every ${b.growEvery} moves`);
-    if (b.hpBonus > a.hpBonus) out.push('tougher obstacles');
-    if (b.buried > a.buried) out.push(`${b.buried} buried finds per board`);
-    return out.length ? `The wilds grow wilder: ${out.join(', ')}.` : 'Your legend grows.';
+    if (Data.maxHp(L) > Data.maxHp(L - 1)) out.push(`❤️ max health ${Data.maxHp(L)}`);
+    if (Data.strength(L) > Data.strength(L - 1)) out.push(`💪 +1 weapon damage`);
+    if (Data.backpackSize(L) > Data.backpackSize(L - 1)) out.push(`🎒 backpack ${Data.backpackSize(L)}`);
+    const st = Object.values(Data.STATIONS).find(s => s.lv === L && s.lv > 1);
+    if (st) out.push(`${st.icon} you can now build the <b>${st.name}</b> in the Workshop`);
+    if (Data.ERA(L) > Data.ERA(L - 1)) out.unshift(`<b>The ${Data.ERA_NAME[Data.ERA(L)]} era begins!</b>`);
+    if (Data.maxHp(L) > Data.maxHp(L - 1)) state.hp = Math.min(Data.maxHp(L), state.hp + 2);
+    return out.join(' · ') || 'Your legend grows.';
   }
 
   // ---------- spoils ----------
@@ -231,25 +285,27 @@ window.App = (() => {
     const armor = Data.ENEMY_ARMOR[enemy][Data.enemyTier(state.enemyWins[enemy]) - 1];
     const wTier = eq.weapon ? Data.ITEMS[eq.weapon.id].tier : 0;
     const weapons = [eq.weapon ? `⚔️ ${Data.ITEMS[eq.weapon.id].name}` : '⚔️ no weapon equipped', eq.tool ? `🛠 ${Data.ITEMS[eq.tool.id].name}` : '🛠 no tool equipped'];
-    const shields = wardLayers().reduce((n, w) => n + w.max, 0);
     if (state.captured[enemy].length) weapons.push(`<br>🎯 They hold your <b>${state.captured[enemy].map(g => Data.ITEMS[g.id].name).join(', ')}</b> — open their loot chest to win it back!`);
-    weapons.push(shields ? `🛡 armor +${shields} shield hearts` : '🛡 no armor');
-    const armorNote = wTier >= armor ? '' : `<p class="warn-note">⚠️ Their troops wear <b>${Data.TIER_LABEL[armor]}</b> armor — your ${wTier ? Data.TIER_LABEL[wTier].toLowerCase() + ' weapon bounces off' : 'bare hands do nothing'}. Craft ${Data.TIER_LABEL[armor].toLowerCase()} weapons!</p>`;
+    const worn = ['helmet', 'body', 'legs', 'shield'].filter(k => eq[k]).length;
+    weapons.push(worn ? `🛡 ${worn} armor piece${worn > 1 ? 's' : ''}` : '🛡 no armor');
+    const armorNote = wTier >= armor ? '' : `<p class="warn-note">⚠️ Their troops wear <b>${Data.TIER_LABEL[armor]}</b> armor — your ${wTier ? Data.TIER_LABEL[wTier].toLowerCase() + ' weapon only does a fraction of its damage' : 'bare hands do nothing'}. It can be done, but it'll take many more swings.</p>`;
+    const lowHp = state.hp < maxHp() * 0.5 ? `<p class="warn-note">❤️ You're hurt (${state.hp}/${maxHp()}). Eat something first — tap 🧍 Warrior.</p>` : '';
     const canGo = food >= cfg.foodCost;
     const boosts = ['drum', 'ale'].filter(k => inv[k] > 0)
-      .map(k => `<label class="check"><input type="checkbox" id="use-${k}"> ${Data.ITEMS[k].icon} Use ${Data.ITEMS[k].name} (they start 3 moves behind)</label>`).join('');
+      .map(k => `<label class="check"><input type="checkbox" id="use-${k}"> ${Data.ITEMS[k].icon} Use ${Data.ITEMS[k].name} (their defenders wait 3 moves longer)</label>`).join('');
     const choice = await choose({
       title: `${cfg.icon} ${cfg.name} · ${Data.TIER_NAMES[enemy][Data.enemyTier(state.enemyWins[enemy]) - 1]}`,
-      html: `<p class="race-rules">🏁 <b>Siege Race:</b> you attack their base while they attack your camp. <b>Fewest moves to break the other keep wins.</b> Big combos throw rubble in their way.
-          Your camp: they need about <b>${Camp.estimate(enemy)}</b> moves. <a href="#" id="prep-fortify">Fortify it</a> · <a href="#" id="prep-hero">Armor up</a></p>
+      html: `<p class="race-rules">⚔️ <b>Raid:</b> break their keep before their defenders wear you down. Every few moves their troops strike at you — your armor takes the blows, food heals you.
+          ❤️ <b>${state.hp}/${maxHp()}</b> · <a href="#" id="prep-hero">Armor up / eat</a><br>
+          <small>Win and they'll want revenge on your camp — <a href="#" id="prep-fortify">fortify it</a>.</small></p>${lowHp}
         <p class="hint">Rank ${Data.enemyTier(state.enemyWins[enemy])}/4 — every 2 wins they send tougher troops (and better loot).</p>
         <p>${cfg.prep}</p>
         <p>Costs <b>${cfg.foodCost} food</b> — you have <b>${food}</b>.</p>
         <p class="hint">Equipped: ${weapons.join(' · ')}</p>${armorNote}
-        ${inv.crown > 0 ? '<p class="hint">👑 The Crown: they start 2 moves behind.</p>' : ''}
+        ${inv.crown > 0 ? '<p class="hint">👑 The Crown: their defenders wait 2 moves longer.</p>' : ''}
         ${boosts}`,
       buttons: [
-        { id: 'go', label: canGo ? '⚔️ Attack!' : `Need ${cfg.foodCost} food`, cls: 'danger', disabled: !canGo },
+        { id: 'go', label: canGo ? '⚔️ Attack!' : `Need ${cfg.foodCost} food`, cls: 'danger', disabled: !canGo || state.hp <= 0 },
         { id: 'later', label: fromField ? '📍 Not now — mark it' : 'Not yet', cls: 'alt' },
       ],
     });
@@ -288,6 +344,21 @@ window.App = (() => {
     document.getElementById('dbg-event').checked = state.debug.eventNow;
   }
 
+  // Every finished trip (gathering or raid): rest a little and let the enemies' plans move on.
+  // Returns any warning text for the trip summary.
+  function tripDone(kind, info = {}) {
+    heal(3);
+    return Camp.tickTrip(kind, info);
+  }
+  // On the map: a revenge raid that has arrived plays out first, then any story beat.
+  let homeBusy = false;
+  async function homeEvents() {
+    if (homeBusy) return;
+    homeBusy = true;
+    try { await Camp.revengeIfDue(); } finally { homeBusy = false; }
+    Story.check();
+  }
+
   // A brand-new journey: fresh save, starter kit, your chosen character.
   function newGame(profile) {
     state = fresh();
@@ -309,7 +380,7 @@ window.App = (() => {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById('screen-' + screen).classList.remove('hidden');
     document.body.classList.toggle('no-stock', screen === 'title' || screen === 'create');
-    if (screen === 'home') { renderHome(); Sound.music('home'); Art.setScene('home'); Story.check(); }
+    if (screen === 'home') { renderHome(); Sound.music('home'); Art.setScene('home'); homeEvents(); }
     if (screen === 'title' || screen === 'create') Art.setScene('home');
     if (screen === 'journal') { Story.journal(); Art.setScene('craft'); }
     if (screen === 'fortify') Story.flag('fortify');
@@ -355,8 +426,8 @@ window.App = (() => {
   }
 
   return {
-    ENEMY_NAME, grantSpecial, addXP, levelPerks, get level() { return level(); }, boot, go, save, newGame, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
-    addGear, gearCount, equip, unequip, wear, wardLayers, captureWeapon, recoverWeapons, grantShard,
+    ENEMY_NAME, grantSpecial, addXP, levelPerks, get level() { return level(); }, boot, go, save, newGame, tripDone, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
+    addGear, gearCount, equip, unequip, wear, captureWeapon, recoverWeapons, grantShard, heal, hurtPlayer, eatFood, eatMeal, get maxHp() { return maxHp(); },
     get state() { return state; },
   };
 })();

@@ -150,6 +150,17 @@ window.Art = (() => {
   TILES.emerald = gem('lgEmerald'); TILES.sapphire = gem('lgSapphire'); TILES.ruby = gem('lgRuby');
   TILES.goldbar = `<ellipse cx="32" cy="52" rx="24" ry="3.5" fill="#000" opacity=".35"/><path d="M8 42l8-16h32l8 16z" fill="url(#lgGold)" stroke="#7a5a10" stroke-width="1"/>
       <path d="M8 42h48v6H8z" fill="#b8860b"/><path d="M18 30h20" stroke="#fff6c4" stroke-width="2" opacity=".9"/><path d="M24 36h16" stroke="#7a5a10" stroke-width="1" opacity=".5"/>`;
+  // Bars & processed materials
+  const bar = (g, edge, shine) => `<ellipse cx="32" cy="52" rx="24" ry="3.5" fill="#000" opacity=".35"/><path d="M8 42l8-16h32l8 16z" fill="url(#${g})" stroke="${edge}" stroke-width="1"/>
+      <path d="M8 42h48v6H8z" fill="${edge}"/><path d="M18 30h20" stroke="${shine}" stroke-width="2" opacity=".85"/>`;
+  TILES.ironbar = bar('lgIron', '#2f353d', '#c9d1da');
+  TILES.silverbar = bar('lgSilver', '#5a6672', '#ffffff');
+  TILES.leather = `<ellipse cx="32" cy="54" rx="22" ry="3" fill="#000" opacity=".3"/><path d="M10 20c8-4 12 2 22-2s14-4 22 2c-2 8 2 16-2 26-8 4-14-2-22 2s-14 2-20-2c-4-10 2-18 0-26z" fill="url(#rgLeather)" stroke="#5a3414" stroke-width="1.2"/>
+      <path d="M14 24c6 3 30 3 36 0M16 44c8 3 26 3 32 0" stroke="#5a3414" stroke-width="1" stroke-dasharray="2 2" fill="none" opacity=".7"/>`;
+  TILES.scrapiron = `<ellipse cx="32" cy="54" rx="22" ry="3" fill="#000" opacity=".3"/><path d="M12 40l10-14 8 6-6 14z" fill="url(#lgIron)" stroke="#2f353d"/><path d="M30 46l6-20 14 4-4 16z" fill="#8a6a50" stroke="#4a3020"/>
+      <circle cx="44" cy="20" r="7" fill="none" stroke="#6e767f" stroke-width="3"/><path d="M20 22l14-8" stroke="#5d6672" stroke-width="3" stroke-linecap="round"/><g fill="#a0522d" opacity=".7"><circle cx="38" cy="36" r="1.5"/><circle cx="18" cy="34" r="1.2"/></g>`;
+  TILES.shell = `<ellipse cx="32" cy="54" rx="22" ry="3" fill="#000" opacity=".3"/><path d="M8 44c0-18 12-30 24-30s24 12 24 30z" fill="#e0603a" stroke="#7a2a14" stroke-width="1.4"/>
+      <path d="M32 14v30M20 18l6 26M44 18l-6 26M12 30l12 14M52 30 40 44" stroke="#7a2a14" stroke-width="1.1" opacity=".7"/><path d="M14 40c6-14 14-20 18-22" stroke="#ffc0a0" stroke-width="2" fill="none" opacity=".6"/>`;
   TILES.mushroom = TILES.leaves;
 
   // ---------- gear icons: shape by type, finish by tier ----------

@@ -92,17 +92,17 @@ window.Gather = (() => {
     // Tougher stumps and richer veins appear as the land levels up (they need better tools).
     const L = run.landLv, roll2 = Math.random();
     if (kind === 'stump') {
-      const t = L >= 6 && roll2 < 0.25 ? 3 : L >= 3 && roll2 < 0.4 ? 2 : 1;
+      const t = L >= 20 && roll2 < 0.3 ? 3 : L >= 10 && roll2 < 0.45 ? 2 : L >= 6 && roll2 < 0.1 ? 2 : 1;
       Object.assign(spec, { hard: t, wood: ['wood', 'oak', 'ironwood'][t - 1], art: ['stump', 'stumpoak', 'stumpiron'][t - 1] });
     }
     if (kind === 'vein') {
-      const t = L >= 5 && roll2 < 0.25 ? 3 : L >= 3 && roll2 < 0.45 ? 2 : 1;
+      const t = L >= 25 && roll2 < 0.25 ? 3 : L >= 10 && roll2 < 0.45 ? 2 : L >= 6 && roll2 < 0.1 ? 2 : 1;
       Object.assign(spec, { hard: t, ore: ['iron', 'silver', 'starsilver'][t - 1], art: ['vein', 'veinsilver', 'veinstar'][t - 1] });
     }
     if (kind === 'locked') {
       // Higher land levels bring gold and crystal chests.
       const L = run.landLv, roll = Math.random();
-      spec.lockTier = L >= 6 && roll < 0.3 ? 3 : L >= 3 && roll < 0.55 ? 2 : 1;
+      spec.lockTier = L >= 20 && roll < 0.3 ? 3 : L >= 10 && roll < 0.55 ? 2 : 1;
       spec.art = ['locked', 'lockedgold', 'lockedcrystal'][spec.lockTier - 1];
     }
     return board.addPiece(spec, r, c, 1, appear);
@@ -249,7 +249,10 @@ window.Gather = (() => {
     const spots = board.tileCells(r => r >= 1);
     if (!spots.length) return null;
     const [r, c] = pick(spots), M = land.monster, plan = run.mon;
-    const p = board.addPiece({ ...P.monster, hp: plan.hp, armor: plan.armor, art: M.art, kin: M.kin, name: M.name, age: 0 }, r, c, 1, appear);
+    const carries = run.keyCarrier && !board.piecesOf('monster').some(x => x.carriesKey);
+    if (carries) run.keyCarrier = false;
+    const p = board.addPiece({ ...P.monster, hp: plan.hp, armor: plan.armor, weapon: plan.weapon, art: M.art, kin: M.kin, name: M.name, age: 0, carriesKey: carries, label: carries ? '🗝️' : '' }, r, c, 1, appear);
+    if (carries && appear) setTimeout(() => board.toast(`🗝️ That ${M.name} has the chest key! Take it down.`, 'alert', 2600), 1500);
     if (appear) {
       board.render();
       if (!run.told.monster) {
@@ -259,6 +262,30 @@ window.Gather = (() => {
     }
     return p;
   }
+  // What each land's monsters carry: scrap iron (goblins), gems & rune scraps (cave goblins), shells & pearls (crabs).
+  function monsterDrops(p, cell) {
+    const M = land.monster, got = [];
+    const name = M.name[0].toUpperCase() + M.name.slice(1);
+    const gain = (t, n, d) => { addToBackpack(t, n, cell, d); got.push(`${n} ${label(t)}`); };
+    if (land.key === 'ocean') { gain('shell', 1 + Math.floor(Math.random() * 2), 0); if (Math.random() < 0.12) gain('pearl', 1, 200); }
+    else gain('scrapiron', 1 + Math.floor(Math.random() * 2) + (p.armor >= 2 ? 1 : 0), 0);
+    if (land.key === 'mine' && Math.random() < 0.2) {
+      const gem = Data.rollFrom([['emerald', 6], ['sapphire', 3], ['ruby', run.landLv >= 12 ? 2 : 0]]);
+      gain(gem, 1, 250); discoverMaterial(gem, cell);
+    }
+    board.toast(`${M.icon} ${name} defeated! It dropped ${got.join(' & ')}.`, 'win');
+    if (p.carriesKey) applyFind('key', cell, 300);
+    else if (land.key !== 'ocean' && Math.random() < (land.key === 'forest' ? 0.25 : 0.15)) applyFind('scrap', cell, 300);
+    if (land.key === 'forest' || land.key === 'mine') discoverMaterial('scrapiron', cell);
+  }
+
+  // Out of health: you stagger home, dropping half of what you carried.
+  function collapse() {
+    if (run.ended) return;
+    land.bag.forEach(t => { run.lost = (run.lost || 0) + Math.ceil(run.backpack[t] / 2); run.backpack[t] = Math.floor(run.backpack[t] / 2); });
+    finish('collapse');
+  }
+
   async function monstersAct() {
     const mons = board.piecesOf('monster');
     let stole = 0;
@@ -270,18 +297,21 @@ window.Gather = (() => {
           .filter(([r, c]) => r >= 1 && r < SIZE && c >= 0 && c < SIZE && board.isTile(board.grid[r][c]));
         if (opts.length) { const [r, c] = pick(opts); board.movePiece(m, r, c); }
       }
-      // Left alone too long, it rummages through your pack.
-      if (m.age % Data.PILFER_EVERY === 0) {
-        const have = land.bag.filter(t => run.backpack[t] > 0);
-        if (have.length) {
-          const t = pick(have);
-          run.backpack[t]--;
-          board.float([m.r, m.c], `−1 ${label(t)}`, 'loss');
-          stole++;
-        }
+      // Every few moves, each one swings at you.
+      if (m.age % run.mon.attackEvery === 0) {
+        const hit = App.hurtPlayer(m.weapon || 1);
+        board.float([m.r, m.c], hit.dmg ? `⚔️ −${hit.dmg} ❤️` : '🛡️ blocked', hit.dmg ? 'loss' : 'gain');
+        stole += hit.dmg;
+        if (!run.told.armorNote && hit.note) { run.told.armorNote = true; setTimeout(() => board.toast(`🛡️ ${hit.note[0].toUpperCase() + hit.note.slice(1)}.`, '', 2000), 700); }
+        if (hit.down) break;
       }
     }
-    if (stole) { board.toast(`${land.monster.icon} ${stole > 1 ? `${stole} ${land.monster.name}s` : `The ${land.monster.name}`} rummaged through your pack!`, 'alert', 2000); Sound.sfx('nope'); }
+    if (stole) {
+      board.renderHealth(true);
+      Sound.sfx('slash');
+      if (!run.told.attack) { run.told.attack = true; board.toast(`${land.monster.icon} Monsters left on the board strike at you every few moves! Kill them — or eat (🍖) to heal.`, 'alert', 3000); }
+    }
+    if (App.state.hp <= 0) { await board.wait(500); collapse(); return; }
     // More arrive as the land grows wilder.
     if (++run.sinceMon >= run.mon.every && mons.length < run.mon.max) {
       run.sinceMon = 0;
@@ -297,7 +327,9 @@ window.Gather = (() => {
     const spots = board.tileCells(filter);
     if (!spots.length) return null;
     const [r, c] = pick(spots);
-    const p = board.addPiece(P[kind], r, c, 1, true);
+    const spec = { ...P[kind] };
+    if (spec.mat === 'creature') Object.assign(spec, { hp: 5 + Math.floor(run.landLv / 3), armor: Data.landEra(run.landLv) });
+    const p = board.addPiece(spec, r, c, 1, true);
     board.render();
     board.toast(msg, kindOfToast, 2600);
     return p;
@@ -387,12 +419,12 @@ window.Gather = (() => {
       }
       const cell = midOf(p);
       if (p.kind === 'vein') {
-        const mined = Math.min(dmg, p.hp) * ((Data.ITEMS[w]?.tier || 1) >= 2 ? 2 : 1);
-        addToBackpack(p.ore || 'iron', mined, cell);
+        const mined = (Math.ceil(p.hp) - Math.ceil(Math.max(0, p.hp - dmg))) * ((Data.ITEMS[w]?.tier || 1) >= 2 ? 2 : 1);
+        if (mined > 0) addToBackpack(p.ore || 'iron', mined, cell);
         if (p.ore && p.ore !== 'iron') discoverMaterial(p.ore, cell);
       }
       if (!board.hurt(p, dmg)) return;
-      xp(p.kind === 'thief' || p.kind === 'cart' || p.kind === 'crab' || p.kind === 'monster' ? Data.XP.chase : p.kind === 'tracks' || p.kind === 'rune' ? Data.XP.discover : Data.XP.obstacle);
+      xp(p.kind === 'monster' ? Data.XP.monster : p.kind === 'thief' || p.kind === 'cart' || p.kind === 'crab' ? Data.XP.chase : p.kind === 'tracks' || p.kind === 'rune' ? Data.XP.discover : Data.XP.obstacle);
       switch (p.kind) {
         case 'stump':
           {
@@ -442,10 +474,7 @@ window.Gather = (() => {
           break;
         case 'monster': {
           run.slain++;
-          const n = 1 + Math.floor(Math.random() * 2) + (p.armor >= 2 ? 1 : 0);
-          for (let i = 0; i < n; i++) addToBackpack(pick(land.bag.filter(t => t !== 'gold')), 1, cell, i * 180);
-          board.toast(`${land.monster.icon} ${land.monster.name[0].toUpperCase() + land.monster.name.slice(1)} defeated! It dropped what it carried.`, 'win');
-          if (Math.random() < 0.15) applyFind(Data.rollFrom(Data.FINDS[land.finds]), cell, 300);
+          monsterDrops(p, cell);
           break;
         }
         case 'tracks':
@@ -475,7 +504,6 @@ window.Gather = (() => {
       board.toast(msg || 'Match next to it.', '', 2800);
     },
     onArm: () => hud(),
-    useInstant: k => (k === 'chowder' ? '🍲 Save the chowder for a raid — drink it to give your keep 2 ♥ back.' : null),
     async afterAction(wasMove) {
       if (run.followed && !run.discovered) {
         run.discovered = true;
@@ -525,6 +553,8 @@ window.Gather = (() => {
     land.bag.forEach(t => { App.state.stockpile[t] += run.backpack[t]; });
     App.save();
     if (reason === 'raid') { App.prepareRaid(land.discover.enemy, { fromField: true }); return; }
+    const survivors = board.piecesOf('monster').length;
+    const warn = App.tripDone(land.key, { survivors, monster: land.monster });
     const rows = land.bag.map(t => `<tr><td>${label(t)}</td><td class="${run.backpack[t] ? 'pos' : ''}">+${run.backpack[t]}</td></tr>`).join('');
     const notes = [];
     if (run.marked) notes.push(`📍 You marked a ${App.ENEMY_NAME[land.discover.enemy]} on your map.`);
@@ -532,6 +562,10 @@ window.Gather = (() => {
     if (board.buried.size) notes.push(`${board.buried.size} find${board.buried.size > 1 ? 's' : ''} stayed buried.`);
     if (run.overflow) notes.push(`${run.overflow} more didn't fit in your backpack.`);
     if (run.slain) notes.push(`${land.monster.icon} ${run.slain} ${land.monster.name}${run.slain > 1 ? 's' : ''} defeated.`);
+    if (survivors && land.key !== 'ocean') notes.push(`${land.monster.icon} ${survivors} ${land.monster.name}${survivors > 1 ? 's' : ''} got away — they'll report back to their kin.`);
+    if (run.lost) notes.unshift(`💀 <b>You collapsed</b> and dropped ${run.lost} things on the way home.`);
+    notes.push(`❤️ ${App.state.hp}/${App.maxHp} after resting at camp.`);
+    if (warn) notes.unshift(warn);
     notes.unshift(`⭐ +${run.xp} XP · Level ${App.level}`);
     const rec = App.state.lands[land.key];
     rec.runs++;
@@ -540,12 +574,12 @@ window.Gather = (() => {
     if (newLv >= 10 && App.grantShard(land.key)) { notes.unshift(`💎 <b>Relic shard!</b> You've mastered the ${land.name} — its shard reveals itself to you (${App.state.shards}/5).`); Sound.sfx('rare'); }
     App.save();
     App.choose({
-      title: reason === 'moves' ? 'Out of moves' : 'Back home safe',
+      title: reason === 'collapse' ? 'You collapsed!' : reason === 'moves' ? 'Out of moves' : 'Back home safe',
       html: `<table class="sum-table"><thead><tr><th></th><th>Banked</th></tr></thead><tbody>${rows}</tbody></table>
              ${run.finds.length ? `<div class="sum-spoils"><b>Finds</b><br>${run.finds.join('<br>')}</div>` : ''}
              ${notes.length ? `<p class="sum-notes">${notes.join('<br>')}</p>` : ''}`,
       buttons: [{ id: 'again', label: `${land.icon} Gather again` }, { id: 'home', label: 'Home', cls: 'alt' }],
-    }).then(c => (c === 'again' ? App.go('gather', { land: land.key }) : App.go('home')));
+    }).then(c => (c === 'again' && App.state.hp > 0 ? App.go('gather', { land: land.key }) : App.go('home')));
   }
 
   // ---------- public ----------
@@ -585,11 +619,14 @@ window.Gather = (() => {
     for (let i = 0; i < run.mon.start; i++) spawnMonster(false);
     const spots = board.tileCells().sort(() => Math.random() - 0.5).slice(0, lv.buried);
     spots.forEach(([r, c]) => board.buried.set(`${r},${c}`, Data.rollFrom(Data.FINDS[land.finds])));
-    // A bronze chest always has its Old key buried somewhere on the same board.
+    // A bronze chest's Old key is on the same board: buried, or carried by one of the monsters.
     const chest = board.piecesOf('locked')[0];
     if (chest && chest.lockTier === 1 && ![...board.buried.values()].includes('key')) {
-      const [r, c] = spots[0];
-      board.buried.set(`${r},${c}`, 'key');
+      if (Math.random() < 0.5) { const [r, c] = spots[0]; board.buried.set(`${r},${c}`, 'key'); }
+      else {
+        const m = board.piecesOf('monster')[0];
+        if (m) { m.carriesKey = true; m.label = '🗝️'; } else run.keyCarrier = true;
+      }
     }
     board.setFrame(key);
     Art.setScene(key);
