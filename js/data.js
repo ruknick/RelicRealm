@@ -342,6 +342,15 @@ window.Data = (() => {
   const ENEMY_ARMOR = { goblin: [1, 1, 2, 2], dwarf: [2, 2, 3, 3] };
   const CHEST_TIERS = { 1: 'Bronze', 2: 'Gold', 3: 'Crystal' };
 
+  // Roaming monsters on gathering boards: more of them, sooner, tougher as the land levels up.
+  const monsterPlan = L => ({
+    start: L <= 1 ? 0 : L <= 3 ? 1 : L <= 6 ? 2 : 3,      // on the board when you arrive
+    every: Math.max(3, 8 - Math.ceil(L / 2)),             // a new one every N moves
+    max: Math.min(6, 1 + Math.ceil(L / 2)),               // most on the board at once
+    hp: L < 4 ? 1 : L < 8 ? 2 : 3,
+    armor: L < 6 ? 1 : 2,                                 // Lv 6+: wood weapons bounce off
+  });
+  const PILFER_EVERY = 5;                                 // a monster left alive this long picks your pack
   const xpForLevel = L => 15 * (L - 1) * L;
   const levelFromXp = xp => { let L = 1; while (xp >= xpForLevel(L + 1)) L++; return L; };
   function levelInfo(L) {
@@ -381,6 +390,6 @@ window.Data = (() => {
   return {
     RESOURCES, ITEMS, TIER_LABEL, ARMOR_LABEL, WARD, gloveEnergy, SHARDS, SLOTS, slotOf, tierLabel, amuletPower, RARE_LAND, DURABILITY, TYPE_INFO, hardness, gearDamage, gearRefusal, matchDamage, MATCH_DMG,
     WEAPONS, weaponDamage, MAT_LABEL, FAMILY, family, RARE, RARE_INFO, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES,
-    backpackSize, landLevel, enemyTier, TIER_NAMES, ENEMY_GEAR, ENEMY_ARMOR, CHEST_TIERS, xpForLevel, levelFromXp, levelInfo, XP, MATERIAL_INFO,
+    backpackSize, landLevel, enemyTier, monsterPlan, PILFER_EVERY, TIER_NAMES, ENEMY_GEAR, ENEMY_ARMOR, CHEST_TIERS, xpForLevel, levelFromXp, levelInfo, XP, MATERIAL_INFO,
   };
 })();

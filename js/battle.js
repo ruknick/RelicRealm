@@ -4,8 +4,7 @@ window.Battle = (() => {
   const ROWS = 9;
   const COLS = 7;
   const FOG_ROWS = 4;
-  const ENEMY_EVERY = 3;
-  const MAX_MINIONS = 3;
+  // Higher ranks act more often and field more troops (see run.every / run.maxMinions).
   const STAR_CHANCE = 0.02;
   const CAP = 40;               // Siege Race soft cap: after this many moves, most damage wins
 
@@ -115,9 +114,9 @@ window.Battle = (() => {
     document.getElementById('b-moves').textContent = run.moves;
     document.getElementById('b-cap').textContent = `/${CAP}`;
     document.querySelector('#screen-battle .moves').classList.toggle('low', CAP - run.moves <= 5);
-    const left = ENEMY_EVERY - run.sinceEnemy;
+    const left = run.every - run.sinceEnemy;
     const who = run.enemy === 'dwarf' ? 'Dwarves' : 'Goblins';
-    document.getElementById('enemy').innerHTML = `${who} act in <b>${'●'.repeat(left)}${'○'.repeat(ENEMY_EVERY - left)}</b>`;
+    document.getElementById('enemy').innerHTML = `${who} act in <b>${'●'.repeat(left)}${'○'.repeat(run.every - left)}</b>`;
     document.getElementById('lootbar-text').textContent = lootText();
     document.getElementById('battle-hint').textContent = board.armedHint() || (run.keep
       ? `Break the ${run.keep.label} before they break yours! Open their loot chest first for bonus loot.`
@@ -285,7 +284,7 @@ window.Battle = (() => {
     Sound.sfx('drums');
     await board.wait(700);
     const options = ['missile', 'minion'];
-    if (board.piecesOf('minion').length >= MAX_MINIONS) options.pop();
+    if (board.piecesOf('minion').length >= run.maxMinions) options.pop();
     if (run.broken.some(([r, c]) => board.isTile(board.grid[r][c]))) options.push('rebuild', 'rebuild');
     if (run.enemy === 'dwarf') options.push('shore');
     await act(pick(options));
@@ -377,7 +376,7 @@ window.Battle = (() => {
         if (res.rubble) await act('missile');
       }
       // Their own village defenders act every few moves.
-      if (run.sinceEnemy >= ENEMY_EVERY) {
+      if (run.sinceEnemy >= run.every) {
         run.sinceEnemy = 0;
         hud();
         await enemyTurn();
@@ -487,12 +486,18 @@ window.Battle = (() => {
       tier,
       race: Camp.newAttack(enemy, false, tier),
       bag: { spoils: [], specials: [] }, won: false, lootOpened: false, ended: false, weaponsUsed: 0, told: {},
+      every: tier >= 3 ? 2 : 3, maxMinions: 2 + tier,
     };
     const hidden = cfg.layout();
     for (let r = 0; r < FOG_ROWS; r++)
       for (let c = 0; c < COLS; c++)
         board.addPiece({ ...P.fog, hidden: hidden.get(`${r},${c}`) || null }, r, c);
     board.fillEmpty();
+    // Tougher ranks already have troops standing in the open when you arrive.
+    for (let i = 0; i < tier - 1; i++) {
+      const spots = board.tileCells(r => r >= FOG_ROWS);
+      if (spots.length) { const [r, c] = pick(spots); board.addPiece(spec(cfg.minion), r, c); }
+    }
     board.renderWeapons(document.getElementById('battle-weapons'));
     board.render();
     board.scheduleHint();

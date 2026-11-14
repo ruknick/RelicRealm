@@ -23,6 +23,7 @@ window.Gather = (() => {
     coral:   { kind: 'coral',   label: '', mat: 'stone',    hp: 2, art: 'coral', toolOnly: 'pick' },
     kelp:    { kind: 'kelp',    label: '', mat: 'plant',    hp: 1, art: 'kelp', toolOnly: 'axe' },
     crab:    { kind: 'crab',    label: '', mat: 'creature', hp: 1, art: 'crab', kin: 'sea' },
+    monster: { kind: 'monster', label: '', mat: 'creature', hp: 1 },
     tracks:  { kind: 'tracks',  label: '', mat: 'other',    hp: 1, art: 'tracks' },
     rune:    { kind: 'rune',    label: '', mat: 'other',    hp: 1, art: 'rune' },
   };
@@ -39,6 +40,7 @@ window.Gather = (() => {
       growMsg: { thorn: '🌿 A thornbush sprouts up!', stump: '🌳 A tree falls — a new stump!' },
       event: { piece: 'thief', msg: '🏃 A goblin thief grabbed a sack and is running! Catch it →', loot: ['wood', 'stone', 'hide', 'food'] },
       discover: { piece: 'tracks', enemy: 'goblin', spot: '🐾 Fresh goblin tracks! Match next to them to follow.' },
+      monster: { name: 'goblin raider', art: 'goblin', icon: '👺' },
       finds: 'forest',
       hint: 'Match 3+ to gather. Wield a wood-axe for stumps & thornbushes. Oak & rarer woods sparkle among the logs.',
     },
@@ -52,6 +54,7 @@ window.Gather = (() => {
       growMsg: { boulder: '🪨 Rocks tumble from the ceiling!', vein: '✨ A new ore vein glints in the wall!' },
       event: { piece: 'cart', msg: '⛏️ A runaway ore cart! Stop it before it rolls off →', loot: ['iron', 'coal', 'stone'] },
       discover: { piece: 'rune', enemy: 'dwarf', spot: 'ᚱ A cracked rune stone… match next to it to read it.' },
+      monster: { name: 'cave goblin', art: 'gbrute', icon: '👹' },
       finds: 'mine',
       hint: 'Match ore for iron and coal. Wield a pick for boulders & veins. Silver glints in the ore, gems in the stone.',
     },
@@ -66,6 +69,7 @@ window.Gather = (() => {
     growMsg: { coral: '🪸 Coral grows over the rocks!', kelp: '🌿 A tangle of kelp washes ashore!' },
     event: { piece: 'crab', msg: '🦀 A giant crab snatched some loot! Only a weapon can stop it →', loot: ['water', 'food', 'gold'] },
     discover: null,
+    monster: { name: 'shore crab', art: 'crab', icon: '🦀', kin: 'sea' },
     finds: 'ocean',
     hint: 'Water quenches iron; fish feed your raids. Pick coral for coral, cut kelp for oysters. Pearls shimmer among the fish.',
   };
@@ -240,6 +244,54 @@ window.Gather = (() => {
     board.celebrate(cell, { icon: Art.tile(type), title: `${Data.RESOURCES[type].label} discovered!`, sub: Data.RARE_INFO[type].use, rare: true, kicker: '✦ New material ✦' });
   }
 
+  // ---------- roaming monsters ----------
+  function spawnMonster(appear = true) {
+    const spots = board.tileCells(r => r >= 1);
+    if (!spots.length) return null;
+    const [r, c] = pick(spots), M = land.monster, plan = run.mon;
+    const p = board.addPiece({ ...P.monster, hp: plan.hp, armor: plan.armor, art: M.art, kin: M.kin, name: M.name, age: 0 }, r, c, 1, appear);
+    if (appear) {
+      board.render();
+      if (!run.told.monster) {
+        run.told.monster = true;
+        board.toast(`${M.icon} A ${M.name} appears! It blocks the board and will pick your pack — tap it to swing (costs ⚡).`, 'alert', 3200);
+      } else board.toast(`${M.icon} Another ${M.name}!`, 'alert', 1400);
+    }
+    return p;
+  }
+  async function monstersAct() {
+    const mons = board.piecesOf('monster');
+    let stole = 0;
+    for (const m of mons) {
+      m.age++;
+      // Wander to a neighbouring tile now and then.
+      if (Math.random() < 0.5) {
+        const opts = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dr, dc]) => [m.r + dr, m.c + dc])
+          .filter(([r, c]) => r >= 1 && r < SIZE && c >= 0 && c < SIZE && board.isTile(board.grid[r][c]));
+        if (opts.length) { const [r, c] = pick(opts); board.movePiece(m, r, c); }
+      }
+      // Left alone too long, it rummages through your pack.
+      if (m.age % Data.PILFER_EVERY === 0) {
+        const have = land.bag.filter(t => run.backpack[t] > 0);
+        if (have.length) {
+          const t = pick(have);
+          run.backpack[t]--;
+          board.float([m.r, m.c], `−1 ${label(t)}`, 'loss');
+          stole++;
+        }
+      }
+    }
+    if (stole) { board.toast(`${land.monster.icon} ${stole > 1 ? `${stole} ${land.monster.name}s` : `The ${land.monster.name}`} rummaged through your pack!`, 'alert', 2000); Sound.sfx('nope'); }
+    // More arrive as the land grows wilder.
+    if (++run.sinceMon >= run.mon.every && mons.length < run.mon.max) {
+      run.sinceMon = 0;
+      spawnMonster(true);
+      Sound.sfx('drums');
+      await board.wait(350);
+    }
+    if (mons.length) board.render();
+  }
+
   // ---------- events ----------
   function spawnOn(kind, filter, msg, kindOfToast = 'alert') {
     const spots = board.tileCells(filter);
@@ -340,7 +392,7 @@ window.Gather = (() => {
         if (p.ore && p.ore !== 'iron') discoverMaterial(p.ore, cell);
       }
       if (!board.hurt(p, dmg)) return;
-      xp(p.kind === 'thief' || p.kind === 'cart' || p.kind === 'crab' ? Data.XP.chase : p.kind === 'tracks' || p.kind === 'rune' ? Data.XP.discover : Data.XP.obstacle);
+      xp(p.kind === 'thief' || p.kind === 'cart' || p.kind === 'crab' || p.kind === 'monster' ? Data.XP.chase : p.kind === 'tracks' || p.kind === 'rune' ? Data.XP.discover : Data.XP.obstacle);
       switch (p.kind) {
         case 'stump':
           {
@@ -388,6 +440,14 @@ window.Gather = (() => {
           run.eventPiece = null;
           Sound.sfx('victory');
           break;
+        case 'monster': {
+          run.slain++;
+          const n = 1 + Math.floor(Math.random() * 2) + (p.armor >= 2 ? 1 : 0);
+          for (let i = 0; i < n; i++) addToBackpack(pick(land.bag.filter(t => t !== 'gold')), 1, cell, i * 180);
+          board.toast(`${land.monster.icon} ${land.monster.name[0].toUpperCase() + land.monster.name.slice(1)} defeated! It dropped what it carried.`, 'win');
+          if (Math.random() < 0.15) applyFind(Data.rollFrom(Data.FINDS[land.finds]), cell, 300);
+          break;
+        }
         case 'tracks':
         case 'rune': run.followed = true; break;
         default: break;
@@ -424,6 +484,7 @@ window.Gather = (() => {
       }
       if (wasMove) {
         await moveEvent();
+        await monstersAct();
         if (!run.eventSpawned && run.movesMade >= EVENT_AFTER && Math.random() < EVENT_CHANCE) {
           run.eventSpawned = true;
           run.eventPiece = spawnOn(land.event.piece, (r, c) => c === 0 && r >= 1, land.event.msg);
@@ -470,6 +531,7 @@ window.Gather = (() => {
     else if (run.discoverSpawned && !run.discovered) notes.push('You left something unexplored…');
     if (board.buried.size) notes.push(`${board.buried.size} find${board.buried.size > 1 ? 's' : ''} stayed buried.`);
     if (run.overflow) notes.push(`${run.overflow} more didn't fit in your backpack.`);
+    if (run.slain) notes.push(`${land.monster.icon} ${run.slain} ${land.monster.name}${run.slain > 1 ? 's' : ''} defeated.`);
     notes.unshift(`⭐ +${run.xp} XP · Level ${App.level}`);
     const rec = App.state.lands[land.key];
     rec.runs++;
@@ -509,6 +571,7 @@ window.Gather = (() => {
       moves: MOVES, movesMade: 0, backpack: Object.fromEntries(land.bag.map(t => [t, 0])), overflow: 0, fullWarned: false,
       finds: [], told: {}, eventPiece: null, eventSpawned: false,
       discoverSpawned: false, followed: false, discovered: false, marked: false, ended: false,
+      mon: Data.monsterPlan(landLv), sinceMon: 0, slain: 0,
     };
     // Obstacles first (rows 1-6), then tiles, then buried finds under random tiles.
     const used = new Set();
@@ -519,6 +582,7 @@ window.Gather = (() => {
       addObstacle(kind, r, c);
     }
     board.fillEmpty();
+    for (let i = 0; i < run.mon.start; i++) spawnMonster(false);
     const spots = board.tileCells().sort(() => Math.random() - 0.5).slice(0, lv.buried);
     spots.forEach(([r, c]) => board.buried.set(`${r},${c}`, Data.rollFrom(Data.FINDS[land.finds])));
     // A bronze chest always has its Old key buried somewhere on the same board.

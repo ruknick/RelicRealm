@@ -92,6 +92,21 @@ Tap **🧍 Gear** under any board, or **🧍 Warrior** on the map. It opens a fi
   - **Tidestone** (sapphire, tide): matches of 4+ and chains give +1 more ⚡; blasts +1 more.
   - **Emberstone** (ruby, fury): when a match strikes a monster beside it, your weapon hits for +1.
 
+## 👺 Roaming monsters (gathering boards)
+Each land has its own: **goblin raiders** (Forest), **cave goblins** (Iron Hills) and **shore crabs** (Coast, which coral spears hit harder).
+- Monsters take up board spaces, so matches and ⚡ are harder to come by. They wander, and one left alive for 5 moves picks 1 item from your backpack.
+- Kill them with weapon swings (⚡) or matches beside them. Each drops 1–3 items, sometimes a find.
+- The land's level sets how many there are and how tough:
+
+| Land Lv | At start | New one every | Max | HP | Armor |
+|---|---|---|---|---|---|
+| 1 | 0 | 7 moves | 2 | 1 | wood |
+| 4 | 2 | 6 | 3 | 2 | wood |
+| 6 | 2 | 5 | 4 | 2 | iron (wood bounces) |
+| 10 | 3 | 3 | 6 | 3 | iron |
+
+**Raids scale by rank too:** at rank 3+ the defenders act every 2 moves instead of 3. Each rank allows one more troop on the board (3 → 6), and troops are already standing in the open when you arrive.
+
 ## Wood & ore tiers
 - **Wood:** Pine → **Oak** → **Ironwood** → **Elderwood**. **Ore:** iron → **silver** → **starsilver**.
 - Rare tiles appear rarely at first, then more often as the land's level rises. They match with their family (oak matches pine).
