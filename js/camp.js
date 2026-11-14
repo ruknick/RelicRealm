@@ -16,8 +16,8 @@ window.Camp = (() => {
   };
   // How each attacker plays your board.
   const AI = {
-    goblin: { name: 'Goblins', march: 5, miss: 0.25, big: 0.15, iron: 0.15 },
-    dwarf:  { name: 'Dwarves', march: 6, miss: 0.2, big: 0.3, iron: 0.5 },
+    goblin: { name: 'Goblins', march: 7, miss: 0.3, big: 0.12 },
+    dwarf:  { name: 'Dwarves', march: 8, miss: 0.25, big: 0.25 },
   };
 
   const budget = L => Math.min(16, 5 + L);
@@ -47,7 +47,8 @@ window.Camp = (() => {
       if (!p.trap && !p.rune && Math.abs(p.r - rs.r) + Math.abs(p.c - rs.c) === 1) p.hp++;
     }));
     pieces.forEach(p => { p.max = p.hp; });
-    const chest = { kind: 'chest', r: L.chest[0], c: L.chest[1], hp: 1, max: 1, mat: 'wood', alive: true };
+    // Iron-banded loot chest: once opened it stays put and still blocks the way.
+    const chest = { kind: 'chest', r: L.chest[0], c: L.chest[1], hp: 2, max: 2, mat: 'wood', hard: 1, alive: true, opened: false };
     const keep = { kind: 'keep', hp: KEEP_HP, max: KEEP_HP, alive: true };
     // Higher-ranked raiders hit harder and arrive sooner.
     const base = AI[enemy], t = tier - 1;
@@ -59,7 +60,7 @@ window.Camp = (() => {
 
   function blockerAt(a, r, c) {
     if (isKeep(r, c)) return a.keep;
-    if (a.chest.alive && a.chest.r === r && a.chest.c === c) return a.chest;
+    if (a.chest.r === r && a.chest.c === c) return a.chest;
     return a.pieces.find(p => p.alive && !p.trap && p.r === r && p.c === c) || null;
   }
 
@@ -116,7 +117,7 @@ window.Camp = (() => {
 
     const targets = [];
     if (touches(reach, KEEP_CELLS)) targets.push(a.keep);
-    if (a.chest.alive && touches(reach, [[a.chest.r, a.chest.c]])) targets.push(a.chest);
+    if (!a.chest.opened && touches(reach, [[a.chest.r, a.chest.c]])) targets.push(a.chest);
     a.pieces.filter(p => p.alive && !p.trap && touches(reach, [[p.r, p.c]])).forEach(p => targets.push(p));
     if (!targets.length) return say(`${P.name} search for a way in…`);
 
@@ -140,7 +141,7 @@ window.Camp = (() => {
     let msg = `${P.name} hit ${name}${dmg > 1 ? ' hard' : ''}!`;
     if (t.spiked) { a.skip++; msg += ' 🔱 The spikes hurt them (−1 move).'; }
     if (t.hp <= 0) {
-      t.alive = false;
+      if (t === a.chest) t.opened = true; else t.alive = false;
       if (t === a.keep) { a.done = true; msg = `💥 ${P.name} broke your keep!`; }
       else if (t === a.chest) {
         const got = steal(a);
@@ -167,7 +168,7 @@ window.Camp = (() => {
     for (let r = 0; r < BASE_ROWS + 1; r++) for (let c = 0; c < COLS; c++) {
       let cls = 'mm';
       if (isKeep(r, c)) cls += a.keep.alive ? ' keep' : ' broken';
-      else if (a.chest.r === r && a.chest.c === c) cls += a.chest.alive ? ' chest' : ' broken';
+      else if (a.chest.r === r && a.chest.c === c) cls += a.chest.opened ? ' broken' : ' chest';
       else {
         const p = a.pieces.find(x => x.r === r && x.c === c);
         if (p) cls += p.alive ? (p.trap ? ' trap' : ` ${p.mat}`) : ' broken';

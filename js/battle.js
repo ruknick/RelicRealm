@@ -417,7 +417,7 @@ window.Battle = (() => {
     if (gainXp) gained.push(`⭐ +${gainXp} XP`);
     if (rankUp) gained.push(rankUp);
     if (newLv) gained.push(`🎉 <b>Level ${newLv}!</b> ${App.levelPerks(newLv)}`);
-    const stars = [won, run.lootOpened, a.chest.alive];
+    const stars = [won, run.lootOpened, !a.chest.opened];
     const title = won ? 'Victory!' : reason === 'retreat' ? 'You retreated' : 'Defeated!';
     const line = reason === 'win' ? `You broke their keep in <b>${run.moves}</b> moves — they had only reached ${Math.round(myDmg * 100)}% of yours.`
       : reason === 'lost' ? `${a.P.name} broke your keep after <b>${a.moves}</b> moves — before you broke theirs. They plundered your storehouse.`

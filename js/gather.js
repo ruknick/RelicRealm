@@ -213,7 +213,7 @@ window.Gather = (() => {
     const chest = board.piecesOf('locked')[0];
     const canOpen = chest && ['key', 'goldkey', 'crystalkey'].some(k => App.state.inventory[k] > 0 && Data.WEAPONS[k].unlock >= chest.lockTier);
     document.getElementById('g-finds').textContent = `🔍 ${board.buried.size} buried` +
-      (chest ? (canOpen ? ' · 🔑 you can open the chest!' : chest.lockTier > 1 ? ` · 🔒 needs a ${Data.CHEST_TIERS[chest.lockTier]} key` : keyHere ? ' · 🔒 its key is buried here' : '') : '');
+      (chest ? (canOpen ? ' · 🔑 can open!' : chest.lockTier > 1 ? ` · 🔒 ${Data.CHEST_TIERS[chest.lockTier]} key` : keyHere ? ' · 🔒 key buried' : '') : '');
     const ev = run.eventPiece && !run.eventPiece.gone;
     document.getElementById('gather-hint').textContent = board.armedHint() ||
       (ev ? ({ forest: 'Catch the thief: only a weapon can stop it!', mine: 'Stop the cart: match next to it or hit it!', ocean: 'Stop the crab: only a weapon can!' }[land.key])
@@ -227,7 +227,7 @@ window.Gather = (() => {
   }
 
   // First time you collect a rare material: a big reveal explaining what it's for.
-  function discover(type, cell) {
+  function discoverMaterial(type, cell) {
     const st = App.state;
     if (st.seen[type]) return;
     st.seen[type] = true;
@@ -313,7 +313,7 @@ window.Gather = (() => {
           const t = board.grid[r][c];
           if (!t || !Data.FAMILY[t.type]) return;
           addToBackpack(t.type, 1, [r, c], 150);
-          discover(t.type, [r, c]);
+          discoverMaterial(t.type, [r, c]);
         });
       }
     },
@@ -332,7 +332,7 @@ window.Gather = (() => {
       if (p.kind === 'vein') {
         const mined = Math.min(dmg, p.hp) * ((Data.ITEMS[w]?.tier || 1) >= 2 ? 2 : 1);
         addToBackpack(p.ore || 'iron', mined, cell);
-        if (p.ore && p.ore !== 'iron') discover(p.ore, cell);
+        if (p.ore && p.ore !== 'iron') discoverMaterial(p.ore, cell);
       }
       if (!board.hurt(p, dmg)) return;
       xp(p.kind === 'thief' || p.kind === 'cart' || p.kind === 'crab' ? Data.XP.chase : p.kind === 'tracks' || p.kind === 'rune' ? Data.XP.discover : Data.XP.obstacle);
@@ -342,7 +342,7 @@ window.Gather = (() => {
             const big = (Data.ITEMS[w]?.tier || 1) >= 2, wood = p.wood || 'wood';
             addToBackpack(wood, big ? 5 : 3, cell);
             board.toast(`🪓 ${big ? 'Clean chop' : 'Stump chopped'}! +${big ? 5 : 3} ${Data.RESOURCES[wood].label}`);
-            if (wood !== 'wood') discover(wood, cell);
+            if (wood !== 'wood') discoverMaterial(wood, cell);
           }
           break;
         case 'thorn':

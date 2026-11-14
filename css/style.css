@@ -856,3 +856,46 @@ details.debug { margin-top: 12px; }
 .g-oak, .g-ironwood, .g-elderwood { --g1: #4f8a3a; --g2: #24461c; }
 .g-silver, .g-starsilver { --g1: #c97a3c; --g2: #6e3a18; }
 .g-charcoal { --g1: #5a4a40; --g2: #2a201a; } .g-steel { --g1: #6d7a88; --g2: #37414c; }
+.energy { flex: none; display: grid; grid-template-columns: auto 8px; grid-template-rows: auto auto; align-items: center; column-gap: 4px;
+  background: rgba(10,14,11,.7); border: 2px solid #c9a227; border-radius: 10px; padding: 2px 6px; min-width: 46px; }
+.en-bolt { font-size: .9rem; line-height: 1; }
+.en-num { grid-column: 1; font-size: 1rem; color: #ffe08a; line-height: 1; text-align: center; }
+.en-bar { grid-row: 1 / span 2; grid-column: 2; width: 8px; height: 32px; border-radius: 4px; background: rgba(255,255,255,.12); display: flex; align-items: flex-end; overflow: hidden; }
+.en-bar i { display: block; width: 100%; background: linear-gradient(0deg, #f2a51a, #ffe86a); transition: height .25s; }
+.energy.full { box-shadow: 0 0 10px rgba(255,220,90,.6); }
+.energy.pulse { animation: enPulse .35s; }
+.energy.short { animation: shake .3s; border-color: #e04b4b; }
+@keyframes enPulse { 50% { transform: scale(1.08); } }
+
+/* ---------- Natural, muted tile sockets (realistic look) ---------- */
+.gem.art {
+  background: radial-gradient(circle at 50% 35%, var(--g1), var(--g2) 85%);
+  border-radius: 18%;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), inset 0 -6px 10px rgba(0,0,0,.45), inset 0 3px 6px rgba(255,255,255,.08), 0 2px 4px rgba(0,0,0,.5);
+}
+.gem.art svg { width: 92%; height: 92%; filter: drop-shadow(0 3px 2px rgba(0,0,0,.5)); }
+.g-wood, .g-oak, .g-ironwood, .g-elderwood { --g1: #4a6a3c; --g2: #1f2e18; }
+.g-stone     { --g1: #5d6672; --g2: #2a3038; }
+.g-hide      { --g1: #7a4c30; --g2: #3a2014; }
+.g-berries   { --g1: #4e3d66; --g2: #221a30; }
+.g-leaves    { --g1: #5f7436; --g2: #2a3418; }
+.g-ore, .g-silver, .g-starsilver { --g1: #7a5034; --g2: #352214; }
+.g-coal      { --g1: #4d4a5c; --g2: #201e28; }
+.g-gravel    { --g1: #85775e; --g2: #463d2e; }
+.g-bones     { --g1: #5e5448; --g2: #2c2620; }
+.g-gold      { --g1: #6e2030; --g2: #300c14; }
+.g-water     { --g1: #2d5f90; --g2: #12283f; }
+.g-fish      { --g1: #2c6e6e; --g2: #123434; }
+.g-driftwood { --g1: #7a6a4e; --g2: #3c3224; }
+.g-sand      { --g1: #a08e66; --g2: #5e5038; }
+.g-seaweed   { --g1: #215055; --g2: #0c2427; }
+.g-charcoal  { --g1: #4a3e36; --g2: #1e1814; }
+.g-steel     { --g1: #5d6a78; --g2: #262d36; }
+.g-star.art  { background: radial-gradient(circle at 50% 40%, #fff3c4, #c9a227 45%, #5a3a10 100%); }
+.tile.sel .gem.art { box-shadow: 0 0 0 3px #ffe9a8, 0 0 14px rgba(255,230,150,.6), inset 0 -6px 10px rgba(0,0,0,.45); }
+/* Info line above the board stays on one line */
+.subbar { flex-wrap: nowrap; gap: 6px; font-size: .74rem; }
+.subbar span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+#g-level { flex: none; }
+#g-finds { flex: 1; text-align: right; }
+#g-level .xpbar { width: 40px; }

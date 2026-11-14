@@ -4,6 +4,9 @@
 window.Board = (() => {
   const ABORT = Symbol('abort');
   const DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+  const ENERGY_MAX = 10;
+  // Cost of a tap-swing: heavier steel and bows cost more.
+  const swingCost = it => (it.tier >= 3 ? 3 : 2) + (it.type === 'bow' ? 1 : 0);
   const WILD = 'star';
   let nextId = 1;
 
@@ -76,6 +79,7 @@ window.Board = (() => {
       this.pieces = [];
       this.buried = new Map();
       this.showBuried = false;
+      this.energy = 3;                 // ⚡ built by matching, spent on tap-swings
       this.grid = Array.from({ length: this.rows }, () => Array(this.cols).fill(null));
     }
 
@@ -398,9 +402,25 @@ window.Board = (() => {
         const it = Data.ITEMS[k];
         return `<button class="spec${this.armed === k ? ' armed' : ''}" data-w="${k}" title="${it.name}">${it.art ? Art.piece(it.art) : it.icon}<b>${inv[k]}</b></button>`;
       }).join('');
-      this.tray.innerHTML = `<div class="gearbar">${slot('weapon', '⚔️', 'Weapon')}${slot('tool', '🛠️', 'Tool')}<div class="specials">${specials}</div></div>`;
+      this.tray.innerHTML = `<div class="gearbar"><div class="energy" title="Energy: make matches to charge, tap a monster or obstacle to swing">
+          <span class="en-bolt">⚡</span><b class="en-num">${this.energy}</b><span class="en-bar"><i style="height:${this.energy / ENERGY_MAX * 100}%"></i></span></div>
+        ${slot('weapon', '⚔️', 'Weapon')}${slot('tool', '🛠️', 'Tool')}<div class="specials">${specials}</div></div>`;
       this.tray.querySelectorAll('.gslot').forEach(b => { b.onclick = () => this.pickGear(b.dataset.slot); });
       this.tray.querySelectorAll('.spec').forEach(b => { b.onclick = () => this.arm(b.dataset.w); });
+    }
+
+    gainEnergy(n) {
+      const before = this.energy;
+      this.energy = Math.min(ENERGY_MAX, this.energy + n);
+      if (this.energy !== before) this.renderEnergy(true);
+    }
+    renderEnergy(pulse = false) {
+      const el = this.tray && this.tray.querySelector('.energy');
+      if (!el) return;
+      el.querySelector('.en-num').textContent = this.energy;
+      el.querySelector('.en-bar i').style.height = (this.energy / ENERGY_MAX * 100) + '%';
+      el.classList.toggle('full', this.energy >= ENERGY_MAX);
+      if (pulse) { el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
     }
 
     // Choose which weapon / tool to wield.
@@ -456,6 +476,15 @@ window.Board = (() => {
       const G = Data.ITEMS[g.id];
       const dmg = Data.gearDamage(g.id, p);
       if (dmg <= 0) { this.toast(Data.gearRefusal(g.id, p), '', 2600); window.Sound?.sfx('nope'); return; }
+      const cost = swingCost(G);
+      if (this.energy < cost) {
+        this.toast(`⚡ Need ${cost} energy to swing — make matches to charge up (${this.energy}/${cost}).`, '', 2600);
+        window.Sound?.sfx('nope');
+        const el = this.tray && this.tray.querySelector('.energy');
+        if (el) { el.classList.remove('short'); void el.offsetWidth; el.classList.add('short'); }
+        return;
+      }
+      this.energy -= cost;
       this.busy = true;
       this.clearHint();
       let targets = [[p, dmg]];
@@ -650,6 +679,7 @@ window.Board = (() => {
           this.lineFlash(horiz, horiz ? ri.cells[0][0] : ri.cells[0][1]);
         }
         this.hooks.onMatch?.(runs, step);
+        this.gainEnergy(runs.reduce((n, ri) => n + 1 + (ri.cells.length >= 4 || step > 1 ? 1 : 0), 0) + blasts.length * 2);
         window.Sound?.sfx(blasts.length ? 'blast' : 'match', step);
         if (step >= 2) this.combo(step);
         if (blasts.length) this.toast('💥 Line blast!', 'win');

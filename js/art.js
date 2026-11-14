@@ -292,6 +292,13 @@ window.Art = (() => {
       <path d="M24 31v-4M40 31v-4" stroke="#b8341f" stroke-width="2"/><circle cx="56" cy="16" r="5" fill="#f6cd45" stroke="#9c6f06" stroke-width="1.5"/>`,
   });
   PIECES.runestone = PIECES.rune;
+  // Tougher stumps and richer veins: recoloured variants.
+  PIECES.stumpoak = PIECES.stump.replace(/#ddb072/g, '#b98a52').replace(/#b07f45/g, '#6e4018').replace(/#6b4423/g, '#3e2810').replace(/#8c5e2c/g, '#4a2a10');
+  PIECES.stumpiron = PIECES.stump.replace(/#ddb072/g, '#8a6a5a').replace(/#b07f45/g, '#3e2a22').replace(/#6b4423/g, '#2a272e').replace(/#4f3217/g, '#1c1a20').replace(/#8c5e2c/g, '#2a1a14')
+    + '<path d="M12 28c10-4 30-4 40 0" stroke="#c9d3de" stroke-opacity=".5" stroke-width="1.5" fill="none"/>';
+  PIECES.veinsilver = PIECES.vein.replace(/#ff9a3c/g, '#eef3f8').replace(/#ffbe78/g, '#ffffff');
+  PIECES.veinstar = PIECES.vein.replace(/#ff9a3c/g, '#a78bfa').replace(/#ffbe78/g, '#e6d8ff')
+    + '<path d="M52 8l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#e6d8ff"/>';
   // Chest tiers: recolour the locked chest.
   PIECES.lockedgold = PIECES.locked.replace(/#98a1ab/g, '#f2c230').replace(/#6f7882/g, '#a87b0c').replace(/#7a4b22/g, '#5a2a14').replace(/#8f5a2a/g, '#6e3418').replace(/#e8c34a/g, '#fff3b0')
     + '<g fill="#fff6c0"><path d="M10 14l2-4 2 4-2 4z"/><path d="M52 10l2-4 2 4-2 4z"/></g>';
