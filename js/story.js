@@ -125,7 +125,7 @@ window.Story = (() => {
     const legacy = !has && (App.state.xp > 0 || App.state.gear.length > 3);   // a save from before characters existed
     const el = document.getElementById('screen-title');
     el.innerHTML = `<div class="title-wrap">
-        <div class="title-art">${Art.WORLD}</div>
+        <div class="title-art">${Art.WORLD.replace(/wm([A-Z])/g, 'wt$1')}</div>
         <div class="title-card">
           <div class="title-crown">👑</div>
           <h1 class="game-title">${GAME.title}</h1>

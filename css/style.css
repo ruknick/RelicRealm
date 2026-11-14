@@ -991,3 +991,14 @@ details.debug { margin-top: 12px; }
 .home-top { flex-wrap: wrap; }
 .journal-btn { font-weight: 700; background: #6a4a20 !important; color: #fff; }
 .no-stock #stockbar { display: none; }
+
+/* ---------- Parchment map labels ---------- */
+.world { border: 5px solid #3a2410; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.6), inset 0 0 0 2px #8a6a3a; background: #e8d4a6; }
+.spot { background: rgba(243,230,196,.93); border: 1.5px solid #3b2a18; border-radius: 4px; color: #2a1a0c; box-shadow: 1px 2px 0 rgba(59,42,24,.35), 0 3px 8px rgba(0,0,0,.25); padding: 2px 8px 2px 4px; }
+.spot .sp-text b { font-family: Georgia, 'Times New Roman', serif; letter-spacing: .3px; }
+.spot .sp-text small { color: #6a4a28; font-style: italic; font-family: Georgia, serif; }
+.spot.raid { border-color: #a23a1a; background: rgba(250,226,206,.95); }
+.spot.unknown { border-style: dashed; border-color: #6a5a3a; opacity: .8; }
+.spot.locked { border-color: #a23a1a; background: rgba(240,206,180,.93); }
+.spot.locked .sp-text small { color: #a23a1a; }
+.world-map .wm-site.dim { opacity: .3; filter: none; }
