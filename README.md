@@ -22,29 +22,28 @@ It's plain HTML/CSS/JS with no build step and no backend. Progress is saved in `
 | `js/sound.js` | Music and sound effects, generated in the browser (home, forest, mine, battle themes) |
 | `js/art.js` | Vector art: tiles, obstacles (ore cart, stump, thornbush…), themed board frames, scene backgrounds |
 
-## Right tool for the job
-- **Forest stumps & thornbushes:** only **axes** (Stone axe, Iron axe). Matches and other weapons do nothing.
-- **Mine boulders & ore veins:** only **pickaxes** (Stone pick, Pickaxe, Dwarven pick).
-- **Goblins & dwarves** (the thief, raid goblins, dwarf guards): only **weapons** hurt them, not matches. A keep is repaired by at most +1 per enemy turn.
-- **Locked chests:** only a key.
+## Gear: weapons, tools, specials
+The tray under every board has three areas:
+- **⚡ Energy meter** (max 10, start each board with 3). Every match line adds +1, with +1 more for a 4+ line or a chain, and +2 for each blast.
+- **Weapon slot:** monsters only. Tap a monster to swing: **2 ⚡** (3 for steel), +1 for bows. Free assist: when a match clears **next to** a monster, your weapon strikes it for free.
+- **Tool slot:** obstacles and defenses only. Wood axe for wood and plants, pick for stone and ore, hammer for anything built (walls, gates, keeps). Tap to use, which costs energy the same way.
+- **Specials row:** firepot, keys, flasks and so on, used once.
+- Tap a slot to **swap** to other gear in your pack.
 
-## Materials: why weapons matter
-Every obstacle and defense is made of something:
-- **Matches** do 1 damage to wood, stone, creatures and other pieces, and **nothing to thorns or iron**.
-- **Weapons** do damage according to what the target is made of:
+**Hardness rule:** every target has a hardness (wood 1 · iron 2 · steel 3 · bulwark 4). Damage = gear tier vs hardness: −1 → 1, equal → 2, +1 → 4, +2 → 6, +3 → 8 (swords +1). Gear 2+ tiers below the target bounces off. Matches only chip soft built things.
 
-| Weapon | Wood | Thorns | Stone | Iron | Creatures | Notes |
-|---|---|---|---|---|---|---|
-| 🏏 Club (T1) | 2 | 2 | 0 | 0 | 1 | |
-| 🪃 Sling (T1) | 1 | 1 | 1 | 1 | 1 | reaches into fog |
-| 🪓 Iron axe (T2, 3 uses) | 3 | 3 | 0 | 0 | 1 | stumps give +5 wood |
-| ⛏️ Pickaxe (T2, 3 uses) | 1 | 1 | 3 | 2 | 0 | ore veins give double iron |
-| ⚔️ Iron sword (T2, 3 uses) | 1 | 1 | 1 | 1 | 3 | 2 damage to any keep |
-| 🔥 Firepot (goblin spoil) | 2 | 2 | 0 | 0 | 1 | 3x3 area, burns fog |
-| ⚒️ Dwarven pick (dwarf spoil, 3 uses) | 2 | 2 | 9 | 9 | 1 | |
-| 🗝️ Old key (found) | – | – | – | – | – | opens locked chests and iron gates |
+**Durability:** wood 4 hits · iron 8 · steel 14 · elder 25. Gear breaks at 0, so repair it at the Workshop for half its materials.
 
-Tapping a weapon on something it can't hurt tells you so and doesn't use it up.
+## Wood & ore tiers
+- **Wood:** Pine → **Oak** → **Ironwood** → **Elderwood**. **Ore:** iron → **silver** → **starsilver**.
+- Rare tiles appear rarely at first, then more often as the land's level rises. They match with their family (oak matches pine).
+- Stumps and veins get tougher with level (oak/ironwood stumps, silver/starsilver veins) and need a better tool.
+- **Smelting:** 2 oak → 3 charcoal · 3 iron + 2 charcoal + 1 water → 1 steel.
+- Hafts need the right wood: iron gear uses oak, steel gear uses ironwood.
+
+## Enemies by rank
+- Goblins carry **wood** gear at low ranks and **iron** at high ranks. Dwarves carry **iron**, then **steel**. Their armor follows the same tiers.
+- Stone walls stop wood-armed goblins. The **steel bulwark** (hardness 4) stops almost everything.
 
 ## World map
 The home screen is a map. Tap a place and your warrior token travels there:
@@ -157,10 +156,9 @@ New players get 2 fences and a pit trap, already placed. The screen shows how ma
 - Stars: ★ win · ★ open their chest · ★ your chest stays safe.
 
 ## Workshop
-- **Tier 1 · Camp:** Club 5 wood · Sling 4 wood, 3 hide · **Stone axe** 4 wood, 3 stone (2 uses, 2 dmg) · **Stone pick** 3 wood, 4 stone (2 uses, 2 dmg)
-- **Tier 2 · Forge:** Iron axe 4 wood, 3 iron · Pickaxe 3 wood, 4 iron · Iron sword 2 hide, 5 iron, 2 coal
-- **Tools (passive, permanent):** Hatchet (+1 wood per wood match) · Skinning knife (+1 hide) · Miner's lamp (buried finds glimmer)
-- **Defenses (for Fortify, later):** Wooden fence · Stone wall · Pit trap
+- **Repair bench** at the top: worn gear back to full for half its recipe.
+- **Weapons & tools** by tier (wood / iron / steel). New gear is equipped automatically if it's better.
+- **Smelting** (charcoal, steel), **key upgrades**, **defenses** (incl. bulwark), **kit** (hatchet, knife, lamp), **dragon prep**.
 
 ## Debug (home screen)
 - Make tracks or a rune stone appear right away, or the thief or cart.
@@ -169,4 +167,4 @@ New players get 2 fences and a pit trap, already placed. The screen shows how ma
 - ⭐ +1 level.
 
 ## Not built yet
-Real PvP (needs a server), Volcano land, Tier 3+.
+Real PvP (needs a server), Deep Tunnels (dark mine + lamp), story/journal, Dragon's Lair, elder tier gear.
