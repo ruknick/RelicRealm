@@ -54,6 +54,7 @@ A hand-inked parchment map of Valdmoor, with a fogged southern edge: **Beyond th
 | `js/world.js` | World map home screen — tap a place to travel there |
 | `js/items.js` | Items screen: Special · Materials · Gear |
 | `js/hero.js` | Warrior screen: the full-body figure, gear slots, health & eating |
+| `js/boss.js` | Boss lairs: Emberwyrm (Dragon's Lair) and the Siren Queen (Siren's Grotto) |
 | `js/story.js` | Title screen, character creation, the opening tale, Journal chapters, place stories |
 | `js/camp.js` | Your camp: Fortify editor, Storehouse, grudges and the live revenge raids |
 | `js/sound.js` | Music and sound effects, generated in the browser (home, forest, mine, battle themes) |
@@ -131,6 +132,24 @@ Old keys are no longer "rare."
 - A bronze chest's key is **on the same board**: buried, or carried by a monster.
 - Random key finds are much rarer.
 
+### 🐉 Boss lairs
+Both are open from the map whenever you like, and both can be fought again (smaller rewards after the first win).
+
+**The Dragon's Lair, against Emberwyrm** (520 HP, mythic scales, hardness 4):
+- Anything below mythic does a fraction of its damage. The **Old King's Crown** dims its scales by one tier.
+- Every 4 moves it breathes fire down a column (lava, plus a burn on you), hatches **whelps**, or spreads the lava.
+- 💧 **Water flasks** douse lava in a 3x3 area, and an 🛡️ **Elderwood ward** halves the fire.
+- **First kill:** gold, gold bars, starsilver, elderwood and **dragon scales**, plus the story's ending.
+
+**The Siren's Grotto, against Nerissa the Siren Queen** (130 HP, iron-strong, a sea creature):
+- It appears once the **Sunlit Coast reaches Lv 8**.
+- Her **song** drains your ⚡, the **tide** floods tiles, her trident strikes, and **shore crabs** fight for her.
+- Coral spears hit her harder.
+- **First win:** the **Siren's Pearl** amulet (matches of 4+ heal 1 ❤️), plus pearls, coral and shells.
+
+### ✨ Mythic gear
+The **Star Anvil** (Lv 35) forges starsilver weapons and armor from **starsilver bars** (smelted at the Dwarven Forge). They are the only gear that cuts through dragon scale at full strength.
+
 ### 💎 Relic shards
 **Reach Lv 35** in the Forest, Iron Hills and Sunlit Coast, and beat the goblin and dwarf **top ranks**. Then 5 shards + 3 gold bars forge the Old King's Crown.
 
@@ -141,4 +160,4 @@ Old keys are no longer "rare."
 - ⭐ +1 level.
 
 ## Not built yet
-Real PvP (needs a server), Deep Tunnels (dark mine + lamp), Dragon's Lair, mythic-era gear, post-dragon lands (swamp giants, spiders).
+Real PvP (needs a server), Deep Tunnels (dark mine + lamp), post-dragon lands beyond the known realm (swamp giants, spiders, frost, barrows), uses for dragon scales.
