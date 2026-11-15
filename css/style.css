@@ -1302,3 +1302,20 @@ body[data-scene] .sound-btn, .sound-btn { background: var(--paper); color: var(-
 .tier-fold { width: 100%; text-align: left; margin: 4px 0 6px; padding: 9px 12px; border-radius: 6px; border: 1.5px dashed rgba(242,228,194,.35); background: rgba(28,19,11,.6); color: #d9c69c; font-family: Georgia, serif; font-size: .85rem; }
 .tier-fold small { color: #a8977a; }
 .fold-link { font-size: .72rem; margin-left: 6px; }
+
+/* ---------- Sunlit Coast, repainted ---------- */
+body[data-scene="ocean"] { background-color: #2c3e48; }
+[data-frame="ocean"] .frame {
+  background: repeating-linear-gradient(0deg, transparent 0 22px, rgba(30,24,16,.45) 22px 24px), linear-gradient(90deg, #8a8070, #a89a80 30%, #7a7060 60%, #9a8c74), #8a8070;
+  box-shadow: 0 10px 24px rgba(0,0,0,.6), inset 0 0 0 3px #4a4234, inset 0 0 18px rgba(0,0,0,.35);
+}
+[data-frame="ocean"] .board { background: radial-gradient(ellipse at 50% 20%, #3a6a6a, #1a3a3e 60%, #0e2226); }
+body[data-scene="ocean"] .hint, body[data-scene="ocean"] p.hint { color: #e6dcc4; }
+.g-water { --g1: #2a5a6a; --g2: #0e2a32; } .g-fish { --g1: #3a5a62; --g2: #16282c; }
+.g-driftwood { --g1: #6a6250; --g2: #2e2a20; } .g-sand { --g1: #8a7a5a; --g2: #3e3424; } .g-seaweed { --g1: #2e4a3a; --g2: #10221a; }
+[data-frame="ocean"] .fr-deco.tr { transform: scaleX(-1); }
+/* Workshop: drawn station & tab icons */
+.sc-icon svg { width: 32px; height: 32px; } .sc-icon { height: 32px; }
+.ctab .ti { display: inline-block; width: 20px; height: 20px; } .ctab .ti svg { width: 100%; height: 100%; }
+.si { display: inline-block; width: 1.25em; height: 1.25em; vertical-align: -.3em; } .si svg { width: 100%; height: 100%; }
+.st-big { width: 84px; height: 84px; margin: 0 auto 6px; } .st-big svg { width: 100%; height: 100%; }

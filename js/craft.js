@@ -12,7 +12,7 @@ window.Craft = (() => {
   const info = r => (r.makes ? { name: r.name, icon: r.icon, desc: r.desc } : Data.ITEMS[r.id]);
   const isKit = r => r.tier === 'kit';
   const ownedKit = r => (isKit(r) || r.id === 'crown') && st().inventory[r.id] > 0;
-  const stationName = id => `${Data.STATIONS[id].icon} ${Data.STATIONS[id].name}`;
+  const stationName = id => `<span class="si">${Art.stationArt(id)}</span> ${Data.STATIONS[id].name}`;
   const tierOf = r => (Data.ITEMS[r.id] && Data.ITEMS[r.id].tier) || (r.id === 'steel' || r.id === 'bulwark' ? 3 : r.id === 'gate' ? 2 : 1);
   const iconOf = it => (it.art ? Art.piece(it.art) : it.icon);
 
@@ -74,13 +74,13 @@ window.Craft = (() => {
   const R = () => Data.RECIPES;
   const gearOf = cls => R().filter(r => Data.ITEMS[r.id] && Data.ITEMS[r.id].gear === cls);
   const TABS = [
-    { id: 'weapon', icon: '⚔️', label: 'Weapons', sub: 'monsters only · wield one at a time', list: () => gearOf('weapon') },
-    { id: 'tool', icon: '🛠️', label: 'Tools', sub: 'obstacles & defenses only', list: () => gearOf('tool') },
-    { id: 'armor', icon: '🛡️', label: 'Armor', sub: 'wear it in 🧍 Warrior', list: () => gearOf('armor') },
-    { id: 'smelt', icon: '🔥', label: 'Smelt', sub: 'ore → bars · hide → leather', list: () => R().filter(r => r.tier === 'smelt') },
-    { id: 'food', icon: '🍲', label: 'Kitchen', sub: 'cook finer food into bigger heals', list: () => R().filter(r => r.tier === 'food') },
-    { id: 'def', icon: '🏰', label: 'Defenses', sub: 'place them in 🏰 Fortify', list: () => R().filter(r => r.defense) },
-    { id: 'other', icon: '✨', label: 'Other', sub: 'amulets · keys · kit · the Crown · dragon prep', list: () => R().filter(r => ['amulet', 'keys', 'kit', 'crown', 'prep'].includes(r.tier)) },
+    { id: 'weapon', art: 'gear:sword:2', icon: '⚔️', label: 'Weapons', sub: 'monsters only · wield one at a time', list: () => gearOf('weapon') },
+    { id: 'tool', art: 'gear:pick:2', icon: '🛠️', label: 'Tools', sub: 'obstacles & defenses only', list: () => gearOf('tool') },
+    { id: 'armor', art: 'gear:body:2', icon: '🛡️', label: 'Armor', sub: 'wear it in 🧍 Warrior', list: () => gearOf('armor') },
+    { id: 'smelt', tile: 'ironbar', icon: '🔥', label: 'Smelt', sub: 'ore → bars · hide → leather', list: () => R().filter(r => r.tier === 'smelt') },
+    { id: 'food', art: 'chowder', icon: '🍲', label: 'Kitchen', sub: 'cook finer food into bigger heals', list: () => R().filter(r => r.tier === 'food') },
+    { id: 'def', art: 'swall', icon: '🏰', label: 'Defenses', sub: 'place them in 🏰 Fortify', list: () => R().filter(r => r.defense) },
+    { id: 'other', art: 'gear:amulet:1', icon: '✨', label: 'Other', sub: 'amulets · keys · kit · the Crown · dragon prep', list: () => R().filter(r => ['amulet', 'keys', 'kit', 'crown', 'prep'].includes(r.tier)) },
   ];
   const readyCount = list => list.filter(r => canAfford(r) && !ownedKit(r)).length;
 
@@ -88,7 +88,7 @@ window.Craft = (() => {
     return `<div class="st-strip">${Data.STATION_ORDER.map(id => {
       const S = Data.STATIONS[id], built = !!st().stations[id];
       const state = built ? '✓' : stationReady(id) ? 'Build!' : `Lv ${S.lv}`;
-      return `<button class="st-chip${built ? ' built' : stationReady(id) ? ' ready' : ''}" data-st="${id}"><span class="sc-icon">${S.icon}</span><span class="sc-name">${S.name}</span><small>${state}</small></button>`;
+      return `<button class="st-chip${built ? ' built' : stationReady(id) ? ' ready' : ''}" data-st="${id}"><span class="sc-icon">${Art.stationArt(id)}</span><span class="sc-name">${S.name}</span><small>${state}</small></button>`;
     }).join('')}</div>`;
   }
   async function stationInfo(id) {
@@ -96,8 +96,8 @@ window.Craft = (() => {
     const req = [`<span class="cost ${App.level >= S.lv ? '' : 'short'}">⭐ Level ${S.lv}</span>`];
     if (S.needs) req.push(`<span class="cost ${st().enemyWins.dwarf > 0 ? '' : 'short'}">⚒️ Beat the dwarves once</span>`);
     const c = await App.choose({
-      title: `${S.icon} ${S.name}`,
-      html: `<p>${S.desc}</p>${built ? '<p class="reward">✓ Built</p>' : `<div class="r-cost" style="justify-content:center">${req.join('')}${costHtml(S.cost)}</div>`}`,
+      title: S.name,
+      html: `<div class="st-big">${Art.stationArt(id)}</div><p>${S.desc}</p>${built ? '<p class="reward">✓ Built</p>' : `<div class="r-cost" style="justify-content:center">${req.join('')}${costHtml(S.cost)}</div>`}`,
       buttons: built ? [{ id: 'ok', label: 'Close', cls: 'alt' }] : [{ id: 'build', label: 'Build', disabled: !stationReady(id) }, { id: 'ok', label: 'Close', cls: 'alt' }],
     });
     if (c === 'build') build(id);
@@ -113,7 +113,7 @@ window.Craft = (() => {
       const key = `${cls}:${t}`;
       if (locked && !open[key]) {
         const sid = rs[0].station, S = Data.STATIONS[sid];
-        return `<button class="tier-fold" data-fold="${key}">🔒 <b>${label}</b> — needs the ${S.icon} ${S.name} (Lv ${S.lv}) <small>· ${rs.length} recipe${rs.length > 1 ? 's' : ''} ▸</small></button>`;
+        return `<button class="tier-fold" data-fold="${key}">🔒 <b>${label}</b> — needs the <span class="si">${Art.stationArt(sid)}</span> ${S.name} (Lv ${S.lv}) <small>· ${rs.length} recipe${rs.length > 1 ? 's' : ''} ▸</small></button>`;
       }
       return `<div class="tier-h t${t}">${label}${locked ? ` <button class="link fold-link" data-fold="${key}">hide ▴</button>` : ''}</div>${rs.map(card).join('')}`;
     }).join('') + (() => {
@@ -125,7 +125,7 @@ window.Craft = (() => {
   function render() {
     const reps = repairList();
     const tabs = [...TABS];
-    if (reps.length) tabs.push({ id: 'repair', icon: '🔧', label: 'Repair', sub: 'mend battered armor for half its materials' });
+    if (reps.length) tabs.push({ id: 'repair', art: 'smithhammer', icon: '🔧', label: 'Repair', sub: 'mend battered armor for half its materials' });
     if (!tabs.some(t => t.id === tab)) tab = 'weapon';
     const T = tabs.find(t => t.id === tab);
     let body;
@@ -137,12 +137,12 @@ window.Craft = (() => {
       const later = Data.STATION_ORDER.map(sid => [sid, list.filter(r => !stationOk(r) && r.station === sid)]).filter(([, l]) => l.length);
       body = now.map(card).join('') + later.map(([sid, l]) => {
         const S = Data.STATIONS[sid], key = `${tab}:${sid}`;
-        return open[key] ? `<div class="tier-h">${S.icon} ${S.name} <button class="link fold-link" data-fold="${key}">hide ▴</button></div>${l.map(card).join('')}`
-          : `<button class="tier-fold" data-fold="${key}">🔒 Needs the ${S.icon} <b>${S.name}</b> (Lv ${S.lv}) <small>· ${l.length} recipe${l.length > 1 ? 's' : ''} ▸</small></button>`;
+        return open[key] ? `<div class="tier-h"><span class="si">${Art.stationArt(sid)}</span> ${S.name} <button class="link fold-link" data-fold="${key}">hide ▴</button></div>${l.map(card).join('')}`
+          : `<button class="tier-fold" data-fold="${key}">🔒 Needs the <span class="si">${Art.stationArt(sid)}</span> <b>${S.name}</b> (Lv ${S.lv}) <small>· ${l.length} recipe${l.length > 1 ? 's' : ''} ▸</small></button>`;
       }).join('') || '<p class="hint">Nothing here yet.</p>';
     }
     document.getElementById('craft-list').innerHTML = stationsStrip()
-      + `<div class="ctabs">${tabs.map(t => { const n = t.id === 'repair' ? reps.length : readyCount(t.list()); return `<button class="ctab${t.id === tab ? ' on' : ''}" data-tab="${t.id}"><span>${t.icon}</span>${t.label}${n ? `<b>${n}</b>` : ''}</button>`; }).join('')}</div>`
+      + `<div class="ctabs">${tabs.map(t => { const n = t.id === 'repair' ? reps.length : readyCount(t.list()); return `<button class="ctab${t.id === tab ? ' on' : ''}" data-tab="${t.id}"><span class="ti">${t.tile ? Art.tile(t.tile) : Art.piece(t.art)}</span>${t.label}${n ? `<b>${n}</b>` : ''}</button>`; }).join('')}</div>`
       + `<p class="tab-sub">${T.sub}</p>` + body;
     const root = document.getElementById('craft-list');
     root.querySelectorAll('.ctab').forEach(b => { b.onclick = () => { tab = b.dataset.tab; render(); }; });
@@ -275,7 +275,7 @@ window.Craft = (() => {
     App.save();
     Sound.sfx('crafted');
     const S = Data.STATIONS[id];
-    App.choose({ title: `${S.icon} ${S.name} built!`, html: `<p>${id === 'dforge' ? 'Thrain Ironbeard shows you how the dwarves fold iron and charcoal into steel. "Don\'t waste it, surface-dweller."' : S.desc}</p>`, buttons: [{ id: 'ok', label: 'To work' }] })
+    App.choose({ title: `${S.name} built!`, html: `<div class="st-big">${Art.stationArt(id)}</div><p>${id === 'dforge' ? 'Thrain Ironbeard shows you how the dwarves fold iron and charcoal into steel. "Don\'t waste it, surface-dweller."' : S.desc}</p>`, buttons: [{ id: 'ok', label: 'To work' }] })
       .then(() => render());
   }
 

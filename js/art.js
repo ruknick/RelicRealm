@@ -124,11 +124,18 @@ window.Art = (() => {
     driftwood: `<ellipse cx="32" cy="52" rx="24" ry="3" fill="#000" opacity=".25"/>
       <path d="M5 40c8-10 20-12 32-14 9-2 16-6 20-10l3 6c-6 6-14 9-22 11-11 3-21 7-29 14z" fill="url(#lgDrift)" filter="url(#fGrain)"/>
       <path d="M8 44c10-8 22-10 32-12M40 22l8-8M24 30l-4-8" stroke="#6e6556" stroke-width="2" fill="none" stroke-linecap="round" opacity=".7"/>`,
-    sand: `<g filter="url(#fGrain)"><path d="M6 46c8-6 18-8 26-6s18 6 26 2v10H6z" fill="#e8d3a2"/></g>
-      <path d="M26 30c4-6 12-6 16 0-5 5-11 5-16 0z" fill="#f6ead2" stroke="#c9a876" stroke-width="1"/><path d="M30 30h8M34 26v8" stroke="#c9a876" stroke-width="1"/>
-      <g fill="#b89a66"><circle cx="16" cy="22" r="1.6"/><circle cx="48" cy="20" r="1.4"/><circle cx="20" cy="38" r="1.2"/><circle cx="46" cy="36" r="1.4"/></g>`,
-    seaweed: `<g fill="none" stroke-linecap="round" stroke-width="5"><path d="M20 58c-6-10 6-16 0-26s6-16 2-24" stroke="#1f6a42"/><path d="M34 58c6-12-6-18 2-30 5-8-2-14 2-20" stroke="#3a9a5c"/><path d="M47 58c-4-8 5-14 0-22" stroke="#24704a"/></g>
-      <g fill="none" stroke="#bff0cf" stroke-width="1.2" opacity=".35" stroke-linecap="round"><path d="M20 50c-3-6 3-10 0-16M35 46c3-8-3-12 1-20"/></g>`,
+    sand: `<ellipse cx="32" cy="54" rx="24" ry="4" fill="#000" opacity=".25"/>
+      <g filter="url(#fGrain)"><path d="M6 50c4-12 14-18 26-18s22 6 26 18c-8 4-44 4-52 0z" fill="#d8c08a"/></g>
+      <path d="M12 46c6-3 12-3 18 0M30 42c6-3 12-3 18 0M18 52c6-2 12-2 18 0" stroke="#a88a5a" stroke-width="1" fill="none" opacity=".7"/>
+      <path d="M26 38c0-8 4-14 10-14s10 6 10 14c-4 2-16 2-20 0z" fill="#efe2c8" stroke="#8a7458" stroke-width="1"/>
+      <path d="M36 24v14M31 26l1 12M41 26l-1 12M28 30l2 8M44 30l-2 8" stroke="#a8906a" stroke-width=".8"/><path d="M33 22h6l-1 3h-4z" fill="#d8c8a8" stroke="#8a7458" stroke-width=".7"/>
+      <g fill="#8a7050"><circle cx="16" cy="44" r=".9"/><circle cx="50" cy="46" r="1"/><circle cx="22" cy="48" r=".7"/></g>`,
+    seaweed: `<ellipse cx="32" cy="58" rx="18" ry="3" fill="#000" opacity=".3"/>
+      <path d="M30 58C26 46 34 38 28 26S30 10 32 6" fill="none" stroke="#3a4a18" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M28 44c-10-2-16-8-18-16 8 2 14 6 18 12zM31 34c8-4 12-10 13-18-7 4-11 9-13 15zM29 22c-6-4-9-9-9-15 5 3 8 7 9 12z" fill="#6a7a2a" stroke="#2e3a10" stroke-width="1"/>
+      <path d="M36 58c4-10 0-18 6-26s2-14 4-18" fill="none" stroke="#3a4a18" stroke-width="2" stroke-linecap="round"/>
+      <path d="M40 40c8 0 13-4 15-10-7 0-12 4-15 9zM43 26c-6-2-9-6-10-12 5 2 8 6 10 11z" fill="#7a8a32" stroke="#2e3a10" stroke-width="1"/>
+      <g fill="#a8a040" stroke="#4a4a14" stroke-width=".6"><circle cx="30" cy="36" r="2.4"/><circle cx="33" cy="20" r="2"/><circle cx="41" cy="33" r="2"/></g>`,
     star: `<g filter="url(#fGlow)"><path d="M32 7l7 14.4 15.8 2.2-11.5 11 2.8 15.7L32 42.8 17.9 50.3l2.8-15.7L9.2 23.6 25 21.4z" fill="#fff" stroke="#fff6c0" stroke-width="2" stroke-linejoin="round"/></g>`,
     charcoal: `<ellipse cx="32" cy="54" rx="20" ry="3" fill="#000" opacity=".35"/><path d="M12 42 16 24 30 16 48 20 54 38 40 50 20 50Z" fill="url(#rgCoal)"/>
       <path d="M20 30l8 6 6-4 8 6M24 42l6-4" stroke="#ff6a2a" stroke-width="1.6" fill="none" opacity=".85"/>`,
@@ -466,9 +473,9 @@ window.Art = (() => {
       <path d="M16 36c0-2 4-4 16-4s16 2 16 4v14c0 4-3 6-8 6H24c-5 0-8-2-8-6z" fill="#d89a48"/><path d="M16 36c4 2 28 2 32 0" stroke="#f2c27a" stroke-width="2" fill="none"/>
       <g fill="#f4e2c0"><circle cx="24" cy="42" r="2.2"/><circle cx="36" cy="45" r="2"/><circle cx="30" cy="49" r="1.6"/></g><circle cx="41" cy="40" r="1.8" fill="#6a9a3a"/>
       <rect x="25" y="2" width="14" height="7" rx="2" fill="#8a5a2c" stroke="#4a2a10"/><path d="M20 22c-2 4-3 9-3 13" stroke="#fff" stroke-width="2.4" opacity=".6" fill="none" stroke-linecap="round"/>`,
-    coral: `<path d="M8 54c2-8 10-12 24-12s22 4 24 12z" fill="#6f6a62"/>
-      <g fill="none" stroke-linecap="round" stroke-width="5"><path d="M24 46V30l-6-8M24 34l7-8M24 26v-8" stroke="#ff7a8a"/><path d="M40 46V24l6-8M40 30l-7-6M46 16l4-6" stroke="#ff9eb0"/><path d="M32 46V36" stroke="#e85d75"/></g>
-      <g fill="#ffd1d8"><circle cx="18" cy="21" r="2.4"/><circle cx="31" cy="25" r="2.4"/><circle cx="24" cy="17" r="2.4"/><circle cx="50" cy="9" r="2.4"/><circle cx="33" cy="23" r="2"/></g>`,
+    coral: `<path d="M8 54c2-8 10-12 24-12s22 4 24 12z" fill="#4a4e4a"/>
+      <g fill="none" stroke-linecap="round" stroke-width="5"><path d="M24 46V30l-6-8M24 34l7-8M24 26v-8" stroke="#c8645a"/><path d="M40 46V24l6-8M40 30l-7-6M46 16l4-6" stroke="#d8806a"/><path d="M32 46V36" stroke="#a84a44"/></g>
+      <g fill="#f0c8b0"><circle cx="18" cy="21" r="2.4"/><circle cx="31" cy="25" r="2.4"/><circle cx="24" cy="17" r="2.4"/><circle cx="50" cy="9" r="2.4"/><circle cx="33" cy="23" r="2"/></g>`,
     kelp: `<ellipse cx="32" cy="40" rx="26" ry="18" fill="#2a5a3a"/>
       <g fill="none" stroke-linecap="round" stroke-width="4"><path d="M10 40c10-14 20 10 30-6s14 8 16 2" stroke="#4f8a3a"/><path d="M12 48c12-10 18 6 28-4s12 2 14-2" stroke="#6aa84f"/><path d="M16 30c8-6 14 4 22-2s10-4 12 0" stroke="#3d7a32"/></g>
       <circle cx="34" cy="40" r="4" fill="#ffe680"/><path d="M34 34v-2M34 48v-2M28 40h-2M42 40h-2" stroke="#fff3b0" stroke-width="2" stroke-linecap="round"/>`,
@@ -683,6 +690,31 @@ window.Art = (() => {
     return TALL[kind] ? svg(TALL[kind], '0 0 192 128') : WIDE[kind] ? svg(WIDE[kind], '0 0 192 64') : PIECES[kind] ? svg(PIECES[kind]) : '';
   };
 
+
+  // ---------- crafting stations (no emoji) ----------
+  const K = '#2a1a0c';
+  const anvil = (top, glow = '') => `<ellipse cx="32" cy="58" rx="22" ry="3" fill="#000" opacity=".35"/>${glow}
+      <path d="M22 54h20l-3-8H25z" fill="#3a3e44" stroke="#14161a" stroke-width="1"/><path d="M27 46h10v-8H27z" fill="#4a5058" stroke="#14161a" stroke-width="1"/>
+      <path d="M8 26h40c4 0 8 2 10 6H46l-4 6H22l-4-6z" fill="url(#${top})" stroke="#14161a" stroke-width="1.3" stroke-linejoin="round"/>
+      <path d="M8 26c-4 0-6 2-6 4h16z" fill="url(#${top})" stroke="#14161a" stroke-width="1.1"/><path d="M12 28h34" stroke="#fff" stroke-width="1" opacity=".5"/>`;
+  const STATION_ART = {
+    workbench: `<ellipse cx="32" cy="58" rx="24" ry="3" fill="#000" opacity=".35"/>
+      <path d="M6 26h52v7H6z" fill="#b8844c" stroke="${K}" stroke-width="1.2"/><path d="M6 26h52" stroke="#e2b77c" stroke-width="1.4"/>
+      <path d="M10 33v22M54 33v22" stroke="#7a5428" stroke-width="4" stroke-linecap="round"/><path d="M11 46h42" stroke="#7a5428" stroke-width="3"/>
+      <path d="M20 26l14-14 4 4-12 10z" fill="#c9cfd6" stroke="#4a5058" stroke-width=".9"/><path d="M34 12l6-4 2 3-4 5z" fill="#7a5428"/>
+      <path d="M40 24h12v-4H40z" fill="#8a5a30" stroke="${K}" stroke-width=".8"/>`,
+    smelter: `<ellipse cx="32" cy="59" rx="22" ry="3" fill="#000" opacity=".35"/>
+      <path d="M12 56V24c0-8 9-14 20-14s20 6 20 14v32z" fill="url(#rgStone)" stroke="#2a3038" stroke-width="1.3"/>
+      <g stroke="#4a5058" stroke-width=".9" fill="none" opacity=".8"><path d="M12 32h40M12 42h40M22 24v8M38 24v8M18 32v10M32 32v10M46 32v10M24 42v14M40 42v14"/></g>
+      <path d="M22 56V44a10 10 0 0 1 20 0v12z" fill="#2a1408" stroke="#14161a" stroke-width="1.1"/>
+      <path d="M26 56c-1-6 3-8 3-12 3 3 2 6 4 7 1-3 3-4 3-7 3 4 3 8 2 12z" fill="#ff8a2a" filter="url(#fGlow)"/><path d="M29 56c0-3 2-4 3-7 1 3 3 4 2 7z" fill="#ffe08a"/>
+      <path d="M28 10V4h8v6" fill="#5a5f68" stroke="#2a3038" stroke-width="1"/>`,
+    forge: anvil('lgIron', '<ellipse cx="32" cy="26" rx="18" ry="6" fill="#ff8a2a" opacity=".25"/>') + `<path d="M30 20l4-8 3 2-4 7z" fill="#ff9a3a" opacity=".85"/><circle cx="40" cy="16" r="1.4" fill="#ffd060"/><circle cx="26" cy="15" r="1.1" fill="#ffd060"/>`,
+    dforge: anvil('lgSteel') + `<g stroke="#7fd4ff" stroke-width="1.4" fill="none" opacity=".85" filter="url(#fGlow)"><path d="M26 30v6M26 31l3 2-3 2M33 30v6l3-3M39 30l3 3-3 3"/></g>
+      <path d="M14 12l8-8 8 8M22 4v10M38 14l6-6 6 6" stroke="#8a9097" stroke-width="2.4" fill="none" stroke-linecap="round"/>`,
+    staranvil: anvil('lgStar', '<circle cx="32" cy="22" r="20" fill="#a78bfa" opacity=".2"/>') + `<path d="M32 4l2.4 6 6.4.6-4.8 4.2 1.6 6.2L32 17.6 26.4 21l1.6-6.2-4.8-4.2 6.4-.6z" fill="#fff6c4" filter="url(#fGlow)"/>`,
+  };
+  const stationArt = id => STATION_ART[id] ? svg(STATION_ART[id]) : '';
   // ---------- board frames ----------
   const FRAME_ART = {
     leafTL: svg(`<path d="M6 6c18 0 30 8 34 22-14 2-30-6-34-22z" fill="#4f8a2a"/><path d="M6 6c4 18 14 30 26 34 2-14-8-28-26-34z" fill="#3d7322"/>
@@ -701,11 +733,14 @@ window.Art = (() => {
       <path d="M30 31c-3-3-2-7 0-10 2 3 3 7 0 10z" fill="#fff1b8"/><path d="M21 38h18l-3 4H24z" fill="#3b3b3b"/>`, '0 0 60 60'),
     rocks: svg(`<path d="M2 60c2-10 8-14 14-12 3-6 10-7 14-2 5-5 12-3 14 3 4-2 10 0 12 11z" fill="#5c544c"/>
       <path d="M16 48c3-6 10-7 14-2-6 2-10 6-12 12z" fill="#7a7168"/><path d="M42 52l4-3 3 4z" fill="#ef8a3c"/><path d="M8 56l3-2 2 3z" fill="#7fdcff"/>`, '0 0 60 60'),
-    starfish: svg(`<path d="M30 6l6 16 17 1-13 11 5 17-15-9-15 9 5-17L7 23l17-1z" fill="#ff8a5a"/><g fill="#ffd2b8"><circle cx="30" cy="16" r="1.6"/><circle cx="30" cy="26" r="1.6"/><circle cx="42" cy="26" r="1.4"/><circle cx="18" cy="26" r="1.4"/><circle cx="24" cy="38" r="1.4"/><circle cx="36" cy="38" r="1.4"/></g>`, '0 0 60 60'),
-    shells: svg(`<path d="M6 54c0-12 8-20 18-20s18 8 18 20z" fill="#f4d9c6"/><g stroke="#d9a98c" stroke-width="1.6"><path d="M24 34v20M14 38l6 16M34 38l-6 16M8 46l12 8M40 46l-12 8"/></g>
-      <path d="M40 58c2-8 8-12 14-10 4 2 4 8 0 10z" fill="#ffd6e0"/><path d="M44 56c1-3 4-5 7-4" stroke="#e8a8b8" stroke-width="1.4" fill="none"/>`, '0 0 60 60'),
-    anchor: svg(`<circle cx="30" cy="10" r="5" fill="none" stroke="#5a6470" stroke-width="3.5"/><path d="M30 15v38M20 24h20" stroke="#5a6470" stroke-width="4" stroke-linecap="round"/>
-      <path d="M10 38c2 10 10 15 20 15s18-5 20-15" stroke="#5a6470" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M6 40l6-4 2 7zM54 40l-6-4-2 7z" fill="#5a6470"/>`, '0 0 60 60'),
+    starfish: svg(`<path d="M32 8l5 16 16 2-13 9 5 16-13-10-13 10 5-16-13-9 16-2z" fill="#c9805a" stroke="#6a3a22" stroke-width="1.2" stroke-linejoin="round"/>
+      <g fill="#e8b890" opacity=".8"><circle cx="32" cy="20" r="1"/><circle cx="32" cy="27" r="1.2"/><circle cx="42" cy="28" r="1"/><circle cx="22" cy="28" r="1"/><circle cx="37" cy="38" r="1"/><circle cx="27" cy="38" r="1"/></g>`),
+    shells: svg(`<path d="M8 56c0-12 6-20 14-20s14 8 14 20z" fill="#e2d4bc" stroke="#7a6a52" stroke-width="1.1"/><path d="M22 36v20M14 40l4 16M30 40l-4 16" stroke="#9a8a70" stroke-width=".9"/>
+      <path d="M36 58c2-8 8-12 14-10 4 2 6 6 4 10z" fill="#6a7a80" stroke="#2a3438" stroke-width="1"/><g fill="#c8d0c8"><circle cx="42" cy="54" r="1.6"/><circle cx="48" cy="52" r="1.3"/><circle cx="46" cy="56" r="1"/></g>`),
+    rope: svg(`<g fill="none" stroke-linecap="round"><path d="M12 30c0-10 8-18 18-18s18 8 18 18-8 18-18 18" stroke="#5a4020" stroke-width="7"/>
+      <path d="M12 30c0-10 8-18 18-18s18 8 18 18-8 18-18 18" stroke="#b8935a" stroke-width="5"/>
+      <path d="M14 24l4 2M18 17l3 3M25 13l1 4M33 12l-1 4M41 15l-2 3M46 22l-3 2M48 30h-4M46 38l-3-2M40 45l-2-3" stroke="#6a4a24" stroke-width="1.2"/></g>
+      <path d="M30 48v12" stroke="#5a4020" stroke-width="6" stroke-linecap="round"/><path d="M30 48v12" stroke="#b8935a" stroke-width="4" stroke-linecap="round"/>`),
     crystals: svg(`<path d="M14 60l6-26 6 26z" fill="#6ec6ff"/><path d="M20 34l6 26h-6z" fill="#3a8fd0"/>
       <path d="M26 60l4-16 4 16z" fill="#a8e2ff"/><path d="M34 60l7-30 7 30z" fill="#58b4f0"/><path d="M41 30l7 30h-7z" fill="#2f7cc0"/>`, '0 0 60 60'),
   };
@@ -722,7 +757,7 @@ window.Art = (() => {
         <div class="fr-deco bl">${A.rocks}</div><div class="fr-deco br">${A.crystals}</div>`;
     }
     if (scene === 'ocean') {
-      return `<div class="fr-deco tl">${A.starfish}</div><div class="fr-deco tr">${A.anchor}</div>
+      return `<div class="fr-deco tl">${A.rope}</div><div class="fr-deco tr">${A.rope}</div>
         <div class="fr-deco bl">${A.shells}</div><div class="fr-deco br">${A.starfish}</div>`;
     }
     if (scene === 'goblin') return `<div class="stakes">${'<i></i>'.repeat(18)}</div>`;
@@ -748,10 +783,20 @@ window.Art = (() => {
       ${Array.from({ length: 16 }, (_, i) => `<path d="M${i * 26} 0 l12 ${30 + (i * 17) % 40} l12 ${-(30 + (i * 17) % 40)}z" fill="#1b1612"/>`).join('')}
       ${Array.from({ length: 10 }, (_, i) => `<circle cx="${(i * 47) % 400}" cy="${80 + (i * 61) % 200}" r="1.6" fill="#7fdcff" opacity=".5"/>`).join('')}</svg>`),
     ocean: enc(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice">
-      <circle cx="320" cy="60" r="34" fill="#ffe9a8" opacity=".55"/>
-      <path d="M0 230 Q50 215 100 230 T200 230 T300 230 T400 230 V300 H0z" fill="#1d5f8a" opacity=".8"/>
-      <path d="M0 255 Q50 240 100 255 T200 255 T300 255 T400 255 V300 H0z" fill="#16486b"/>
-      <path d="M0 280 Q50 268 100 280 T200 280 T300 280 T400 280 V300 H0z" fill="#e8d3a2" opacity=".5"/></svg>`),
+      <defs><linearGradient id="oSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c3e48"/><stop offset=".55" stop-color="#6a7a78"/><stop offset="1" stop-color="#b8aa8a"/></linearGradient>
+      <linearGradient id="oSea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a6a6e"/><stop offset="1" stop-color="#1a3238"/></linearGradient>
+      <radialGradient id="oSun" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#f4dca0" stop-opacity=".8"/><stop offset="1" stop-color="#f4dca0" stop-opacity="0"/></radialGradient></defs>
+      <rect width="400" height="300" fill="url(#oSky)"/>
+      <circle cx="300" cy="150" r="70" fill="url(#oSun)"/><circle cx="300" cy="150" r="14" fill="#f6e2b0" opacity=".85"/>
+      <g fill="#c8c0a8" opacity=".25"><ellipse cx="90" cy="90" rx="70" ry="8"/><ellipse cx="250" cy="70" rx="90" ry="6"/><ellipse cx="160" cy="120" rx="60" ry="5"/></g>
+      <path d="M0 170 L30 150 L55 160 L80 138 L104 158 L130 166 L130 180 H0z" fill="#3e4a4a" opacity=".75"/>
+      <path d="M330 176 L338 130 L350 128 L356 176z M362 176 L368 150 L378 150 L382 176z" fill="#3a4444" opacity=".85"/>
+      <path d="M60 158 v-26 h6 v26z" fill="#d8d0c0"/><path d="M58 132 h10 l-2 -6 h-6z" fill="#8a3a2a"/><circle cx="63" cy="128" r="3" fill="#ffe8a0"/><path d="M63 128 L170 112 L170 144z" fill="#ffe8a0" opacity=".12"/>
+      <rect y="176" width="400" height="124" fill="url(#oSea)"/>
+      <path d="M260 178 h80 l-10 3 h-60z" fill="#f6e2b0" opacity=".45"/><path d="M270 186 h60 l-8 2 h-44z" fill="#f6e2b0" opacity=".3"/><path d="M280 194 h40 l-6 2 h-28z" fill="#f6e2b0" opacity=".2"/>
+      <g fill="none" stroke="#9ab8b4" stroke-width="1.2" opacity=".35">${Array.from({ length: 14 }, (_, i) => `<path d="M${(i * 61) % 400} ${200 + (i * 37) % 90} q8 -4 16 0 t16 0"/>`).join('')}</g>
+      <g fill="none" stroke="#2a3438" stroke-width="1.6" stroke-linecap="round" opacity=".7"><path d="M150 60q6-5 12 0q6-5 12 0"/><path d="M196 80q4-3 8 0q4-3 8 0"/></g>
+      <path d="M0 286 Q60 272 130 284 T260 282 T400 286 V300 H0z" fill="#8a7a5a" opacity=".9"/></svg>`),
     goblin: enc(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice">
       ${Array.from({ length: 30 }, (_, i) => `<path d="M${i * 14} 300 v-${40 + (i * 13) % 25} l6 -10 l6 10 v${40 + (i * 13) % 25}z" fill="#1d120a"/>`).join('')}</svg>`),
     dwarf: enc(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice">
@@ -915,5 +960,5 @@ window.Art = (() => {
   }
 
   const any = k => tile(k) || piece(k);
-  return { injectDefs, WORLD, tile, piece, any, frame, setScene, hasPiece: k => !!PIECES[k] || !!WIDE[k] || !!TALL[k] };
+  return { injectDefs, WORLD, tile, piece, any, stationArt, frame, setScene, hasPiece: k => !!PIECES[k] || !!WIDE[k] || !!TALL[k] };
 })();
