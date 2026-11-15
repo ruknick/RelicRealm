@@ -216,12 +216,20 @@ window.Art = (() => {
       <path d="M18 22l3-5 3 5zM22 24l3-5 3 5z" fill="#c8b890" stroke="#5a4020" stroke-width=".7"/><path d="M34 40q3-2 6 0t6 0" fill="none" stroke="#4a7a8a" stroke-width="1"/>`;
   // A relic shard: a glowing crystal splinter in a broken gold setting.
   // A dwarf rune fragment: a broken piece of carved stone tablet, runes faintly glowing.
-  TILES.runescrap = `<ellipse cx="32" cy="57" rx="22" ry="3" fill="#000" opacity=".35"/>
-      <path d="M10 14l20-4 8 6 16-2-2 16 4 10-6 14-18 2-8-4-12 2 2-14-6-10z" fill="url(#rgStone)" stroke="#2a3038" stroke-width="1.3"/>
-      <path d="M38 16l-4 10 6 8-4 10" fill="none" stroke="#2a3038" stroke-width="1" opacity=".6"/>
-      <g filter="url(#fGlow)" stroke="#7fd4ff" stroke-width="1.8" fill="none" stroke-linecap="round" opacity=".9">
-        <path d="M18 20v14M18 20l5 4-5 4 6 6"/><path d="M28 24v12M28 24l4 3M28 30l4 3"/><path d="M42 24v12l5-6"/><path d="M20 42l6 4 6-4M34 44h8"/></g>
-      <path d="M12 16l18-4" stroke="#eef2f6" stroke-width="1.2" opacity=".6"/>`;
+  TILES.runescrap = `<defs>
+        <linearGradient id="tRune" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b8b2a6"/><stop offset=".55" stop-color="#8a847a"/><stop offset="1" stop-color="#5a554e"/></linearGradient>
+        <linearGradient id="tRuneEdge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6a655c"/><stop offset="1" stop-color="#3a3630"/></linearGradient></defs>
+      <ellipse cx="32" cy="57" rx="22" ry="3.2" fill="#000" opacity=".35"/>
+      <path d="M12 16l10-5 14 1 6 6-2 6 7 2 4 8-3 14-12 4-16-1-9-5-2-14z" fill="url(#tRuneEdge)" transform="translate(1.5 3)"/>
+      <path d="M12 16l10-5 14 1 6 6-2 6 7 2 4 8-3 14-12 4-16-1-9-5-2-14z" fill="url(#tRune)" stroke="#3a3630" stroke-width="1.2" stroke-linejoin="round" filter="url(#fGrain)"/>
+      <path d="M12 16l10-5 14 1" fill="none" stroke="#e2ddd2" stroke-width="1.4" opacity=".7" stroke-linecap="round"/>
+      <path d="M42 18l-2 6 7 2" fill="none" stroke="#4a463e" stroke-width="1" opacity=".8"/><path d="M30 46l3 5M46 38l4 1" stroke="#5a554e" stroke-width=".8" opacity=".7"/>
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <g stroke="#2a2620" stroke-width="2.6"><path d="M19 21v17M19 24l6-4M19 30l6-4"/><path d="M31 21v17M31 21l5 4-5 4 6 9"/><path d="M42 31l5 4-5 4-5-4z M37 43l5-4M47 43l-5-4"/></g>
+        <g stroke="#d8d2c6" stroke-width=".9" opacity=".75" transform="translate(.9 1.1)"><path d="M19 21v17M19 24l6-4M19 30l6-4"/><path d="M31 21v17M31 21l5 4-5 4 6 9"/><path d="M42 31l5 4-5 4-5-4z"/></g>
+        <g stroke="#7fd4ff" stroke-width="1" opacity=".5" filter="url(#fGlow)"><path d="M19 21v17M19 24l6-4M19 30l6-4"/><path d="M31 21v17M31 21l5 4-5 4 6 9"/><path d="M42 31l5 4-5 4-5-4z M37 43l5-4M47 43l-5-4"/></g>
+      </g>
+      <g fill="#4a463e" opacity=".5"><circle cx="24" cy="44" r=".8"/><circle cx="16" cy="40" r=".6"/><circle cx="38" cy="15" r=".7"/><circle cx="48" cy="46" r=".6"/></g>`;
   // A fragment of the Wayfarer's Chart: dark vellum, gold ink, stars and an unknown coast.
   TILES.chartfrag = `<defs><radialGradient id="tChart" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="#4a3e6e"/><stop offset=".7" stop-color="#2a2244"/><stop offset="1" stop-color="#16122a"/></radialGradient></defs>
       <ellipse cx="32" cy="57" rx="22" ry="3" fill="#000" opacity=".35"/>
