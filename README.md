@@ -179,6 +179,15 @@ The **Bounty board** (on the map under your quest) always has three jobs, such a
 ### ✨ Mythic gear
 The **Star Anvil** (Lv 35) forges starsilver weapons and armor from **starsilver bars** (smelted at the Dwarven Forge). They are the only gear that cuts through dragon scale at full strength.
 
+### 🗺️ Maps
+| Map | Looks like | Found in | Leads to |
+|---|---|---|---|
+| **Goblin map scraps** | torn parchment with a red X | the Whispering Wood (finds, goblin raiders) | 3 reveal a goblin village |
+| **Dwarf rune fragments** | broken stone tablet with glowing runes | the Iron Hills (finds, cave goblins) | 3 reveal a dwarf stronghold |
+| **Wayfarer's Chart** (rare, 7 fragments) | dark vellum in gold ink with stars and an unknown coast | every boss's first defeat (25% on repeats), crystal chests (35%), gold chests (8%), very rare deep finds | **Beyond the Known Realm** |
+
+The Items screen and the Beyond seal on the map show how much of the chart you've pieced together.
+
 ### 💎 Relic shards
 **Reach Lv 35** in the Forest, Iron Hills and Sunlit Coast, and beat the goblin and dwarf **top ranks**. Then 5 shards + 3 gold bars forge the Old King's Crown.
 

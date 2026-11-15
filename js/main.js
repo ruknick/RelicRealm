@@ -28,6 +28,7 @@ window.App = (() => {
       revenge: null,                         // { enemy, trips } — a war party on its way
       sinceRevenge: 99,                      // trips since the last revenge raid
       bossWins: {},                          // times each boss has been beaten
+      chart: 0,                              // fragments of the Wayfarer's Chart found
       seen: {},                          // rare materials already discovered
       profile: null,                     // { name, origin, look }
       story: { chapter: 0, flags: {}, places: {}, introSeen: false },
@@ -64,6 +65,7 @@ window.App = (() => {
         revenge: s.revenge || null,
         sinceRevenge: s.sinceRevenge ?? 99,
         bossWins: s.bossWins || {},
+        chart: s.chart || 0,
         seen: s.seen || {},
         starterGear: !!s.starterGear,
         debug: { ...base.debug, ...(s.debug || {}) },
@@ -247,8 +249,17 @@ window.App = (() => {
   }
 
   // Special items from an enemy loot chest: keys, map scraps, relic shards.
+  // A fragment of the Wayfarer's Chart. Returns a line about how far along it is.
+  function grantChart() {
+    if (state.chart >= Data.CHART_PIECES) { state.stockpile.gold += 10; save(); return 'You already hold the whole chart — this one sells for 10 gold.'; }
+    state.chart++;
+    save();
+    return state.chart >= Data.CHART_PIECES ? '✦ The Wayfarer\'s Chart is whole! It shows the way beyond the known realm.'
+      : `${state.chart}/${Data.CHART_PIECES} pieces of the Wayfarer's Chart`;
+  }
+
   function grantSpecial(k, enemy) {
-    const info = Data.FIND_INFO[k];
+    const info = Data.FIND_INFO[k === 'scrap' && enemy === 'dwarf' ? 'runescrap' : k];
     if (k === 'key') state.inventory.key++;
     else if (k === 'nugget') state.stockpile.gold += 3;
     else if (k === 'scrap') {
@@ -447,7 +458,7 @@ window.App = (() => {
 
   return {
     ENEMY_NAME, grantSpecial, addXP, bountyEvent: (id, n) => Bounty.event(id, n), levelPerks, get level() { return level(); }, boot, go, save, newGame, tripDone, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
-    addGear, gearCount, equip, unequip, wear, captureWeapon, recoverWeapons, grantShard, heal, hurtPlayer, eatFood, eatMeal, foodTotal, spendFood, get maxHp() { return maxHp(); },
+    addGear, gearCount, equip, unequip, wear, captureWeapon, recoverWeapons, grantShard, grantChart, heal, hurtPlayer, eatFood, eatMeal, foodTotal, spendFood, get maxHp() { return maxHp(); },
     get state() { return state; },
   };
 })();

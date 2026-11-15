@@ -317,6 +317,7 @@ window.Boss = (() => {
       Object.entries(first ? cfg.firstReward : cfg.reward).forEach(([k, n]) => { s.stockpile[k] += n; gained.push(`+${n} ${Data.RESOURCES[k].label}`); });
       if (first && cfg.firstItem) { App.addGear(cfg.firstItem); gained.push(`✨ <b>${Data.ITEMS[cfg.firstItem].name}</b> — ${Data.ITEMS[cfg.firstItem].desc}`); }
       if (kind === 'dragon') s.story.flags.dragonSlain = true;
+      if (first || Math.random() < 0.25) gained.push(`✦ <b>Wayfarer's Chart fragment</b> — ${App.grantChart()}`);
       App.bountyEvent?.(`boss:${kind}`);
       xp = cfg.xp[first ? 0 : 1];
     }

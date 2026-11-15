@@ -1272,3 +1272,8 @@ body[data-scene] .sound-btn, .sound-btn { background: var(--paper); color: var(-
 .g-honey { --g1: #6a4a14; --g2: #2c1e06; }
 .gem.art.g-mushroom::after { display: none; }
 .gem.art.g-mushroom { background: radial-gradient(circle at 50% 40%, var(--g1), var(--g2)); }
+
+.chart-mosaic { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; justify-content: center; }
+.chart-mosaic .cm { width: 34px; height: 34px; border-radius: 6px; display: grid; place-items: center; background: #2a2440; color: #6a6090; font-weight: 800; border: 1px solid #14102a; }
+.chart-mosaic .cm.got { background: radial-gradient(circle, #3a3466, #1a1636); box-shadow: 0 0 8px rgba(255,214,120,.45); }
+.chart-mosaic .cm svg { width: 100%; height: 100%; }

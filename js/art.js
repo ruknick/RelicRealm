@@ -215,6 +215,23 @@ window.Art = (() => {
       <path d="M43 17l6 6M49 17l-6 6" stroke="#a0281a" stroke-width="2.2" stroke-linecap="round"/>
       <path d="M18 22l3-5 3 5zM22 24l3-5 3 5z" fill="#c8b890" stroke="#5a4020" stroke-width=".7"/><path d="M34 40q3-2 6 0t6 0" fill="none" stroke="#4a7a8a" stroke-width="1"/>`;
   // A relic shard: a glowing crystal splinter in a broken gold setting.
+  // A dwarf rune fragment: a broken piece of carved stone tablet, runes faintly glowing.
+  TILES.runescrap = `<ellipse cx="32" cy="57" rx="22" ry="3" fill="#000" opacity=".35"/>
+      <path d="M10 14l20-4 8 6 16-2-2 16 4 10-6 14-18 2-8-4-12 2 2-14-6-10z" fill="url(#rgStone)" stroke="#2a3038" stroke-width="1.3"/>
+      <path d="M38 16l-4 10 6 8-4 10" fill="none" stroke="#2a3038" stroke-width="1" opacity=".6"/>
+      <g filter="url(#fGlow)" stroke="#7fd4ff" stroke-width="1.8" fill="none" stroke-linecap="round" opacity=".9">
+        <path d="M18 20v14M18 20l5 4-5 4 6 6"/><path d="M28 24v12M28 24l4 3M28 30l4 3"/><path d="M42 24v12l5-6"/><path d="M20 42l6 4 6-4M34 44h8"/></g>
+      <path d="M12 16l18-4" stroke="#eef2f6" stroke-width="1.2" opacity=".6"/>`;
+  // A fragment of the Wayfarer's Chart: dark vellum, gold ink, stars and an unknown coast.
+  TILES.chartfrag = `<defs><radialGradient id="tChart" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="#4a3e6e"/><stop offset=".7" stop-color="#2a2244"/><stop offset="1" stop-color="#16122a"/></radialGradient></defs>
+      <ellipse cx="32" cy="57" rx="22" ry="3" fill="#000" opacity=".35"/>
+      <path d="M8 12l12-3 6 4 12-4 18 4-3 10 4 8-5 16-14-2-6 5-14-3-9 2 3-14-4-10z" fill="url(#tChart)" stroke="#c9a227" stroke-width="1.3"/>
+      <g stroke="#e8c050" fill="none" stroke-width=".9" opacity=".9">
+        <circle cx="22" cy="28" r="9"/><path d="M22 17v22M11 28h22M15 21l14 14M29 21 15 35" stroke-width=".5"/>
+        <path d="M34 40c4-6 10-4 12-10s6-6 8-4" stroke-width="1.2"/><path d="M36 44q4-3 8 0t8 0" stroke-width=".7" opacity=".7"/></g>
+      <path d="M22 18l2 7 6 3-6 3-2 7-2-7-6-3 6-3z" fill="#ffd86a"/>
+      <g fill="#fff6c4" filter="url(#fGlow)"><circle cx="42" cy="16" r="1.4"/><circle cx="48" cy="22" r="1"/><circle cx="38" cy="24" r=".9"/><circle cx="12" cy="44" r="1"/></g>
+      <path d="M42 16l6 6-10 2" stroke="#fff6c4" stroke-width=".5" fill="none" opacity=".7"/>`;
   TILES.relicshard = `<ellipse cx="32" cy="57" rx="18" ry="3" fill="#000" opacity=".3"/>
       <g filter="url(#fGlow)"><path d="M32 6l10 18-4 26-6 6-6-6-4-26z" fill="url(#lgStar)" stroke="#2a1a5a" stroke-width="1.2"/></g>
       <path d="M32 6v50M22 24h20M32 6l-4 44M32 6l6 44" stroke="#fff" stroke-width=".7" opacity=".55" fill="none"/>
@@ -412,15 +429,14 @@ window.Art = (() => {
       <path d="M8 34c6-4 12-2 16-4M40 30c6 2 10 0 16 4" stroke="#7a9a3a" stroke-width="3" fill="none" stroke-linecap="round"/>`,
   });
   // An old blacksmith's hammer: forged cross-peen head, wedge, ash handle with a leather grip.
-  PIECES.smithhammer = `<ellipse cx="32" cy="58" rx="18" ry="3" fill="#000" opacity=".3"/>
-      <path d="M17 55L41 20" stroke="#2a1608" stroke-width="7.5" stroke-linecap="round"/><path d="M17 55L41 20" stroke="url(#lgHaft2)" stroke-width="5.5" stroke-linecap="round"/>
-      <path d="M19.6 51.2l3.4-5M22.4 47.2l3.4-5M25.2 43.2l3.4-5" stroke="#5a3414" stroke-width="3.2" stroke-linecap="round"/>
-      <path d="M19.6 51.2l3.4-5M22.4 47.2l3.4-5M25.2 43.2l3.4-5" stroke="#8a5a30" stroke-width="1.6" stroke-linecap="round"/>
-      <path d="M28 12l10-6 18 13-6 9-3-2-4 5-7-5 3-5z" fill="url(#lgIron)" stroke="#16181c" stroke-width="1.3" stroke-linejoin="round"/>
-      <path d="M50 28l6-9 3 2-6 9z" fill="#4a5058" stroke="#16181c" stroke-width="1.1"/>
-      <path d="M28 12l-6 8 7 5 3-5z" fill="#3a3e44" stroke="#16181c" stroke-width="1.1"/><path d="M22 20l2-7 4-1" stroke="#16181c" stroke-width="1" fill="none"/>
-      <path d="M38 8l14 10" stroke="#c9d1da" stroke-width="1.4" opacity=".7"/><path d="M39 23l3 2" stroke="#16181c" stroke-width="1.6"/>
-      <g fill="#2a2e34" opacity=".6"><circle cx="44" cy="14" r=".8"/><circle cx="35" cy="13" r=".7"/><circle cx="47" cy="20" r=".7"/></g>`;
+  PIECES.smithhammer = `<ellipse cx="32" cy="59" rx="15" ry="2.4" fill="#000" opacity=".3"/>
+      <g transform="translate(4 6) rotate(-35 30 30) scale(.86)">
+        <rect x="28.8" y="20" width="6.4" height="40" rx="3" fill="#2a1608"/><rect x="29.8" y="20" width="4.4" height="40" rx="2" fill="url(#lgHaft2)"/>
+        <rect x="29" y="44" width="6" height="13" rx="2" fill="#5a3414" stroke="#2a1608" stroke-width=".8"/><path d="M29.2 47.5h5.6M29.2 51h5.6M29.2 54.5h5.6" stroke="#2a1608" stroke-width=".7" opacity=".7"/>
+        <path d="M17 9h10l2 2h6l2-2h8c3 0 6 2.5 9 5.5-3 3-6 5.5-9 5.5h-8l-2-2h-6l-2 2H17z" fill="url(#lgIron)" stroke="#14161a" stroke-width="1.3" stroke-linejoin="round"/>
+        <rect x="12" y="6.5" width="6" height="16" rx="1.4" fill="#4a5058" stroke="#14161a" stroke-width="1.1"/>
+        <path d="M19 12h8M37 12h8" stroke="#d6dde5" stroke-width="1.1" opacity=".75"/>
+      </g>`;
   Object.assign(PIECES, {
     whelp: `<path d="M8 30c-6-10 2-18 10-14l6 8z" fill="#7a1e14" stroke="#2a0806"/><path d="M56 30c6-10-2-18-10-14l-6 8z" fill="#7a1e14" stroke="#2a0806"/>
       <ellipse cx="32" cy="40" rx="15" ry="13" fill="#b0301c" stroke="#2a0806" stroke-width="1.4"/><path d="M24 44c4 4 12 4 16 0" stroke="#ffb070" stroke-width="2" fill="none"/>

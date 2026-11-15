@@ -177,8 +177,10 @@ window.Gather = (() => {
       case 'lostclub': App.addGear('baxe1'); break;
       case 'sling': App.addGear('bow1'); break;
       case 'key': st.inventory.key++; break;
+      case 'chart': detail = App.grantChart(); break;
+      case 'runescrap':
       case 'scrap': {
-        const enemy = land.discover ? land.discover.enemy : 'goblin';
+        const enemy = id === 'runescrap' ? 'dwarf' : 'goblin';
         st.scraps[enemy]++;
         detail = `${st.scraps[enemy]}/3 to a ${App.ENEMY_NAME[enemy]}`;
         if (st.scraps[enemy] >= 3) {
@@ -193,7 +195,7 @@ window.Gather = (() => {
     App.save();
     run.finds.push(`${info.icon} ${info.name}`);
     if (id === 'key' && board.piecesOf('locked').some(c => c.lockTier === 1)) detail = 'Now tap 🗝️ Old key, then the locked chest!';
-    board.celebrate(cell, { icon: info.art ? Art.any(info.art) : info.icon, title: `${info.name}!`, sub: detail || info.desc, rare: id === 'shard' || id === 'key' });
+    board.celebrate(cell, { icon: info.art ? Art.any(info.art) : info.icon, title: `${info.name}!`, sub: detail || info.desc, rare: id === 'shard' || id === 'chart' });
     xp(Data.XP.find);
     board.renderWeapons();
     board.renderPieces();
@@ -277,7 +279,7 @@ window.Gather = (() => {
     }
     board.toast(`${M.icon} ${name} defeated! It dropped ${got.join(' & ')}.`, 'win');
     if (p.carriesKey) applyFind('key', cell, 300);
-    else if (land.key !== 'ocean' && Math.random() < (land.key === 'forest' ? 0.25 : 0.15)) applyFind('scrap', cell, 300);
+    else if (land.key !== 'ocean' && Math.random() < (land.key === 'forest' ? 0.25 : 0.15)) applyFind(land.key === 'mine' ? 'runescrap' : 'scrap', cell, 300);
     if (land.key === 'forest' || land.key === 'mine') discoverMaterial('scrapiron', cell);
   }
 
@@ -469,6 +471,7 @@ window.Gather = (() => {
           board.toast(`🔓 The ${Data.CHEST_TIERS[t].toLowerCase()} chest creaks open!`, 'win');
           applyFind(Data.rollFrom([['nugget', 45], ['sling', 20], [land.discover ? 'scrap' : 'pearl', 20], ['lostclub', 15]]), cell);
           if (t >= 2) applyFind(t === 3 ? 'nugget' : Data.rollFrom([['nugget', 50], ['key', 50]]), cell);
+          if (Math.random() < (t === 3 ? 0.35 : t === 2 ? 0.08 : 0)) applyFind('chart', cell);
           if (t === 3) {
             const k = App.rollSpoil(Math.random() < 0.5 ? 'goblin' : 'dwarf');
             board.celebrate(cell, { icon: '💠', title: App.grantSpoil(k), sub: 'From the crystal chest!', rare: true });

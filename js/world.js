@@ -34,6 +34,7 @@ window.World = (() => {
         if (s.lair && Boss.unlocked(s.lair)) marks.push(`<span class="mk boss" title="boss lair">${Boss.CONFIG[s.lair].icon}</span>`);
       }
       if (s.boss) { const wins = (st.bossWins || {})[s.boss] || 0; cls += ' bossspot'; sub = wins ? `slain ×${wins}` : s.sub; }
+      if (s.id === 'beyond') sub = st.chart >= Data.CHART_PIECES ? 'the chart is whole!' : `chart ${st.chart || 0}/${Data.CHART_PIECES}`;
       if (s.locked) cls += ' locked';
       return `<button class="${cls}" data-id="${s.id}" style="left:${s.x}%;top:${s.y}%">
         <span class="sp-seal">${s.art ? Art.piece(s.art) : s.icon}</span><span class="sp-name">${s.name}</span><span class="sp-sub">${sub}${marks.length ? ' ' + marks.join('') : ''}</span></button>`;
@@ -69,8 +70,8 @@ window.World = (() => {
     if (s.locked && s.id === 'beyond') {
       App.choose({
         title: '❓ Beyond the Known Realm',
-        html: `<p class="story-text">No map goes further than this. Travellers speak of a drowned swamp where giants wade, of tunnels choked with webs, of frozen peaks and haunted barrows.</p>
-          <p class="hint">${(App.state.bossWins || {}).dragon ? 'Emberwyrm has fallen. The way beyond is opening — coming in a future update.' : 'Uncharted lands open after Emberwyrm falls.'}</p>`,
+        html: `${Items.chartHtml()}<p class="story-text">No map goes further than this. Travellers speak of a drowned swamp where giants wade, of tunnels choked with webs, of frozen peaks and haunted barrows.</p>
+          <p class="hint">${(App.state.chart || 0) >= Data.CHART_PIECES ? '✦ Your Wayfarer\'s Chart is whole — the way beyond is marked. The new lands arrive in a future update.' : 'Piece together the <b>Wayfarer\'s Chart</b> to find the way: its 7 fragments come from defeating bosses, crystal chests, and — very rarely — from digging.'}</p>`,
         buttons: [{ id: 'ok', label: 'Someday…' }],
       });
       return;

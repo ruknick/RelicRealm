@@ -291,16 +291,19 @@ window.Data = (() => {
   };
 
   // ---------- finds ----------
+  const CHART_PIECES = 7;   // fragments of the Wayfarer's Chart, the way beyond the known realm
   const FINDS = {
-    forest: [['cache', 30], ['basket', 22], ['lostclub', 10], ['scrap', 15], ['key', 3], ['nugget', 12]],
-    mine:   [['orepocket', 32], ['coalseam', 22], ['nugget', 26], ['scrap', 15], ['key', 2]],
-    ocean:  [['pearl', 26], ['barrel', 26], ['nugget', 30], ['key', 3], ['basket', 12]],
+    forest: [['cache', 30], ['basket', 22], ['lostclub', 10], ['scrap', 15], ['key', 3], ['nugget', 12], ['chart', 1]],
+    mine:   [['orepocket', 32], ['coalseam', 22], ['nugget', 26], ['runescrap', 15], ['key', 2], ['chart', 1]],
+    ocean:  [['pearl', 26], ['barrel', 26], ['nugget', 30], ['key', 3], ['basket', 12], ['chart', 1]],
   };
   const FIND_INFO = {
     cache:     { icon: '📦', name: 'Hidden cache', desc: 'Someone\'s stash — +3 supplies', art: 'cache' },
     basket:    { icon: '🧺', name: 'Food basket', desc: '+3 food', art: 'basket' },
     lostclub:  { icon: '🪓', name: 'Lost battle-axe', desc: 'A wooden battle-axe — added to your gear', art: 'gear:baxe:1' },
-    scrap:     { icon: '🗺️', name: 'Map scrap', desc: 'Collect 3 to reveal a raid target', art: 'mapscrap' },
+    scrap:     { icon: '🗺️', name: 'Goblin map scrap', desc: 'Collect 3 to find a goblin village', art: 'mapscrap' },
+    runescrap: { icon: 'ᚱ', name: 'Dwarf rune fragment', desc: 'Collect 3 to find a dwarf stronghold', art: 'runescrap' },
+    chart:     { icon: '✦', name: 'Wayfarer\'s Chart fragment', desc: 'A piece of an ancient chart of the lands beyond the known realm. Collect all 7.', art: 'chartfrag' },
     key:       { icon: '🗝️', name: 'Old key', desc: 'Opens a locked chest or iron gate', art: 'key1' },
     shard:     { icon: '💎', art: 'relicshard', name: 'Relic shard', desc: 'A piece of the Old King\'s Crown — earned by mastering a land' },
     orepocket: { icon: '⛏️', name: 'Ore pocket', desc: '+3 iron ore', art: 'orepocket' },
@@ -511,7 +514,7 @@ window.Data = (() => {
   };
 
   return {
-    RESOURCES, ITEMS, FOODS, FOOD_ORDER, TIER_LABEL, ARMOR_LABEL, gloveEnergy, STATIONS, STATION_ORDER, ERA, ERA_NAME, LAND_MAX, maxHp, strength, ATTACK, TROOP_HP, underGeared, landEra,
+    RESOURCES, ITEMS, FOODS, FOOD_ORDER, CHART_PIECES, TIER_LABEL, ARMOR_LABEL, gloveEnergy, STATIONS, STATION_ORDER, ERA, ERA_NAME, LAND_MAX, maxHp, strength, ATTACK, TROOP_HP, underGeared, landEra,
     GRUDGE_FULL, REVENGE_WARN_TRIPS, REVENGE_COOLDOWN, REVENGE_MOVES, SHARDS, SLOTS, slotOf, tierLabel, amuletPower, RARE_LAND, DURABILITY, TYPE_INFO, hardness, gearDamage, gearRefusal, matchDamage, MATCH_DMG,
     WEAPONS, weaponDamage, MAT_LABEL, FAMILY, family, RARE, RARE_INFO, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES,
     backpackSize, landLevel, enemyTier, monsterPlan, TIER_NAMES, ENEMY_GEAR, ENEMY_ARMOR, CHEST_TIERS, xpForLevel, levelFromXp, levelInfo, XP, MATERIAL_INFO,

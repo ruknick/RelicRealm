@@ -14,8 +14,9 @@ window.Items = (() => {
       html += card(itemIcon(k), n, `×${inv[k]}`, Data.ITEMS[k].desc + (k === 'key' ? ' Upgrade 2 Old keys + 6 gold → Gold key in the Workshop.' : k === 'goldkey' ? ' Upgrade 2 Gold keys + water & coal → Crystal key.' : ''), inv[k] > 0);
     });
     const pic = k => `<div class="ic-art">${Art.any(k)}</div>`;
-    html += card(pic('mapscrap'), 'Goblin map', `${st.scraps.goblin}/3`, '3 scraps reveal a goblin village on the world map.', st.scraps.goblin > 0);
-    html += card(pic('mapscrap'), 'Dwarf map', `${st.scraps.dwarf}/3`, '3 scraps reveal a dwarf stronghold on the world map.', st.scraps.dwarf > 0);
+    html += card(pic('chartfrag'), 'Wayfarer\'s Chart', `${st.chart || 0}/${Data.CHART_PIECES}`, `An ancient chart of the lands beyond the known realm, torn into 7. Bosses, crystal chests and (very rarely) deep digging give up its fragments.${chartHtml()}`, (st.chart || 0) > 0);
+    html += card(pic('mapscrap'), 'Goblin map', `${st.scraps.goblin}/3`, '3 map scraps reveal a goblin village in the Whispering Wood.', st.scraps.goblin > 0);
+    html += card(pic('runescrap'), 'Dwarf rune tablet', `${st.scraps.dwarf}/3`, '3 rune fragments reveal a dwarf stronghold in the Iron Hills.', st.scraps.dwarf > 0);
     html += card(pic('relicshard'), 'Relic shards', `${Object.keys(st.shardFrom).length}/5`, 'Each shard reveals itself to one who masters its land. 5 shards + 3 gold bars forge the Old King\'s Crown.<br>'
       + Data.SHARDS.map(x => `${st.shardFrom[x.id] ? '✅' : '⬜'} ${x.icon} ${x.how}`).join('<br>'), st.shards > 0 || st.inventory.crown > 0);
     html += card('👑', 'Old King\'s Crown', inv.crown ? '✓' : '', Data.ITEMS.crown.desc, inv.crown > 0);
@@ -74,6 +75,12 @@ window.Items = (() => {
       + group('🐉 Dragon prep', R.filter(r => r.tier === 'prep').map(r => r.id));
   }
 
+  // The Wayfarer's Chart, piece by piece: found fragments glow, missing ones are dark.
+  function chartHtml() {
+    const n = App.state.chart || 0;
+    return `<div class="chart-mosaic">${Array.from({ length: Data.CHART_PIECES }, (_, k) => `<span class="cm${k < n ? ' got' : ''}">${k < n ? Art.any('chartfrag') : '?'}</span>`).join('')}</div>`;
+  }
+
   function render() {
     document.querySelectorAll('.itab').forEach(b => {
       b.classList.toggle('on', b.dataset.tab === tab);
@@ -82,5 +89,5 @@ window.Items = (() => {
     document.getElementById('items-list').innerHTML = tab === 'special' ? special() : tab === 'materials' ? materials() : gear();
   }
 
-  return { render };
+  return { render, chartHtml };
 })();
