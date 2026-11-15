@@ -175,4 +175,4 @@ The **Star Anvil** (Lv 35) forges starsilver weapons and armor from **starsilver
 - ⭐ +1 level.
 
 ## Not built yet
-Real PvP (needs a server), Deep Tunnels (dark mine + lamp), post-dragon lands beyond the known realm (swamp giants, spiders, frost, barrows), uses for dragon scales.
+Real PvP (needs a server), Deep Tunnels (dark mine + lamp), post-dragon lands beyond the known realm (swamp giants, spiders, frost, barrows), uses for dragon scales, a sea-monster level out on the Sunlit Sea, and a hidden island off the edge of the map to discover.
