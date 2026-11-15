@@ -447,6 +447,9 @@ window.Data = (() => {
   const LAND_MAX = 35;
   const backpackSize = L => Math.min(100, 30 + 2 * (L - 1));
   const maxHp = L => 10 + 2 * Math.floor(L / 2);
+  // Energy grows with you: +1 max every 5 levels, +1 starting energy each new era.
+  const maxEnergy = L => 10 + Math.floor(L / 5);
+  const startEnergy = (L, gloves) => 3 + (ERA(L) - 1) + gloveEnergy(gloves);
   const landLevel = runs => Math.min(LAND_MAX, 1 + Math.floor(runs * 2 / 3));
   const enemyTier = wins => Math.min(4, 1 + Math.floor(wins / 2));
   const TIER_NAMES = { goblin: ['Scouts', 'Warriors', 'Raiders', 'Warband'], dwarf: ['Miners', 'Guards', 'Ironclads', 'Lords'] };
@@ -523,7 +526,7 @@ window.Data = (() => {
   };
 
   return {
-    RESOURCES, ITEMS, FOODS, FOOD_ORDER, CHART_PIECES, TIER_LABEL, ARMOR_LABEL, gloveEnergy, STATIONS, STATION_ORDER, ERA, ERA_NAME, LAND_MAX, maxHp, strength, ATTACK, TROOP_HP, underGeared, landEra,
+    RESOURCES, ITEMS, FOODS, FOOD_ORDER, CHART_PIECES, TIER_LABEL, ARMOR_LABEL, gloveEnergy, STATIONS, STATION_ORDER, ERA, ERA_NAME, LAND_MAX, maxHp, maxEnergy, startEnergy, strength, ATTACK, TROOP_HP, underGeared, landEra,
     GRUDGE_FULL, REVENGE_WARN_TRIPS, REVENGE_COOLDOWN, REVENGE_MOVES, SHARDS, SLOTS, slotOf, tierLabel, amuletPower, RARE_LAND, DURABILITY, TYPE_INFO, hardness, gearDamage, gearRefusal, matchDamage, MATCH_DMG,
     WEAPONS, weaponDamage, MAT_LABEL, FAMILY, family, RARE, RARE_INFO, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES,
     backpackSize, landLevel, enemyTier, monsterPlan, TIER_NAMES, ENEMY_GEAR, ENEMY_ARMOR, CHEST_TIERS, xpForLevel, levelFromXp, levelInfo, XP, MATERIAL_INFO,

@@ -219,6 +219,8 @@ window.App = (() => {
     const out = [];
     if (Data.maxHp(L) > Data.maxHp(L - 1)) out.push(`❤️ max health ${Data.maxHp(L)}`);
     if (Data.strength(L) > Data.strength(L - 1)) out.push(`💪 +1 weapon damage`);
+    if (Data.maxEnergy(L) > Data.maxEnergy(L - 1)) out.push(`⚡ max energy ${Data.maxEnergy(L)}`);
+    if (Data.ERA(L) > Data.ERA(L - 1)) out.push(`⚡ +1 starting energy`);
     if (Data.backpackSize(L) > Data.backpackSize(L - 1)) out.push(`🎒 backpack ${Data.backpackSize(L)}`);
     const st = Object.values(Data.STATIONS).find(s => s.lv === L && s.lv > 1);
     if (st) out.push(`${st.icon} you can now build the <b>${st.name}</b> in the Workshop`);

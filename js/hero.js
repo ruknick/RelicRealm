@@ -169,7 +169,7 @@ window.Hero = (() => {
     return `<div class="hp-line"><b>❤️ Health ${S.hp}/${mx}</b><span class="hp-wide"><i style="width:${S.hp / mx * 100}%"></i></span></div>
       <div class="eat-row">${Data.FOOD_ORDER.filter(k => S.stockpile[k] > 0).map(k => `<button class="small eat-btn" data-food="${k}" ${S.hp < mx ? '' : 'disabled'}>${Data.RESOURCES[k].label} ×${S.stockpile[k]} (+${Data.FOODS[k]})</button>`).join('') || '<span class="hint">No food in your Storehouse — gather berries or fish.</span>'}${meals}</div>
       <div><b>🛡 Armor:</b> ${worn.length ? `${worn.length} piece${worn.length > 1 ? 's' : ''} — blows that land on armored spots are softened, or turned aside by better metal` : 'none — every blow lands in full'}</div>
-      <div><b>💪 Strength:</b> +${Data.strength(L)} weapon damage (grows every 5 levels) · <b>⚡ Start energy:</b> ${3 + Data.gloveEnergy(eq('gloves'))}</div>
+      <div><b>💪 Strength:</b> +${Data.strength(L)} weapon damage (grows every 5 levels) · <b>⚡ Energy:</b> start ${Data.startEnergy(L, eq('gloves'))} · max ${Data.maxEnergy(L)}</div>
       <div><b>💎 Amulet:</b> ${eq('amulet') ? Data.ITEMS[eq('amulet').id].desc : 'none — set a gem in silver at the Workshop'}</div>
       <div class="h-est">⭐ Level ${L} · ${Data.ERA_NAME[Data.ERA(L)]} era</div>`;
   }

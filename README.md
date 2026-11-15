@@ -72,7 +72,7 @@ An antique atlas page of Valdmoor: shaded mountain ranges with snowcaps, the den
 | ✨ Mythic | 35+ | after the dragon | — |
 
 - XP needed: Lv 2 = 8, Lv 5 = 138, Lv 10 ≈ 760, Lv 20 ≈ 3,600, Lv 35 ≈ 12,300.
-- **Every level:** +max ❤️ (every 2 levels), +1 weapon damage (every 5), +2 backpack.
+- **Every level:** +max ❤️ (every 2 levels), +1 weapon damage and +1 max ⚡ (every 5), +2 backpack. Each new era also adds +1 starting ⚡ (3 → 6 by the Mythic era, plus gloves). Max ⚡ goes 10 → 17 by Lv 35.
 
 ### ⚔️ Combat
 - Weapons do **3 (wood) / 6 (iron) / 10 (steel)** damage, plus strength. Swords get +1. Hits vary ±1, and 10% are **critical** (×2).

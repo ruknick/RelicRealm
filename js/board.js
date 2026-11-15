@@ -4,7 +4,7 @@
 window.Board = (() => {
   const ABORT = Symbol('abort');
   const DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-  const ENERGY_MAX = 10;
+  const energyMax = () => Data.maxEnergy(window.App?.level || 1);
   // Cost of a tap-swing: heavier steel and bows cost more.
   // Cost of a swing: wood gear is quick (1 ⚡), iron & steel take 2; bows +1, light blades −1.
   const swingCost = it => Math.max(1, (it.tier >= 2 ? 2 : 1) + (it.type === 'bow' ? 1 : 0) - (it.light ? 1 : 0));
@@ -81,7 +81,7 @@ window.Board = (() => {
       this.pieces = [];
       this.buried = new Map();
       this.showBuried = false;
-      this.energy = 3 + Data.gloveEnergy(window.App?.state?.equip?.gloves);   // ⚡ built by matching, spent on tap-swings (gloves add more)
+      this.energy = Data.startEnergy(window.App?.level || 1, window.App?.state?.equip?.gloves);   // ⚡ built by matching, spent on tap-swings (gloves add more)
       this.grid = Array.from({ length: this.rows }, () => Array(this.cols).fill(null));
     }
 
@@ -410,7 +410,7 @@ window.Board = (() => {
         return `<button class="spec${this.armed === k ? ' armed' : ''}" data-w="${k}" title="${it.name}">${it.art ? Art.piece(it.art) : it.icon}<b>${inv[k]}</b></button>`;
       }).join('');
       this.tray.innerHTML = `<div class="gearbar"><div class="energy" title="Energy: make matches to charge, tap a monster or obstacle to swing">
-          <span class="en-bolt">⚡</span><b class="en-num">${this.energy}</b><span class="en-bar"><i style="height:${this.energy / ENERGY_MAX * 100}%"></i></span></div>
+          <span class="en-bolt">⚡</span><b class="en-num">${this.energy}</b><span class="en-bar"><i style="height:${this.energy / energyMax() * 100}%"></i></span></div>
         <div class="health${hp <= mx * 0.3 ? ' low' : ''}" title="Your health: monsters wear it down, food heals it"><span class="hp-ico">❤️</span><b class="hp-num">${hp}</b><span class="hp-bar"><i style="height:${hp / mx * 100}%"></i></span></div>
         <button class="gearbtn">${mini('weapon', '⚔️')}${mini('tool', '🛠️')}<span class="gb-label">🧍 Gear</span></button>
         <div class="specials"><button class="spec eat" title="Eat: your plainest food first (berries +2, herring +3 … kingfish +12)">🍖<b>${food}</b></button>${specials}</div></div>`;
@@ -442,15 +442,15 @@ window.Board = (() => {
 
     gainEnergy(n) {
       const before = this.energy;
-      this.energy = Math.min(ENERGY_MAX, this.energy + n);
+      this.energy = Math.min(energyMax(), this.energy + n);
       if (this.energy !== before) this.renderEnergy(true);
     }
     renderEnergy(pulse = false) {
       const el = this.tray && this.tray.querySelector('.energy');
       if (!el) return;
       el.querySelector('.en-num').textContent = this.energy;
-      el.querySelector('.en-bar i').style.height = (this.energy / ENERGY_MAX * 100) + '%';
-      el.classList.toggle('full', this.energy >= ENERGY_MAX);
+      el.querySelector('.en-bar i').style.height = (this.energy / energyMax() * 100) + '%';
+      el.classList.toggle('full', this.energy >= energyMax());
       if (pulse) { el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
     }
 
