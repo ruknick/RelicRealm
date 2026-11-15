@@ -1,20 +1,17 @@
 // World map (home screen): tap a place and your warrior travels there.
 window.World = (() => {
-  // x / y are % positions on the 360x480 map.
+  // x / y are % positions on the 360x580 map. Only the lands themselves are marked; each land's
+  // raid target and boss lair are reached from inside it.
   const SPOTS = [
-    { id: 'lair',   x: 80, y: 9.1, icon: '🐉', name: 'Dragon\'s Lair', sub: 'Emberwyrm', boss: 'dragon' },
-    { id: 'siren',  x: 84, y: 34, icon: '🧜‍♀️', name: 'Siren\'s Grotto', sub: 'the Siren Queen', boss: 'siren' },
-    { id: 'warchief', x: 28, y: 60, icon: '👺', name: 'Warchief\'s Clearing', sub: 'Grak the Warchief', boss: 'warchief' },
-    { id: 'golem',  x: 27, y: 33, icon: '🗿', name: 'Golem\'s Deep', sub: 'the Stone Golem', boss: 'golem' },
-    { id: 'mine',   x: 21, y: 15.7, icon: '⛏️', name: 'Iron Hills', sub: 'stone · iron · coal', land: 'mine' },
-    { id: 'dwarf',  x: 41, y: 24.0, icon: '⚒️', name: 'Dwarf Stronghold', raid: 'dwarf', how: 'find a ᚱ rune stone in the Iron Hills' },
-    { id: 'goblin', x: 47, y: 41.4, icon: '🔥', name: 'Goblin Village', raid: 'goblin', how: 'follow 🐾 tracks in the Forest' },
-    { id: 'forest', x: 21, y: 53.0, icon: '🌲', name: 'Forest', sub: 'wood · hide · food', land: 'forest' },
-    { id: 'ocean',  x: 76, y: 48.0, icon: '🌊', name: 'Sunlit Coast', sub: 'water · fish · driftwood', land: 'ocean' },
-    { id: 'camp',   x: 56, y: 65.4, icon: '🏰', name: 'Your Camp', sub: 'fortify', screen: 'fortify' },
-    { id: 'craft',  x: 26, y: 77.0, icon: '🔨', name: 'Workshop', sub: 'craft', screen: 'craft' },
-    { id: 'beyond', x: 33, y: 93, icon: '❓', name: 'Beyond the Known Realm', sub: 'uncharted', locked: true },
+    { id: 'lair',   x: 80, y: 10, icon: '🐉', name: 'Dragon\'s Lair', sub: 'Emberwyrm', boss: 'dragon' },
+    { id: 'mine',   x: 24, y: 17, icon: '⛏️', name: 'Iron Hills', land: 'mine', raid: 'dwarf', lair: 'golem' },
+    { id: 'forest', x: 23, y: 52, icon: '🌲', name: 'Whispering Wood', land: 'forest', raid: 'goblin', lair: 'warchief' },
+    { id: 'ocean',  x: 78, y: 46, icon: '🌊', name: 'Sunlit Coast', land: 'ocean', lair: 'siren' },
+    { id: 'camp',   x: 56, y: 66, icon: '🏰', name: 'Your Camp', sub: 'fortify', screen: 'fortify' },
+    { id: 'craft',  x: 28, y: 77, icon: '🔨', name: 'Workshop', sub: 'craft', screen: 'craft' },
+    { id: 'beyond', x: 36, y: 93, icon: '❓', name: 'Beyond the Known Realm', sub: 'uncharted', locked: true },
   ];
+  const RAID = { goblin: { icon: '🔥', name: 'Raid the goblin village', how: 'follow 🐾 tracks in the Forest' }, dwarf: { icon: '⚒️', name: 'Raid the dwarf stronghold', how: 'find a ᚱ rune stone in the Iron Hills' } };
   let travelling = false;
   const LAND_NAME = { forest: 'Forest', mine: 'Iron Hills', ocean: 'Sunlit Coast' };
   // Before a boss's lair is found, the map only has rumors.
@@ -27,28 +24,19 @@ window.World = (() => {
   function render() {
     const st = App.state;
     document.getElementById('world-map').innerHTML = Art.WORLD;
-    const map = document.getElementById('world-map');
-    map.querySelectorAll('.wm-site.goblin').forEach(e => e.classList.toggle('dim', st.marked.goblin < 1));
-    map.querySelectorAll('.wm-site.dwarf').forEach(e => e.classList.toggle('dim', st.marked.dwarf < 1));
 
     document.getElementById('world-spots').innerHTML = SPOTS.map(s => {
-      let cls = 'spot', badge = '', sub = s.sub || '';
-      if (s.land) sub = `Lv ${Data.landLevel(st.lands[s.land].runs)} · ${s.sub}`;
-      if (s.raid) {
-        const n = st.marked[s.raid];
-        const rank = Data.TIER_NAMES[s.raid][Data.enemyTier(st.enemyWins[s.raid]) - 1];
-        if (n > 0) { badge = `<span class="badge">⚔️ ${n}</span>`; sub = `${rank} · raid!`; cls += ' raid'; }
-        else { cls += ' unknown'; sub = 'not found yet'; }
+      let cls = 'spot', sub = s.sub || '';
+      const marks = [];
+      if (s.land) {
+        sub = `Lv ${Data.landLevel(st.lands[s.land].runs)}`;
+        if (s.raid && st.marked[s.raid] > 0) marks.push(`<span class="mk raid" title="raid ready">⚔️${st.marked[s.raid] > 1 ? st.marked[s.raid] : ''}</span>`);
+        if (s.lair && Boss.unlocked(s.lair)) marks.push(`<span class="mk boss" title="boss lair">${Boss.CONFIG[s.lair].icon}</span>`);
       }
-      if (s.boss) {
-        const wins = (st.bossWins || {})[s.boss] || 0;
-        const U = Boss.CONFIG[s.boss].unlock;
-        if (!Boss.unlocked(s.boss)) { cls += ' unknown'; sub = `${RUMOR[s.boss].hint} (${LAND_NAME[U.land]} Lv ${U.lv})`; }
-        else { cls += ' boss'; sub = wins ? `${s.sub} · beaten ×${wins}` : s.sub; }
-      }
+      if (s.boss) { const wins = (st.bossWins || {})[s.boss] || 0; cls += ' bossspot'; sub = wins ? `slain ×${wins}` : s.sub; }
       if (s.locked) cls += ' locked';
       return `<button class="${cls}" data-id="${s.id}" style="left:${s.x}%;top:${s.y}%">
-        <span class="sp-icon">${s.icon}</span><span class="sp-text"><b>${s.name}</b><small>${sub}</small></span>${badge}</button>`;
+        <span class="sp-seal">${s.icon}</span><span class="sp-name">${s.name}</span><span class="sp-sub">${sub}${marks.length ? ' ' + marks.join('') : ''}</span></button>`;
     }).join('');
     document.querySelectorAll('.spot').forEach(b => { b.onclick = () => travel(b.dataset.id); });
 
@@ -78,11 +66,6 @@ window.World = (() => {
     if (travelling) return;
     const s = SPOTS.find(x => x.id === id);
     const st = App.state;
-    if (s.boss && !Boss.unlocked(s.boss)) {
-      const U = Boss.CONFIG[s.boss].unlock, R = RUMOR[s.boss];
-      App.choose({ title: `${s.icon} ${R.title}`, html: `<p class="story-text">${R.text}</p><p class="hint">Reach ${LAND_NAME[U.land]} Lv ${U.lv} to find it.</p>`, buttons: [{ id: 'ok', label: 'Got it' }] });
-      return;
-    }
     if (s.locked && s.id === 'beyond') {
       App.choose({
         title: '❓ Beyond the Known Realm',
@@ -90,20 +73,6 @@ window.World = (() => {
           <p class="hint">${(App.state.bossWins || {}).dragon ? 'Emberwyrm has fallen. The way beyond is opening — coming in a future update.' : 'Uncharted lands open after Emberwyrm falls.'}</p>`,
         buttons: [{ id: 'ok', label: 'Someday…' }],
       });
-      return;
-    }
-    if (s.locked) {
-      App.choose({
-        title: '🐉 The Dragon\'s Lair',
-        html: `<p>Emberwyrm sleeps inside the fire mountain on the Old King\'s stolen gold. This is where your journey ends.</p>
-          <p class="hint">Coming next: lava that spreads across the board, dragonfire, and treasure you can't find anywhere else.</p>
-          <p>Prepare now: gather <b>💧 water</b> at the Sunlit Coast and craft <b>Water flasks</b> in the Workshop to douse the flames.</p>`,
-        buttons: [{ id: 'ok', label: 'I\'ll be ready' }],
-      });
-      return;
-    }
-    if (s.raid && st.marked[s.raid] < 1) {
-      App.choose({ title: `${s.icon} ${s.name}`, html: `<p>You haven't found one yet.</p><p class="hint">To find it: ${s.how}.</p>`, buttons: [{ id: 'ok', label: 'Got it' }] });
       return;
     }
     travelling = true;
@@ -118,11 +87,36 @@ window.World = (() => {
       hero.classList.remove('walking');
       await Story.visit(s.id);
       travelling = false;
-      if (s.land) App.go('gather', { land: s.land });
-      else if (s.raid) App.prepareRaid(s.raid);
+      if (s.land) landMenu(s);
       else if (s.boss) Boss.prepare(s.boss);
       else if (s.screen) App.go(s.screen);
     }, 750);
+  }
+
+  // Arriving at a land: gather, or (once found) raid its enemy or face its boss.
+  async function landMenu(s) {
+    const st = App.state, lv = Data.landLevel(st.lands[s.land].runs);
+    const buttons = [{ id: 'gather', label: `${s.icon} Gather here (Lv ${lv})` }];
+    const notes = [];
+    if (s.raid) {
+      const R = RAID[s.raid], rank = Data.TIER_NAMES[s.raid][Data.enemyTier(st.enemyWins[s.raid]) - 1];
+      if (st.marked[s.raid] > 0) buttons.push({ id: 'raid', label: `${R.icon} ${R.name} · ${rank}`, cls: 'danger' });
+      else notes.push(`${R.icon} <i>No ${s.raid === 'goblin' ? 'goblin village' : 'dwarf stronghold'} found yet — ${R.how}.</i>`);
+    }
+    if (s.lair) {
+      const C = Boss.CONFIG[s.lair];
+      if (Boss.unlocked(s.lair)) buttons.push({ id: 'boss', label: `${C.icon} ${C.place}`, cls: 'danger' });
+      else notes.push(`${C.icon} <i>${RUMOR[s.lair].text}</i> <small>(${LAND_NAME[s.land]} Lv ${C.unlock.lv})</small>`);
+    }
+    if (buttons.length === 1 && !st.seenLandMenu?.[s.land]) {
+      st.seenLandMenu = { ...(st.seenLandMenu || {}), [s.land]: true };
+      App.save();
+    } else if (buttons.length === 1) { App.go('gather', { land: s.land }); return; }
+    buttons.push({ id: 'back', label: 'Back to the map', cls: 'alt' });
+    const c = await App.choose({ title: `${s.icon} ${s.name}`, html: notes.length ? `<div class="land-notes">${notes.map(n => `<p>${n}</p>`).join('')}</div>` : '<p class="hint">What will you do here?</p>', buttons });
+    if (c === 'gather') App.go('gather', { land: s.land });
+    else if (c === 'raid') App.prepareRaid(s.raid);
+    else if (c === 'boss') Boss.prepare(s.lair);
   }
 
   return { render };

@@ -1243,3 +1243,21 @@ body[data-scene] .sound-btn, .sound-btn { background: var(--paper); color: var(-
 .bt-body small { color: var(--ink-soft); font-size: .74rem; }
 .bt-bar { height: 6px; border-radius: 3px; background: rgba(43,27,13,.15); overflow: hidden; }
 .bt-bar i { display: block; height: 100%; background: linear-gradient(90deg, #7a5416, var(--brass)); }
+
+/* ---------- atlas markers (map spots as seals with lettered names) ---------- */
+.world-spots .spot { background: none !important; border: none !important; box-shadow: none !important; padding: 0; flex-direction: column; gap: 0; align-items: center; transform: translate(-50%, -24%); }
+.world-spots .spot:active { transform: translate(-50%, -24%) scale(.95); }
+.sp-seal { width: 30px; height: 30px; display: grid; place-items: center; font-size: 1rem; border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #f6ead0, #d9c08e); border: 1.5px solid #3b2a18; box-shadow: 0 2px 4px rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,248,230,.6); }
+.sp-name { margin-top: 2px; font-family: Georgia, serif; font-weight: 700; font-size: .78rem; color: #2a1a0c; letter-spacing: .3px; white-space: nowrap;
+  text-shadow: 0 0 3px #f2e4c2, 0 0 3px #f2e4c2, 0 0 6px #f2e4c2; }
+.sp-sub { font-family: Georgia, serif; font-style: italic; font-size: .64rem; color: #5a3a1c; white-space: nowrap; text-shadow: 0 0 3px #f2e4c2, 0 0 3px #f2e4c2; display: flex; gap: 3px; align-items: center; }
+.sp-sub .mk { font-style: normal; font-size: .7rem; background: #8e2a1a; color: #fff; border-radius: 8px; padding: 0 4px; line-height: 1.3; text-shadow: none; }
+.sp-sub .mk.boss { background: #3b2a18; }
+.world-spots .spot.bossspot .sp-seal { background: radial-gradient(circle at 40% 35%, #f3c0a0, #a8402a); border-color: #3a0a06; }
+.world-spots .spot.locked .sp-seal { opacity: .75; border-style: dashed; }
+.world-spots .spot.locked .sp-name { color: #5a4a30; font-style: italic; }
+.land-notes p { text-align: left !important; font-size: .9rem; }
+/* your location pin sits just above the place's seal */
+.world .hero { width: 26px; height: 26px; transform: translate(-50%, -190%); }
+.world .hero span { font-size: .8rem; }

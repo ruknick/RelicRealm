@@ -585,7 +585,9 @@ window.Gather = (() => {
     rec.runs++;
     const newLv = Data.landLevel(rec.runs);
     if (newLv > run.landLv) notes.unshift(`${land.icon} <b>The ${land.name} grows wilder — now Lv ${newLv}!</b> More obstacles, tougher chests, richer finds.`);
-    if (newLv >= 10 && App.grantShard(land.key)) { notes.unshift(`💎 <b>Relic shard!</b> You've mastered the ${land.name} — its shard reveals itself to you (${App.state.shards}/5).`); Sound.sfx('rare'); }
+    Object.values(Boss.CONFIG).filter(c => c.unlock && c.unlock.land === land.key && run.landLv < c.unlock.lv && newLv >= c.unlock.lv)
+      .forEach(c => notes.unshift(`${c.icon} <b>${c.place} found!</b> Tap the ${land.name} on the map to face ${c.short}.`));
+    if (newLv >= Data.LAND_MAX && App.grantShard(land.key)) { notes.unshift(`💎 <b>Relic shard!</b> You've mastered the ${land.name} — its shard reveals itself to you (${App.state.shards}/5).`); Sound.sfx('rare'); }
     App.save();
     App.choose({
       title: reason === 'collapse' ? 'You collapsed!' : reason === 'moves' ? 'Out of moves' : 'Back home safe',

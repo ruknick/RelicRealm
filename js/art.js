@@ -655,103 +655,148 @@ window.Art = (() => {
   // ---------- world map ----------
   const trees = (pts, c1, c2) => pts.map(([x, y, h]) => `<path d="M${x} ${y} l${h * 0.42} ${-h} l${h * 0.42} ${h}z" fill="${c1}"/><path d="M${x + h * 0.42} ${y - h} l${h * 0.42} ${h} h${-h * 0.42}z" fill="${c2}"/>`).join('');
   const peaks = (pts, c1, c2, snow) => pts.map(([x, y, w, h]) => `<path d="M${x} ${y} l${w / 2} ${-h} l${w / 2} ${h}z" fill="${c1}"/><path d="M${x + w / 2} ${y - h} l${w / 2} ${h} h${-w / 2}z" fill="${c2}"/>${snow ? `<path d="M${x + w / 2} ${y - h} l${w * 0.12} ${h * 0.24} l${-w * 0.06} ${-h * 0.04} l${-w * 0.06} ${h * 0.06} l${-w * 0.06} ${-h * 0.06} l${-w * 0.04} ${h * 0.04}z" fill="#eef3f8"/>` : ''}`).join('');
-  // ---------- world map: an old hand-inked parchment map ----------
+  // ---------- world map: an antique atlas page, drawn procedurally ----------
   const INK = '#3b2a18';
-  const inkPeak = (x, y, w, h, fill = '#efe0bb') => `<path d="M${x} ${y} L${x + w * 0.5} ${y - h} L${x + w} ${y}" fill="${fill}" stroke="${INK}" stroke-width="1.4" stroke-linejoin="round"/>`
-    + [1, 2, 3, 4].map(k => `<path d="M${x + w * 0.5 + k * w * 0.09} ${y - h + k * h * 0.19} L${x + w * 0.5 + k * w * 0.05} ${y - 1}" stroke="${INK}" stroke-width=".7" opacity=".7"/>`).join('');
-  const inkTree = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M0 0v4" stroke="${INK}" stroke-width="1"/><path d="M-5 0 0 -13 5 0z" fill="#a6b07a" fill-opacity=".75" stroke="${INK}" stroke-width=".9" stroke-linejoin="round"/><path d="M0 -13 3 -4" stroke="${INK}" stroke-width=".5" opacity=".6"/></g>`;
-  const hill = (x, y, w) => `<path d="M${x} ${y} q${w / 2} ${-w * 0.5} ${w} 0" fill="none" stroke="${INK}" stroke-width="1" opacity=".75"/><path d="M${x + w * 0.55} ${y - w * 0.18} l${w * 0.12} ${w * 0.16}" stroke="${INK}" stroke-width=".6" opacity=".6"/>`;
-  const wave = (x, y) => `<path d="M${x} ${y} q3 -3 6 0 t6 0" fill="none" stroke="${INK}" stroke-width=".8" opacity=".55"/>`;
   const COAST = 'M300 0 C280 40 300 80 270 120 C240 160 250 200 236 240 C222 290 252 330 230 380 C214 420 236 450 220 480 C206 520 236 550 214 580';
-  const rnd = (seed => () => (seed = (seed * 9301 + 49297) % 233280) / 233280)(7);
-  const forestTrees = [];
-  for (let i = 0; i < 46; i++) {
-    const x = 14 + rnd() * 150, y = 252 + rnd() * 130;
-    if (x > 130 && y < 280) continue;
-    forestTrees.push([x, y, 0.8 + rnd() * 0.5]);
+  const coastX = y => { // rough x of the coastline at height y (for keeping land things on land)
+    const pts = [[0, 300], [60, 288], [120, 270], [180, 244], [240, 236], [300, 238], [340, 244], [380, 230], [430, 222], [480, 220], [530, 220], [580, 214]];
+    for (let i = 1; i < pts.length; i++) if (y <= pts[i][0]) { const [y0, x0] = pts[i - 1], [y1, x1] = pts[i]; return x0 + (x1 - x0) * (y - y0) / (y1 - y0); }
+    return 214;
+  };
+  const rnd = (seed => () => (seed = (seed * 9301 + 49297) % 233280) / 233280)(11);
+  const f1 = n => Math.round(n * 10) / 10;
+
+  // A mountain: lit left face, shaded right face with hatching, ink ridge, optional snow.
+  const peak = (x, y, w, h, opt = {}) => {
+    const t = [x + w * (0.45 + rnd() * 0.1), y - h], L = opt.light || '#e7dcc2', D = opt.dark || '#a8977a';
+    let g = `<path d="M${f1(x)} ${f1(y)} L${f1(t[0])} ${f1(t[1])} L${f1(t[0] + w * 0.08)} ${f1(y - h * 0.55)} L${f1(t[0] - w * 0.02)} ${f1(y)} Z" fill="${L}"/>`
+      + `<path d="M${f1(t[0])} ${f1(t[1])} L${f1(x + w)} ${f1(y)} L${f1(t[0] - w * 0.02)} ${f1(y)} L${f1(t[0] + w * 0.08)} ${f1(y - h * 0.55)} Z" fill="${D}"/>`;
+    for (let k = 1; k <= 5; k++) {
+      const yy = t[1] + (h * k) / 6, xx = t[0] + (x + w - t[0]) * k / 6;
+      g += `<path d="M${f1(xx)} ${f1(yy)} l${f1(-w * 0.12)} ${f1(h * 0.1)}" stroke="${INK}" stroke-width=".45" opacity=".45"/>`;
+    }
+    if (opt.snow) g += `<path d="M${f1(t[0])} ${f1(t[1])} l${f1(w * 0.1)} ${f1(h * 0.22)} l${f1(-w * 0.05)} ${f1(-h * 0.03)} l${f1(-w * 0.05)} ${f1(h * 0.06)} l${f1(-w * 0.06)} ${f1(-h * 0.06)} l${f1(-w * 0.04)} ${f1(h * 0.05)} Z" fill="#fbf8f0"/>`;
+    g += `<path d="M${f1(x)} ${f1(y)} L${f1(t[0])} ${f1(t[1])} L${f1(x + w)} ${f1(y)}" fill="none" stroke="${INK}" stroke-width=".8" stroke-linejoin="round"/>`;
+    return g;
+  };
+  // A tiny conifer with a lit and a shaded side.
+  const tree = (x, y, s) => `<path d="M${f1(x)} ${f1(y - 9 * s)} L${f1(x - 3.6 * s)} ${f1(y)} H${f1(x)} Z" fill="#4f6b3a"/><path d="M${f1(x)} ${f1(y - 9 * s)} L${f1(x + 3.6 * s)} ${f1(y)} H${f1(x)} Z" fill="#2c4426"/>`
+    + `<path d="M${f1(x - 3.6 * s)} ${f1(y)} L${f1(x)} ${f1(y - 9 * s)} L${f1(x + 3.6 * s)} ${f1(y)}" fill="none" stroke="#1f2e18" stroke-width=".35"/>`;
+  const hill = (x, y, w) => `<path d="M${f1(x)} ${f1(y)} q${f1(w / 2)} ${f1(-w * 0.45)} ${f1(w)} 0" fill="#c9b98e" opacity=".55"/><path d="M${f1(x)} ${f1(y)} q${f1(w / 2)} ${f1(-w * 0.45)} ${f1(w)} 0" fill="none" stroke="${INK}" stroke-width=".7" opacity=".7"/>`
+    + `<path d="M${f1(x + w * 0.6)} ${f1(y - w * 0.15)} l${f1(w * 0.12)} ${f1(w * 0.14)}M${f1(x + w * 0.7)} ${f1(y - w * 0.1)} l${f1(w * 0.1)} ${f1(w * 0.1)}" stroke="${INK}" stroke-width=".4" opacity=".5"/>`;
+
+  // Mountain range of the Iron Hills (back to front), the fire mountain, the forest.
+  const range = [];
+  for (let i = 0; i < 26; i++) {
+    const y = 70 + rnd() * 110, x = 4 + rnd() * 200 - (y - 70) * 0.2, w = 26 + rnd() * 34 - (y - 70) * 0.1, h = w * (0.8 + rnd() * 0.5);
+    if (x + w < coastX(y) - 10) range.push([x, y, w, h]);
   }
-  forestTrees.sort((p, q) => p[1] - q[1]);
+  range.sort((p, q) => p[1] - q[1]);
+  const woodTrees = [];
+  for (let i = 0; i < 420; i++) {
+    const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd());
+    const x = 92 + Math.cos(a) * r * 88, y = 316 + Math.sin(a) * r * 66;
+    if (x > 8 && x < coastX(y) - 16 && y > 240 && !(x > 150 && y < 270)) woodTrees.push([x, y, 0.75 + rnd() * 0.5]);
+  }
+  woodTrees.sort((p, q) => p[1] - q[1]);
+  const scattered = [];
+  for (let i = 0; i < 40; i++) {
+    const x = 120 + rnd() * 100, y = 190 + rnd() * 120;
+    if (x < coastX(y) - 14) scattered.push([x, y, 0.7 + rnd() * 0.3]);
+  }
+  const waves = [];
+  for (let i = 0; i < 70; i++) {
+    const y = 10 + rnd() * 470, x = coastX(y) + 18 + rnd() * (350 - coastX(y) - 18);
+    if (x < 352 && !(x > 296 && y > 410 && y < 470)) waves.push(`<path d="M${f1(x)} ${f1(y)} q2.5 -2 5 0 t5 0" fill="none" stroke="#2f5a66" stroke-width=".6" opacity="${f1(0.25 + rnd() * 0.3)}"/>`);
+  }
+  // Portolan rhumb lines radiating from the compass.
+  const rhumbs = Array.from({ length: 16 }, (_, i) => { const ang = i * Math.PI / 8; return `<path d="M318 438 L${f1(318 + Math.cos(ang) * 420)} ${f1(438 + Math.sin(ang) * 420)}" stroke="${INK}" stroke-width=".35" opacity=".18"/>`; }).join('');
+
   const WORLD = svg(`
     <defs>
       <filter id="wmPaper" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="3" seed="11" result="n"/>
         <feColorMatrix in="n" type="matrix" values="0 0 0 0 .35  0 0 0 0 .24  0 0 0 0 .1  0 0 0 .55 -.12"/><feComposite in2="SourceGraphic" operator="in"/></filter>
       <filter id="wmBlot"><feTurbulence type="fractalNoise" baseFrequency=".02" numOctaves="2" seed="4"/><feColorMatrix type="matrix" values="0 0 0 0 .45  0 0 0 0 .3  0 0 0 0 .12  0 0 0 .9 -.35"/></filter>
+      <filter id="wmWash" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="3" seed="7" result="t"/>
+        <feDisplacementMap in="SourceGraphic" in2="t" scale="14" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="2.4"/></filter>
+      <filter id="wmSoft"><feGaussianBlur stdDeviation="4"/></filter>
       <radialGradient id="wmBurn" cx="50%" cy="50%" r="72%"><stop offset=".62" stop-color="#6b4a22" stop-opacity="0"/><stop offset=".9" stop-color="#6b4a22" stop-opacity=".45"/><stop offset="1" stop-color="#2a1608" stop-opacity=".9"/></radialGradient>
-      <linearGradient id="wmSeaWash" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8fae9f" stop-opacity=".55"/><stop offset="1" stop-color="#6e9488" stop-opacity=".75"/></linearGradient>
-      <linearGradient id="wmFog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8d4a6" stop-opacity="0"/><stop offset=".5" stop-color="#d8c49a" stop-opacity=".55"/><stop offset="1" stop-color="#c8b48a" stop-opacity=".8"/></linearGradient>
-      <radialGradient id="wmFire" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#c2502a" stop-opacity=".55"/><stop offset="1" stop-color="#7a2e1a" stop-opacity="0"/></radialGradient>
+      <linearGradient id="wmSeaWash" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8db3ad" stop-opacity=".55"/><stop offset=".4" stop-color="#5f8f92" stop-opacity=".7"/><stop offset="1" stop-color="#3e6c78" stop-opacity=".85"/></linearGradient>
+      <radialGradient id="wmFire" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#d0552a" stop-opacity=".7"/><stop offset="1" stop-color="#7a2e1a" stop-opacity="0"/></radialGradient>
+      <linearGradient id="wmFog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8d4a6" stop-opacity="0"/><stop offset=".5" stop-color="#d8c49a" stop-opacity=".6"/><stop offset="1" stop-color="#c8b48a" stop-opacity=".85"/></linearGradient>
     </defs>
     <!-- aged paper -->
     <rect width="360" height="580" fill="#e8d4a6"/>
     <rect width="360" height="580" filter="url(#wmBlot)" opacity=".5"/>
-    <rect width="360" height="580" fill="#e8d4a6" filter="url(#wmPaper)"/>
-    <!-- sea -->
+    <!-- land washes: meadows, the wood, the hills, the scorched north-east -->
+    <g filter="url(#wmWash)">
+      <path d="M0 40 C60 30 150 40 230 60 L250 300 C200 340 160 420 210 470 L0 470 Z" fill="#b9b47a" opacity=".45"/>
+      <ellipse cx="92" cy="318" rx="98" ry="76" fill="#6f8a4a" opacity=".55"/>
+      <ellipse cx="100" cy="130" rx="118" ry="70" fill="#a89a74" opacity=".5"/>
+      <ellipse cx="282" cy="60" rx="80" ry="58" fill="#7a4a36" opacity=".55"/>
+    </g>
+    <rect width="360" height="580" fill="#e8d4a6" filter="url(#wmPaper)" opacity=".9"/>
+    <!-- sea: deepening away from the coast, with a pale shallows band and stippled waves -->
     <path d="${COAST} H360 V0z" fill="url(#wmSeaWash)"/>
-    ${[6, 12, 19, 27].map((d, i) => `<path d="${COAST}" transform="translate(${d} 0)" fill="none" stroke="${INK}" stroke-width=".7" opacity="${0.5 - i * 0.1}"/>`).join('')}
-    <path d="${COAST}" fill="none" stroke="${INK}" stroke-width="2"/>
-    ${[[300, 160], [326, 190], [290, 300], [330, 320], [312, 260], [270, 420], [300, 400], [340, 380], [262, 200], [320, 130]].map(([x, y]) => wave(x, y)).join('')}
-    <!-- sea serpent -->
-    <g fill="none" stroke="${INK}" stroke-width="1.6" stroke-linecap="round">
-      <path d="M284 236c4-10 12-10 14 0M300 238c4-12 14-12 16 0M318 238c3-8 10-8 12 0"/>
-      <path d="M332 234c4-6 10-6 10 0 0 4-4 4-6 3" /><circle cx="338" cy="232" r=".9" fill="${INK}"/>
-      <path d="M276 240h66" stroke-width=".7" opacity=".5"/></g>
-    <!-- ship -->
-    <g transform="translate(286 346)" stroke="${INK}" stroke-width="1.1" fill="#efe0bb"><path d="M0 0h30l-6 9H6z"/><path d="M14 0v-24" fill="none"/><path d="M15 -24c10 6 10 14 0 20z"/><path d="M13 -22c-8 6-8 12 0 17z"/><path d="M-4 12q4 -3 8 0t8 0" fill="none" opacity=".6"/></g>
+    <path d="${COAST}" fill="none" stroke="#c4dad2" stroke-width="16" opacity=".55" filter="url(#wmSoft)"/>
+    ${rhumbs}
+    ${waves.join('')}
+    <path d="${COAST}" fill="none" stroke="#e6d3a2" stroke-width="5" opacity=".9"/>
+    ${[4, 9, 15].map((d, i) => `<path d="${COAST}" transform="translate(${d} 0)" fill="none" stroke="${INK}" stroke-width=".55" opacity="${0.42 - i * 0.12}"/>`).join('')}
+    <path d="${COAST}" fill="none" stroke="${INK}" stroke-width="1.7"/>
+    <!-- river from the hills to the sea -->
+    <path d="M128 150 C136 190 120 214 142 240 C164 266 150 300 176 330 C196 352 200 372 226 392" fill="none" stroke="#5d8f9c" stroke-width="3" stroke-linecap="round"/>
+    <path d="M128 150 C136 190 120 214 142 240 C164 266 150 300 176 330 C196 352 200 372 226 392" fill="none" stroke="#a9cbd0" stroke-width="1" stroke-linecap="round"/>
+    <path d="M168 120 C170 150 152 170 150 200 C148 222 140 232 142 240" fill="none" stroke="#5d8f9c" stroke-width="1.8" stroke-linecap="round"/>
     <!-- the fire mountain -->
-    <ellipse cx="290" cy="58" rx="80" ry="54" fill="url(#wmFire)"/>
-    ${inkPeak(214, 100, 70, 62, '#d9b48a')}${inkPeak(250, 96, 84, 86, '#c99a74')}${inkPeak(300, 104, 56, 48, '#d9b48a')}
-    <path d="M292 12c-8 10-2 18-6 26M292 16c4 8 10 12 6 20" stroke="#a23a1a" stroke-width="2.2" fill="none" stroke-linecap="round" class="wm-lava"/>
-    <path d="M286 6c-6-6 2-12-4-18M296 4c4-6-2-12 4-16" stroke="${INK}" stroke-width=".9" fill="none" opacity=".7"/>
-    <g transform="translate(318 66)" fill="${INK}"><path d="M0 8c6-10 16-12 24-6-6 0-8 2-8 4 6-2 12 0 14 4-6-1-10 0-14 2l-4 6-2-6c-4 0-8-1-10-4z"/><path d="M10 2l-4-8 8 6z"/></g>
-    <text x="236" y="122" font-family="Georgia, serif" font-style="italic" font-size="9" fill="#7a2e1a">Here be dragons</text>
-    <!-- northern hills & dwarf mountains -->
-    ${inkPeak(6, 134, 60, 62)}${inkPeak(44, 120, 74, 84)}${inkPeak(104, 134, 58, 64)}${inkPeak(146, 150, 52, 50)}${inkPeak(30, 160, 46, 36)}${inkPeak(176, 168, 40, 30)}
-    ${hill(20, 196, 22)}${hill(60, 204, 26)}${hill(110, 190, 22)}${hill(196, 208, 20)}${hill(150, 214, 18)}
-    <g class="wm-site dwarf" transform="translate(132 104)" stroke="${INK}" stroke-width="1" fill="#efe0bb">
-      <path d="M0 26V8h6v-6h4v6h6V2h4v6h6v18z"/><path d="M10 26v-8a3 3 0 0 1 6 0v8z" fill="${INK}"/><path d="M2 8h22" fill="none"/></g>
-    <!-- the forest -->
-    <g>${forestTrees.map(([x, y, sc]) => inkTree(x, y, sc)).join('')}</g>
-    <!-- goblin camp -->
-    <g class="wm-site goblin" stroke="${INK}" stroke-width="1" fill="#d9b48a">
-      <path d="M152 238l12-18 12 18z"/><path d="M164 220v-12" fill="none"/><path d="M164 208h10l-3 3 3 3h-10z" fill="#a23a1a"/>
-      <path d="M142 242l8-12 8 12zM176 242l8-12 8 12z"/><path d="M160 246c4-3 8-3 10 0" fill="none" opacity=".6"/></g>
+    <ellipse cx="290" cy="56" rx="86" ry="56" fill="url(#wmFire)"/>
+    ${peak(206, 104, 64, 56, { light: '#b98a6a', dark: '#6e4434' })}${peak(296, 108, 58, 50, { light: '#b98a6a', dark: '#6e4434' })}${peak(240, 100, 86, 86, { light: '#a8705a', dark: '#4e2a20' })}
+    <path d="M282 16c4 10 2 18-4 28M290 18c-2 10 4 18 2 30" stroke="#c4421c" stroke-width="2.4" fill="none" stroke-linecap="round" class="wm-lava"/>
+    <g filter="url(#wmSoft)" fill="#6a6058" opacity=".5"><circle cx="284" cy="6" r="9"/><circle cx="296" cy="-4" r="12"/><circle cx="276" cy="-8" r="10"/></g>
+    <text x="234" y="124" font-family="Georgia, serif" font-style="italic" font-size="8.5" fill="#7a2e1a">Here be dragons</text>
+    <!-- the Iron Hills -->
+    ${range.map(([x, y, w, h], i) => peak(x, y, w, h, { snow: h > 44 })).join('')}
+    ${hill(18, 200, 26)}${hill(56, 210, 30)}${hill(108, 196, 24)}${hill(190, 214, 22)}${hill(150, 222, 20)}${hill(160, 412, 22)}${hill(120, 420, 18)}
+    <!-- the Whispering Wood and scattered copses -->
+    <g>${woodTrees.map(([x, y, sc]) => tree(x, y, sc)).join('')}</g>
+    <g>${scattered.map(([x, y, sc]) => tree(x, y, sc)).join('')}</g>
     <!-- roads -->
-    <path d="M168 400 C150 360 120 340 100 300 M180 392 C190 330 160 250 168 240 M186 396 C200 300 150 200 146 138 M196 398 C230 380 250 360 276 330 M190 392 C230 300 262 180 282 112 M150 412 C130 420 120 430 110 436"
-      stroke="#7a2e1a" stroke-width="1.4" stroke-dasharray="1.5 4" stroke-linecap="round" fill="none" opacity=".85"/>
-    <!-- your camp (castle) -->
-    <g transform="translate(148 382)" stroke="${INK}" stroke-width="1.1" fill="#efe0bb">
-      <path d="M0 30V6h6v-4h4v4h6v-4h4v4h6V30z"/><path d="M40 30V6h6v-4h4v4h6v-4h4v4h6V30z"/><path d="M26 30V14h14v16z"/>
-      <path d="M30 30v-8a3 3 0 0 1 6 0v8z" fill="${INK}"/><path d="M33 14V2" fill="none"/><path d="M33 2h10l-3 3 3 3H33z" fill="#a23a1a"/></g>
-    <!-- workshop -->
-    <g transform="translate(96 424)" stroke="${INK}" stroke-width="1.1" fill="#efe0bb"><path d="M0 22V10l14-10 14 10v12z"/><path d="M10 22v-7h8v7z" fill="${INK}"/><path d="M20 4v-8h5v11" /><path d="M22 -8c-2-4 2-6 0-10" fill="none" opacity=".6"/></g>
+    <path d="M196 384 C170 360 130 340 100 310 M200 380 C190 320 150 200 110 120 M206 384 C226 370 252 340 268 300 M200 380 C240 300 268 180 282 110 M184 396 C150 420 120 440 104 450"
+      stroke="#7a4a2a" stroke-width="1.1" stroke-dasharray="3 3" stroke-linecap="round" fill="none" opacity=".8"/>
+    <!-- your camp: a small walled keep -->
+    <g transform="translate(184 368)" stroke="${INK}" stroke-width=".8">
+      <path d="M0 22 V10 h4 v-3 h3 v3 h4 v-3 h3 v3 h4 v-3 h3 v3 h4 v-3 h3 v3 h4 v12 z" fill="#d8ccb0"/>
+      <rect x="11" y="-2" width="12" height="24" fill="#e6dcc4"/><path d="M11 -2 h3 v-3 h3 v3 h3 v-3 h3 v3" fill="#e6dcc4"/>
+      <path d="M15 22 v-6 a2 2 0 0 1 4 0 v6" fill="${INK}"/><path d="M17 -5 v-8" fill="none"/><path d="M17 -13 h7 l-2 2 2 2 h-7" fill="#8e2a1a"/>
+      <path d="M23 2 v18" stroke="#a8977a" stroke-width="2.4"/></g>
+    <!-- the workshop: a smithy with a smoking chimney -->
+    <g transform="translate(86 440)" stroke="${INK}" stroke-width=".8"><path d="M0 14 V6 L9 0 L18 6 V14 Z" fill="#d8ccb0"/><path d="M0 6 L9 0 L18 6" fill="#8a5a3a"/>
+      <rect x="12" y="-4" width="3" height="7" fill="#a8977a"/><path d="M7 14 v-5 h4 v5" fill="${INK}"/></g>
+    <g fill="#8a8078" opacity=".45" filter="url(#wmSoft)"><circle cx="100" cy="430" r="3"/><circle cx="103" cy="424" r="4"/></g>
+    <!-- a ship and a sea serpent -->
+    <g transform="translate(286 346)" stroke="${INK}" stroke-width=".9" fill="#e6dcc4"><path d="M0 0h26l-5 7H5z" fill="#7a5a3a"/><path d="M12 0v-22" fill="none"/><path d="M13 -21c9 5 9 13 0 18z"/><path d="M11 -19c-7 5-7 10 0 15z"/></g>
+    <g fill="none" stroke="${INK}" stroke-width="1.2" stroke-linecap="round" opacity=".75"><path d="M292 232c3-8 9-8 11 0M306 234c3-9 10-9 12 0M321 234c2-6 8-6 9 0"/><path d="M330 230c4-5 9-5 9 0 0 3-3 3-5 2"/></g>
+    <text x="296" y="190" font-family="Georgia, serif" font-style="italic" font-size="10" letter-spacing="3" fill="#2f5a66" opacity=".75" transform="rotate(78 296 190)">THE SUNLIT SEA</text>
     <!-- title cartouche -->
     <g transform="translate(180 22)">
-      <path d="M-62 -11h124l-8 11 8 11h-124l8-11z" fill="#efe0bb" stroke="${INK}" stroke-width="1.2"/>
-      <path d="M-62 -11l-10 4 6 7-6 7 10 4M62 -11l10 4-6 7 6 7-10 4" fill="#d9b48a" stroke="${INK}" stroke-width="1"/>
-      <text x="0" y="4" text-anchor="middle" font-family="Georgia, serif" font-size="13" font-weight="700" letter-spacing="3" fill="${INK}">VALDMOOR</text></g>
+      <path d="M-64 -11h128l-8 11 8 11h-128l8-11z" fill="#ede0bd" stroke="${INK}" stroke-width="1.1"/>
+      <path d="M-64 -11l-10 4 6 7-6 7 10 4M64 -11l10 4-6 7 6 7-10 4" fill="#d9c08e" stroke="${INK}" stroke-width=".9"/>
+      <text x="0" y="4" text-anchor="middle" font-family="Georgia, serif" font-size="13" font-weight="700" letter-spacing="4" fill="${INK}">VALDMOOR</text></g>
     <!-- compass rose -->
-    <g transform="translate(318 438)" stroke="${INK}" stroke-width=".9">
-      <circle r="20" fill="none"/><circle r="16" fill="none" stroke-dasharray="1 2"/>
-      <path d="M0 -26 4 -4 0 0z" fill="${INK}"/><path d="M0 -26 -4 -4 0 0z" fill="#efe0bb"/><path d="M0 26 -4 4 0 0z" fill="${INK}"/><path d="M0 26 4 4 0 0z" fill="#efe0bb"/>
-      <path d="M26 0 4 4 0 0z" fill="${INK}"/><path d="M26 0 4 -4 0 0z" fill="#efe0bb"/><path d="M-26 0 -4 -4 0 0z" fill="${INK}"/><path d="M-26 0 -4 4 0 0z" fill="#efe0bb"/>
-      <path d="M12 -12 3 -3M-12 12 -3 3M12 12 3 3M-12 -12 -3 -3" />
-      <text y="-29" text-anchor="middle" font-family="Georgia, serif" font-size="9" font-weight="700" fill="${INK}" stroke="none">N</text></g>
-    <!-- beyond the known realm: the map fades into fog and rumor -->
-    <path d="M12 488 C60 478 110 498 160 486 C190 478 206 492 222 488" stroke="${INK}" stroke-width="1.2" stroke-dasharray="6 3 1 3" fill="none"/>
-    <rect x="0" y="490" width="360" height="90" fill="url(#wmFog)"/>
-    <g fill="none" stroke="${INK}" stroke-width="1" opacity=".55" stroke-linecap="round">
-      <path d="M20 520c6-8 18-8 22 0 4-6 14-6 16 2"/><path d="M120 540c6-8 18-8 22 0 4-6 14-6 16 2"/><path d="M240 512c6-8 18-8 22 0 4-6 14-6 16 2"/><path d="M60 560c6-6 14-6 18 0"/></g>
-    <g stroke="${INK}" stroke-width=".9" fill="none" opacity=".45">
-      <path d="M40 506v-6M44 506v-8M48 506v-5M38 506h12"/><path d="M152 508l8 8M160 508l-8 8M156 506v12M150 512h12"/><circle cx="156" cy="512" r="4"/>
-      <path d="M86 530c4 0 6 3 6 6s-3 5-6 5-6-2-6-5 2-6 6-6zM80 528a1.5 1.5 0 1 0 0 .1M84 525a1.5 1.5 0 1 0 0 .1M89 525a1.5 1.5 0 1 0 0 .1"/></g>
-    <text x="118" y="508" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="10" fill="${INK}" opacity=".8">Beyond the Known Realm</text>
-    <text x="300" y="560" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="7" fill="${INK}" opacity=".6">terra incognita</text>
-    ${[[30, 548], [196, 552], [260, 540]].map(([x, y]) => `<text x="${x}" y="${y}" font-family="Georgia, serif" font-size="11" fill="${INK}" opacity=".35">?</text>`).join('')}
+    <g transform="translate(318 438)" stroke="${INK}" stroke-width=".8">
+      <circle r="21" fill="#ede0bd" opacity=".7"/><circle r="21" fill="none"/><circle r="17" fill="none" stroke-dasharray="1 2"/>
+      ${[0, 1, 2, 3].map(i => `<g transform="rotate(${i * 90})"><path d="M0 -27 4 -4 0 0z" fill="${INK}"/><path d="M0 -27 -4 -4 0 0z" fill="#ede0bd"/></g>`).join('')}
+      ${[0, 1, 2, 3].map(i => `<g transform="rotate(${45 + i * 90})"><path d="M0 -16 2.5 -3 0 0z" fill="#8e2a1a"/><path d="M0 -16 -2.5 -3 0 0z" fill="#ede0bd"/></g>`).join('')}
+      <text y="-30" text-anchor="middle" font-family="Georgia, serif" font-size="9" font-weight="700" fill="${INK}" stroke="none">N</text></g>
+    <!-- beyond the known realm -->
+    <path d="M12 490 C60 480 110 500 160 488 C190 480 206 494 222 490" stroke="${INK}" stroke-width="1" stroke-dasharray="6 3 1 3" fill="none"/>
+    <rect x="0" y="492" width="360" height="88" fill="url(#wmFog)"/>
+    <g fill="none" stroke="${INK}" stroke-width=".9" opacity=".4" stroke-linecap="round"><path d="M20 522c6-8 18-8 22 0 4-6 14-6 16 2M130 545c6-8 18-8 22 0 4-6 14-6 16 2M240 514c6-8 18-8 22 0 4-6 14-6 16 2"/></g>
+    <text x="300" y="562" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="7" fill="${INK}" opacity=".55">terra incognita</text>
     <!-- burned edges & ink border -->
     <rect width="360" height="580" fill="url(#wmBurn)"/>
-    <rect x="7" y="7" width="346" height="566" fill="none" stroke="${INK}" stroke-width="1.6" opacity=".8"/>
-    <rect x="11" y="11" width="338" height="558" fill="none" stroke="${INK}" stroke-width=".6" opacity=".7"/>
-    ${[[9, 9], [351, 9], [9, 571], [351, 571]].map(([x, y]) => `<path d="M${x} ${y - 4}l4 4-4 4-4-4z" fill="${INK}" opacity=".8"/>`).join('')}
+    <rect x="7" y="7" width="346" height="566" fill="none" stroke="${INK}" stroke-width="1.5" opacity=".8"/>
+    <rect x="11" y="11" width="338" height="558" fill="none" stroke="${INK}" stroke-width=".55" opacity=".7"/>
   `, '0 0 360 580');
 
   function setScene(scene) {

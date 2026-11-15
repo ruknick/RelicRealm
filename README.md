@@ -34,7 +34,7 @@ Shards are never random drops. Each one reveals itself when you **master** an en
 The Workshop smelts **gold bars** (6 gold + 1 coal) and forges the **Old King's Crown** from **5 shards + 3 gold bars**. Raiders who open your loot chest can steal gold bars (never shards). The Items screen tracks which shards you've earned.
 
 ### 🗺️ The map
-A hand-inked parchment map of Valdmoor, with a fogged southern edge: **Beyond the Known Realm**. That's where post-dragon regions (swamp giants, spider tunnels, frost, barrows) will appear.
+An antique atlas page of Valdmoor: shaded mountain ranges with snowcaps, the dense Whispering Wood, a river, watercolour washes, a sea that deepens away from the shore, and old-style rhumb lines. Only the places themselves are marked, as wax seals with lettered names. **Raids and boss lairs live inside their land:** tap the Wood to gather, raid the goblin village (once found) or face Grak (once his clearing is found). A ⚔️ or boss mark under a land's name shows what's waiting there. The southern edge fades into fog: **Beyond the Known Realm**. That's where post-dragon regions (swamp giants, spider tunnels, frost, barrows) will appear.
   - **Ch 5 · Emberwyrm:** flasks, an elderwood ward, the Dragon's Lair (next update).
 - **Places introduce themselves** with a short story the first time you travel there.
 
