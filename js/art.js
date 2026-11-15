@@ -735,11 +735,12 @@ window.Art = (() => {
       <radialGradient id="wmBurn" cx="50%" cy="50%" r="72%"><stop offset=".62" stop-color="#6b4a22" stop-opacity="0"/><stop offset=".9" stop-color="#6b4a22" stop-opacity=".45"/><stop offset="1" stop-color="#2a1608" stop-opacity=".9"/></radialGradient>
       <linearGradient id="wmSeaWash" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8db3ad" stop-opacity=".55"/><stop offset=".4" stop-color="#5f8f92" stop-opacity=".7"/><stop offset="1" stop-color="#3e6c78" stop-opacity=".85"/></linearGradient>
       <radialGradient id="wmFire" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#d0552a" stop-opacity=".7"/><stop offset="1" stop-color="#7a2e1a" stop-opacity="0"/></radialGradient>
-      <linearGradient id="wmFog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8d4a6" stop-opacity="0"/><stop offset=".5" stop-color="#d8c49a" stop-opacity=".6"/><stop offset="1" stop-color="#c8b48a" stop-opacity=".85"/></linearGradient>
+      <linearGradient id="wmFogN" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#e8d4a6" stop-opacity="0"/><stop offset=".5" stop-color="#d8c49a" stop-opacity=".6"/><stop offset="1" stop-color="#c8b48a" stop-opacity=".85"/></linearGradient>
     </defs>
     <!-- aged paper -->
     <rect width="360" height="580" fill="#e8d4a6"/>
     <rect width="360" height="580" filter="url(#wmBlot)" opacity=".5"/>
+    <g transform="translate(0 90)">
     <!-- land washes: meadows, the wood, the hills, the scorched north-east -->
     <g filter="url(#wmWash)">
       <path d="M0 40 C60 30 150 40 230 60 L250 300 C200 340 160 420 210 470 L0 470 Z" fill="#b9b47a" opacity=".45"/>
@@ -789,22 +790,25 @@ window.Art = (() => {
     <g transform="translate(286 346)" stroke="${INK}" stroke-width=".9" fill="#e6dcc4"><path d="M0 0h26l-5 7H5z" fill="#7a5a3a"/><path d="M12 0v-22" fill="none"/><path d="M13 -21c9 5 9 13 0 18z"/><path d="M11 -19c-7 5-7 10 0 15z"/></g>
     <g fill="none" stroke="${INK}" stroke-width="1.2" stroke-linecap="round" opacity=".75"><path d="M292 232c3-8 9-8 11 0M306 234c3-9 10-9 12 0M321 234c2-6 8-6 9 0"/><path d="M330 230c4-5 9-5 9 0 0 3-3 3-5 2"/></g>
     <text x="296" y="190" font-family="Georgia, serif" font-style="italic" font-size="10" letter-spacing="3" fill="#2f5a66" opacity=".75" transform="rotate(78 296 190)">THE SUNLIT SEA</text>
-    <!-- title cartouche -->
-    <g transform="translate(180 22)">
-      <path d="M-64 -11h128l-8 11 8 11h-128l8-11z" fill="#ede0bd" stroke="${INK}" stroke-width="1.1"/>
-      <path d="M-64 -11l-10 4 6 7-6 7 10 4M64 -11l10 4-6 7 6 7-10 4" fill="#d9c08e" stroke="${INK}" stroke-width=".9"/>
-      <text x="0" y="4" text-anchor="middle" font-family="Georgia, serif" font-size="13" font-weight="700" letter-spacing="4" fill="${INK}">VALDMOOR</text></g>
     <!-- compass rose -->
     <g transform="translate(318 438)" stroke="${INK}" stroke-width=".8">
       <circle r="21" fill="#ede0bd" opacity=".7"/><circle r="21" fill="none"/><circle r="17" fill="none" stroke-dasharray="1 2"/>
       ${[0, 1, 2, 3].map(i => `<g transform="rotate(${i * 90})"><path d="M0 -27 4 -4 0 0z" fill="${INK}"/><path d="M0 -27 -4 -4 0 0z" fill="#ede0bd"/></g>`).join('')}
       ${[0, 1, 2, 3].map(i => `<g transform="rotate(${45 + i * 90})"><path d="M0 -16 2.5 -3 0 0z" fill="#8e2a1a"/><path d="M0 -16 -2.5 -3 0 0z" fill="#ede0bd"/></g>`).join('')}
       <text y="-30" text-anchor="middle" font-family="Georgia, serif" font-size="9" font-weight="700" fill="${INK}" stroke="none">N</text></g>
-    <!-- beyond the known realm -->
-    <path d="M12 490 C60 480 110 500 160 488 C190 480 206 494 222 490" stroke="${INK}" stroke-width="1" stroke-dasharray="6 3 1 3" fill="none"/>
-    <rect x="0" y="492" width="360" height="88" fill="url(#wmFog)"/>
-    <g fill="none" stroke="${INK}" stroke-width=".9" opacity=".4" stroke-linecap="round"><path d="M20 522c6-8 18-8 22 0 4-6 14-6 16 2M130 545c6-8 18-8 22 0 4-6 14-6 16 2M240 514c6-8 18-8 22 0 4-6 14-6 16 2"/></g>
-    <text x="300" y="562" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="7" fill="${INK}" opacity=".55">terra incognita</text>
+    </g>
+    <!-- beyond the known realm: fog over the far north -->
+    <rect x="0" y="0" width="360" height="104" fill="url(#wmFogN)"/>
+    <path d="M12 98 C60 88 110 108 160 96 C200 88 250 102 300 94" stroke="${INK}" stroke-width="1" stroke-dasharray="6 3 1 3" fill="none"/>
+    <g fill="none" stroke="${INK}" stroke-width=".9" opacity=".4" stroke-linecap="round"><path d="M24 70c6-8 18-8 22 0 4-6 14-6 16 2M150 78c6-8 18-8 22 0M250 64c6-8 18-8 22 0 4-6 14-6 16 2"/></g>
+    <g stroke="${INK}" stroke-width=".8" fill="none" opacity=".35"><path d="M110 60v-6M114 60v-8M118 60v-5M108 60h12"/><path d="M210 52l7 7M217 52l-7 7M213.5 50v11M208 55.5h11"/></g>
+    ${[[60, 84], [196, 80], [300, 74]].map(([x, y]) => `<text x="${x}" y="${y}" font-family="Georgia, serif" font-size="11" fill="${INK}" opacity=".3">?</text>`).join('')}
+    <text x="300" y="58" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="7" fill="${INK}" opacity=".55">terra incognita</text>
+    <!-- title cartouche -->
+    <g transform="translate(180 22)">
+      <path d="M-64 -11h128l-8 11 8 11h-128l8-11z" fill="#ede0bd" stroke="${INK}" stroke-width="1.1"/>
+      <path d="M-64 -11l-10 4 6 7-6 7 10 4M64 -11l10 4-6 7 6 7-10 4" fill="#d9c08e" stroke="${INK}" stroke-width=".9"/>
+      <text x="0" y="4" text-anchor="middle" font-family="Georgia, serif" font-size="13" font-weight="700" letter-spacing="4" fill="${INK}">VALDMOOR</text></g>
     <!-- burned edges & ink border -->
     <rect width="360" height="580" fill="url(#wmBurn)"/>
     <rect x="7" y="7" width="346" height="566" fill="none" stroke="${INK}" stroke-width="1.5" opacity=".8"/>

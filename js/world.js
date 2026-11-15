@@ -3,13 +3,13 @@ window.World = (() => {
   // x / y are % positions on the 360x580 map. Only the lands themselves are marked; each land's
   // raid target and boss lair are reached from inside it.
   const SPOTS = [
-    { id: 'lair',   x: 80, y: 10, icon: '🐉', name: 'Dragon\'s Lair', sub: 'Emberwyrm', boss: 'dragon' },
-    { id: 'mine',   x: 24, y: 17, icon: '⛏️', name: 'Iron Hills', land: 'mine', raid: 'dwarf', lair: 'golem' },
-    { id: 'forest', x: 23, y: 52, icon: '🌲', name: 'Whispering Wood', land: 'forest', raid: 'goblin', lair: 'warchief' },
-    { id: 'ocean',  x: 78, y: 46, icon: '🌊', name: 'Sunlit Coast', land: 'ocean', lair: 'siren' },
-    { id: 'camp',   x: 56, y: 66, icon: '🏰', name: 'Your Camp', sub: 'fortify', screen: 'fortify' },
-    { id: 'craft',  x: 28, y: 77, icon: '🔨', name: 'Workshop', sub: 'craft', screen: 'craft' },
-    { id: 'beyond', x: 36, y: 93, icon: '❓', name: 'Beyond the Known Realm', sub: 'uncharted', locked: true },
+    { id: 'lair',   x: 80, y: 25.5, icon: '🐉', name: 'Dragon\'s Lair', sub: 'Emberwyrm', boss: 'dragon' },
+    { id: 'mine',   x: 24, y: 32.5, icon: '⛏️', name: 'Iron Hills', land: 'mine', raid: 'dwarf', lair: 'golem' },
+    { id: 'forest', x: 23, y: 67.5, icon: '🌲', name: 'Whispering Wood', land: 'forest', raid: 'goblin', lair: 'warchief' },
+    { id: 'ocean',  x: 78, y: 61.5, icon: '🌊', name: 'Sunlit Coast', land: 'ocean', lair: 'siren' },
+    { id: 'camp',   x: 56, y: 81.5, icon: '🏰', name: 'Your Camp', sub: 'fortify', screen: 'fortify' },
+    { id: 'craft',  x: 30, y: 90.5, icon: '🔨', name: 'Workshop', sub: 'craft', screen: 'craft' },
+    { id: 'beyond', x: 34, y: 9, icon: '❓', name: 'Beyond the Known Realm', sub: 'uncharted', locked: true },
   ];
   const RAID = { goblin: { icon: '🔥', name: 'Raid the goblin village', how: 'follow 🐾 tracks in the Forest' }, dwarf: { icon: '⚒️', name: 'Raid the dwarf stronghold', how: 'find a ᚱ rune stone in the Iron Hills' } };
   let travelling = false;
