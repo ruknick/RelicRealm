@@ -164,6 +164,18 @@ window.Art = (() => {
   TILES.starbar = bar('lgStar', '#3a2a7a', '#f3e8ff');
   TILES.dragonscale = `<ellipse cx="32" cy="54" rx="20" ry="3" fill="#000" opacity=".3"/><path d="M32 8c12 8 20 18 20 30 0 9-9 15-20 15S12 47 12 38c0-12 8-22 20-30z" fill="#8e1e14" stroke="#3a0a06" stroke-width="1.4"/>
       <path d="M32 14c8 7 13 15 13 24M20 30c6 6 18 6 24 0M18 40c8 5 20 5 28 0" stroke="#e0603a" stroke-width="1.4" fill="none" opacity=".8"/><path d="M26 18c-4 6-6 12-6 18" stroke="#ffc08a" stroke-width="2" fill="none" opacity=".6"/>`;
+  // A wooden water barrel: curved oak staves, iron hoops, a spigot dripping water.
+  TILES.barrel = `<defs><linearGradient id="tBarrel" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5a3414"/><stop offset=".3" stop-color="#b07a44"/><stop offset=".55" stop-color="#c98f52"/><stop offset="1" stop-color="#4a2a10"/></linearGradient></defs>
+      <ellipse cx="32" cy="58" rx="20" ry="3.5" fill="#000" opacity=".35"/>
+      <path d="M17 10c-4 7-6 14-6 22s2 15 6 22h30c4-7 6-14 6-22s-2-15-6-22z" fill="url(#tBarrel)" stroke="#2e1a08" stroke-width="1.3"/>
+      <g stroke="#3a2210" stroke-width=".9" opacity=".7" fill="none"><path d="M24 10c-2 7-3 14-3 22s1 15 3 22M32 10v44M40 10c2 7 3 14 3 22s-1 15-3 22"/></g>
+      <ellipse cx="32" cy="10" rx="15" ry="4" fill="#8a5a2c" stroke="#2e1a08" stroke-width="1.2"/>
+      <ellipse cx="32" cy="10" rx="11" ry="2.6" fill="#3a6a8a"/><path d="M25 9.6q4-1.4 8 0" stroke="#bfe6ff" stroke-width="1" fill="none"/>
+      <g fill="none" stroke="#3a3e44" stroke-width="2.6"><path d="M14.6 17c11 2.6 23.8 2.6 34.8 0M12.2 32c13 2.4 26.6 2.4 39.6 0M14.6 47c11 2.6 23.8 2.6 34.8 0"/></g>
+      <g fill="none" stroke="#9aa3ad" stroke-width=".8" opacity=".8"><path d="M16 16.4c10 2.2 22 2.2 32 0M13.6 31.4c12 2.2 24.8 2.2 36.8 0M16 46.4c10 2.2 22 2.2 32 0"/></g>
+      <path d="M22 14c-2 6-3 12-3 18" stroke="#f0c890" stroke-width="2" opacity=".45" fill="none" stroke-linecap="round"/>
+      <path d="M44 38h7v3h-5v3h-2z" fill="#7a5a3a" stroke="#2e1a08" stroke-width=".8"/>
+      <path d="M48 46c-1.6 2.4-1.6 4 0 4.6 1.6-.6 1.6-2.2 0-4.6z" fill="#5fb0e0" stroke="#1f5c86" stroke-width=".5"/>`;
   TILES.mushroom = TILES.leaves;
 
   // ---------- gear icons: shape by type, finish by tier ----------

@@ -288,7 +288,7 @@ window.Data = (() => {
     nugget:    { icon: '✨', name: 'Gold nuggets', desc: '+3 gold', art: 'gold' },
     sling:     { icon: '🏹', name: 'Old short bow', desc: 'A pine short bow — added to your gear' },
     pearl:     { icon: '🦪', name: 'Oyster', desc: '+1 pearl, +2 gold', art: 'pearl' },
-    barrel:    { icon: '🛢️', name: 'Fresh-water barrel', desc: '+3 water' },
+    barrel:    { icon: '💧', name: 'Fresh-water barrel', desc: '+3 water', art: 'barrel' },
   };
 
   function rollFrom(list) {
