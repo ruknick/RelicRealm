@@ -40,7 +40,7 @@ window.Boss = (() => {
     siren: {
       name: 'Nerissa, the Siren Queen', short: 'Nerissa', place: 'Siren\'s Grotto', icon: '🧜‍♀️', foodCost: 4,
       unlock: { land: 'ocean', lv: 8 }, frame: 'ocean', scene: 'ocean', music: 'ocean',
-      types: ['water', 'fish', 'seaweed', 'sand', 'driftwood'], loot: { water: 'water', fish: 'food', driftwood: 'wood' },
+      types: ['water', 'fish', 'seaweed', 'sand', 'driftwood'], loot: { water: 'water', fish: 'herring', driftwood: 'wood' },
       boss: { hp: 130, armor: 2, weapon: 2, kin: 'sea', art: 'siren', h: 2, scale: 1.08 },
       minion: { name: 'shore crab', hp: 12, armor: 2, weapon: 1, kin: 'sea', art: 'crab' }, maxMinions: 3,
       every: 3, cycle: ['song', 'crabs', 'tide'],
@@ -254,7 +254,7 @@ window.Boss = (() => {
   function prepare(kind) {
     const c = CONFIG[kind], s = st();
     App.reprep = () => prepare(kind);
-    const food = s.stockpile.food, canGo = food >= c.foodCost && s.hp > 0;
+    const food = App.foodTotal(), canGo = food >= c.foodCost && s.hp > 0;
     const wins = (s.bossWins || {})[kind] || 0;
     const w = s.equip.weapon ? Data.ITEMS[s.equip.weapon.id] : null;
     const armor = c.boss.armor - (kind === 'dragon' && s.inventory.crown > 0 ? 1 : 0);
@@ -274,7 +274,7 @@ window.Boss = (() => {
       ],
     }).then(ch => {
       if (ch !== 'go') { App.go('home'); return; }
-      s.stockpile.food -= c.foodCost;
+      App.spendFood(c.foodCost);
       App.save();
       App.go('boss', { kind });
     });

@@ -404,7 +404,7 @@ window.Board = (() => {
         const it = Data.ITEMS[g.id];
         return `<span class="gb-item t${it.tier}">${Art.piece(it.art)}</span>`;
       };
-      const hp = st.hp, mx = App.maxHp, food = st.stockpile.food;
+      const hp = st.hp, mx = App.maxHp, food = App.foodTotal();
       const specials = Object.keys(Data.ITEMS).filter(k => Data.ITEMS[k].special && inv[k] > 0).map(k => {
         const it = Data.ITEMS[k];
         return `<button class="spec${this.armed === k ? ' armed' : ''}" data-w="${k}" title="${it.name}">${it.art ? Art.piece(it.art) : it.icon}<b>${inv[k]}</b></button>`;
@@ -413,12 +413,12 @@ window.Board = (() => {
           <span class="en-bolt">⚡</span><b class="en-num">${this.energy}</b><span class="en-bar"><i style="height:${this.energy / ENERGY_MAX * 100}%"></i></span></div>
         <div class="health${hp <= mx * 0.3 ? ' low' : ''}" title="Your health: monsters wear it down, food heals it"><span class="hp-ico">❤️</span><b class="hp-num">${hp}</b><span class="hp-bar"><i style="height:${hp / mx * 100}%"></i></span></div>
         <button class="gearbtn">${mini('weapon', '⚔️')}${mini('tool', '🛠️')}<span class="gb-label">🧍 Gear</span></button>
-        <div class="specials"><button class="spec eat" title="Eat a ration: 1 food → +2 ❤️">🍖<b>${food}</b></button>${specials}</div></div>`;
+        <div class="specials"><button class="spec eat" title="Eat: your plainest food first (berries +2, herring +3 … kingfish +12)">🍖<b>${food}</b></button>${specials}</div></div>`;
       this.tray.querySelector('.spec.eat').onclick = () => {
         if (this.busy) return;
         const got = App.eatFood();
-        if (got) { this.float(this.centerCell(), `+${got} ❤️`, 'gain'); window.Sound?.sfx('found'); }
-        else this.toast(App.state.stockpile.food < 1 ? '🍖 No food left in your Storehouse.' : '❤️ You\'re already at full health.', '', 1800);
+        if (got) { this.float(this.centerCell(), `${Data.RESOURCES[App.eatFood.last].label} +${got} ❤️`, 'gain'); window.Sound?.sfx('found'); }
+        else this.toast(App.foodTotal() < 1 ? '🍖 No food left in your Storehouse.' : '❤️ You\'re already at full health.', '', 1800);
         this.renderWeapons();
       };
       this.tray.querySelector('.gearbtn').onclick = () => {

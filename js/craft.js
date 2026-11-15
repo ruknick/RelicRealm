@@ -23,7 +23,7 @@ window.Craft = (() => {
       + Object.entries(items).map(([k, n]) =>
       `<span class="cost ${has(k, n) ? '' : 'short'}"><span class="wicon">${iconOf(Data.ITEMS[k])}</span>${n} ${Data.ITEMS[k].name}</span>`).join('');
   }
-  const TILE = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water', oak: 'oak', ironwood: 'ironwood', elderwood: 'elderwood', silver: 'silver', starsilver: 'starsilver', charcoal: 'charcoal', steel: 'steel', starbar: 'starbar', dragonscale: 'dragonscale', goldbar: 'goldbar', ironbar: 'ironbar', silverbar: 'silverbar', leather: 'leather', scrapiron: 'scrapiron', shell: 'shell' };
+  const TILE = { herring: 'fish', wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water', oak: 'oak', ironwood: 'ironwood', elderwood: 'elderwood', silver: 'silver', starsilver: 'starsilver', charcoal: 'charcoal', steel: 'steel', starbar: 'starbar', dragonscale: 'dragonscale', goldbar: 'goldbar', ironbar: 'ironbar', silverbar: 'silverbar', leather: 'leather', scrapiron: 'scrapiron', shell: 'shell' };
   const tileFor = k => TILE[k] || k;
 
   function card(r) {
@@ -87,7 +87,7 @@ window.Craft = (() => {
       sec('👑 The Old King\'s Crown', 'one shard from mastering each land · gold bars from the smelter', R.filter(r => r.tier === 'crown').map(card)) +
       sec('🔑 Key upgrades', 'gold & crystal chests need better keys', R.filter(r => r.tier === 'keys').map(card)) +
       sec('🛡️ Defenses', 'place them in 🏰 Fortify', R.filter(r => r.defense).map(card)) +
-      sec('🍲 Provisions', 'eat them anywhere to heal ❤️', R.filter(r => r.tier === 'food').map(card)) +
+      sec('🍲 Kitchen', 'cook finer food into bigger heals · eat them anywhere', R.filter(r => r.tier === 'food').map(card)) +
       sec('🎒 Kit', 'passive & permanent', R.filter(isKit).map(card)) +
       sec('🐉 Dragon prep', 'for the Dragon\'s Lair — coming soon', R.filter(r => r.tier === 'prep').map(card));
     document.querySelectorAll('.craft-btn:not(.repair-btn):not(.build-btn)').forEach(b => { b.onclick = () => craft(b.dataset.id, +(b.dataset.n || 1)); });

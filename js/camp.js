@@ -369,7 +369,7 @@ window.Camp = (() => {
       <span class="hint">Win raids (or leave goblins alive) and their grudge grows. When it's full, they come for your Storehouse — you'll get a warning a couple of trips ahead.</span>`;
     const sp = App.state;
     // The Storehouse: everything banked at camp.
-    const TILE = { food: 'berries', iron: 'ore' };
+    const TILE = { food: 'berries', iron: 'ore', herring: 'fish' };
     const keys = Object.keys(Data.RESOURCES).sort((x, y) => (sp.stockpile[y] > 0) - (sp.stockpile[x] > 0));
     document.getElementById('fort-store').innerHTML = keys.map(k => `<div class="st-item${sp.stockpile[k] ? '' : ' none'}">
       <span class="gem art g-${TILE[k] || k}">${Art.tile(TILE[k] || k)}</span><b>${sp.stockpile[k]}</b><small>${Data.RESOURCES[k].label}</small></div>`).join('');

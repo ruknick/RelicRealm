@@ -91,6 +91,20 @@ An antique atlas page of Valdmoor: shaded mountain ranges with snowcaps, the den
 - **Eat:** 🍖 on any board or in 🧍 Warrior (1 food → +2), **Trail bread** (+5), **Bottled chowder** (+8).
 - **At 0 ❤️** you collapse and stagger home, dropping half your backpack.
 
+### 🍖 Food tiers
+| Tier | Forest | Sunlit Coast | Heals |
+|---|---|---|---|
+| 1 | Berries | — | +2 |
+| 2 | Wild mushrooms (rare) | Herring (common) | +3 |
+| 3 | Wild honey (Lv 12+) | Salmon (rare) | +5 |
+| 4 | — | Swordfish (Lv 15+) | +8 |
+| 5 | — | Golden kingfish (Lv 25+, very rare) | +12 |
+
+- Rare foods sprinkle in among the berries or fish, like rare woods and ores.
+- 🍖 on a board eats your **plainest** food first. The Warrior screen lets you pick which food to eat.
+- Marching to a raid or boss spends rations plainest-first. Every food counts as one ration.
+- **Kitchen** (Workshop) meals: Trail bread +5, Fish chowder +8, Honey cake +12, Salmon & mushroom pie +15, Swordfish steak +20, **Kingfish feast +40**.
+
 ### 👺 Monsters on gathering boards
 Goblin raiders (Forest), cave goblins (Iron Hills), shore crabs (Coast). Lands go up to **Lv 35**, and monsters scale with the land's level:
 - **Numbers:** up to 3 on the board when you arrive, a new one every 8 → 3 moves, at most 2 → 6.

@@ -5,7 +5,7 @@ window.Data = (() => {
     wood:      { label: 'Pine', primary: true },
     stone:     { label: 'Stone', primary: true },
     hide:      { label: 'Hide', primary: true },
-    food:      { label: 'Food', primary: true },
+    food:      { label: 'Berries', primary: true },
     gold:      { label: 'Gold', primary: true },
     iron:      { label: 'Iron ore', primary: true },
     coal:      { label: 'Coal', primary: true },
@@ -23,6 +23,12 @@ window.Data = (() => {
     scrapiron: { label: 'Scrap iron' },
     shell:     { label: 'Crab shell' },
     starbar:   { label: 'Starsilver bar' },
+    herring:   { label: 'Herring' },
+    mushroom:  { label: 'Wild mushrooms' },
+    salmon:    { label: 'Salmon' },
+    honey:     { label: 'Wild honey' },
+    swordfish: { label: 'Swordfish' },
+    kingfish:  { label: 'Golden kingfish' },
     dragonscale: { label: 'Dragon scale' },
     pearl:     { label: 'Pearl' },
     coral:     { label: 'Coral' },
@@ -156,8 +162,12 @@ window.Data = (() => {
     cartbp:     { name: 'Mine-cart blueprint', icon: '🛤️', spoil: 'dwarf', desc: 'Unlocks the Mine-cart defense.' },
     crown:      { name: 'Old King\'s Crown', icon: '👑', trinket: true, desc: 'Legendary. Forged from the five relic shards and gold. On raids their defenders wait 2 moves longer, and the way to Emberwyrm opens.' },
     // Provisions
-    bread:      { name: 'Trail bread', icon: '🍞', special: true, instant: true, heal: 5, desc: 'Eat it anytime: +5 ❤️.' },
-    chowder:    { name: 'Bottled chowder', icon: '🍲', art: 'chowder', special: true, instant: true, heal: 8, desc: 'A hearty meal in a bottle: +8 ❤️.' },
+    bread:      { name: 'Trail bread', icon: '🍞', special: true, instant: true, heal: 5, desc: 'Berry-studded bread: +5 ❤️.' },
+    chowder:    { name: 'Fish chowder', icon: '🍲', art: 'chowder', special: true, instant: true, heal: 8, desc: 'Herring chowder in a bottle: +8 ❤️.' },
+    honeycake:  { name: 'Honey cake', icon: '🍯', special: true, instant: true, heal: 12, desc: 'Sweet and filling: +12 ❤️.' },
+    salmonpie:  { name: 'Salmon & mushroom pie', icon: '🥧', special: true, instant: true, heal: 15, desc: 'A proper hot pie: +15 ❤️.' },
+    swordsteak: { name: 'Swordfish steak', icon: '🐟', special: true, instant: true, heal: 20, desc: 'Grilled over coals: +20 ❤️.' },
+    feast:      { name: 'Kingfish feast', icon: '👑', special: true, instant: true, heal: 40, desc: 'A feast fit for the Old King: +40 ❤️.' },
     // Dragon prep
     flask:      { name: 'Water flask', icon: '💧', prep: true, special: true, desc: 'Throw it to douse lava and flood-water in a 3x3 area.' },
     elderward:  { name: 'Elderwood ward', icon: '🛡️', prep: true, desc: 'Carry it into the Dragon\'s Lair: dragonfire burns you for half.' },
@@ -239,7 +249,7 @@ window.Data = (() => {
   const MAT_LABEL = { wood: 'wood', stone: 'stone', iron: 'iron', plant: 'thorns', creature: 'creatures', other: 'that' };
 
   // ---------- tile families: rarer woods & ores match with the common one ----------
-  const FAMILY = { oak: 'wood', ironwood: 'wood', elderwood: 'wood', silver: 'ore', starsilver: 'ore', pearl: 'fish', emerald: 'stone', sapphire: 'stone', ruby: 'stone' };
+  const FAMILY = { mushroom: 'berries', honey: 'berries', salmon: 'fish', swordfish: 'fish', kingfish: 'fish', oak: 'wood', ironwood: 'wood', elderwood: 'wood', silver: 'ore', starsilver: 'ore', pearl: 'fish', emerald: 'stone', sapphire: 'stone', ruby: 'stone' };
   // Rares that only show up in one land (gems glint in Iron Hills rock, not forest stones).
   const RARE_LAND = { emerald: 'mine', sapphire: 'mine', ruby: 'mine' };
   const family = t => FAMILY[t] || t;
@@ -251,6 +261,11 @@ window.Data = (() => {
     silver:     L => (L <= 5 ? 3 : L <= 9 ? 12 : L <= 15 ? 20 : 28),
     starsilver: L => (L <= 24 ? 0 : L <= 30 ? 3 : 12),
     pearl:      L => (L <= 6 ? 5 : L <= 15 ? 10 : 15),
+    mushroom:   L => (L <= 4 ? 6 : L <= 12 ? 12 : 16),
+    honey:      L => (L <= 11 ? 0 : L <= 20 ? 4 : 9),
+    salmon:     L => (L <= 5 ? 4 : L <= 14 ? 12 : 18),
+    swordfish:  L => (L <= 14 ? 0 : L <= 24 ? 4 : 9),
+    kingfish:   L => (L <= 24 ? 0 : L <= 30 ? 2 : 5),
     emerald:    L => (L <= 6 ? 4 : L <= 15 ? 7 : 9),
     sapphire:   L => (L <= 6 ? 1 : L <= 15 ? 4 : 7),
     ruby:       L => (L <= 11 ? 0 : L <= 20 ? 2 : 5),
@@ -266,6 +281,11 @@ window.Data = (() => {
     emerald:    { use: 'Set it in silver for a Rootstone amulet: your matches chip any obstacle.' },
     sapphire:   { use: 'Set it in silver for a Tidestone amulet: big matches charge more ⚡.' },
     ruby:       { use: 'Set it in silver for an Emberstone amulet: match-strikes on monsters hit harder.' },
+    mushroom:   { use: 'Better than berries (+3 ❤️), and the heart of a salmon pie.' },
+    honey:      { use: 'Wild honey (+5 ❤️) — bake it into honey cakes.' },
+    salmon:     { use: 'A fine fish (+5 ❤️) — bake it into a salmon & mushroom pie.' },
+    swordfish:  { use: 'A great fish (+8 ❤️) — grill it into a swordfish steak.' },
+    kingfish:   { use: 'The rarest fish in the sea (+12 ❤️) — the heart of a Kingfish feast.' },
     scrapiron:  { use: 'Goblins carry bits of looted metal. Smelt 3 into an iron bar at the Smelter.' },
     shell:      { use: 'Hard as iron. Five make a Shellback buckler at the Workbench.' },
   };
@@ -382,7 +402,11 @@ window.Data = (() => {
     { id: 'knife',   tier: 'kit', station: 'workbench', cost: { wood: 2, ironbar: 1 } },
     { id: 'lamp',    tier: 'kit', station: 'workbench', cost: { coal: 4, ironbar: 1, gold: 2 } },
     { id: 'bread',   tier: 'food', station: 'workbench', cost: { food: 3, wood: 1 } },
-    { id: 'chowder', tier: 'food', station: 'workbench', cost: { food: 3, water: 2 } },
+    { id: 'chowder', tier: 'food', station: 'workbench', cost: { herring: 3, water: 2 } },
+    { id: 'honeycake', tier: 'food', station: 'workbench', cost: { honey: 2, food: 2, wood: 1 } },
+    { id: 'salmonpie', tier: 'food', station: 'workbench', cost: { salmon: 2, mushroom: 2, wood: 1 } },
+    { id: 'swordsteak', tier: 'food', station: 'workbench', cost: { swordfish: 1, coal: 1 } },
+    { id: 'feast',   tier: 'food', station: 'workbench', cost: { kingfish: 1, honey: 1, salmon: 1 } },
     { id: 'flask',   tier: 'prep', station: 'workbench', cost: { water: 4, leather: 1 } },
     { id: 'elderward', tier: 'prep', station: 'workbench', cost: { elderwood: 3, water: 2 } },
   ];
@@ -399,6 +423,10 @@ window.Data = (() => {
   };
   const STATION_ORDER = ['workbench', 'smelter', 'forge', 'dforge', 'staranvil'];
 
+
+  // ---------- food: lowest to finest. Each counts as one ration for marching; finer food heals more. ----------
+  const FOODS = { food: 2, herring: 3, mushroom: 3, salmon: 5, honey: 5, swordfish: 8, kingfish: 12 };
+  const FOOD_ORDER = Object.keys(FOODS);   // eaten / spent lowest first
 
   // ---------- progression ----------
   // Eras: wood & leather (Lv 1–9), iron (10–19), steel (20–34), mythic (35+).
@@ -449,7 +477,13 @@ window.Data = (() => {
     wood:  { from: 'Forest pine logs, Coast driftwood, stumps (wood-axe)', use: 'Wooden weapons, stone tools, fences, towers' },
     stone: { from: 'Forest & Iron Hills rocks, boulders (pick)', use: 'Stone tools, stone walls, bulwarks' },
     hide:  { from: 'Forest pelts', use: 'Tanned into leather; pit traps' },
-    food:  { from: 'Forest berries, Coast fish', use: 'Eat to heal ❤️, meals, marching to raids' },
+    food:  { from: 'Forest berries', use: 'The plainest food (+2 ❤️) · trail bread · marching to raids' },
+    herring:   { from: 'Sunlit Coast: the common fish', use: 'Food (+3 ❤️) · fish chowder' },
+    mushroom:  { from: 'Forest: among the berries (rare)', use: RARE_INFO.mushroom.use },
+    honey:     { from: 'Forest Lv 12+: among the berries', use: RARE_INFO.honey.use },
+    salmon:    { from: 'Sunlit Coast: among the fish (rare)', use: RARE_INFO.salmon.use },
+    swordfish: { from: 'Sunlit Coast Lv 15+', use: RARE_INFO.swordfish.use },
+    kingfish:  { from: 'Sunlit Coast Lv 25+ (very rare)', use: RARE_INFO.kingfish.use },
     gold:  { from: 'Gold nuggets everywhere, oysters, chests', use: 'Gold bars, gold keys, the miner\'s lamp' },
     goldbar: { from: 'Smelted from gold nuggets (Workshop)', use: 'The Old King\'s Crown' },
     iron:  { from: 'Iron Hills ore, iron veins, spoils', use: 'Smelt into iron bars (Smelter)' },
@@ -477,7 +511,7 @@ window.Data = (() => {
   };
 
   return {
-    RESOURCES, ITEMS, TIER_LABEL, ARMOR_LABEL, gloveEnergy, STATIONS, STATION_ORDER, ERA, ERA_NAME, LAND_MAX, maxHp, strength, ATTACK, TROOP_HP, underGeared, landEra,
+    RESOURCES, ITEMS, FOODS, FOOD_ORDER, TIER_LABEL, ARMOR_LABEL, gloveEnergy, STATIONS, STATION_ORDER, ERA, ERA_NAME, LAND_MAX, maxHp, strength, ATTACK, TROOP_HP, underGeared, landEra,
     GRUDGE_FULL, REVENGE_WARN_TRIPS, REVENGE_COOLDOWN, REVENGE_MOVES, SHARDS, SLOTS, slotOf, tierLabel, amuletPower, RARE_LAND, DURABILITY, TYPE_INFO, hardness, gearDamage, gearRefusal, matchDamage, MATCH_DMG,
     WEAPONS, weaponDamage, MAT_LABEL, FAMILY, family, RARE, RARE_INFO, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES,
     backpackSize, landLevel, enemyTier, monsterPlan, TIER_NAMES, ENEMY_GEAR, ENEMY_ARMOR, CHEST_TIERS, xpForLevel, levelFromXp, levelInfo, XP, MATERIAL_INFO,

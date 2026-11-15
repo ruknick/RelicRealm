@@ -62,12 +62,12 @@ window.Gather = (() => {
   LANDS.ocean = {
     name: 'Sunlit Coast', icon: '🌊', music: 'ocean',
     weights: { water: 18, fish: 17, driftwood: 15, sand: 28, seaweed: 22 },
-    gives: { water: 'water', fish: 'food', driftwood: 'wood', gold: 'gold' },
-    bag: ['water', 'food', 'wood', 'gold'],
+    gives: { water: 'water', fish: 'herring', driftwood: 'wood', gold: 'gold' },
+    bag: ['water', 'herring', 'wood', 'gold'],
     obstacles: n => [...Array.from({ length: n }, (_, i) => (i % 2 ? 'kelp' : 'coral')), ...(Math.random() < 0.4 ? ['locked'] : [])],
     grow: () => (Math.random() < 0.5 ? 'coral' : 'kelp'),
     growMsg: { coral: '🪸 Coral grows over the rocks!', kelp: '🌿 A tangle of kelp washes ashore!' },
-    event: { piece: 'crab', msg: '🦀 A giant crab snatched some loot! Only a weapon can stop it →', loot: ['water', 'food', 'gold'] },
+    event: { piece: 'crab', msg: '🦀 A giant crab snatched some loot! Only a weapon can stop it →', loot: ['water', 'herring', 'gold'] },
     discover: null,
     monster: { name: 'shore crab', art: 'crab', icon: '🦀', kin: 'sea' },
     finds: 'ocean',
@@ -168,7 +168,7 @@ window.Gather = (() => {
     let detail = '';
     switch (id) {
       case 'cache': for (let i = 0; i < 3; i++) addToBackpack(pick(['wood', 'stone', 'hide']), 1, cell, delay + i * 200); break;
-      case 'basket': addToBackpack('food', 3, cell, delay); break;
+      case 'basket': addToBackpack(land.key === 'ocean' ? 'herring' : 'food', 3, cell, delay); break;
       case 'orepocket': addToBackpack('iron', 3, cell, delay); break;
       case 'coalseam': addToBackpack('coal', 3, cell, delay); break;
       case 'nugget': addToBackpack('gold', 3, cell, delay); break;
@@ -226,7 +226,7 @@ window.Gather = (() => {
   }
 
   // The backpack, opened over the board.
-  const TILE_OF = { wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water' };
+  const TILE_OF = { herring: 'fish', wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water' };
   function renderPack() {
     const total = bagTotal(), pct = Math.min(100, Math.round(total / run.cap * 100));
     document.getElementById('bp-pop').innerHTML = `<div class="bp-card"><div class="bp-head"><b>🎒 Backpack</b><span>${total}/${run.cap}</span></div>
@@ -355,7 +355,7 @@ window.Gather = (() => {
     board.smoke();
     board.toast(cfg.foundBanner, 'alert', 2200);
     await board.wait(1400);
-    const food = App.state.stockpile.food + (run.backpack.food || 0);
+    const food = App.foodTotal() + (run.backpack.food || 0) + (run.backpack.herring || 0);
     const canRaid = food >= cfg.foodCost;
     const choice = await App.choose({
       title: `${cfg.icon} ${cfg.foundTitle}`,

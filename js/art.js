@@ -25,7 +25,10 @@ window.Art = (() => {
     <linearGradient id="lgLeaf" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#2f5a14"/><stop offset=".5" stop-color="#5f9a2a"/><stop offset="1" stop-color="#a9d45a"/></linearGradient>
     <linearGradient id="lgGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6c4"/><stop offset=".3" stop-color="#f6cd45"/><stop offset=".65" stop-color="#b8860b"/><stop offset="1" stop-color="#f2c230"/></linearGradient>
     <radialGradient id="rgWater" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#e6f8ff"/><stop offset=".35" stop-color="#6cc8f5"/><stop offset=".8" stop-color="#1f6fb0"/><stop offset="1" stop-color="#0f3f6e"/></radialGradient>
-    <linearGradient id="lgFish" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb370"/><stop offset=".5" stop-color="#f07a2a"/><stop offset="1" stop-color="#ffe2c0"/></linearGradient>
+    <linearGradient id="lgFish" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a6a86"/><stop offset=".45" stop-color="#a9bccb"/><stop offset="1" stop-color="#eef3f6"/></linearGradient>
+    <linearGradient id="lgSalmon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a5a6a"/><stop offset=".45" stop-color="#f08a6a"/><stop offset="1" stop-color="#ffd8c4"/></linearGradient>
+    <linearGradient id="lgSword" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c3a6a"/><stop offset=".5" stop-color="#4a7ab8"/><stop offset="1" stop-color="#d8e6f4"/></linearGradient>
+    <linearGradient id="lgKing" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b8860b"/><stop offset=".45" stop-color="#ffd84a"/><stop offset="1" stop-color="#fff6c4"/></linearGradient>
     <linearGradient id="lgSteel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#c7cfd8"/><stop offset=".7" stop-color="#7d8896"/><stop offset="1" stop-color="#dfe5eb"/></linearGradient>
     <radialGradient id="rgPearl" cx="38%" cy="32%" r="70%"><stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#eef0f6"/><stop offset=".8" stop-color="#c9c3dc"/><stop offset="1" stop-color="#9fb4c6"/></radialGradient>
     <linearGradient id="lgShell" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d8cdb8"/><stop offset=".6" stop-color="#a59680"/><stop offset="1" stop-color="#6e604e"/></linearGradient>
@@ -114,9 +117,9 @@ window.Art = (() => {
       <path d="M21 39c0-7 4-12 8-15" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" opacity=".85"/>
       <ellipse cx="38" cy="47" rx="5" ry="2.5" fill="#bfeaff" opacity=".45"/>`,
     fish: `<ellipse cx="32" cy="50" rx="22" ry="3" fill="#000" opacity=".25"/>
-      <path d="M6 32c8-13 25-17 37-8l11-9v34l-11-9c-12 9-29 5-37-8z" fill="url(#lgFish)" stroke="#a04a10" stroke-width="1"/>
-      <g fill="none" stroke="#c4561a" stroke-width="1" opacity=".55"><path d="M24 25q3 3 0 6M30 24q3 3 0 6M36 25q3 3 0 6M27 31q3 3 0 6M33 31q3 3 0 6"/></g>
-      <path d="M22 21c3 6 3 16 0 22" stroke="#ffe0c0" stroke-width="1.6" fill="none" opacity=".7"/>
+      <path d="M6 32c8-13 25-17 37-8l11-9v34l-11-9c-12 9-29 5-37-8z" fill="url(#lgFish)" stroke="#2c4a62" stroke-width="1"/>
+      <g fill="none" stroke="#4a6a86" stroke-width="1" opacity=".55"><path d="M24 25q3 3 0 6M30 24q3 3 0 6M36 25q3 3 0 6M27 31q3 3 0 6M33 31q3 3 0 6"/></g>
+      <path d="M22 21c3 6 3 16 0 22" stroke="#ffffff" stroke-width="1.6" fill="none" opacity=".7"/>
       <circle cx="15" cy="29" r="3.2" fill="#fff"/><circle cx="15.6" cy="29.4" r="1.8" fill="#111"/>`,
     driftwood: `<ellipse cx="32" cy="52" rx="24" ry="3" fill="#000" opacity=".25"/>
       <path d="M5 40c8-10 20-12 32-14 9-2 16-6 20-10l3 6c-6 6-14 9-22 11-11 3-21 7-29 14z" fill="url(#lgDrift)" filter="url(#fGrain)"/>
@@ -217,7 +220,23 @@ window.Art = (() => {
       <path d="M32 6v50M22 24h20M32 6l-4 44M32 6l6 44" stroke="#fff" stroke-width=".7" opacity=".55" fill="none"/>
       <path d="M20 44c4 6 8 8 12 8s8-2 12-8l-2-2c-4 4-6 6-10 6s-6-2-10-6z" fill="url(#lgGold)" stroke="#6a4a08" stroke-width="1"/>
       <path d="M44 42l4-3 1 4M20 42l-4-3-1 4" stroke="#6a4a08" stroke-width="1" fill="url(#lgGold)"/><circle cx="32" cy="50" r="1.6" fill="#e0324b"/>`;
-  TILES.mushroom = TILES.leaves;
+  // Finer foods
+  TILES.mushroom = `<ellipse cx="32" cy="56" rx="22" ry="3.5" fill="#000" opacity=".3"/>
+      <path d="M38 54c0-8 2-16 4-20h8c2 4 4 12 4 20z" fill="#efe2c8" stroke="#6a5a40" stroke-width="1"/><path d="M30 34c0-12 8-18 16-18s16 6 16 18z" fill="#a0522d" stroke="#4a2410" stroke-width="1.2"/>
+      <path d="M33 30c2-6 7-10 13-10" stroke="#d88a5a" stroke-width="2" fill="none" opacity=".7"/><g fill="#f2dcc0"><circle cx="40" cy="25" r="1.6"/><circle cx="50" cy="27" r="1.3"/></g>
+      <path d="M16 54c0-6 1-12 3-15h6c2 3 3 9 3 15z" fill="#efe2c8" stroke="#6a5a40" stroke-width="1"/><path d="M10 40c0-9 6-14 12-14s12 5 12 14z" fill="#b8652f" stroke="#4a2410" stroke-width="1.2"/>
+      <path d="M14 52c4-2 8 0 10-1M40 52c4-2 8 0 10-1" stroke="#5a8a3a" stroke-width="2" stroke-linecap="round"/>`;
+  TILES.honey = `<ellipse cx="32" cy="57" rx="22" ry="3.5" fill="#000" opacity=".3"/>
+      <g stroke="#7a4a08" stroke-width="1.3" fill="url(#lgGold)"><path d="M20 14l8-4 8 4v9l-8 4-8-4z"/><path d="M36 14l8-4 8 4v9l-8 4-8-4z"/><path d="M12 27l8-4 8 4v9l-8 4-8-4z"/><path d="M28 27l8-4 8 4v9l-8 4-8-4z"/><path d="M44 27l8-4 8 4v9l-8 4-8-4z"/><path d="M20 40l8-4 8 4v9l-8 4-8-4z"/><path d="M36 40l8-4 8 4v9l-8 4-8-4z"/></g>
+      <path d="M30 51c-1 3-1 6 1 7 2-1 2-4 1-7z" fill="#e0a020" stroke="#7a4a08" stroke-width=".7"/><path d="M24 17l3-2" stroke="#fff6c4" stroke-width="1.6" opacity=".8"/>`;
+  const finFish = (grad, edge, extra = '') => `<ellipse cx="32" cy="50" rx="22" ry="3" fill="#000" opacity=".25"/>
+      <path d="M6 32c8-13 25-17 37-8l11-9v34l-11-9c-12 9-29 5-37-8z" fill="url(#${grad})" stroke="${edge}" stroke-width="1.1"/>
+      <path d="M22 21c3 6 3 16 0 22" stroke="#fff" stroke-width="1.4" fill="none" opacity=".6"/><path d="M26 24c6-6 12-6 16-2l-4 2z" fill="${edge}" opacity=".6"/>
+      <circle cx="15" cy="29" r="3.2" fill="#fff"/><circle cx="15.6" cy="29.4" r="1.8" fill="#111"/>${extra}`;
+  TILES.salmon = finFish('lgSalmon', '#7a3a3a', '<g fill="#5a2a3a" opacity=".55"><circle cx="30" cy="27" r="1.2"/><circle cx="36" cy="30" r="1.2"/><circle cx="33" cy="35" r="1.1"/><circle cx="40" cy="26" r="1"/></g>');
+  TILES.swordfish = finFish('lgSword', '#14284a', '<path d="M8 30L-2 27l10 6z" fill="#c9d4e0" stroke="#14284a" stroke-width=".8"/><path d="M28 21c4-10 10-12 12-12-1 4-2 8-6 13z" fill="#1c3a6a" stroke="#14284a" stroke-width=".8"/>');
+  TILES.kingfish = `<g filter="url(#fGlow)">${finFish('lgKing', '#7a5a08', '<path d="M24 20l3-6 3 5 3-6 3 6 3-4v6H24z" fill="#fff6c4" stroke="#7a5a08" stroke-width=".7"/><g fill="#b8860b" opacity=".6"><path d="M30 28q3 2 6 0M33 33q3 2 6 0"/></g>')}</g>`;
+  /* (mushroom now has its own art) */
 
   // ---------- gear icons: shape by type, finish by tier ----------
   const HEAD = { 1: 'lgStoneHead', 2: 'lgIron', 3: 'lgSteel', 4: 'lgStar' };

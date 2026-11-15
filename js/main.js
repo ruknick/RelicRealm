@@ -149,11 +149,24 @@ window.App = (() => {
     save();
     return { dmg, note, down: state.hp <= 0 };
   }
-  // Eat a plain ration from the Storehouse: 1 food → +2 ❤️.
-  function eatFood() {
-    if (state.stockpile.food < 1 || state.hp >= maxHp()) return 0;
-    state.stockpile.food--;
-    return heal(2);
+  // Food of every kind in the Storehouse (each counts as one ration).
+  const foodTotal = () => Data.FOOD_ORDER.reduce((n, k) => n + (state.stockpile[k] || 0), 0);
+  // Spend rations for a march, plainest first. Returns false if there isn't enough.
+  function spendFood(n) {
+    if (foodTotal() < n) return false;
+    for (const k of Data.FOOD_ORDER) { const take = Math.min(n, state.stockpile[k] || 0); state.stockpile[k] -= take; n -= take; if (!n) break; }
+    save();
+    return true;
+  }
+  // Eat one piece of food (a given kind, or the plainest you have). Returns { got, kind }.
+  function eatFood(kind) {
+    if (state.hp >= maxHp()) return 0;
+    kind = kind || Data.FOOD_ORDER.find(k => state.stockpile[k] > 0);
+    if (!kind || !(state.stockpile[kind] > 0)) return 0;
+    state.stockpile[kind]--;
+    const got = heal(Data.FOODS[kind]);
+    eatFood.last = kind;
+    return got;
   }
   // Use a meal (bread, chowder): heals by its own amount.
   function eatMeal(k) {
@@ -282,7 +295,7 @@ window.App = (() => {
     prepareRaid.last = [enemy, { fromField }];
     App.reprep = () => prepareRaid(enemy, { fromField });
     const cfg = Battle.CONFIG[enemy];
-    const food = state.stockpile.food;
+    const food = foodTotal();
     const inv = state.inventory;
     const eq = state.equip;
     const armor = Data.ENEMY_ARMOR[enemy][Data.enemyTier(state.enemyWins[enemy]) - 1];
@@ -319,7 +332,7 @@ window.App = (() => {
       go('home');
       return;
     }
-    state.stockpile.food -= cfg.foodCost;
+    spendFood(cfg.foodCost);
     if (!fromField) state.marked[enemy] = Math.max(0, state.marked[enemy] - 1);
     let headStart = inv.crown > 0 ? 2 : 0;
     ['drum', 'ale'].forEach(k => { if (extra['use-' + k] && inv[k] > 0) { inv[k]--; headStart += 3; } });
@@ -434,7 +447,7 @@ window.App = (() => {
 
   return {
     ENEMY_NAME, grantSpecial, addXP, bountyEvent: (id, n) => Bounty.event(id, n), levelPerks, get level() { return level(); }, boot, go, save, newGame, tripDone, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
-    addGear, gearCount, equip, unequip, wear, captureWeapon, recoverWeapons, grantShard, heal, hurtPlayer, eatFood, eatMeal, get maxHp() { return maxHp(); },
+    addGear, gearCount, equip, unequip, wear, captureWeapon, recoverWeapons, grantShard, heal, hurtPlayer, eatFood, eatMeal, foodTotal, spendFood, get maxHp() { return maxHp(); },
     get state() { return state; },
   };
 })();
