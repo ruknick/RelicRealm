@@ -410,6 +410,111 @@ window.Art = (() => {
   PIECES.wall = PIECES.swall;
 
   // Wide keeps (3 tiles).
+
+  // ---------- boss portraits: full 3x2 canvases (192x128), ink-illustration style ----------
+  const TALL = {
+    dragon: `<defs>
+        <linearGradient id="bdWing" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a2a18"/><stop offset=".55" stop-color="#5e140a"/><stop offset="1" stop-color="#2e0804"/></linearGradient>
+        <radialGradient id="bdBody" cx="45%" cy="35%" r="70%"><stop offset="0" stop-color="#e0582c"/><stop offset=".5" stop-color="#a42a14"/><stop offset="1" stop-color="#4a0e06"/></radialGradient>
+        <linearGradient id="bdBelly" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d48a"/><stop offset="1" stop-color="#b8742a"/></linearGradient>
+        <linearGradient id="bdHorn" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4e6c4"/><stop offset="1" stop-color="#8a7448"/></linearGradient>
+        <radialGradient id="bdHeat" cx="50%" cy="60%" r="60%"><stop offset="0" stop-color="#ff9a3c" stop-opacity=".55"/><stop offset="1" stop-color="#ff6a1a" stop-opacity="0"/></radialGradient>
+      </defs>
+      <ellipse cx="96" cy="70" rx="96" ry="62" fill="url(#bdHeat)"/>
+      <!-- wings -->
+      <g stroke="#1e0f06" stroke-width="1.5" stroke-linejoin="round">
+        <path d="M80 62 46 18 30 4 6 10 18 26 4 40 22 48 10 64 32 68 26 84 52 80 70 84z" fill="url(#bdWing)"/>
+        <path d="M112 62 146 18 162 4 186 10 174 26 188 40 170 48 182 64 160 68 166 84 140 80 122 84z" fill="url(#bdWing)"/>
+      </g>
+      <g stroke="#2a0602" stroke-width="2.2" stroke-linecap="round" fill="none">
+        <path d="M80 62 30 4M80 62 6 10M78 64 4 40M76 68 10 64M74 74 26 84"/>
+        <path d="M112 62 162 4M112 62 186 10M114 64 188 40M116 68 182 64M118 74 166 84"/>
+      </g>
+      <g stroke="#e0603a" stroke-width=".8" opacity=".35" fill="none"><path d="M60 40q-10 8-18 6M56 56q-14 2-24-2M150 40q10 8 18 6M136 56q14 2 24-2"/></g>
+      <!-- tail curling round the hoard -->
+      <path d="M118 104c24 6 46 0 50-14 3-10-6-16-14-12-6 3-5 11 1 12" fill="none" stroke="#1e0f06" stroke-width="9" stroke-linecap="round"/>
+      <path d="M118 104c24 6 46 0 50-14 3-10-6-16-14-12-6 3-5 11 1 12" fill="none" stroke="#9a2414" stroke-width="6.5" stroke-linecap="round"/>
+      <path d="M155 90l9-10 2 12z" fill="#5e140a" stroke="#1e0f06" stroke-width="1.2"/>
+      <!-- the hoard -->
+      <path d="M2 128c8-14 26-22 50-22 16-6 32-8 44-6 14-2 30 0 46 6 24 0 42 8 48 22z" fill="url(#lgGold)" stroke="#6a4a08" stroke-width="1.2"/>
+      <g fill="#fff3b0" stroke="#9a7010" stroke-width=".7"><ellipse cx="22" cy="118" rx="6" ry="2.4"/><ellipse cx="44" cy="112" rx="6" ry="2.4"/><ellipse cx="150" cy="114" rx="6" ry="2.4"/><ellipse cx="172" cy="120" rx="6" ry="2.4"/><ellipse cx="128" cy="120" rx="5" ry="2"/><ellipse cx="62" cy="122" rx="5" ry="2"/></g>
+      <path d="M34 120l5-11 6 9z" fill="#e0324b" stroke="#5a0814"/><circle cx="160" cy="124" r="3.4" fill="#3d7bff" stroke="#132a7a"/><path d="M104 122l8-4 4 6-8 3z" fill="#c9cfd6" stroke="#4a5560"/>
+      <!-- haunches & body -->
+      <ellipse cx="96" cy="88" rx="36" ry="24" fill="url(#bdBody)" stroke="#1e0f06" stroke-width="1.6"/>
+      <path d="M62 92c-4 10-2 18 4 22h14c-2-6 0-12 4-16z" fill="#8a2010" stroke="#1e0f06" stroke-width="1.4"/>
+      <path d="M130 92c4 10 2 18-4 22h-14c2-6 0-12-4-16z" fill="#8a2010" stroke="#1e0f06" stroke-width="1.4"/>
+      <g fill="#f4e6c4" stroke="#1e0f06" stroke-width=".8"><path d="M64 114l-4 4 6-1zM70 114l-2 5 4-3zM76 114l1 5 2-4zM128 114l4 4-6-1zM122 114l2 5-4-3zM116 114l-1 5-2-4z"/></g>
+      <!-- belly plates up the chest and neck -->
+      <path d="M84 104c-2-14 0-28 4-40 2-10 4-18 8-24 4 6 6 14 8 24 4 12 6 26 4 40z" fill="url(#bdBelly)" stroke="#1e0f06" stroke-width="1.2"/>
+      <g stroke="#8a5420" stroke-width="1" fill="none" opacity=".8"><path d="M86 96h20M86 88h20M87 80h18M88 72h16M89 64h14M90 56h12M92 48h8"/></g>
+      <!-- neck -->
+      <path d="M86 66c-6-14-4-28 4-38h12c8 10 10 24 4 38" fill="none" stroke="#1e0f06" stroke-width="1.4"/>
+      <path d="M86 66c-6-14-4-28 4-38" fill="none" stroke="#a42a14" stroke-width="4" opacity=".9"/><path d="M106 66c6-14 4-28-4-38" fill="none" stroke="#7a1a0c" stroke-width="4" opacity=".9"/>
+      <g fill="#3a0a06" stroke="#1e0f06" stroke-width=".8"><path d="M83 44l-6-2 5 6zM82 54l-7-1 6 6zM109 44l6-2-5 6zM110 54l7-1-6 6z"/></g>
+      <!-- head -->
+      <path d="M78 24c-2-12 8-20 18-20s20 8 18 20l-2 8c-2 6-8 10-16 10s-14-4-16-10z" fill="url(#bdBody)" stroke="#1e0f06" stroke-width="1.6"/>
+      <path d="M82 28q14 16 28 0-2 10-14 12-12-2-14-12z" fill="#7a1a0c" stroke="#1e0f06" stroke-width="1.2"/>
+      <g fill="#f4ecd8" stroke="#1e0f06" stroke-width=".6"><path d="M86 34l2 5 1.5-4zM91 36l1.5 4 1.5-4zM100 36l1.5 4 1.5-4zM105 34l1.5 5 2-5z"/></g>
+      <path d="M82 6c-6-4-12-4-18 2 6-1 10 1 12 6zM110 6c6-4 12-4 18 2-6-1-10 1-12 6z" fill="url(#bdHorn)" stroke="#1e0f06" stroke-width="1.2"/>
+      <path d="M80 10c-10-10-20-10-26-2 8-2 14 2 18 10zM112 10c10-10 20-10 26-2-8-2-14 2-18 10z" fill="url(#bdHorn)" stroke="#1e0f06" stroke-width="1.2"/>
+      <path d="M83 18q6-3 11 1M98 19q5-4 11-1" stroke="#1e0f06" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <g filter="url(#fGlow)"><path d="M84 22q4-3 9 0-4 3-9 0zM99 22q5-3 9 0-5 3-9 0z" fill="#ffd34a"/></g>
+      <path d="M88.5 20.5v3M103.5 20.5v3" stroke="#1e0402" stroke-width="1.4"/>
+      <circle cx="92" cy="29" r="1.1" fill="#1e0f06"/><circle cx="100" cy="29" r="1.1" fill="#1e0f06"/>
+      <g fill="none" stroke="#c8b8a0" stroke-width="1" opacity=".55" stroke-linecap="round"><path d="M90 28c-4-3-6-6-4-10M102 28c4-3 6-6 4-10"/></g>
+      <path d="M86 12c3-3 7-4 10-4" stroke="#ffb070" stroke-width="1.4" opacity=".6" fill="none"/>`,
+    siren: `<defs>
+        <linearGradient id="bsTail" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4fd1bd"/><stop offset=".5" stop-color="#1f8a7a"/><stop offset="1" stop-color="#0e4a44"/></linearGradient>
+        <linearGradient id="bsHair" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c5a74"/><stop offset="1" stop-color="#0c2a3a"/></linearGradient>
+        <radialGradient id="bsSkin" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#f4d0b0"/><stop offset="1" stop-color="#c88e64"/></radialGradient>
+        <linearGradient id="bsRock" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a8a8e"/><stop offset="1" stop-color="#2e3a40"/></linearGradient>
+        <radialGradient id="bsGlow" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#bff0ff" stop-opacity=".45"/><stop offset="1" stop-color="#bff0ff" stop-opacity="0"/></radialGradient>
+      </defs>
+      <ellipse cx="96" cy="56" rx="70" ry="56" fill="url(#bsGlow)"/>
+      <!-- the rock she sits on -->
+      <path d="M34 128c4-22 20-34 40-34 12-6 30-8 46-2 20 0 34 14 40 36z" fill="url(#bsRock)" stroke="#1e0f06" stroke-width="1.4"/>
+      <g stroke="#1e0f06" stroke-width=".8" opacity=".5" fill="none"><path d="M60 110l10 6M120 104l8 10M90 118l6-8"/></g>
+      <g fill="#2e7a4a" opacity=".85"><path d="M44 112c4-6 10-6 14 0zM140 116c4-6 10-6 14 0z"/></g>
+      <!-- hair flowing behind -->
+      <path d="M84 20c-10 10-14 30-16 50-2 14-8 24-14 30 14-2 22-12 26-26 2-10 4-22 6-34zM106 18c14 6 22 22 26 40 4 16 10 26 18 32-14 0-24-8-30-24-4-12-8-26-12-38z" fill="url(#bsHair)" stroke="#1e0f06" stroke-width="1.2"/>
+      <!-- tail: hips curling over the rock into a fin -->
+      <path d="M82 82c-4 14 0 26 14 30 18 6 36 2 48-8 8-6 12-16 12-26-6 8-14 14-24 16-12 2-24-2-32-8-4-2-10-4-18-4z" fill="url(#bsTail)" stroke="#1e0f06" stroke-width="1.5"/>
+      <g fill="none" stroke="#bff0e6" stroke-width=".8" opacity=".55"><path d="M90 92q4 3 8 0M100 98q4 3 8 0M112 100q4 3 8 0M124 98q4 3 8 0M136 92q4 3 8 0M94 104q4 3 8 0M106 108q4 3 8 0M120 108q4 3 8 0"/></g>
+      <path d="M156 78c4-14 14-20 26-18-6 4-8 10-8 16 8-4 14-2 16 4-10-2-20 2-28 8z" fill="#3fc1b0" stroke="#1e0f06" stroke-width="1.3"/>
+      <path d="M162 76l18-12M164 80l20-2" stroke="#0e4a44" stroke-width=".9" opacity=".7"/>
+      <!-- torso -->
+      <path d="M84 84c-2-10-2-22 2-30l4-4h12l4 4c4 8 4 20 2 30z" fill="url(#bsSkin)" stroke="#1e0f06" stroke-width="1.3"/>
+      <path d="M86 62c2-6 6-8 8-6l2 6-2 6c-4 2-8 0-8-6zM110 62c-2-6-6-8-8-6l-2 6 2 6c4 2 8 0 8-6z" fill="#f2b8c0" stroke="#7a3a44" stroke-width="1"/>
+      <path d="M88 59l4 5M106 59l-4 5" stroke="#7a3a44" stroke-width=".8"/>
+      <path d="M86 52q10 8 20 0" fill="none" stroke="#f4f0ff" stroke-width="2.2" stroke-dasharray="1.6 1.6"/><circle cx="96" cy="56.5" r="2.2" fill="url(#rgPearl)" stroke="#8a8aa8" stroke-width=".5"/>
+      <path d="M88 78h20" stroke="#c9a227" stroke-width="2"/>
+      <!-- arms: one raising the trident, one resting on the rock -->
+      <path d="M86 54c-8 4-14 8-16 2l-2-12" fill="none" stroke="#1e0f06" stroke-width="7" stroke-linecap="round"/>
+      <path d="M86 54c-8 4-14 8-16 2l-2-12" fill="none" stroke="#e2b088" stroke-width="5" stroke-linecap="round"/>
+      <path d="M106 54c8 6 14 14 18 24" fill="none" stroke="#1e0f06" stroke-width="7" stroke-linecap="round"/>
+      <path d="M106 54c8 6 14 14 18 24" fill="none" stroke="#e2b088" stroke-width="5" stroke-linecap="round"/>
+      <path d="M64 6v118" stroke="#1e0f06" stroke-width="4" stroke-linecap="round"/><path d="M64 6v118" stroke="url(#lgGold)" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M56 2v10q0 6 8 6t8-6V2M64 0v18" stroke="#1e0f06" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+      <path d="M56 2v10q0 6 8 6t8-6V2M64 0v18" stroke="#e8c050" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <circle cx="64" cy="20" r="2.4" fill="url(#rgPearl)" stroke="#6a7a8a" stroke-width=".5"/>
+      <ellipse cx="68" cy="43" rx="3.6" ry="4" fill="#e2b088" stroke="#1e0f06" stroke-width="1"/>
+      <!-- head -->
+      <path d="M92 40h8v12h-8z" fill="url(#bsSkin)" stroke="#1e0f06" stroke-width="1"/>
+      <path d="M86 26c0-10 4-16 10-16s10 6 10 16c0 8-4 16-10 16s-10-8-10-16z" fill="url(#bsSkin)" stroke="#1e0f06" stroke-width="1.3"/>
+      <path d="M89.5 24.5q2.5-1.6 5 0M97.5 24.5q2.5-1.6 5 0" stroke="#2a1a10" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+      <path d="M90 28q2-1.6 4 0-2 1.4-4 0zM98 28q2-1.6 4 0-2 1.4-4 0z" fill="#1c5a74"/>
+      <path d="M96 29l-1.2 4.5h2.4" stroke="#8a5a3a" stroke-width=".7" fill="none"/>
+      <path d="M93.5 36.5q2.5 1.4 5 0" stroke="#a83a3a" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      <!-- hair framing the face, over the shoulders -->
+      <path d="M86 26c-2-12 4-20 10-20s14 6 12 20c-2-8-6-12-12-12s-8 4-10 12z" fill="url(#bsHair)" stroke="#1e0f06" stroke-width="1"/>
+      <path d="M86 24c-4 10-4 22 0 32 2-10 2-20 2-28zM106 24c4 10 6 22 2 34-2-10-2-20-4-30z" fill="url(#bsHair)" stroke="#1e0f06" stroke-width="1"/>
+      <!-- crown -->
+      <path d="M86 12l2-8 4 5 4-7 4 7 4-5 2 8z" fill="url(#lgGold)" stroke="#6a4a08" stroke-width="1"/>
+      <circle cx="96" cy="5" r="2" fill="url(#rgPearl)" stroke="#8a8aa8" stroke-width=".5"/>
+      <!-- waves at her tail -->
+      <path d="M0 122q12-8 24 0t24 0 24 0 24 0 24 0 24 0 24 0 24 0V128H0z" fill="#2a6a7a" opacity=".85"/>
+      <path d="M0 122q12-8 24 0t24 0 24 0 24 0 24 0 24 0 24 0 24 0" fill="none" stroke="#dff6ff" stroke-width="1.4" opacity=".7"/>`,
+  };
   const WIDE = {
     warchief: `<ellipse cx="96" cy="60" rx="46" ry="4" fill="#000" opacity=".35"/>
       <path d="M150 4l-26 54" stroke="#4a2a10" stroke-width="5" stroke-linecap="round"/><path d="M150 2c14 2 22 14 18 28-8-4-14-4-22 0 0-10 0-20 4-28z" fill="#8b939c" stroke="#2a2018" stroke-width="1.4"/>
@@ -431,28 +536,6 @@ window.Art = (() => {
       <path d="M80 18h12M100 18h12" stroke="#2a2622" stroke-width="3"/><path d="M82 19h8M102 19h8" stroke="#7fffd4" stroke-width="2.4" class="glow"/>
       <path d="M88 26h16" stroke="#2a2622" stroke-width="2"/><path d="M80 8l6 6M112 8l-6 6" stroke="#5d5651" stroke-width="1.4"/>
       <g fill="#5d8a2c" opacity=".85"><path d="M70 30c4-4 8-4 10 0z"/><path d="M112 28c4-4 8-4 10 0z"/></g>`,
-    dragon: `<defs><linearGradient id="gWyrm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c0381e"/><stop offset=".6" stop-color="#7a1e14"/><stop offset="1" stop-color="#3a0a06"/></linearGradient></defs>
-      <path d="M20 40C6 30 2 14 14 6c4 14 14 18 30 18z" fill="#5a1410" stroke="#1e0402" stroke-width="1.5"/><path d="M172 40c14-10 18-26 6-34-4 14-14 18-30 18z" fill="#5a1410" stroke="#1e0402" stroke-width="1.5"/>
-      <path d="M18 10l10 14M30 8l6 16M178 10l-10 14M166 8l-6 16" stroke="#1e0402" stroke-width="1.2"/>
-      <path d="M40 62c-4-18 14-34 56-34s60 16 56 34z" fill="url(#gWyrm)" stroke="#1e0402" stroke-width="1.6"/>
-      <g fill="none" stroke="#e0603a" stroke-width="1.2" opacity=".55"><path d="M56 50q8-6 16 0t16 0 16 0 16 0 16 0"/><path d="M64 58q8-6 16 0t16 0 16 0 16 0"/></g>
-      <path d="M96 2c-16 0-26 10-26 24 0 10 8 18 26 18s26-8 26-18c0-14-10-24-26-24z" fill="url(#gWyrm)" stroke="#1e0402" stroke-width="1.6"/>
-      <path d="M78 8l-8-8 2 12zM114 8l8-8-2 12z" fill="#2a0806" stroke="#1e0402"/><path d="M84 6l-4-6M108 6l4-6" stroke="#e8d2a2" stroke-width="2.4" stroke-linecap="round"/>
-      <path d="M82 20q4-4 8 0-4 3-8 0zM102 20q4-4 8 0-4 3-8 0z" fill="#ffd34a" class="glow"/><path d="M86 18v4M106 18v4" stroke="#1e0402" stroke-width="1.6"/>
-      <path d="M84 34q12 8 24 0" stroke="#1e0402" stroke-width="1.6" fill="none"/><path d="M88 36l2 4 2-4M100 36l2 4 2-4" fill="#e8d2a2"/>
-      <circle cx="90" cy="28" r="1.4" fill="#1e0402"/><circle cx="102" cy="28" r="1.4" fill="#1e0402"/><path d="M92 26c-2-4 0-6 4-8M100 26c2-4 0-6-4-8" stroke="#ff8a3a" stroke-width="1" fill="none" opacity=".7"/>`,
-    siren: `<defs><linearGradient id="gTail" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1f8a7a"/><stop offset="1" stop-color="#3fc1b0"/></linearGradient></defs>
-      <path d="M8 60c10-10 30-14 50-10s40 4 60-2 50-6 66 10z" fill="#4a7a8a" opacity=".6"/>
-      <path d="M100 44c18 6 34 6 48-2 10-6 20-4 26 2-8 0-14 4-16 10-6-4-12-6-20-4-14 4-28 4-40-2z" fill="url(#gTail)" stroke="#0c3a34" stroke-width="1.4"/>
-      <path d="M166 40c6-10 16-12 22-8-6 2-8 6-8 10 6-2 10 0 12 4-8-2-16 0-22 4z" fill="#3fc1b0" stroke="#0c3a34" stroke-width="1.2"/>
-      <g fill="none" stroke="#bff0e6" stroke-width=".8" opacity=".6"><path d="M108 46q4 3 8 0M120 48q4 3 8 0M132 48q4 3 8 0M144 46q4 3 8 0"/></g>
-      <path d="M82 54c0-14 6-26 14-30 8 4 12 14 10 28z" fill="#e8b48a" stroke="#5a3414" stroke-width="1.2"/>
-      <path d="M86 34c4 2 12 2 16 0" stroke="#3fc1b0" stroke-width="4" stroke-linecap="round"/><circle cx="94" cy="16" r="10" fill="#e8b48a" stroke="#5a3414" stroke-width="1.2"/>
-      <path d="M84 14c0-12 20-14 22 0 4 10 4 26 10 36-8-2-12-10-14-18-2 8-8 14-16 16 4-10 0-22-2-34z" fill="#1f6a8a" stroke="#0c2a3a" stroke-width="1.2"/>
-      <path d="M86 6l4-6 4 5 4-5 4 6z" fill="url(#lgGold)" stroke="#7a5a10"/><circle cx="94" cy="3" r="1.6" fill="url(#rgPearl)"/>
-      <path d="M90 15q2-1.5 4 0M96 15q2-1.5 4 0" stroke="#0c2a3a" stroke-width="1.2" fill="none"/><path d="M92 21q2 1 4 0" stroke="#7a2a1a" stroke-width="1" fill="none"/>
-      <path d="M62 8l10 56" stroke="#c9a227" stroke-width="2.6" stroke-linecap="round"/><path d="M56 4l6 10 6-10M62 2v12" stroke="#c9a227" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <path d="M70 34c6-2 12 0 14 4" stroke="#e8b48a" stroke-width="5" stroke-linecap="round"/>`,
     gkeep: `<rect x="8" y="52" width="176" height="10" rx="3" fill="#3b2410"/>
       <g fill="#6e4521" stroke="#3b2410" stroke-width="1.5"><path d="M4 56V22l5-8 5 8v34z"/><path d="M15 56V26l5-8 5 8v30z"/><path d="M167 56V26l5-8 5 8v30z"/><path d="M178 56V22l5-8 5 8v34z"/></g>
       <rect x="28" y="28" width="136" height="26" fill="#7a4d24"/><g stroke="#55331a" stroke-width="2"><path d="M28 34h136M28 41h136M28 48h136"/></g>
@@ -491,7 +574,7 @@ window.Art = (() => {
   const piece = kind => {
     if (!kind) return '';
     if (kind.startsWith('gear:')) { const [, type, tier] = kind.split(':'); return svg(gearArt(type, +tier)); }
-    return WIDE[kind] ? svg(WIDE[kind], '0 0 192 64') : PIECES[kind] ? svg(PIECES[kind]) : '';
+    return TALL[kind] ? svg(TALL[kind], '0 0 192 128') : WIDE[kind] ? svg(WIDE[kind], '0 0 192 64') : PIECES[kind] ? svg(PIECES[kind]) : '';
   };
 
   // ---------- board frames ----------
@@ -676,5 +759,5 @@ window.Art = (() => {
     document.body.style.setProperty('--scene-art', SCENES[scene] || 'none');
   }
 
-  return { injectDefs, WORLD, tile, piece, frame, setScene, hasPiece: k => !!PIECES[k] || !!WIDE[k] };
+  return { injectDefs, WORLD, tile, piece, frame, setScene, hasPiece: k => !!PIECES[k] || !!WIDE[k] || !!TALL[k] };
 })();
