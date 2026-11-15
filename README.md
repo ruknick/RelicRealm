@@ -117,6 +117,19 @@ Goblin raiders (Forest), cave goblins (Iron Hills), shore crabs (Coast). Lands g
 - Sometimes one carries the **chest key** (🗝️).
 - Survivors report back and add to the goblins' grudge.
 
+### 🛡️ Armor unlocks piece by piece
+Within each tier the helmet comes first and the body armor last:
+
+| Piece | Leather | Iron | Steel | Mythic |
+|---|---|---|---|---|
+| Helmet | 1 | 10 | 20 | 35 |
+| Gloves | 2 | 12 | 23 | 36 |
+| Shield | 4 | 14 | 26 | 37 |
+| Legs | 6 | 16 | 29 | 38 |
+| Body | 8 | 18 | 32 | 40 |
+
+Locked pieces show "🔒 Unlocks at Level N" in the Workshop, and leveling up announces each new piece.
+
 ### 🔥 Bars & stations
 - **Every metal recipe needs bars.** At the Smelter: 2 iron ore + 1 coal → iron bar, 3 scrap iron + 1 coal → iron bar, silver → silver bars, 6 gold + 1 coal → gold bar, oak → charcoal.
 - **Steel:** 2 iron bars + 2 charcoal + 1 water, at the Dwarven Forge.

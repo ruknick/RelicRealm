@@ -414,6 +414,15 @@ window.Data = (() => {
     { id: 'elderward', tier: 'prep', station: 'workbench', cost: { elderwood: 3, water: 2 } },
   ];
 
+  // Armor unlocks piece by piece within each tier: helmet first, body armor last.
+  const ARMOR_LV = {
+    helmet: [1, 10, 20, 35], gloves: [2, 12, 23, 36], shield: [4, 14, 26, 37], legs: [6, 16, 29, 38], body: [8, 18, 32, 40],
+  };
+  RECIPES.forEach(r => {
+    const it = ITEMS[r.id];
+    if (it && it.gear === 'armor' && !it.sea && ARMOR_LV[it.type]) r.lv = ARMOR_LV[it.type][it.tier - 1];
+  });
+
   // ---------- crafting stations (built at your camp) ----------
   const STATIONS = {
     workbench: { icon: '🪵', name: 'Workbench', lv: 1, cost: {}, desc: 'Wood & stone tools, leather, fences, traps, meals.' },

@@ -7,7 +7,8 @@ window.Craft = (() => {
   const stationOk = r => !r.station || !!st().stations[r.station];
   // How many times a smelting recipe could run with what's in the Storehouse.
   const maxTimes = r => Math.min(...Object.entries(r.cost).map(([k, n]) => Math.floor(st().stockpile[k] / n)));
-  const canAfford = r => stationOk(r) && !locked(r) && Object.entries(r.cost).every(([k, n]) => st().stockpile[k] >= n)
+  const levelOk = r => !r.lv || App.level >= r.lv;
+  const canAfford = r => stationOk(r) && levelOk(r) && !locked(r) && Object.entries(r.cost).every(([k, n]) => st().stockpile[k] >= n)
     && Object.entries(r.items || {}).every(([k, n]) => has(k, n)) && (!r.shards || st().shards >= r.shards);
   const info = r => (r.makes ? { name: r.name, icon: r.icon, desc: r.desc } : Data.ITEMS[r.id]);
   const isKit = r => r.tier === 'kit';
@@ -37,7 +38,7 @@ window.Craft = (() => {
       <div class="r-body">
         <div class="r-name">${it.name} ${tag}${ownedTxt ? ` <span class="r-owned">${ownedTxt}</span>` : ''}</div>
         <div class="r-effect">${it.desc}${ownedTxt ? ` <b>${ownedTxt}</b>` : ''}</div>
-        <div class="r-cost">${!stationOk(r) ? `<span class="cost short">🔒 Requires the ${stationName(r.station)} (Lv ${Data.STATIONS[r.station].lv})</span>`
+        <div class="r-cost">${stationOk(r) && !levelOk(r) ? `<span class="cost short">🔒 Unlocks at Level ${r.lv}</span>` : !stationOk(r) ? `<span class="cost short">🔒 Requires the ${stationName(r.station)} (Lv ${Data.STATIONS[r.station].lv})</span>`
           : locked(r) ? '<span class="cost short">🔒 Needs the Palisade blueprint (goblin spoil)</span>' : costHtml(r.cost, r.items)}${r.shards ? `<span class="cost ${st().shards >= r.shards ? '' : 'short'}">💎 ${st().shards}/${r.shards} Relic shards</span>` : ''}</div>
       </div>
       <div class="r-btns"><button class="craft-btn" data-id="${r.id}" ${ready ? '' : 'disabled'}>${ownedKit(r) ? 'Owned' : r.makes ? 'Make' : 'Craft'}</button>
@@ -106,7 +107,7 @@ window.Craft = (() => {
   // Gear tabs group by tier; tiers whose station isn't built fold away into one line.
   function tierGroups(list, cls) {
     return [1, 2, 3, 4].map(t => {
-      const rs = list.filter(r => Data.ITEMS[r.id].tier === t && !Data.ITEMS[r.id].sea && !Data.ITEMS[r.id].gem);
+      const rs = list.filter(r => Data.ITEMS[r.id].tier === t && !Data.ITEMS[r.id].sea && !Data.ITEMS[r.id].gem).sort((a, b) => (a.lv || 0) - (b.lv || 0));
       if (!rs.length) return '';
       const label = (cls === 'armor' ? Data.ARMOR_LABEL : Data.TIER_LABEL)[t];
       const locked = rs.every(r => !stationOk(r));
