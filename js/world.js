@@ -8,7 +8,7 @@ window.World = (() => {
     { id: 'forest', x: 23, y: 67.5, icon: '🌲', name: 'Whispering Wood', land: 'forest', raid: 'goblin', lair: 'warchief' },
     { id: 'ocean',  x: 78, y: 61.5, icon: '🌊', name: 'Sunlit Coast', land: 'ocean', lair: 'siren' },
     { id: 'camp',   x: 56, y: 81.5, icon: '🏰', name: 'Your Camp', sub: 'fortify', screen: 'fortify' },
-    { id: 'craft',  x: 30, y: 90.5, icon: '🔨', name: 'Workshop', sub: 'craft', screen: 'craft' },
+    { id: 'craft',  x: 30, y: 90.5, icon: '⚒', art: 'smithhammer', name: 'Workshop', sub: 'craft', screen: 'craft' },
     { id: 'beyond', x: 34, y: 9, icon: '❓', name: 'Beyond the Known Realm', sub: 'uncharted', locked: true },
   ];
   const RAID = { goblin: { icon: '🔥', name: 'Raid the goblin village', how: 'follow 🐾 tracks in the Forest' }, dwarf: { icon: '⚒️', name: 'Raid the dwarf stronghold', how: 'find a ᚱ rune stone in the Iron Hills' } };
@@ -36,7 +36,7 @@ window.World = (() => {
       if (s.boss) { const wins = (st.bossWins || {})[s.boss] || 0; cls += ' bossspot'; sub = wins ? `slain ×${wins}` : s.sub; }
       if (s.locked) cls += ' locked';
       return `<button class="${cls}" data-id="${s.id}" style="left:${s.x}%;top:${s.y}%">
-        <span class="sp-seal">${s.icon}</span><span class="sp-name">${s.name}</span><span class="sp-sub">${sub}${marks.length ? ' ' + marks.join('') : ''}</span></button>`;
+        <span class="sp-seal">${s.art ? Art.piece(s.art) : s.icon}</span><span class="sp-name">${s.name}</span><span class="sp-sub">${sub}${marks.length ? ' ' + marks.join('') : ''}</span></button>`;
     }).join('');
     document.querySelectorAll('.spot').forEach(b => { b.onclick = () => travel(b.dataset.id); });
 

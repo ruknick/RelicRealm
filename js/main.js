@@ -398,6 +398,8 @@ window.App = (() => {
 
   function boot() {
     Hero.init();
+    document.getElementById('forge-hammer').innerHTML = Art.piece('smithhammer');
+    document.getElementById('craft-title-art').innerHTML = Art.piece('smithhammer');
     Art.injectDefs();
     load();
     renderStock();

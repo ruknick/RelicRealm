@@ -37,7 +37,7 @@ window.Story = (() => {
       intro: 'Ashford is gone, but the forest still stands, and so do you. Start again: gather what you can, forge something useful, and raise a camp the raiders can\'t simply walk into.',
       goals: [
         { text: 'Gather in the 🌲 Forest', done: () => st().lands.forest.runs >= 1 },
-        { text: 'Craft anything at the 🔨 Workshop', done: () => !!st().story.flags.crafted },
+        { text: 'Craft anything at the ⚒ Workshop', done: () => !!st().story.flags.crafted },
         { text: 'Fortify 🏰 Your Camp', done: () => !!st().story.flags.fortify },
       ],
       reward: { label: '🧢 Leather cap + 20 XP', give: () => { App.addGear('helmet1'); App.addXP(20); } },
@@ -108,7 +108,7 @@ window.Story = (() => {
     goblin: { title: '🔥 Goblin Village', text: 'A ramshackle camp of stolen timber, still smelling of Ashford smoke. Their keep is hidden in the fog, so scout it out before they break your camp.' },
     dwarf:  { title: '⚒️ Dwarf Stronghold', text: 'Stone halls behind iron gates. The dwarves wear iron and steel; bring a weapon that can bite through it.' },
     camp:   { title: '🏰 Your Camp', text: 'All that\'s left of Ashford: a keep, a loot chest, and room to build. Raiders will come while you\'re away. Make them work for it.' },
-    craft:  { title: '🔨 The Workshop', text: 'An old anvil pulled from the ashes, a forge, a bench. Everything you gather becomes something here.' },
+    craft:  { title: '⚒ The Workshop', text: 'An old anvil pulled from the ashes, a forge, a bench. Everything you gather becomes something here.' },
   };
 
   function ensure() {

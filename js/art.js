@@ -392,6 +392,16 @@ window.Art = (() => {
       <g fill="#c9ced6"><path d="M20 40l3-10 3 10z"/><path d="M29 42l3-12 3 12z"/><path d="M38 40l3-10 3 10z"/></g>
       <path d="M8 34c6-4 12-2 16-4M40 30c6 2 10 0 16 4" stroke="#7a9a3a" stroke-width="3" fill="none" stroke-linecap="round"/>`,
   });
+  // An old blacksmith's hammer: forged cross-peen head, wedge, ash handle with a leather grip.
+  PIECES.smithhammer = `<ellipse cx="32" cy="58" rx="18" ry="3" fill="#000" opacity=".3"/>
+      <path d="M17 55L41 20" stroke="#2a1608" stroke-width="7.5" stroke-linecap="round"/><path d="M17 55L41 20" stroke="url(#lgHaft2)" stroke-width="5.5" stroke-linecap="round"/>
+      <path d="M19.6 51.2l3.4-5M22.4 47.2l3.4-5M25.2 43.2l3.4-5" stroke="#5a3414" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M19.6 51.2l3.4-5M22.4 47.2l3.4-5M25.2 43.2l3.4-5" stroke="#8a5a30" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M28 12l10-6 18 13-6 9-3-2-4 5-7-5 3-5z" fill="url(#lgIron)" stroke="#16181c" stroke-width="1.3" stroke-linejoin="round"/>
+      <path d="M50 28l6-9 3 2-6 9z" fill="#4a5058" stroke="#16181c" stroke-width="1.1"/>
+      <path d="M28 12l-6 8 7 5 3-5z" fill="#3a3e44" stroke="#16181c" stroke-width="1.1"/><path d="M22 20l2-7 4-1" stroke="#16181c" stroke-width="1" fill="none"/>
+      <path d="M38 8l14 10" stroke="#c9d1da" stroke-width="1.4" opacity=".7"/><path d="M39 23l3 2" stroke="#16181c" stroke-width="1.6"/>
+      <g fill="#2a2e34" opacity=".6"><circle cx="44" cy="14" r=".8"/><circle cx="35" cy="13" r=".7"/><circle cx="47" cy="20" r=".7"/></g>`;
   Object.assign(PIECES, {
     whelp: `<path d="M8 30c-6-10 2-18 10-14l6 8z" fill="#7a1e14" stroke="#2a0806"/><path d="M56 30c6-10-2-18-10-14l-6 8z" fill="#7a1e14" stroke="#2a0806"/>
       <ellipse cx="32" cy="40" rx="15" ry="13" fill="#b0301c" stroke="#2a0806" stroke-width="1.4"/><path d="M24 44c4 4 12 4 16 0" stroke="#ffb070" stroke-width="2" fill="none"/>

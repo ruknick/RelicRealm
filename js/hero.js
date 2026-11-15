@@ -188,7 +188,7 @@ window.Hero = (() => {
     let html = `<h3 class="craft-h">${I.icon} ${I.label}</h3>`;
     if (cur) html += row(cur, '<button class="small alt" data-off="1">Take off</button>');
     html += owned.map(({ g, i }) => row(g, `<button class="small" data-i="${i}">${cur ? 'Swap' : 'Wear'}</button>`)).join('');
-    if (!cur && !owned.length) html += `<p class="hint">Nothing for this slot yet — craft one in the 🔨 Workshop.</p>`;
+    if (!cur && !owned.length) html += `<p class="hint">Nothing for this slot yet — craft one in the ⚒ Workshop.</p>`;
     return html;
   }
 
