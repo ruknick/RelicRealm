@@ -1261,3 +1261,4 @@ body[data-scene] .sound-btn, .sound-btn { background: var(--paper); color: var(-
 /* your location pin sits just above the place's seal */
 .world .hero { width: 26px; height: 26px; transform: translate(-50%, -190%); }
 .world .hero span { font-size: .8rem; }
+.ic-art { width: 100%; height: 100%; display: grid; place-items: center; } .ic-art svg { width: 90%; height: 90%; }

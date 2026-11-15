@@ -193,7 +193,7 @@ window.Gather = (() => {
     App.save();
     run.finds.push(`${info.icon} ${info.name}`);
     if (id === 'key' && board.piecesOf('locked').some(c => c.lockTier === 1)) detail = 'Now tap 🗝️ Old key, then the locked chest!';
-    board.celebrate(cell, { icon: info.art ? Art.tile(info.art) : info.icon, title: `${info.name}!`, sub: detail || info.desc, rare: id === 'shard' || id === 'key' });
+    board.celebrate(cell, { icon: info.art ? Art.any(info.art) : info.icon, title: `${info.name}!`, sub: detail || info.desc, rare: id === 'shard' || id === 'key' });
     xp(Data.XP.find);
     board.renderWeapons();
     board.renderPieces();

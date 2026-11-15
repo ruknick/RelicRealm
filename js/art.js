@@ -176,6 +176,47 @@ window.Art = (() => {
       <path d="M22 14c-2 6-3 12-3 18" stroke="#f0c890" stroke-width="2" opacity=".45" fill="none" stroke-linecap="round"/>
       <path d="M44 38h7v3h-5v3h-2z" fill="#7a5a3a" stroke="#2e1a08" stroke-width=".8"/>
       <path d="M48 46c-1.6 2.4-1.6 4 0 4.6 1.6-.6 1.6-2.2 0-4.6z" fill="#5fb0e0" stroke="#1f5c86" stroke-width=".5"/>`;
+  // ---------- finds: hand-drawn, no emoji ----------
+  // A hidden cache: a small iron-bound crate spilling supplies.
+  TILES.cache = `<ellipse cx="32" cy="56" rx="22" ry="3.5" fill="#000" opacity=".35"/>
+      <path d="M12 26h40v26H12z" fill="#9a6a3a" stroke="#2e1a08" stroke-width="1.3"/><path d="M12 34h40M12 44h40" stroke="#5a3414" stroke-width="1.2"/>
+      <path d="M12 26l6-8h40l-6 8z" fill="#b8844c" stroke="#2e1a08" stroke-width="1.2"/><path d="M52 26l6-8v26l-6 8z" fill="#6e4422" stroke="#2e1a08" stroke-width="1.2"/>
+      <path d="M16 26v26M48 26v26" stroke="#4a4e57" stroke-width="2.4"/><g fill="#9aa3ad"><circle cx="16" cy="30" r="1"/><circle cx="16" cy="48" r="1"/><circle cx="48" cy="30" r="1"/><circle cx="48" cy="48" r="1"/></g>
+      <path d="M24 18c2-6 8-8 12-4 2-4 8-4 10 0" fill="#d8b878" stroke="#5a3a14" stroke-width="1"/><path d="M28 14l4-6 3 5z" fill="#8a9097" stroke="#2e1a08" stroke-width=".8"/>`;
+  // A wicker basket of bread and berries.
+  TILES.basket = `<ellipse cx="32" cy="57" rx="22" ry="3.5" fill="#000" opacity=".35"/>
+      <path d="M16 30c0-14 32-14 32 0" fill="none" stroke="#7a5428" stroke-width="3"/><path d="M16 30c0-14 32-14 32 0" fill="none" stroke="#c99a5c" stroke-width="1.4"/>
+      <circle cx="24" cy="28" r="4.5" fill="url(#rgBerry)" stroke="#25103f" stroke-width=".6"/><circle cx="30" cy="25" r="4" fill="url(#rgBerry)" stroke="#25103f" stroke-width=".6"/>
+      <path d="M33 30c0-8 14-8 14 0z" fill="#d89a48" stroke="#7a4a1c" stroke-width="1"/><path d="M37 26l2 2M41 25l2 2" stroke="#7a4a1c" stroke-width=".8"/>
+      <path d="M10 30h44l-6 24H16z" fill="#b8844c" stroke="#4a2a10" stroke-width="1.3"/>
+      <g stroke="#7a5428" stroke-width="1.1" fill="none"><path d="M12 36h40M14 42h36M15 48h34"/><path d="M18 30l2 24M26 30l1 24M34 30v24M42 30l-1 24M50 30l-2 24" opacity=".7"/></g>
+      <path d="M10 30h44" stroke="#e2b77c" stroke-width="2"/>`;
+  // A pocket of iron ore: a split rock with rusty ore inside.
+  TILES.orepocket = `<ellipse cx="32" cy="56" rx="23" ry="3.5" fill="#000" opacity=".35"/>
+      <path d="M8 48 12 26 26 16 30 30 22 50z" fill="url(#rgRock)" stroke="#1e1a16" stroke-width="1.1"/>
+      <path d="M34 16 50 22 56 44 44 52 34 32z" fill="url(#rgRock)" stroke="#1e1a16" stroke-width="1.1"/>
+      <path d="M26 16l4 14-8 20 12 2 10-20-10-16z" fill="#3a2a22"/>
+      <g fill="url(#lgIronOre)" stroke="#5a2a0a" stroke-width=".8"><path d="M27 24l6-2 3 5-5 4z"/><path d="M25 36l7-2 3 6-6 3z"/><path d="M33 44l5-1 2 4-5 2z"/></g>
+      <g fill="#ffe0b0" opacity=".9"><circle cx="30" cy="25" r="1"/><circle cx="29" cy="37" r="1"/></g>`;
+  // A coal seam: black, glinting layers in grey rock.
+  TILES.coalseam = `<ellipse cx="32" cy="56" rx="23" ry="3.5" fill="#000" opacity=".35"/>
+      <path d="M8 50 10 24 24 12 46 14 56 30 52 50z" fill="url(#rgRock)" stroke="#1e1a16" stroke-width="1.1"/>
+      <path d="M10 30c10-4 20 2 30-2s12-2 16 0l1 6c-6 0-10 2-16 4-10 4-22-2-31 2z" fill="#16171b" stroke="#000" stroke-width=".8"/>
+      <path d="M9 42c12-3 22 1 32-1s12 0 14 1l-1 5c-4-1-8 0-14 1-10 2-20-2-31 0z" fill="#1c1d22" stroke="#000" stroke-width=".8"/>
+      <g fill="#8a94a8"><circle cx="20" cy="31" r="1"/><circle cx="36" cy="30" r="1.1"/><circle cx="46" cy="32" r=".9"/><circle cx="28" cy="44" r="1"/><circle cx="44" cy="43" r=".9"/></g>`;
+  // A torn scrap of map: parchment, a dotted trail and a red X.
+  TILES.mapscrap = `<ellipse cx="32" cy="56" rx="22" ry="3" fill="#000" opacity=".3"/>
+      <path d="M10 14l14-2 4 4 10-3 16 3-2 12 3 8-4 14-12-2-6 4-14-3-8 2 2-14-3-9z" fill="#ead6a6" stroke="#5a4020" stroke-width="1.2"/>
+      <path d="M10 14l14-2 4 4" fill="none" stroke="#a0804a" stroke-width="2" opacity=".5"/>
+      <path d="M16 44c6-4 6-12 14-14s10-8 16-10" fill="none" stroke="#7a4a2a" stroke-width="1.4" stroke-dasharray="2.4 2.4"/>
+      <path d="M43 17l6 6M49 17l-6 6" stroke="#a0281a" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M18 22l3-5 3 5zM22 24l3-5 3 5z" fill="#c8b890" stroke="#5a4020" stroke-width=".7"/><path d="M34 40q3-2 6 0t6 0" fill="none" stroke="#4a7a8a" stroke-width="1"/>`;
+  // A relic shard: a glowing crystal splinter in a broken gold setting.
+  TILES.relicshard = `<ellipse cx="32" cy="57" rx="18" ry="3" fill="#000" opacity=".3"/>
+      <g filter="url(#fGlow)"><path d="M32 6l10 18-4 26-6 6-6-6-4-26z" fill="url(#lgStar)" stroke="#2a1a5a" stroke-width="1.2"/></g>
+      <path d="M32 6v50M22 24h20M32 6l-4 44M32 6l6 44" stroke="#fff" stroke-width=".7" opacity=".55" fill="none"/>
+      <path d="M20 44c4 6 8 8 12 8s8-2 12-8l-2-2c-4 4-6 6-10 6s-6-2-10-6z" fill="url(#lgGold)" stroke="#6a4a08" stroke-width="1"/>
+      <path d="M44 42l4-3 1 4M20 42l-4-3-1 4" stroke="#6a4a08" stroke-width="1" fill="url(#lgGold)"/><circle cx="32" cy="50" r="1.6" fill="#e0324b"/>`;
   TILES.mushroom = TILES.leaves;
 
   // ---------- gear icons: shape by type, finish by tier ----------
@@ -820,5 +861,6 @@ window.Art = (() => {
     document.body.style.setProperty('--scene-art', SCENES[scene] || 'none');
   }
 
-  return { injectDefs, WORLD, tile, piece, frame, setScene, hasPiece: k => !!PIECES[k] || !!WIDE[k] || !!TALL[k] };
+  const any = k => tile(k) || piece(k);
+  return { injectDefs, WORLD, tile, piece, any, frame, setScene, hasPiece: k => !!PIECES[k] || !!WIDE[k] || !!TALL[k] };
 })();

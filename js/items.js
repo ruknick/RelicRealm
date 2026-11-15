@@ -13,9 +13,10 @@ window.Items = (() => {
     [['key', 'Old keys'], ['goldkey', 'Gold keys'], ['crystalkey', 'Crystal keys']].forEach(([k, n]) => {
       html += card(itemIcon(k), n, `×${inv[k]}`, Data.ITEMS[k].desc + (k === 'key' ? ' Upgrade 2 Old keys + 6 gold → Gold key in the Workshop.' : k === 'goldkey' ? ' Upgrade 2 Gold keys + water & coal → Crystal key.' : ''), inv[k] > 0);
     });
-    html += card('🗺️', 'Goblin map', `${st.scraps.goblin}/3`, '3 scraps reveal a goblin village on the world map.', st.scraps.goblin > 0);
-    html += card('🗺️', 'Dwarf map', `${st.scraps.dwarf}/3`, '3 scraps reveal a dwarf stronghold on the world map.', st.scraps.dwarf > 0);
-    html += card('💎', 'Relic shards', `${Object.keys(st.shardFrom).length}/5`, 'Each shard reveals itself to one who masters its land. 5 shards + 3 gold bars forge the Old King\'s Crown.<br>'
+    const pic = k => `<div class="ic-art">${Art.any(k)}</div>`;
+    html += card(pic('mapscrap'), 'Goblin map', `${st.scraps.goblin}/3`, '3 scraps reveal a goblin village on the world map.', st.scraps.goblin > 0);
+    html += card(pic('mapscrap'), 'Dwarf map', `${st.scraps.dwarf}/3`, '3 scraps reveal a dwarf stronghold on the world map.', st.scraps.dwarf > 0);
+    html += card(pic('relicshard'), 'Relic shards', `${Object.keys(st.shardFrom).length}/5`, 'Each shard reveals itself to one who masters its land. 5 shards + 3 gold bars forge the Old King\'s Crown.<br>'
       + Data.SHARDS.map(x => `${st.shardFrom[x.id] ? '✅' : '⬜'} ${x.icon} ${x.how}`).join('<br>'), st.shards > 0 || st.inventory.crown > 0);
     html += card('👑', 'Old King\'s Crown', inv.crown ? '✓' : '', Data.ITEMS.crown.desc, inv.crown > 0);
     for (const [enemy, title] of [['goblin', '🔥 Goblin spoils'], ['dwarf', '⚒️ Dwarf spoils']]) {
