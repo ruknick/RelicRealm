@@ -1,7 +1,7 @@
 # Tile Realm: The Shattered Crown (match-3 prototype)
 
 A browser prototype of the core loop: **gather → find → craft → raid**.
-It's plain HTML/CSS/JS with no build step and no backend. Progress is saved in `localStorage`.
+It's plain HTML/CSS/JS with no build step. Progress is saved in `localStorage` and, when played as a claude.ai artifact, also to a private per-player record in the artifact's database (the newer save wins on load).
 
 ## Look & layout
 - **Old-world theme:** parchment cards with ink text, brass and red-wax buttons, serif lettering, on a dark wood background, matching the hand-inked map.

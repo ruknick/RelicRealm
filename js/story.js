@@ -135,9 +135,10 @@ window.Story = (() => {
           ${legacy ? `<button class="big" id="t-legacy">▶ Continue <small>Level ${App.level} · create your character, keep your progress</small></button>` : ''}
           <button class="big ${has || legacy ? 'alt' : ''}" id="t-new">✨ New game</button>
           ${has ? '<button class="link" id="t-intro">Watch the story again</button>' : ''}
+          <p class="cloud-status" id="cloud-status">${App.cloudStatus()}</p>
         </div></div>`;
     App.go('title');
-    const on = (id, f) => { const b = document.getElementById(id); if (b) b.onclick = f; };
+    const on = (id, f) => { const b = document.getElementById(id); if (b) { b.onclick = f; b.disabled = !App.cloudReady; } };
     on('t-continue', () => { App.go('home'); });
     on('t-legacy', () => create(true));
     on('t-intro', () => intro(() => App.go('home')));

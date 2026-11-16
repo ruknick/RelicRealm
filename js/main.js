@@ -37,10 +37,16 @@ window.App = (() => {
   }
 
   function load() {
+    let raw = null;
+    try { raw = localStorage.getItem(KEY); } catch (e) { /* storage blocked */ }
+    fromJson(raw);
+  }
+  // Build the game state from a saved JSON string (or a fresh game if there is none).
+  let cloudReady = false;
+  function fromJson(raw) {
     const base = fresh();
     state = base;
     try {
-      const raw = localStorage.getItem(KEY);
       if (!raw) return;
       const s = JSON.parse(raw);
       state = {
@@ -70,6 +76,7 @@ window.App = (() => {
         starterGear: !!s.starterGear,
         debug: { ...base.debug, ...(s.debug || {}) },
         heroAt: s.heroAt || 'camp',
+        savedAt: s.savedAt || 0,
         profile: s.profile || null,
         story: s.story || { chapter: 0, flags: {}, places: {}, introSeen: false },
       };
@@ -200,9 +207,57 @@ window.App = (() => {
   }
 
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* private mode etc. */ }
+    state.savedAt = Date.now();
+    const json = JSON.stringify(state);
+    try { localStorage.setItem(KEY, json); } catch (e) { /* private mode etc. */ }
+    Cloud.queue(json);
     renderStock();
   }
+
+  // ---------- cloud save: kept in the artifact's database, private to each player ----------
+  // Browser storage can be wiped when the page reopens inside the Claude app, so every save is
+  // also written (a moment later, batched) to a per-player record tied to the viewer's account.
+  const Cloud = (() => {
+    let ref = null, pending = null, timer = null, writing = false, status = 'checking';
+    const setStatus = s => { status = s; const el = document.getElementById('cloud-status'); if (el) el.innerHTML = statusText(); };
+    const statusText = () => ({
+      checking: '☁️ Looking for your saved game…',
+      on: '☁️ Progress saves to your Claude account',
+      off: '⚠️ Cloud save unavailable — progress is kept on this device only',
+    })[status];
+    async function flush() {
+      timer = null;
+      if (!ref || !pending || writing) return;
+      const json = pending; pending = null; writing = true;
+      try { await ref.set({ json, savedAt: Date.now() }); } catch (e) { pending = pending || json; }
+      writing = false;
+      if (pending && !timer) timer = setTimeout(flush, 2000);
+    }
+    function queue(json) { pending = json; if (ref && !timer) timer = setTimeout(flush, 1500); }
+    // Find this player's cloud save. Resolves with its JSON (or null) within ~10 s.
+    async function connect() {
+      const timeout = new Promise(r => setTimeout(() => r('timeout'), 10000));
+      const work = (async () => {
+        if (!window.claude || !window.claude.use) return null;
+        const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+        if (!db || !user) return null;
+        const uid = await user.id();
+        if (!uid) return null;
+        const r = db.collection('data/users/' + uid).doc('save');
+        const snap = await r.get();
+        ref = r;
+        return { json: snap.exists ? snap.data().json : null };
+      })().catch(() => null);
+      const res = await Promise.race([work, timeout]);
+      if (!res || res === 'timeout') { setStatus('off'); return null; }
+      setStatus('on');
+      return res.json || null;
+    }
+    // Write now (e.g. when the page is being hidden).
+    function now() { if (timer) { clearTimeout(timer); flush(); } }
+    return { queue, connect, now, statusText };
+  })();
+  document.addEventListener('visibilitychange', () => { if (document.hidden) Cloud.now(); });
 
   // ---------- levels ----------
   const level = () => Data.levelFromXp(state.xp);
@@ -429,6 +484,7 @@ window.App = (() => {
     document.getElementById('craft-title-art').innerHTML = Art.piece('smithhammer');
     Art.injectDefs();
     load();
+    const loadedAt = state.profile || state.xp > 0 ? (state.savedAt || 1) : 0;   // the real save on this device, before startup writes
     renderStock();
     Gather.init();
     Battle.init();
@@ -457,10 +513,23 @@ window.App = (() => {
     on('btn-journal', () => go('journal'));
     on('journal-back', () => go('home'));
     Story.title();
+    Cloud.connect().then(json => {
+      const localAt = loadedAt;
+      let cloudAt = 0;
+      try { cloudAt = json ? (JSON.parse(json).savedAt || 1) : 0; } catch (e) { /* ignore */ }
+      if (json && cloudAt > localAt) {
+        fromJson(json);
+        try { localStorage.setItem(KEY, json); } catch (e) { /* ignore */ }
+      } else if (state.profile || state.xp > 0) {
+        Cloud.queue(JSON.stringify(state));   // first time: upload what this device has
+      }
+      cloudReady = true;
+      if (!document.getElementById('screen-title').classList.contains('hidden')) Story.title();
+    });
   }
 
   return {
-    ENEMY_NAME, grantSpecial, addXP, bountyEvent: (id, n) => Bounty.event(id, n), levelPerks, get level() { return level(); }, boot, go, save, newGame, tripDone, choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
+    ENEMY_NAME, grantSpecial, addXP, bountyEvent: (id, n) => Bounty.event(id, n), levelPerks, get level() { return level(); }, boot, go, save, newGame, tripDone, get cloudReady() { return cloudReady; }, cloudStatus: () => Cloud.statusText(), choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
     addGear, gearCount, equip, unequip, wear, captureWeapon, recoverWeapons, grantShard, grantChart, heal, hurtPlayer, eatFood, eatMeal, foodTotal, spendFood, get maxHp() { return maxHp(); },
     get state() { return state; },
   };
