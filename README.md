@@ -105,6 +105,19 @@ An antique atlas page of Valdmoor: shaded mountain ranges with snowcaps, the den
 - Marching to a raid or boss spends rations plainest-first. Every food counts as one ration.
 - **Kitchen** (Workshop) meals: Trail bread +5, Fish chowder +8, Honey cake +12, Salmon & mushroom pie +15, Swordfish steak +20, **Kingfish feast +40**.
 
+### 🎯 Trip goals & stars
+Every gathering trip gives two goals: a **gather** goal ("Gather 9 Hide") plus one of **break** obstacles, **defeat** monsters, or **clear** the land's blocker. The goal bar above the board tracks them.
+- ★ one goal: gold
+- ★★ both goals: also XP
+- ★★★ both with 5+ moves to spare: also a reward chest (10 gold + 2 oak, silver or pearl)
+
+### 🌿 Each land's own blocker (from land Lv 5)
+- **Forest, creeping vines:** spread to a neighbouring tile every few moves.
+- **Iron Hills, crystal clusters:** take two matches to shatter, and often hold silver.
+- **Sunlit Coast, barnacles:** crust the shore rows, spread with the tide, and sometimes drop shells.
+
+All three are cleared by matching beside them. More appear as the land levels up, and they spread faster. Each one is explained the first time you meet it.
+
 ### 👺 Monsters on gathering boards
 Goblin raiders (Forest), cave goblins (Iron Hills), shore crabs (Coast). Lands go up to **Lv 35**, and monsters scale with the land's level:
 - **Numbers:** up to 3 on the board when you arrive, a new one every 8 → 3 moves, at most 2 → 6.

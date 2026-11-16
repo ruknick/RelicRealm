@@ -77,6 +77,8 @@ window.App = (() => {
         debug: { ...base.debug, ...(s.debug || {}) },
         heroAt: s.heroAt || 'camp',
         savedAt: s.savedAt || 0,
+        seenBlockers: s.seenBlockers || {},
+        bestStars: s.bestStars || {},
         profile: s.profile || null,
         story: s.story || { chapter: 0, flags: {}, places: {}, introSeen: false },
       };

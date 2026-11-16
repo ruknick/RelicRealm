@@ -452,6 +452,20 @@ window.Art = (() => {
         <rect x="12" y="6.5" width="6" height="16" rx="1.4" fill="#4a5058" stroke="#14161a" stroke-width="1.1"/>
         <path d="M19 12h8M37 12h8" stroke="#d6dde5" stroke-width="1.1" opacity=".75"/>
       </g>`;
+  // Each land's blocker
+  PIECES.vine = `<rect x="4" y="4" width="56" height="56" rx="10" fill="#1e3014" opacity=".55"/>
+      <g fill="none" stroke-linecap="round"><path d="M6 54C16 40 10 26 24 18S44 14 58 6" stroke="#2c4a1c" stroke-width="5"/><path d="M6 54C16 40 10 26 24 18S44 14 58 6" stroke="#5a8a2c" stroke-width="2.6"/>
+        <path d="M6 12c14 6 18 20 28 26s18 8 24 20" stroke="#2c4a1c" stroke-width="4"/><path d="M6 12c14 6 18 20 28 26s18 8 24 20" stroke="#6a9a32" stroke-width="2"/></g>
+      <g fill="#7aa83a" stroke="#2c4a1c" stroke-width=".9"><path d="M16 34c-6-2-8-8-6-12 5 1 8 6 6 12z"/><path d="M36 14c2-6 8-8 12-6-1 5-6 8-12 6z"/><path d="M40 44c6-1 10 3 10 8-5 0-9-3-10-8z"/><path d="M22 22c-2 6-8 8-12 6 1-5 6-8 12-6z"/></g>
+      <g fill="#c23a2a"><circle cx="30" cy="30" r="2"/><circle cx="46" cy="22" r="1.6"/></g>`;
+  PIECES.crystal = `<ellipse cx="32" cy="56" rx="22" ry="4" fill="#000" opacity=".3"/><path d="M8 56c4-6 12-8 24-8s20 2 24 8z" fill="#5a5651"/>
+      <g stroke="#2a4a6a" stroke-width="1.2" stroke-linejoin="round" filter="url(#fGlow)">
+        <path d="M18 52l-4-22 8-10 6 12-2 20z" fill="#9ad4f0"/><path d="M28 52l2-34 8-12 6 14-6 32z" fill="#c4ecff"/><path d="M40 52l4-24 8-4 4 10-8 18z" fill="#86c4e4"/></g>
+      <path d="M30 18l8-12M22 20l6 12M46 24l4 10" stroke="#fff" stroke-width="1.2" opacity=".8" fill="none"/>`;
+  PIECES.barnacle = `<ellipse cx="32" cy="56" rx="24" ry="4" fill="#000" opacity=".3"/><path d="M6 54c0-18 12-30 26-30s26 12 26 30z" fill="url(#rgRock)" stroke="#1e1a16" stroke-width="1.1"/>
+      <g fill="#d8d0c0" stroke="#6a6458" stroke-width="1"><path d="M16 46l3-9h6l3 9z"/><path d="M28 36l3-9h6l3 9z"/><path d="M38 48l3-8h5l3 8z"/><path d="M22 52l2-6h4l2 6z"/></g>
+      <g fill="#3a3630"><ellipse cx="22" cy="37.5" rx="2" ry=".9"/><ellipse cx="34" cy="27.5" rx="2" ry=".9"/><ellipse cx="43.5" cy="40.5" rx="1.8" ry=".8"/></g>
+      <path d="M10 54c6-2 10 0 14-2" stroke="#2e4a3a" stroke-width="2" fill="none"/>`;
   Object.assign(PIECES, {
     whelp: `<path d="M8 30c-6-10 2-18 10-14l6 8z" fill="#7a1e14" stroke="#2a0806"/><path d="M56 30c6-10-2-18-10-14l-6 8z" fill="#7a1e14" stroke="#2a0806"/>
       <ellipse cx="32" cy="40" rx="15" ry="13" fill="#b0301c" stroke="#2a0806" stroke-width="1.4"/><path d="M24 44c4 4 12 4 16 0" stroke="#ffb070" stroke-width="2" fill="none"/>

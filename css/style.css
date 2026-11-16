@@ -1320,3 +1320,12 @@ body[data-scene="ocean"] .hint, body[data-scene="ocean"] p.hint { color: #e6dcc4
 .si { display: inline-block; width: 1.25em; height: 1.25em; vertical-align: -.3em; } .si svg { width: 100%; height: 100%; }
 .st-big { width: 84px; height: 84px; margin: 0 auto 6px; } .st-big svg { width: 100%; height: 100%; }
 .cloud-status { margin: 4px 0 0; font-size: .78rem; color: var(--ink-soft); font-style: italic; }
+
+/* ---------- trip goals ---------- */
+.goalbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: 0 2px 6px; padding: 4px 8px; border-radius: 6px; font-size: .78rem; font-family: Georgia, serif;
+  background: rgba(28,19,11,.72); color: #e8d6b0; border: 1px solid rgba(242,228,194,.2); }
+.goalbar .gl b { color: #ffe08a; } .goalbar .gl.done { color: #9fe07a; text-decoration: line-through; } .goalbar .gl.done b { color: #9fe07a; }
+.goalbar .gl-stars { margin-left: auto; color: #e2b553; letter-spacing: 1px; }
+.trip-stars { text-align: center; font-size: 2rem; letter-spacing: 4px; color: var(--brass); text-shadow: 0 1px 0 #3b2410; }
+.trip-stars .off { color: var(--ink-faint); text-shadow: none; }
+.trip-goals { text-align: left; font-size: .88rem; margin: 2px 0 6px; } .trip-goals .done { color: #3d5a14; } .trip-goals small { color: var(--ink-soft); font-size: .72rem; }

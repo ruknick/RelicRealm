@@ -73,6 +73,86 @@ window.Gather = (() => {
     finds: 'ocean',
     hint: 'Water quenches iron; fish feed your raids. Pick coral for coral, cut kelp for oysters. Pearls shimmer among the fish.',
   };
+  // ---------- each land's own blocker (arrives at land Lv 5) ----------
+  const BLOCKERS = {
+    forest: { kind: 'vine', name: 'creeping vines', hp: 1, spreads: true, rows: [1, 6],
+      intro: '🌿 New: <b>Creeping vines!</b> They choke a tile and spread every few moves. Match beside them to tear them out.' },
+    mine: { kind: 'crystal', name: 'crystal clusters', hp: 2, spreads: false, rows: [1, 6], give: 'silver',
+      intro: '💎 New: <b>Crystal clusters!</b> They take two matches beside them to shatter — and hide a little silver.' },
+    ocean: { kind: 'barnacle', name: 'barnacle rocks', hp: 1, spreads: true, rows: [4, 6], give: 'shell',
+      intro: '🐚 New: <b>Barnacles!</b> They crust over the shore rows and spread with the tide. Match beside them to scrape them off.' },
+  };
+  const BLOCKER_LV = 5;
+  const blockerCount = L => (L < BLOCKER_LV ? 0 : Math.min(7, 2 + Math.floor((L - BLOCKER_LV) / 6)));
+  const spreadEvery = L => Math.max(3, 6 - Math.floor(L / 10));
+
+  // ---------- trip goals: two per trip, 1-3 stars ----------
+  const GOAL_RES = { forest: ['wood', 'hide', 'food'], mine: ['iron', 'coal', 'stone'], ocean: ['herring', 'water', 'wood'] };
+  const BREAK = { forest: ['stump', 'thorn'], mine: ['boulder', 'vein'], ocean: ['coral', 'kelp'] };
+  const BREAK_NAME = { forest: 'stumps or thornbushes', mine: 'boulders or veins', ocean: 'coral or kelp' };
+  const STAR_RARE = { forest: 'oak', mine: 'silver', ocean: 'pearl' };
+  function makeGoals(L) {
+    const res = pick(GOAL_RES[land.key]);
+    const goals = [{ type: 'collect', key: res, need: Math.min(16, 6 + Math.floor(L / 4)), have: 0,
+      text: n => `Gather ${n} ${label(res)}` }];
+    const second = [
+      { type: 'break', need: Math.min(4, 2 + Math.floor(L / 8)), have: 0, text: n => `Break ${n} ${BREAK_NAME[land.key]}` },
+      { type: 'slay', need: Math.min(4, 1 + Math.floor(L / 8)), have: 0, text: n => `Defeat ${n} ${land.monster.name}${n > 1 ? 's' : ''}` },
+    ];
+    if (L >= BLOCKER_LV) second.push({ type: 'blocker', need: Math.min(8, 3 + Math.floor(L / 6)), have: 0, text: n => `Clear ${n} ${BLOCKERS[land.key].name}` });
+    goals.push(pick(second));
+    return goals;
+  }
+  function goalProgress(type, key, n = 1) {
+    if (!run || !run.goals) return;
+    run.goals.forEach(gl => {
+      if (gl.type !== type || (gl.key && gl.key !== key) || gl.have >= gl.need) return;
+      gl.have = Math.min(gl.need, gl.have + n);
+      if (gl.have >= gl.need) {
+        gl.doneAt = run.moves;
+        board.toast(`🎯 Goal complete: ${gl.text(gl.need)}!`, 'win', 2000);
+        Sound.sfx('rare');
+      }
+    });
+    hudGoals();
+  }
+  const starsNow = () => {
+    const done = run.goals.filter(x => x.have >= x.need);
+    return done.length === 2 ? (done.every(x => x.doneAt >= 5) ? 3 : 2) : done.length;
+  };
+  function hudGoals() {
+    const el = document.getElementById('g-goals');
+    if (!el || !run) return;
+    el.innerHTML = '🎯 ' + run.goals.map(x => `<span class="gl${x.have >= x.need ? ' done' : ''}">${x.text(x.need)} <b>${x.have}/${x.need}</b></span>`).join('')
+      + `<span class="gl-stars">${'★'.repeat(starsNow())}${'☆'.repeat(3 - starsNow())}</span>`;
+  }
+
+  function addBlocker(r, c, appear = false) {
+    const B = BLOCKERS[land.key];
+    return board.addPiece({ kind: B.kind, label: '', mat: 'other', hp: B.hp, art: B.kind }, r, c, 1, appear);
+  }
+  function blockerSpots() {
+    const [lo, hi] = BLOCKERS[land.key].rows;
+    return board.tileCells(r => r >= lo && r <= hi);
+  }
+  async function spreadBlockers() {
+    const B = BLOCKERS[land.key];
+    if (!B.spreads || run.landLv < BLOCKER_LV || ++run.sinceSpread < spreadEvery(run.landLv)) return;
+    run.sinceSpread = 0;
+    const have = board.piecesOf(B.kind);
+    if (!have.length || have.length >= 10) return;
+    const [lo, hi] = B.rows;
+    const from = pick(have);
+    const opts = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dr, dc]) => [from.r + dr, from.c + dc])
+      .filter(([r, c]) => r >= lo && r <= hi && c >= 0 && c < SIZE && board.isTile(board.grid[r][c]));
+    if (!opts.length) return;
+    const [r, c] = pick(opts);
+    addBlocker(r, c, true);
+    board.render();
+    board.toast(land.key === 'forest' ? '🌿 The vines creep further!' : '🐚 The tide spreads the barnacles!', 'alert', 1400);
+    await board.wait(300);
+  }
+
   const TOOL_BONUS = { wood: 'hatchet', hide: 'knife' };
 
   let board = null;
@@ -144,6 +224,7 @@ window.Gather = (() => {
 
   // ---------- backpack ----------
   function addToBackpack(type, n, cell, delay = 0) {
+    goalProgress('collect', type, n);
     if (!(type in run.backpack)) { App.state.stockpile[type] += n; App.save(); board.float(cell, `+${n} ${label(type)}`, 'gain', delay); return; }
     const add = Math.min(n, run.cap - bagTotal());
     if (add > 0) {
@@ -439,6 +520,13 @@ window.Gather = (() => {
         if (p.ore && p.ore !== 'iron') discoverMaterial(p.ore, cell);
       }
       if (!board.hurt(p, dmg)) return;
+      if (BREAK[land.key].includes(p.kind)) goalProgress('break');
+      if (p.kind === 'monster') goalProgress('slay');
+      if (p.kind === BLOCKERS[land.key].kind) {
+        goalProgress('blocker');
+        const B = BLOCKERS[land.key];
+        if (B.give && Math.random() < (B.give === 'silver' ? 0.6 : 0.35)) addToBackpack(B.give, 1, cell);
+      }
       xp(p.kind === 'monster' ? Data.XP.monster : p.kind === 'thief' || p.kind === 'cart' || p.kind === 'crab' ? Data.XP.chase : p.kind === 'tracks' || p.kind === 'rune' ? Data.XP.discover : Data.XP.obstacle);
       switch (p.kind) {
         case 'stump':
@@ -515,6 +603,9 @@ window.Gather = (() => {
         rune: 'A cracked rune stone — match next to it to read it.',
         coral: `Coral (${p.hp} HP). Only a pick can break it — gives coral for sea gear, sometimes an oyster.`,
         kelp: `Kelp tangle (${p.hp} HP) — something's caught in it! Only an axe can cut it.`,
+        vine: 'Creeping vines — they spread every few moves. Match beside them to tear them out.',
+        crystal: `Crystal cluster (${p.hp} HP) — match beside it to chip it. It hides silver.`,
+        barnacle: 'Barnacles crusting the shore — they spread with the tide. Match beside them to scrape them off.',
         crab: 'A giant crab with stolen loot! Only a weapon can stop it before it reaches the sea. Coral spears hit it extra hard.',
       }[p.kind];
       board.toast(msg || 'Match next to it.', '', 2800);
@@ -529,6 +620,8 @@ window.Gather = (() => {
       if (wasMove) {
         await moveEvent();
         await monstersAct();
+        if (run.ended) return;
+        await spreadBlockers();
         if (!run.eventSpawned && run.movesMade >= EVENT_AFTER && Math.random() < EVENT_CHANCE) {
           run.eventSpawned = true;
           run.eventPiece = spawnOn(land.event.piece, (r, c) => c === 0 && r >= 1, land.event.msg);
@@ -562,6 +655,8 @@ window.Gather = (() => {
   };
 
   // ---------- end of run ----------
+  const tripReward = r => (r.stars ? `<p class="reward">Goal reward: ${[
+    `${5 + Math.floor(r.landLv / 2)} gold`, r.stars >= 2 ? `${15 + r.landLv * 2} XP` : '', r.stars >= 3 ? `reward chest (10 gold + 2 ${Data.RESOURCES[STAR_RARE[land.key]].label})` : ''].filter(Boolean).join(' · ')}</p>` : '<p class="hint">No goals met this time.</p>');
   function finish(reason) {
     if (run.ended) return;
     run.ended = true;
@@ -583,6 +678,15 @@ window.Gather = (() => {
     if (run.lost) notes.unshift(`💀 <b>You collapsed</b> and dropped ${run.lost} things on the way home.`);
     notes.push(`❤️ ${App.state.hp}/${App.maxHp} after resting at camp.`);
     if (warn) notes.unshift(warn);
+    // Trip goals: stars and their rewards.
+    const stars = reason === 'collapse' ? Math.min(1, starsNow()) : starsNow();
+    const L = run.landLv, rew = [];
+    if (stars >= 1) { App.state.stockpile.gold += 5 + Math.floor(L / 2); rew.push(`${5 + Math.floor(L / 2)} gold`); }
+    if (stars >= 2) { const x = 15 + L * 2; App.addXP(x); run.xp += x; rew.push(`${x} XP`); }
+    if (stars >= 3) { const rr = STAR_RARE[land.key]; App.state.stockpile[rr] += 2; App.state.stockpile.gold += 10; rew.push(`a reward chest: 10 gold + 2 ${Data.RESOURCES[rr].label}`); }
+    run.stars = stars;
+    const best = App.state.bestStars = App.state.bestStars || {};
+    best[land.key] = Math.max(best[land.key] || 0, stars);
     notes.unshift(`⭐ +${run.xp} XP · Level ${App.level}`);
     const rec = App.state.lands[land.key];
     rec.runs++;
@@ -594,7 +698,11 @@ window.Gather = (() => {
     App.save();
     App.choose({
       title: reason === 'collapse' ? 'You collapsed!' : reason === 'moves' ? 'Out of moves' : 'Back home safe',
-      html: `<table class="sum-table"><thead><tr><th></th><th>Banked</th></tr></thead><tbody>${rows}</tbody></table>
+      html: `<div class="trip-stars">${'<span>★</span>'.repeat(run.stars)}${'<span class="off">★</span>'.repeat(3 - run.stars)}</div>
+             <div class="trip-goals">${run.goals.map(x => `<div class="${x.have >= x.need ? 'done' : ''}">${x.have >= x.need ? '✓' : '○'} ${x.text(x.need)} <b>${x.have}/${x.need}</b></div>`).join('')}
+             <small>★ one goal · ★★ both · ★★★ both with 5+ moves to spare</small></div>
+             ${tripReward(run)}
+             <table class="sum-table"><thead><tr><th></th><th>Banked</th></tr></thead><tbody>${rows}</tbody></table>
              ${run.finds.length ? `<div class="sum-spoils"><b>Finds</b><br>${run.finds.join('<br>')}</div>` : ''}
              ${notes.length ? `<p class="sum-notes">${notes.join('<br>')}</p>` : ''}`,
       buttons: [{ id: 'again', label: `${land.icon} Gather again` }, { id: 'home', label: 'Home', cls: 'alt' }],
@@ -624,8 +732,9 @@ window.Gather = (() => {
       moves: MOVES, movesMade: 0, backpack: Object.fromEntries(land.bag.map(t => [t, 0])), overflow: 0, fullWarned: false,
       finds: [], told: {}, eventPiece: null, eventSpawned: false,
       discoverSpawned: false, followed: false, discovered: false, marked: false, ended: false,
-      mon: Data.monsterPlan(landLv), sinceMon: 0, slain: 0,
+      mon: Data.monsterPlan(landLv), sinceMon: 0, slain: 0, sinceSpread: 0,
     };
+    run.goals = makeGoals(landLv);
     // Obstacles first (rows 1-6), then tiles, then buried finds under random tiles.
     const used = new Set();
     for (const kind of land.obstacles(lv.startObstacles)) {
@@ -636,6 +745,12 @@ window.Gather = (() => {
     }
     board.fillEmpty();
     for (let i = 0; i < run.mon.start; i++) spawnMonster(false);
+    for (let i = 0, spots0 = blockerSpots().sort(() => Math.random() - 0.5); i < blockerCount(landLv) && i < spots0.length; i++) addBlocker(...spots0[i]);
+    if (landLv >= BLOCKER_LV && !(App.state.seenBlockers || {})[key]) {
+      App.state.seenBlockers = { ...(App.state.seenBlockers || {}), [key]: true };
+      App.save();
+      setTimeout(() => App.choose({ title: 'A new obstacle', html: `<p>${BLOCKERS[key].intro}</p>`, buttons: [{ id: 'ok', label: 'Got it' }] }), 900);
+    }
     const spots = board.tileCells().sort(() => Math.random() - 0.5).slice(0, lv.buried);
     spots.forEach(([r, c]) => board.buried.set(`${r},${c}`, Data.rollFrom(Data.FINDS[land.finds])));
     // A bronze chest's Old key is on the same board: buried, or carried by one of the monsters.
@@ -656,6 +771,7 @@ window.Gather = (() => {
     board.scheduleHint();
     hud();
     hudLevel();
+    hudGoals();
     Sound.music(land.music);
     if (App.state.debug.discoverNow && land.discover) {
       run.discoverSpawned = true;
