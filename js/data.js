@@ -24,6 +24,10 @@ window.Data = (() => {
     shell:     { label: 'Crab shell' },
     starbar:   { label: 'Starsilver bar' },
     herring:   { label: 'Herring' },
+    wheat:     { label: 'Wheat' },
+    apple:     { label: 'Apples' },
+    egg:       { label: 'Eggs' },
+    meat:      { label: 'Meat' },
     mushroom:  { label: 'Wild mushrooms' },
     salmon:    { label: 'Salmon' },
     honey:     { label: 'Wild honey' },
@@ -162,9 +166,11 @@ window.Data = (() => {
     cartbp:     { name: 'Mine-cart blueprint', icon: '🛤️', spoil: 'dwarf', desc: 'Unlocks the Mine-cart defense.' },
     crown:      { name: 'Old King\'s Crown', icon: '👑', trinket: true, desc: 'Legendary. Forged from the five relic shards and gold. On raids their defenders wait 2 moves longer, and the way to Emberwyrm opens.' },
     // Provisions
-    bread:      { name: 'Trail bread', icon: '🍞', special: true, instant: true, heal: 5, desc: 'Berry-studded bread: +5 ❤️.' },
+    bread:      { name: 'Trail bread', icon: '🍞', special: true, instant: true, heal: 5, desc: 'Plain wheat bread: +5 ❤️.' },
     chowder:    { name: 'Fish chowder', icon: '🍲', art: 'chowder', special: true, instant: true, heal: 8, desc: 'Herring chowder in a bottle: +8 ❤️.' },
     honeycake:  { name: 'Honey cake', icon: '🍯', special: true, instant: true, heal: 12, desc: 'Sweet and filling: +12 ❤️.' },
+    roastchicken: { name: 'Roast chicken', icon: '🍗', special: true, instant: true, heal: 10, desc: 'Spit-roasted over a wood fire: +10 ❤️.' },
+    farmpie:    { name: 'Farmhouse pie', icon: '🥧', special: true, instant: true, heal: 18, desc: 'Meat, wheat and egg under a golden crust: +18 ❤️.' },
     salmonpie:  { name: 'Salmon & mushroom pie', icon: '🥧', special: true, instant: true, heal: 15, desc: 'A proper hot pie: +15 ❤️.' },
     swordsteak: { name: 'Swordfish steak', icon: '🐟', special: true, instant: true, heal: 20, desc: 'Grilled over coals: +20 ❤️.' },
     feast:      { name: 'Kingfish feast', icon: '👑', special: true, instant: true, heal: 40, desc: 'A feast fit for the Old King: +40 ❤️.' },
@@ -249,9 +255,9 @@ window.Data = (() => {
   const MAT_LABEL = { wood: 'wood', stone: 'stone', iron: 'iron', plant: 'thorns', creature: 'creatures', other: 'that' };
 
   // ---------- tile families: rarer woods & ores match with the common one ----------
-  const FAMILY = { mushroom: 'berries', honey: 'berries', salmon: 'fish', swordfish: 'fish', kingfish: 'fish', oak: 'wood', ironwood: 'wood', elderwood: 'wood', silver: 'ore', starsilver: 'ore', pearl: 'fish', emerald: 'stone', sapphire: 'stone', ruby: 'stone' };
+  const FAMILY = { egg: 'hay', mushroom: 'berries', honey: 'berries', salmon: 'fish', swordfish: 'fish', kingfish: 'fish', oak: 'wood', ironwood: 'wood', elderwood: 'wood', silver: 'ore', starsilver: 'ore', pearl: 'fish', emerald: 'stone', sapphire: 'stone', ruby: 'stone' };
   // Rares that only show up in one land (gems glint in Iron Hills rock, not forest stones).
-  const RARE_LAND = { emerald: 'mine', sapphire: 'mine', ruby: 'mine' };
+  const RARE_LAND = { egg: 'farm', emerald: 'mine', sapphire: 'mine', ruby: 'mine' };
   const family = t => FAMILY[t] || t;
   // Spawn weight (per 100 of that family) for each rare type by land level: a teaser first, then common.
   const RARE = {
@@ -262,6 +268,7 @@ window.Data = (() => {
     starsilver: L => (L <= 24 ? 0 : L <= 30 ? 3 : 12),
     pearl:      L => (L <= 6 ? 5 : L <= 15 ? 10 : 15),
     mushroom:   L => (L <= 4 ? 6 : L <= 12 ? 12 : 16),
+    egg:        L => (L <= 4 ? 8 : L <= 12 ? 12 : 16),
     honey:      L => (L <= 11 ? 0 : L <= 20 ? 4 : 9),
     salmon:     L => (L <= 5 ? 4 : L <= 14 ? 12 : 18),
     swordfish:  L => (L <= 14 ? 0 : L <= 24 ? 4 : 9),
@@ -281,6 +288,7 @@ window.Data = (() => {
     emerald:    { use: 'Set it in silver for a Rootstone amulet: your matches chip any obstacle.' },
     sapphire:   { use: 'Set it in silver for a Tidestone amulet: big matches charge more ⚡.' },
     ruby:       { use: 'Set it in silver for an Emberstone amulet: match-strikes on monsters hit harder.' },
+    egg:        { use: 'A fresh egg (+2 ❤️) — the heart of a Farmhouse pie and a Honey cake.' },
     mushroom:   { use: 'Better than berries (+3 ❤️), and the heart of a salmon pie.' },
     honey:      { use: 'Wild honey (+5 ❤️) — bake it into honey cakes.' },
     salmon:     { use: 'A fine fish (+5 ❤️) — bake it into a salmon & mushroom pie.' },
@@ -295,6 +303,7 @@ window.Data = (() => {
   const FINDS = {
     forest: [['cache', 30], ['basket', 22], ['lostclub', 10], ['scrap', 15], ['key', 3], ['nugget', 12], ['chart', 1]],
     mine:   [['orepocket', 32], ['coalseam', 22], ['nugget', 26], ['runescrap', 15], ['key', 2], ['chart', 1]],
+    farm:   [['sack', 30], ['eggs', 25], ['basket', 15], ['nugget', 20], ['key', 3], ['chart', 1]],
     ocean:  [['pearl', 26], ['barrel', 26], ['nugget', 30], ['key', 3], ['basket', 12], ['chart', 1]],
   };
   const FIND_INFO = {
@@ -312,6 +321,8 @@ window.Data = (() => {
     sling:     { icon: '🏹', name: 'Old short bow', desc: 'A pine short bow — added to your gear', art: 'gear:bow:1' },
     pearl:     { icon: '🦪', name: 'Oyster', desc: '+1 pearl, +2 gold', art: 'pearl' },
     barrel:    { icon: '💧', name: 'Fresh-water barrel', desc: '+3 water', art: 'barrel' },
+    sack:      { icon: '🌾', name: 'Sack of grain', desc: '+4 wheat', art: 'sack' },
+    eggs:      { icon: '🥚', name: 'Nest of eggs', desc: '+3 eggs', art: 'egg' },
   };
 
   function rollFrom(list) {
@@ -404,9 +415,11 @@ window.Data = (() => {
     { id: 'hatchet', tier: 'kit', station: 'workbench', cost: { wood: 6, ironbar: 1 } },
     { id: 'knife',   tier: 'kit', station: 'workbench', cost: { wood: 2, ironbar: 1 } },
     { id: 'lamp',    tier: 'kit', station: 'workbench', cost: { coal: 4, ironbar: 1, gold: 2 } },
-    { id: 'bread',   tier: 'food', station: 'workbench', cost: { food: 3, wood: 1 } },
+    { id: 'bread',   tier: 'food', station: 'workbench', cost: { wheat: 2, water: 1 } },
+    { id: 'roastchicken', tier: 'food', station: 'workbench', cost: { meat: 2, wood: 1 } },
+    { id: 'farmpie', tier: 'food', station: 'workbench', cost: { meat: 2, wheat: 2, egg: 1 } },
     { id: 'chowder', tier: 'food', station: 'workbench', cost: { herring: 3, water: 2 } },
-    { id: 'honeycake', tier: 'food', station: 'workbench', cost: { honey: 2, food: 2, wood: 1 } },
+    { id: 'honeycake', tier: 'food', station: 'workbench', cost: { honey: 2, wheat: 1, egg: 1 } },
     { id: 'salmonpie', tier: 'food', station: 'workbench', cost: { salmon: 2, mushroom: 2, wood: 1 } },
     { id: 'swordsteak', tier: 'food', station: 'workbench', cost: { swordfish: 1, coal: 1 } },
     { id: 'feast',   tier: 'food', station: 'workbench', cost: { kingfish: 1, honey: 1, salmon: 1 } },
@@ -437,7 +450,7 @@ window.Data = (() => {
 
 
   // ---------- food: lowest to finest. Each counts as one ration for marching; finer food heals more. ----------
-  const FOODS = { food: 2, herring: 3, mushroom: 3, salmon: 5, honey: 5, swordfish: 8, kingfish: 12 };
+  const FOODS = { food: 2, apple: 2, egg: 2, herring: 3, mushroom: 3, meat: 3, salmon: 5, honey: 5, swordfish: 8, kingfish: 12 };
   const FOOD_ORDER = Object.keys(FOODS);   // eaten / spent lowest first
 
   // ---------- progression ----------
@@ -494,6 +507,10 @@ window.Data = (() => {
     hide:  { from: 'Forest pelts', use: 'Tanned into leather; pit traps' },
     food:  { from: 'Forest berries', use: 'The plainest food (+2 ❤️) · trail bread · marching to raids' },
     herring:   { from: 'Sunlit Coast: the common fish', use: 'Food (+3 ❤️) · fish chowder' },
+    wheat:     { from: 'Golden Fields: wheat sheaves, hay bales', use: 'Bread, pies, honey cake' },
+    apple:     { from: 'Golden Fields: the orchard trees', use: 'Food (+2 ❤️)' },
+    egg:       { from: 'Golden Fields: hidden in the hay, chickens', use: RARE_INFO.egg.use },
+    meat:      { from: 'Golden Fields: chickens and runaway pigs', use: 'Food (+3 ❤️) · roast chicken · farmhouse pie' },
     mushroom:  { from: 'Forest: among the berries (rare)', use: RARE_INFO.mushroom.use },
     honey:     { from: 'Forest Lv 12+: among the berries', use: RARE_INFO.honey.use },
     salmon:    { from: 'Sunlit Coast: among the fish (rare)', use: RARE_INFO.salmon.use },

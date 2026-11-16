@@ -16,7 +16,7 @@ window.App = (() => {
       shardFrom: {},                     // which lands / enemies have given their relic shard
       xp: 0,
       camp: { cells: {}, chest: [1, 3] },
-      lands: { forest: { runs: 0 }, mine: { runs: 0 }, ocean: { runs: 0 } },
+      lands: { forest: { runs: 0 }, mine: { runs: 0 }, ocean: { runs: 0 }, farm: { runs: 0 } },
       enemyWins: { goblin: 0, dwarf: 0 },
       starterDef: false,
       gear: [],                          // owned gear: [{ id, dur }]

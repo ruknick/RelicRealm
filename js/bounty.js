@@ -8,6 +8,8 @@ window.Bounty = (() => {
   const JOBS = [
     { id: 'kill:forest', icon: '👺', need: [4, 8], text: n => `Slay ${n} goblin raiders in the Forest` },
     { id: 'kill:mine', icon: '👹', need: [4, 7], text: n => `Slay ${n} cave goblins in the Iron Hills` },
+    { id: 'kill:farm', icon: '🐔', need: [3, 6], text: n => `Catch ${n} chickens in the Golden Fields` },
+    { id: 'trip:farm', icon: '🌾', need: [2, 3], text: n => `Gather in the Golden Fields ${n} times` },
     { id: 'kill:ocean', icon: '🦀', need: [3, 6], text: n => `Drive off ${n} shore crabs on the Coast` },
     { id: 'trip:forest', icon: '🌲', need: [2, 3], text: n => `Gather in the Forest ${n} times` },
     { id: 'trip:mine', icon: '⛏️', need: [2, 3], text: n => `Gather in the Iron Hills ${n} times` },

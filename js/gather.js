@@ -22,6 +22,9 @@ window.Gather = (() => {
     cart:    { kind: 'cart',    label: '', mat: 'wood',     hp: 1, art: 'cart' },
     coral:   { kind: 'coral',   label: '', mat: 'stone',    hp: 2, art: 'coral', toolOnly: 'pick' },
     kelp:    { kind: 'kelp',    label: '', mat: 'plant',    hp: 1, art: 'kelp', toolOnly: 'axe' },
+    haybale: { kind: 'haybale', label: '', mat: 'plant',    hp: 2, art: 'haybale', toolOnly: 'axe' },
+    molehill:{ kind: 'molehill',label: '', mat: 'stone',    hp: 1, art: 'molehill', toolOnly: 'pick' },
+    pig:     { kind: 'pig',     label: '', mat: 'creature', hp: 1, art: 'pig' },
     crab:    { kind: 'crab',    label: '', mat: 'creature', hp: 1, art: 'crab', kin: 'sea' },
     monster: { kind: 'monster', label: '', mat: 'creature', hp: 1 },
     tracks:  { kind: 'tracks',  label: '', mat: 'other',    hp: 1, art: 'tracks' },
@@ -79,6 +82,8 @@ window.Gather = (() => {
       intro: '🌿 New: <b>Creeping vines!</b> They choke a tile and spread every few moves. Match beside them to tear them out.' },
     mine: { kind: 'crystal', name: 'crystal clusters', hp: 2, spreads: false, rows: [1, 6], give: 'silver',
       intro: '💎 New: <b>Crystal clusters!</b> They take two matches beside them to shatter — and hide a little silver.' },
+    farm: { kind: 'thistle', name: 'thistles', hp: 1, spreads: true, rows: [1, 6],
+      intro: '🌱 New: <b>Thistles!</b> They choke the field and spread every few moves. Match beside them to pull them up.' },
     ocean: { kind: 'barnacle', name: 'barnacle rocks', hp: 1, spreads: true, rows: [4, 6], give: 'shell',
       intro: '🐚 New: <b>Barnacles!</b> They crust over the shore rows and spread with the tide. Match beside them to scrape them off.' },
   };
@@ -87,17 +92,17 @@ window.Gather = (() => {
   const spreadEvery = L => Math.max(3, 6 - Math.floor(L / 10));
 
   // ---------- trip goals: two per trip, 1-3 stars ----------
-  const GOAL_RES = { forest: ['wood', 'hide', 'food'], mine: ['iron', 'coal', 'stone'], ocean: ['herring', 'water', 'wood'] };
-  const BREAK = { forest: ['stump', 'thorn'], mine: ['boulder', 'vein'], ocean: ['coral', 'kelp'] };
-  const BREAK_NAME = { forest: 'stumps or thornbushes', mine: 'boulders or veins', ocean: 'coral or kelp' };
-  const STAR_RARE = { forest: 'oak', mine: 'silver', ocean: 'pearl' };
+  const GOAL_RES = { farm: ['wheat', 'apple'], forest: ['wood', 'hide', 'food'], mine: ['iron', 'coal', 'stone'], ocean: ['herring', 'water', 'wood'] };
+  const BREAK = { farm: ['haybale', 'molehill'], forest: ['stump', 'thorn'], mine: ['boulder', 'vein'], ocean: ['coral', 'kelp'] };
+  const BREAK_NAME = { farm: 'hay bales or molehills', forest: 'stumps or thornbushes', mine: 'boulders or veins', ocean: 'coral or kelp' };
+  const STAR_RARE = { farm: 'egg', forest: 'oak', mine: 'silver', ocean: 'pearl' };
   function makeGoals(L) {
     const res = pick(GOAL_RES[land.key]);
     const goals = [{ type: 'collect', key: res, need: Math.min(16, 6 + Math.floor(L / 4)), have: 0,
       text: n => `Gather ${n} ${label(res)}` }];
     const second = [
       { type: 'break', need: Math.min(4, 2 + Math.floor(L / 8)), have: 0, text: n => `Break ${n} ${BREAK_NAME[land.key]}` },
-      { type: 'slay', need: Math.min(4, 1 + Math.floor(L / 8)), have: 0, text: n => `Defeat ${n} ${land.monster.name}${n > 1 ? 's' : ''}` },
+      { type: 'slay', need: Math.min(4, 1 + Math.floor(L / 8)), have: 0, text: n => `${land.monster.harmless ? 'Catch' : 'Defeat'} ${n} ${land.monster.name}${n > 1 ? 's' : ''}` },
     ];
     if (L >= BLOCKER_LV) second.push({ type: 'blocker', need: Math.min(8, 3 + Math.floor(L / 6)), have: 0, text: n => `Clear ${n} ${BLOCKERS[land.key].name}` });
     goals.push(pick(second));
@@ -149,9 +154,25 @@ window.Gather = (() => {
     const [r, c] = pick(opts);
     addBlocker(r, c, true);
     board.render();
-    board.toast(land.key === 'forest' ? '🌿 The vines creep further!' : '🐚 The tide spreads the barnacles!', 'alert', 1400);
+    board.toast({ forest: '🌿 The vines creep further!', farm: '🌱 The thistles spread!', ocean: '🐚 The tide spreads the barnacles!' }[land.key], 'alert', 1400);
     await board.wait(300);
   }
+
+  // The Golden Fields: a peaceful farm. Resources only — no boss, no raid.
+  LANDS.farm = {
+    name: 'Golden Fields', icon: '🌾', music: 'home',
+    weights: { wheat: 22, apple: 18, hay: 32, clover: 28 },
+    gives: { wheat: 'wheat', apple: 'apple', gold: 'gold' },
+    bag: ['wheat', 'apple', 'meat', 'gold'],
+    obstacles: n => [...Array.from({ length: n }, (_, i) => (i % 2 ? 'molehill' : 'haybale')), ...(Math.random() < 0.35 ? ['locked'] : [])],
+    grow: () => (Math.random() < 0.5 ? 'haybale' : 'molehill'),
+    growMsg: { haybale: '🌾 Another hay bale gets stacked in the field!', molehill: '🕳️ A mole pops up!' },
+    event: { piece: 'pig', msg: '🐖 A pig broke out of its pen! Catch it before it bolts →', loot: ['meat', 'meat', 'apple'] },
+    discover: null,
+    monster: { name: 'chicken', art: 'chicken', icon: '🐔', harmless: true },
+    finds: 'farm',
+    hint: 'Wheat bakes bread; apples and chickens feed you. Chop hay bales with a wood-axe, dig molehills with a pick. Eggs hide in the hay.',
+  };
 
   const TOOL_BONUS = { wood: 'hatchet', hide: 'knife' };
 
@@ -165,7 +186,7 @@ window.Gather = (() => {
   const has = k => App.state.inventory[k] > 0;
   const midOf = p => [p.r, p.c + Math.floor(p.w / 2)];
 
-  const SCALES = ['stump', 'thorn', 'boulder', 'vein', 'coral', 'kelp'];
+  const SCALES = ['stump', 'thorn', 'boulder', 'vein', 'coral', 'kelp', 'haybale', 'molehill'];
   function addObstacle(kind, r, c, appear = false) {
     const spec = { ...P[kind] };
     if (SCALES.includes(kind)) spec.hp += run.lv.hpBonus;
@@ -249,7 +270,9 @@ window.Gather = (() => {
     let detail = '';
     switch (id) {
       case 'cache': for (let i = 0; i < 3; i++) addToBackpack(pick(['wood', 'stone', 'hide']), 1, cell, delay + i * 200); break;
-      case 'basket': addToBackpack(land.key === 'ocean' ? 'herring' : 'food', 3, cell, delay); break;
+      case 'basket': addToBackpack(land.key === 'ocean' ? 'herring' : land.key === 'farm' ? 'apple' : 'food', 3, cell, delay); break;
+      case 'sack': addToBackpack('wheat', 4, cell, delay); break;
+      case 'eggs': addToBackpack('egg', 3, cell, delay); break;
       case 'orepocket': addToBackpack('iron', 3, cell, delay); break;
       case 'coalseam': addToBackpack('coal', 3, cell, delay); break;
       case 'nugget': addToBackpack('gold', 3, cell, delay); break;
@@ -297,7 +320,7 @@ window.Gather = (() => {
       (chest ? (canOpen ? ' · 🔑 can open!' : chest.lockTier > 1 ? ` · 🔒 ${Data.CHEST_TIERS[chest.lockTier]} key` : keyHere ? ' · 🔒 key buried' : '') : '');
     const ev = run.eventPiece && !run.eventPiece.gone;
     document.getElementById('gather-hint').textContent = board.armedHint() ||
-      (ev ? ({ forest: 'Catch the thief: only a weapon can stop it!', mine: 'Stop the cart: match next to it or hit it!', ocean: 'Stop the crab: only a weapon can!' }[land.key])
+      (ev ? ({ forest: 'Catch the thief: only a weapon can stop it!', mine: 'Stop the cart: match next to it or hit it!', ocean: 'Stop the crab: only a weapon can!', farm: 'Catch the pig before it bolts!' }[land.key])
         : land.discover && board.piecesOf(land.discover.piece).length ? land.discover.spot : land.hint);
   }
 
@@ -334,7 +357,7 @@ window.Gather = (() => {
     const [r, c] = pick(spots), M = land.monster, plan = run.mon;
     const carries = run.keyCarrier && !board.piecesOf('monster').some(x => x.carriesKey);
     if (carries) run.keyCarrier = false;
-    const p = board.addPiece({ ...P.monster, hp: plan.hp, armor: plan.armor, weapon: plan.weapon, art: M.art, kin: M.kin, name: M.name, age: 1, carriesKey: carries }, r, c, 1, appear);
+    const p = board.addPiece({ ...P.monster, hp: M.harmless ? 3 + Math.floor(run.landLv / 6) : plan.hp, armor: M.harmless ? 1 : plan.armor, weapon: plan.weapon, art: M.art, kin: M.kin, name: M.name, age: 1, carriesKey: carries }, r, c, 1, appear);
     monLabel(p);
     if (carries && appear) setTimeout(() => board.toast(`🗝️ That ${M.name} has the chest key! Take it down.`, 'alert', 2600), 1500);
     if (appear) {
@@ -352,15 +375,16 @@ window.Gather = (() => {
     App.bountyEvent(`kill:${land.key}`);
     const name = M.name[0].toUpperCase() + M.name.slice(1);
     const gain = (t, n, d) => { addToBackpack(t, n, cell, d); got.push(`${n} ${label(t)}`); };
-    if (land.key === 'ocean') { gain('shell', 1 + Math.floor(Math.random() * 2), 0); if (Math.random() < 0.12) gain('pearl', 1, 200); }
+    if (land.key === 'farm') { gain('meat', 1 + Math.floor(Math.random() * 2), 0); if (Math.random() < 0.3) gain('egg', 1, 200); }
+    else if (land.key === 'ocean') { gain('shell', 1 + Math.floor(Math.random() * 2), 0); if (Math.random() < 0.12) gain('pearl', 1, 200); }
     else gain('scrapiron', 1 + Math.floor(Math.random() * 2) + (p.armor >= 2 ? 1 : 0), 0);
     if (land.key === 'mine' && Math.random() < 0.2) {
       const gem = Data.rollFrom([['emerald', 6], ['sapphire', 3], ['ruby', run.landLv >= 12 ? 2 : 0]]);
       gain(gem, 1, 250); discoverMaterial(gem, cell);
     }
-    board.toast(`${M.icon} ${name} defeated! It dropped ${got.join(' & ')}.`, 'win');
+    board.toast(`${M.icon} ${name} ${M.harmless ? 'caught' : 'defeated'}! ${M.harmless ? 'You get' : 'It dropped'} ${got.join(' & ')}.`, 'win');
     if (p.carriesKey) applyFind('key', cell, 300);
-    else if (land.key !== 'ocean' && Math.random() < (land.key === 'forest' ? 0.25 : 0.15)) applyFind(land.key === 'mine' ? 'runescrap' : 'scrap', cell, 300);
+    else if ((land.key === 'forest' || land.key === 'mine') && Math.random() < (land.key === 'forest' ? 0.25 : 0.15)) applyFind(land.key === 'mine' ? 'runescrap' : 'scrap', cell, 300);
     if (land.key === 'forest' || land.key === 'mine') discoverMaterial('scrapiron', cell);
   }
 
@@ -373,6 +397,7 @@ window.Gather = (() => {
 
   // Each monster wears a countdown: ⚔️2 = it strikes you in 2 moves.
   function monLabel(m) {
+    if (land.monster.harmless) { m.label = m.carriesKey ? '🗝️' : ''; m.cls = ''; return; }
     const left = run.mon.attackEvery - (m.age % run.mon.attackEvery);
     m.label = `${m.carriesKey ? '🗝️' : ''}⚔️${left}`;
     m.cls = left === 1 ? 'readying' : '';
@@ -388,6 +413,11 @@ window.Gather = (() => {
         const opts = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dr, dc]) => [m.r + dr, m.c + dc])
           .filter(([r, c]) => r >= 1 && r < SIZE && c >= 0 && c < SIZE && board.isTile(board.grid[r][c]));
         if (opts.length) { const [r, c] = pick(opts); board.movePiece(m, r, c); }
+      }
+      // Chickens don't fight back — they wander off after a while.
+      if (land.monster.harmless) {
+        if (m.age >= 9 && !m.carriesKey) { board.removePiece(m, 'fog-out'); board.float([m.r, m.c], 'flapped off!', 'loss'); }
+        continue;
       }
       // Every few moves, each one swings at you.
       if (m.age % run.mon.attackEvery === 0) {
@@ -466,7 +496,7 @@ window.Gather = (() => {
     if (!p || p.gone) return;
     if (p.c + 1 >= SIZE) {
       board.removePiece(p, 'fog-out');
-      board.toast({ forest: 'The thief got away with the sack!', mine: 'The cart rolled off down the tunnel…', ocean: 'The crab scuttled into the sea!' }[land.key], 'alert');
+      board.toast({ forest: 'The thief got away with the sack!', mine: 'The cart rolled off down the tunnel…', ocean: 'The crab scuttled into the sea!', farm: 'The pig bolted into the hedgerow!' }[land.key], 'alert');
       run.eventPiece = null;
       Sound.sfx('nope');
       return;
@@ -487,7 +517,10 @@ window.Gather = (() => {
     onMatch(runs, step) {
       for (const ri of runs) {
         const res = land.gives[ri.type];
-        if (!res) continue;   // filler tiles
+        if (!res) {   // filler tiles — but a rare one hidden among them (eggs in the hay) still counts
+          ri.cells.forEach(([r, c]) => { const t = board.grid[r][c]; if (t && Data.FAMILY[t.type]) { addToBackpack(t.type, 1, [r, c], 150); discoverMaterial(t.type, [r, c]); } });
+          continue;
+        }
         if (res === 'gold') Sound.sfx('coin');
         let n = points(ri.cells.length) + (step > 1 ? 1 : 0);
         if (TOOL_BONUS[res] && has(TOOL_BONUS[res])) n += 1;
@@ -548,6 +581,11 @@ window.Gather = (() => {
           }
           if (Math.random() < 0.3) applyFind(Data.rollFrom(Data.FINDS[land.finds]), cell, 300);
           break;
+        case 'haybale': addToBackpack('wheat', 3, cell); board.toast('🌾 Hay bale chopped! +3 wheat'); break;
+        case 'molehill':
+          addToBackpack('apple', 1, cell);
+          if (Math.random() < 0.45) applyFind(Data.rollFrom(Data.FINDS[land.finds]), cell, 300);
+          break;
         case 'boulder':
           addToBackpack('stone', 2, cell);
           if (Math.random() < 0.35) applyFind(Data.rollFrom(Data.FINDS[land.finds]), cell, 300);
@@ -566,11 +604,12 @@ window.Gather = (() => {
           }
           break;
         }
+        case 'pig':
         case 'thief':
         case 'crab':
         case 'cart':
           for (let i = 0; i < 4; i++) addToBackpack(pick(land.event.loot), 1, cell, i * 180);
-          board.toast({ thief: 'Caught the thief! You take the sack.', cart: 'Cart stopped! You grab the ore.', crab: 'Crab defeated! You take its haul.' }[p.kind], 'win');
+          board.toast({ thief: 'Caught the thief! You take the sack.', cart: 'Cart stopped! You grab the ore.', crab: 'Crab defeated! You take its haul.', pig: 'Pig caught! Fresh meat for the larder.' }[p.kind], 'win');
           if (needsKey() && Math.random() < 0.6) applyFind('key', cell);
           else if (Math.random() < 0.35) applyFind(pick(['lostclub', 'sling', 'scrap']), cell);
           run.eventPiece = null;
@@ -603,6 +642,10 @@ window.Gather = (() => {
         rune: 'A cracked rune stone — match next to it to read it.',
         coral: `Coral (${p.hp} HP). Only a pick can break it — gives coral for sea gear, sometimes an oyster.`,
         kelp: `Kelp tangle (${p.hp} HP) — something's caught in it! Only an axe can cut it.`,
+        haybale: `Hay bale (${p.hp} HP). Chop it with a wood-axe for wheat.`,
+        molehill: 'A molehill. Dig it with a pick — moles bury all sorts of things.',
+        thistle: 'Thistles — they spread every few moves. Match beside them to pull them up.',
+        pig: 'A runaway pig! Catch it with a weapon before it bolts off the board.',
         vine: 'Creeping vines — they spread every few moves. Match beside them to tear them out.',
         crystal: `Crystal cluster (${p.hp} HP) — match beside it to chip it. It hides silver.`,
         barnacle: 'Barnacles crusting the shore — they spread with the tide. Match beside them to scrape them off.',
@@ -674,7 +717,7 @@ window.Gather = (() => {
     if (board.buried.size) notes.push(`${board.buried.size} find${board.buried.size > 1 ? 's' : ''} stayed buried.`);
     if (run.overflow) notes.push(`${run.overflow} more didn't fit in your backpack.`);
     if (run.slain) notes.push(`${land.monster.icon} ${run.slain} ${land.monster.name}${run.slain > 1 ? 's' : ''} defeated.`);
-    if (survivors && land.key !== 'ocean') notes.push(`${land.monster.icon} ${survivors} ${land.monster.name}${survivors > 1 ? 's' : ''} got away — they'll report back to their kin.`);
+    if (survivors && (land.key === 'forest' || land.key === 'mine')) notes.push(`${land.monster.icon} ${survivors} ${land.monster.name}${survivors > 1 ? 's' : ''} got away — they'll report back to their kin.`);
     if (run.lost) notes.unshift(`💀 <b>You collapsed</b> and dropped ${run.lost} things on the way home.`);
     notes.push(`❤️ ${App.state.hp}/${App.maxHp} after resting at camp.`);
     if (warn) notes.unshift(warn);
@@ -694,7 +737,7 @@ window.Gather = (() => {
     if (newLv > run.landLv) notes.unshift(`${land.icon} <b>The ${land.name} grows wilder — now Lv ${newLv}!</b> More obstacles, tougher chests, richer finds.`);
     Object.values(Boss.CONFIG).filter(c => c.unlock && c.unlock.land === land.key && run.landLv < c.unlock.lv && newLv >= c.unlock.lv)
       .forEach(c => notes.unshift(`${c.icon} <b>${c.place} found!</b> Tap the ${land.name} on the map to face ${c.short}.`));
-    if (newLv >= Data.LAND_MAX && App.grantShard(land.key)) { notes.unshift(`💎 <b>Relic shard!</b> You've mastered the ${land.name} — its shard reveals itself to you (${App.state.shards}/5).`); Sound.sfx('rare'); }
+    if (newLv >= Data.LAND_MAX && Data.SHARDS.some(x => x.id === land.key) && App.grantShard(land.key)) { notes.unshift(`💎 <b>Relic shard!</b> You've mastered the ${land.name} — its shard reveals itself to you (${App.state.shards}/5).`); Sound.sfx('rare'); }
     App.save();
     App.choose({
       title: reason === 'collapse' ? 'You collapsed!' : reason === 'moves' ? 'Out of moves' : 'Back home safe',

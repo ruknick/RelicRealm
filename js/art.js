@@ -252,6 +252,32 @@ window.Art = (() => {
       <path d="M32 6v50M22 24h20M32 6l-4 44M32 6l6 44" stroke="#fff" stroke-width=".7" opacity=".55" fill="none"/>
       <path d="M20 44c4 6 8 8 12 8s8-2 12-8l-2-2c-4 4-6 6-10 6s-6-2-10-6z" fill="url(#lgGold)" stroke="#6a4a08" stroke-width="1"/>
       <path d="M44 42l4-3 1 4M20 42l-4-3-1 4" stroke="#6a4a08" stroke-width="1" fill="url(#lgGold)"/><circle cx="32" cy="50" r="1.6" fill="#e0324b"/>`;
+  // ---------- Golden Fields ----------
+  TILES.wheat = `<ellipse cx="32" cy="58" rx="16" ry="3" fill="#000" opacity=".3"/>
+      <g stroke="#8a6a1a" stroke-width="1.6" fill="none" stroke-linecap="round"><path d="M32 58V20M26 58l2-30M38 58l-2-30"/></g>
+      ${[[32, 10], [24, 16], [40, 16]].map(([x, y]) => `<g transform="translate(${x} ${y})">${[0, 5, 10, 15].map(d => `<ellipse cx="-2.6" cy="${d}" rx="2.8" ry="4.2" fill="#e8c050" stroke="#9a7418" stroke-width=".7" transform="rotate(-24 -2.6 ${d})"/><ellipse cx="2.6" cy="${d}" rx="2.8" ry="4.2" fill="#d8a838" stroke="#9a7418" stroke-width=".7" transform="rotate(24 2.6 ${d})"/>`).join('')}<path d="M0 -4v-6" stroke="#c8a040" stroke-width=".8"/></g>`).join('')}
+      <path d="M24 44h16" stroke="#7a4a1a" stroke-width="3"/>`;
+  TILES.apple = `<ellipse cx="32" cy="57" rx="17" ry="3" fill="#000" opacity=".3"/>
+      <path d="M32 18c-6-6-20-4-20 12 0 14 10 24 20 24s20-10 20-24c0-16-14-18-20-12z" fill="#b8302a" stroke="#5a1410" stroke-width="1.2"/>
+      <path d="M20 26c2-6 8-8 12-6" stroke="#ff9a8a" stroke-width="2.4" fill="none" opacity=".6" stroke-linecap="round"/><path d="M40 40c4-4 5-10 4-14" stroke="#7a1a14" stroke-width="2" fill="none" opacity=".5"/>
+      <path d="M32 19c0-6 2-10 5-12" stroke="#5a3414" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M35 12c6-4 12-2 14 2-6 2-11 1-14-2z" fill="#5a8a2c" stroke="#2c4a1c" stroke-width=".8"/>`;
+  TILES.hay = `<ellipse cx="32" cy="56" rx="22" ry="3.5" fill="#000" opacity=".3"/><path d="M8 54c4-18 12-30 24-30s20 12 24 30z" fill="#c8a85a" stroke="#7a6024" stroke-width="1"/>
+      <g stroke="#9a7a30" stroke-width="1" fill="none" opacity=".8"><path d="M14 52l8-20M22 54l6-24M32 54V26M42 54l-6-24M50 52l-8-20M18 40l10-6M46 40l-10-6"/></g>
+      <g stroke="#e8d08a" stroke-width="1" fill="none" opacity=".7"><path d="M20 36l4-6M30 30l2-4M40 34l-2-6"/></g>`;
+  TILES.clover = `<ellipse cx="32" cy="57" rx="18" ry="3" fill="#000" opacity=".25"/>
+      <g fill="#4f8a3a" stroke="#24461c" stroke-width=".9">${[0, 120, 240].map(a => `<path d="M32 30c-8-10-18-4-12 4 4 4 10 2 12-4z" transform="rotate(${a} 32 30)"/>`).join('')}</g>
+      <path d="M32 30c2 10 0 18-4 26" stroke="#3a6a2a" stroke-width="2" fill="none"/><circle cx="44" cy="44" r="4" fill="#e8b0d0" stroke="#8a4a7a" stroke-width=".7"/><circle cx="44" cy="44" r="1.4" fill="#fff"/>`;
+  TILES.egg = `<ellipse cx="32" cy="57" rx="20" ry="3.5" fill="#000" opacity=".3"/><path d="M12 52c2-8 10-12 20-12s18 4 20 12z" fill="#c8a85a" stroke="#7a6024"/>
+      <ellipse cx="25" cy="38" rx="8" ry="10.5" fill="#f4e8d4" stroke="#8a7a5a" stroke-width="1"/><ellipse cx="38" cy="40" rx="7.5" ry="10" fill="#e8c8a0" stroke="#8a6a4a" stroke-width="1"/>
+      <path d="M21 32c1-3 3-4 5-4M35 34c1-3 3-4 5-4" stroke="#fff" stroke-width="1.6" opacity=".8" fill="none" stroke-linecap="round"/>`;
+  TILES.meat = `<ellipse cx="32" cy="56" rx="22" ry="3.5" fill="#000" opacity=".3"/>
+      <path d="M16 40c-6-10 2-24 16-24 12 0 18 10 14 20-2 6-8 10-14 12-6 2-12-2-16-8z" fill="#b8503a" stroke="#5a1a10" stroke-width="1.2"/>
+      <path d="M22 26c6-4 14-4 18 2M20 36c6 2 12 0 18-4" stroke="#f0c8b0" stroke-width="2" fill="none" opacity=".7"/>
+      <path d="M44 38l10 10" stroke="#efe6d0" stroke-width="5" stroke-linecap="round"/><circle cx="55" cy="47" r="3.6" fill="#efe6d0" stroke="#8a7a60"/><circle cx="51" cy="51" r="3.2" fill="#efe6d0" stroke="#8a7a60"/>`;
+  TILES.sack = `<ellipse cx="32" cy="58" rx="18" ry="3" fill="#000" opacity=".3"/><path d="M18 56c-4-12-2-26 6-32h16c8 6 10 20 6 32z" fill="#c8a878" stroke="#5a4020" stroke-width="1.2" filter="url(#fGrain)"/>
+      <path d="M24 24c-2-4 2-8 8-8s10 4 8 8" fill="none" stroke="#5a4020" stroke-width="2.4"/><path d="M28 14c-2-6 0-10 4-10 2 4 0 8-4 10zM34 14c2-6 6-8 8-6-2 4-4 6-8 6z" fill="#e8c050" stroke="#9a7418" stroke-width=".7"/>
+      <path d="M26 40l12 0M28 44h8" stroke="#8a6a3a" stroke-width="1.4"/>`;
+
   // Finer foods
   TILES.mushroom = `<ellipse cx="32" cy="56" rx="22" ry="3.5" fill="#000" opacity=".3"/>
       <path d="M38 54c0-8 2-16 4-20h8c2 4 4 12 4 20z" fill="#efe2c8" stroke="#6a5a40" stroke-width="1"/><path d="M30 34c0-12 8-18 16-18s16 6 16 18z" fill="#a0522d" stroke="#4a2410" stroke-width="1.2"/>
@@ -466,6 +492,31 @@ window.Art = (() => {
       <g fill="#d8d0c0" stroke="#6a6458" stroke-width="1"><path d="M16 46l3-9h6l3 9z"/><path d="M28 36l3-9h6l3 9z"/><path d="M38 48l3-8h5l3 8z"/><path d="M22 52l2-6h4l2 6z"/></g>
       <g fill="#3a3630"><ellipse cx="22" cy="37.5" rx="2" ry=".9"/><ellipse cx="34" cy="27.5" rx="2" ry=".9"/><ellipse cx="43.5" cy="40.5" rx="1.8" ry=".8"/></g>
       <path d="M10 54c6-2 10 0 14-2" stroke="#2e4a3a" stroke-width="2" fill="none"/>`;
+  // ---------- Golden Fields pieces ----------
+  PIECES.haybale = `<ellipse cx="32" cy="56" rx="26" ry="4" fill="#000" opacity=".3"/>
+      <path d="M8 22h48v32H8z" fill="#d8b860" stroke="#7a6024" stroke-width="1.3"/><path d="M8 22c4-6 44-6 48 0" fill="#e8cc78" stroke="#7a6024" stroke-width="1.2"/>
+      <g stroke="#a88a3a" stroke-width="1" opacity=".8"><path d="M12 30h40M12 38h40M12 46h40"/></g><path d="M22 20v34M42 20v34" stroke="#8a4a20" stroke-width="2.4"/>
+      <g stroke="#f0dc90" stroke-width=".9" opacity=".8"><path d="M14 26l3 2M30 33l4 1M46 42l3 2M18 50l3-1"/></g>`;
+  PIECES.molehill = `<ellipse cx="32" cy="56" rx="24" ry="4" fill="#000" opacity=".3"/><path d="M8 54c4-16 14-26 24-26s20 10 24 26z" fill="#6a4a2a" stroke="#2e1e10" stroke-width="1.2" filter="url(#fGrain)"/>
+      <g fill="#4a3018"><circle cx="20" cy="46" r="2"/><circle cx="40" cy="42" r="2.4"/><circle cx="30" cy="50" r="1.6"/></g>
+      <ellipse cx="32" cy="32" rx="7" ry="5" fill="#3a3030"/><circle cx="32" cy="30" r="2" fill="#e8a8a0"/><path d="M28 35l-4 1M36 35l4 1" stroke="#c8b8b0" stroke-width=".7"/>`;
+  PIECES.chicken = `<ellipse cx="32" cy="58" rx="16" ry="3" fill="#000" opacity=".3"/>
+      <path d="M26 50l-2 7M36 50l1 7" stroke="#d89a2a" stroke-width="2.2" stroke-linecap="round"/><path d="M20 57h7M34 57h7" stroke="#d89a2a" stroke-width="1.6"/>
+      <path d="M44 22c8 4 12 14 6 24-4 6-12 8-20 6-10-2-16-10-14-20 2-8 10-12 18-10z" fill="#f4ede0" stroke="#7a6a58" stroke-width="1.2"/>
+      <path d="M14 36c-4-6-2-14 4-16-2 6 0 10 4 12" fill="#e8dcc8" stroke="#7a6a58" stroke-width="1"/>
+      <path d="M26 36c6 6 14 6 18 2-6 0-12-2-18-6z" fill="#e0d4bc" stroke="#7a6a58" stroke-width=".9"/>
+      <path d="M44 14c0-4 3-6 5-4 1-3 4-3 5 0 2-2 5 0 4 3-2 2-8 3-14 1z" fill="#c8302a"/><path d="M54 24l6 2-6 2z" fill="#e8a020" stroke="#8a5a10" stroke-width=".6"/>
+      <path d="M52 30c1 3 0 5-2 6-1-2 0-4 2-6z" fill="#c8302a"/><circle cx="50" cy="22" r="1.6" fill="#1e1206"/>`;
+  PIECES.pig = `<ellipse cx="32" cy="58" rx="22" ry="3" fill="#000" opacity=".3"/>
+      <path d="M18 50v7M26 52v6M40 52v6M48 50v7" stroke="#c88080" stroke-width="4" stroke-linecap="round"/>
+      <ellipse cx="32" cy="38" rx="22" ry="15" fill="#f0b0a8" stroke="#8a4a44" stroke-width="1.2"/><path d="M10 34c-4-2-4-6 0-6" stroke="#8a4a44" stroke-width="1.4" fill="none"/>
+      <path d="M46 26l4-8 4 8z M38 24l2-7 4 6z" fill="#e89890" stroke="#8a4a44" stroke-width=".9"/>
+      <ellipse cx="52" cy="38" rx="6" ry="5" fill="#e89890" stroke="#8a4a44" stroke-width="1"/><circle cx="50" cy="38" r="1" fill="#6a2a24"/><circle cx="54" cy="38" r="1" fill="#6a2a24"/>
+      <circle cx="44" cy="31" r="1.6" fill="#1e1206"/><path d="M20 30c6-4 14-4 20-2" stroke="#ffd8d0" stroke-width="2" fill="none" opacity=".7"/>`;
+  PIECES.thistle = `<rect x="4" y="4" width="56" height="56" rx="10" fill="#2a3018" opacity=".45"/>
+      <g fill="#6a8a4a" stroke="#2e3e1c" stroke-width=".9"><path d="M30 58l-12-14 4-2-8-10 6 0-4-10 10 8 2-6 4 10z"/><path d="M34 58l12-16-4-2 8-8-6-1 4-9-10 7-2-5-4 10z"/></g>
+      <g stroke="#3a4a24" stroke-width="2" fill="none"><path d="M32 58V24M32 40l-10-12M32 36l12-14"/></g>
+      ${[[32, 20], [22, 26], [44, 20]].map(([x, y]) => `<g transform="translate(${x} ${y})"><path d="M-4 2c0-4 8-4 8 0l-1 5h-6z" fill="#7a9a5a" stroke="#2e3e1c" stroke-width=".7"/><path d="M-4 1l-2-7M-2 0l-1-8M0 0v-9M2 0l1-8M4 1l2-7" stroke="#a860c0" stroke-width="2" stroke-linecap="round"/></g>`).join('')}`;
   Object.assign(PIECES, {
     whelp: `<path d="M8 30c-6-10 2-18 10-14l6 8z" fill="#7a1e14" stroke="#2a0806"/><path d="M56 30c6-10-2-18-10-14l-6 8z" fill="#7a1e14" stroke="#2a0806"/>
       <ellipse cx="32" cy="40" rx="15" ry="13" fill="#b0301c" stroke="#2a0806" stroke-width="1.4"/><path d="M24 44c4 4 12 4 16 0" stroke="#ffb070" stroke-width="2" fill="none"/>
@@ -774,6 +825,7 @@ window.Art = (() => {
       return `<div class="fr-deco tl">${A.rope}</div><div class="fr-deco tr">${A.rope}</div>
         <div class="fr-deco bl">${A.shells}</div><div class="fr-deco br">${A.starfish}</div>`;
     }
+    if (scene === 'farm') return `<div class="fr-deco tl">${A.leafTL}</div><div class="fr-deco tr">${A.leafTL}</div><div class="fr-deco bl">${svg(TILES.sack)}</div><div class="fr-deco br">${svg(TILES.apple)}</div>`;
     if (scene === 'goblin') return `<div class="stakes">${'<i></i>'.repeat(18)}</div>`;
     if (scene === 'dwarf') return '<div class="arch"></div><div class="fr-deco lamp l">' + A.lantern + '</div><div class="fr-deco lamp r">' + A.lantern + '</div>';
     return '';
@@ -811,6 +863,16 @@ window.Art = (() => {
       <g fill="none" stroke="#9ab8b4" stroke-width="1.2" opacity=".35">${Array.from({ length: 14 }, (_, i) => `<path d="M${(i * 61) % 400} ${200 + (i * 37) % 90} q8 -4 16 0 t16 0"/>`).join('')}</g>
       <g fill="none" stroke="#2a3438" stroke-width="1.6" stroke-linecap="round" opacity=".7"><path d="M150 60q6-5 12 0q6-5 12 0"/><path d="M196 80q4-3 8 0q4-3 8 0"/></g>
       <path d="M0 286 Q60 272 130 284 T260 282 T400 286 V300 H0z" fill="#8a7a5a" opacity=".9"/></svg>`),
+    farm: enc(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice">
+      <defs><linearGradient id="fSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7aa0b8"/><stop offset=".6" stop-color="#d8d0a8"/><stop offset="1" stop-color="#e8d090"/></linearGradient></defs>
+      <rect width="400" height="300" fill="url(#fSky)"/>
+      <g fill="#f4ecd8" opacity=".55"><ellipse cx="90" cy="60" rx="50" ry="10"/><ellipse cx="290" cy="40" rx="70" ry="9"/></g>
+      <path d="M0 170 Q100 140 200 160 T400 150 V300 H0z" fill="#9aa860"/><path d="M0 200 Q120 180 240 196 T400 188 V300 H0z" fill="#c8a850"/>
+      ${Array.from({ length: 40 }, (_, i) => `<path d="M${i * 10} 300 L${i * 10 + 4} 215" stroke="#a8862a" stroke-width="1.4" opacity=".55"/>`).join('')}
+      <g transform="translate(300 118)"><path d="M-8 52 L-4 0 h8 L8 52z" fill="#d8c8a8" stroke="#6a5a40"/><path d="M-8 0 L0 -8 L8 0z" fill="#8a4a2a"/>
+        <g stroke="#5a4a30" stroke-width="2"><path d="M0 -2 L-26 -28M0 -2 L26 -28M0 -2 L-26 24M0 -2 L26 24"/></g>
+        <g fill="#efe6d0" stroke="#6a5a40" stroke-width=".8"><path d="M-6 -8 L-26 -28 L-20 -32z"/><path d="M6 -8 L26 -28 L30 -22z"/><path d="M-6 4 L-26 24 L-30 18z"/><path d="M6 4 L26 24 L20 28z"/></g></g>
+      <g transform="translate(60 150)"><path d="M0 30V12L18 0 36 12V30z" fill="#a8483a" stroke="#4a2018"/><path d="M14 30V18h8v12z" fill="#3a2010"/></g></svg>`),
     goblin: enc(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice">
       ${Array.from({ length: 30 }, (_, i) => `<path d="M${i * 14} 300 v-${40 + (i * 13) % 25} l6 -10 l6 10 v${40 + (i * 13) % 25}z" fill="#1d120a"/>`).join('')}</svg>`),
     dwarf: enc(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice">
@@ -926,6 +988,10 @@ window.Art = (() => {
     <!-- the Whispering Wood and scattered copses -->
     <g>${woodTrees.map(([x, y, sc]) => tree(x, y, sc)).join('')}</g>
     <g>${scattered.map(([x, y, sc]) => tree(x, y, sc)).join('')}</g>
+    <!-- the Golden Fields: striped plots of wheat -->
+    <g transform="translate(150 228) rotate(-8)" stroke="${INK}" stroke-width=".6">
+      ${[[0, 0, 26, 16, '#e0c068'], [28, 2, 22, 14, '#c8b060'], [4, 18, 22, 14, '#d8b858'], [28, 18, 24, 16, '#e8cc78']].map(([x, y, w, h, f]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}" opacity=".9"/>${Array.from({ length: Math.floor(w / 3) }, (_, k) => `<path d="M${x + 1.5 + k * 3} ${y + 1}v${h - 2}" stroke="#9a7a30" stroke-width=".4" opacity=".7"/>`).join('')}`).join('')}
+    </g>
     <!-- roads -->
     <path d="M196 384 C170 360 130 340 100 310 M200 380 C190 320 150 200 110 120 M206 384 C226 370 252 340 268 300 M200 380 C240 300 268 180 282 110 M184 396 C150 420 120 440 104 450"
       stroke="#7a4a2a" stroke-width="1.1" stroke-dasharray="3 3" stroke-linecap="round" fill="none" opacity=".8"/>

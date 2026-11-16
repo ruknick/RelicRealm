@@ -1329,3 +1329,12 @@ body[data-scene="ocean"] .hint, body[data-scene="ocean"] p.hint { color: #e6dcc4
 .trip-stars { text-align: center; font-size: 2rem; letter-spacing: 4px; color: var(--brass); text-shadow: 0 1px 0 #3b2410; }
 .trip-stars .off { color: var(--ink-faint); text-shadow: none; }
 .trip-goals { text-align: left; font-size: .88rem; margin: 2px 0 6px; } .trip-goals .done { color: #3d5a14; } .trip-goals small { color: var(--ink-soft); font-size: .72rem; }
+
+/* ---------- Golden Fields ---------- */
+.g-wheat { --g1: #8a6a24; --g2: #3a2a0c; } .g-apple { --g1: #5a2a1e; --g2: #24100a; } .g-hay { --g1: #7a6a3a; --g2: #34280e; }
+.g-clover { --g1: #3a5a2a; --g2: #14240e; } .g-egg { --g1: #7a6a4a; --g2: #34280e; } .g-meat { --g1: #5a2a20; --g2: #24100a; } .g-sack { --g1: #6a5030; --g2: #2a1e0e; }
+[data-frame="farm"] .frame { background: repeating-linear-gradient(90deg, #a8783a 0 14px, #8a5a2a 14px 16px); box-shadow: 0 10px 24px rgba(0,0,0,.5), inset 0 0 0 3px #5a3a14; }
+[data-frame="farm"] .board { background: radial-gradient(ellipse at 50% 30%, #6a7a3a, #3a4a1e 70%, #24300e); }
+body[data-scene="farm"] { background-color: #c8a850; }
+body[data-scene="farm"] p.hint, body[data-scene="farm"] .hint { color: #3a2a10; }
+body[data-scene="farm"] #gather-hint { color: #3a2a10; font-weight: 600; }

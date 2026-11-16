@@ -104,6 +104,7 @@ window.Story = (() => {
   const PLACES = {
     forest: { title: '🌲 The Whispering Forest', text: 'Pine and oak grow thick here, and older trees grow deeper in. Goblins hide among the trunks, and thieves have been known to snatch a full sack and run.' },
     mine:   { title: '⛏️ The Iron Hills', text: 'The dwarves dug these hills for a thousand years before they sealed their doors. Ore and coal are everywhere, and deep in the stone, gems still glint.' },
+    farm:   { title: '🌾 The Golden Fields', text: 'The old Ashford farms survived the fire: wheat to your waist, apple trees heavy with fruit, and chickens that never stay where you put them. No monsters here — just hard, honest work and a full larder.' },
     ocean:  { title: '🌊 The Sunlit Coast', text: 'Waves wash up driftwood, fish and the occasional oyster. Fresh water from the springs here is the only thing known to stop dragonfire.' },
     goblin: { title: '🔥 Goblin Village', text: 'A ramshackle camp of stolen timber, still smelling of Ashford smoke. Their keep is hidden in the fog, so scout it out before they break your camp.' },
     dwarf:  { title: '⚒️ Dwarf Stronghold', text: 'Stone halls behind iron gates. The dwarves wear iron and steel; bring a weapon that can bite through it.' },

@@ -105,6 +105,15 @@ An antique atlas page of Valdmoor: shaded mountain ranges with snowcaps, the den
 - Marching to a raid or boss spends rations plainest-first. Every food counts as one ration.
 - **Kitchen** (Workshop) meals: Trail bread +5, Fish chowder +8, Honey cake +12, Salmon & mushroom pie +15, Swordfish steak +20, **Kingfish feast +40**.
 
+### 🌾 Golden Fields (farm)
+A peaceful resource land between the Wood and the Coast: **no boss, no raids**.
+- **Tiles:** wheat and apples to gather. Hay and clover are fillers. **Eggs** hide in the hay (more often as the land levels).
+- **Chickens** wander the board. They're harmless and flap away after a while, so catch them for **meat** (and sometimes eggs). A **runaway pig** sometimes bolts across the board for a haul of meat.
+- **Obstacles:** hay bales (wood-axe, +3 wheat), molehills (pick, often hide finds), and spreading **thistles** from Lv 5.
+- **Finds:** sacks of grain, nests of eggs, apple baskets, gold.
+- **Food:** apples +2, eggs +2, meat +3.
+- **Kitchen:** Trail bread is now **wheat + water**. Roast chicken (meat + pine) +10. **Farmhouse pie** (meat, wheat, egg) +18. Honey cake is now honey, wheat and an egg.
+
 ### 🎯 Trip goals & stars
 Every gathering trip gives two goals: a **gather** goal ("Gather 9 Hide") plus one of **break** obstacles, **defeat** monsters, or **clear** the land's blocker. The goal bar above the board tracks them.
 - ★ one goal: gold
