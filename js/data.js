@@ -431,6 +431,9 @@ window.Data = (() => {
   const ARMOR_LV = {
     helmet: [1, 10, 20, 35], gloves: [2, 12, 23, 36], shield: [4, 14, 26, 37], legs: [6, 16, 29, 38], body: [8, 18, 32, 40],
   };
+  // Kitchen dishes unlock by level too: simple bread first, the Kingfish feast last.
+  const FOOD_LV = { bread: 1, chowder: 3, roastchicken: 5, honeycake: 9, salmonpie: 12, farmpie: 15, swordsteak: 20, feast: 28 };
+  RECIPES.forEach(r => { if (FOOD_LV[r.id]) r.lv = FOOD_LV[r.id]; });
   RECIPES.forEach(r => {
     const it = ITEMS[r.id];
     if (it && it.gear === 'armor' && !it.sea && ARMOR_LV[it.type]) r.lv = ARMOR_LV[it.type][it.tier - 1];

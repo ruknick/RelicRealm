@@ -114,6 +114,8 @@ A peaceful resource land between the Wood and the Coast: **no boss, no raids**.
 - **Food:** apples +2, eggs +2, meat +3.
 - **Kitchen:** Trail bread is now **wheat + water**. Roast chicken (meat + pine) +10. **Farmhouse pie** (meat, wheat, egg) +18. Honey cake is now honey, wheat and an egg.
 
+**Kitchen dishes unlock by level:** Trail bread 1 · Fish chowder 3 · Roast chicken 5 · Honey cake 9 · Salmon & mushroom pie 12 · Farmhouse pie 15 · Swordfish steak 20 · Kingfish feast 28.
+
 ### 🎯 Trip goals & stars
 Every gathering trip gives two goals: a **gather** goal ("Gather 9 Hide") plus one of **break** obstacles, **defeat** monsters, or **clear** the land's blocker. The goal bar above the board tracks them.
 - ★ one goal: gold

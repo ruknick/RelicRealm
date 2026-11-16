@@ -134,7 +134,7 @@ window.Craft = (() => {
     else if (['weapon', 'tool', 'armor'].includes(tab)) body = tierGroups(T.list(), tab);
     else {
       // Recipes you can use now first; the rest fold into one line per station.
-      const list = T.list(), now = list.filter(stationOk);
+      const list = T.list().slice().sort((a, b) => (a.lv || 0) - (b.lv || 0)), now = list.filter(stationOk);
       const later = Data.STATION_ORDER.map(sid => [sid, list.filter(r => !stationOk(r) && r.station === sid)]).filter(([, l]) => l.length);
       body = now.map(card).join('') + later.map(([sid, l]) => {
         const S = Data.STATIONS[sid], key = `${tab}:${sid}`;

@@ -281,7 +281,7 @@ window.App = (() => {
     if (Data.backpackSize(L) > Data.backpackSize(L - 1)) out.push(`🎒 backpack ${Data.backpackSize(L)}`);
     const st = Object.values(Data.STATIONS).find(s => s.lv === L && s.lv > 1);
     if (st) out.push(`${st.icon} you can now build the <b>${st.name}</b> in the Workshop`);
-    Data.RECIPES.filter(r => r.lv === L && L > 1).forEach(r => out.push(`🛡️ you can now craft the <b>${Data.ITEMS[r.id].name}</b>`));
+    Data.RECIPES.filter(r => r.lv === L && L > 1).forEach(r => out.push(r.tier === 'food' ? `🍲 you can now cook <b>${Data.ITEMS[r.id].name}</b>` : `🛡️ you can now craft the <b>${Data.ITEMS[r.id].name}</b>`));
     if (Data.ERA(L) > Data.ERA(L - 1)) out.unshift(`<b>The ${Data.ERA_NAME[Data.ERA(L)]} era begins!</b>`);
     if (Data.maxHp(L) > Data.maxHp(L - 1)) state.hp = Math.min(Data.maxHp(L), state.hp + 2);
     return out.join(' · ') || 'Your legend grows.';
