@@ -224,6 +224,7 @@ window.App = (() => {
     const setStatus = s => { status = s; const el = document.getElementById('cloud-status'); if (el) el.innerHTML = statusText(); };
     const statusText = () => ({
       checking: '☁️ Looking for your saved game…',
+      local: '💾 Progress saves on this device · use “Move your save” to take it to another one',
       on: '☁️ Progress saves to your Claude account',
       off: '⚠️ Cloud save unavailable — progress is kept on this device only',
     })[status];
@@ -240,7 +241,7 @@ window.App = (() => {
     async function connect() {
       const timeout = new Promise(r => setTimeout(() => r('timeout'), 10000));
       const work = (async () => {
-        if (!window.claude || !window.claude.use) return null;
+        if (!window.claude || !window.claude.use) return 'local';
         const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
         if (!db || !user) return null;
         const uid = await user.id();
@@ -251,6 +252,7 @@ window.App = (() => {
         return { json: snap.exists ? snap.data().json : null };
       })().catch(() => null);
       const res = await Promise.race([work, timeout]);
+      if (res === 'local') { setStatus('local'); return null; }
       if (!res || res === 'timeout') { setStatus('off'); return null; }
       setStatus('on');
       return res.json || null;
@@ -260,6 +262,52 @@ window.App = (() => {
     return { queue, connect, now, statusText };
   })();
   document.addEventListener('visibilitychange', () => { if (document.hidden) Cloud.now(); });
+
+  // ---------- moving a save between devices: a copy-and-paste code ----------
+  const exportSave = () => 'TR1:' + btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+  function importSave(code) {
+    let json;
+    try {
+      code = String(code || '').trim().replace(/\s+/g, '');
+      if (!code.startsWith('TR1:')) return false;
+      json = decodeURIComponent(escape(atob(code.slice(4))));
+      const s = JSON.parse(json);
+      if (!s || typeof s !== 'object' || !s.stockpile) return false;
+    } catch (e) { return false; }
+    fromJson(json);
+    save();
+    return true;
+  }
+  async function moveSave() {
+    let pasted = '';
+    const code = exportSave();
+    const c = await choose({
+      title: '💾 Move your save',
+      html: `<p class="hint">To play on another phone or browser, copy this code, send it to yourself, and paste it there.</p>
+        <textarea class="save-code" id="save-out" readonly rows="3">${code}</textarea>
+        <p class="hint">Got a code from another device? Paste it here to load it. <b>This replaces the game on this device.</b></p>
+        <textarea class="save-code" id="save-in" rows="3" placeholder="Paste a save code (starts with TR1:)"></textarea>`,
+      buttons: [{ id: 'copy', label: '📋 Copy my code' }, { id: 'load', label: '⬇ Load pasted code', cls: 'alt' }, { id: 'close', label: 'Close', cls: 'alt' }],
+      onOpen: () => { const i = document.getElementById('save-in'); if (i) i.oninput = () => { pasted = i.value; }; },
+    });
+    if (c === 'copy') {
+      let ok = false;
+      try { await navigator.clipboard.writeText(code); ok = true; } catch (e) { /* clipboard blocked */ }
+      if (!ok) { const o = document.getElementById('save-out'); try { o.select(); ok = document.execCommand('copy'); } catch (e) { /* ignore */ } }
+      await choose({ title: ok ? '✓ Copied' : 'Copy it by hand', html: ok ? '<p>Your save code is on the clipboard. Paste it into a note or message to yourself.</p>' : `<p>Press and hold to copy:</p><textarea class="save-code" readonly rows="4">${code}</textarea>`, buttons: [{ id: 'ok', label: 'OK' }] });
+    } else if (c === 'load') {
+      pasted = pasted || document.getElementById('save-in')?.value || '';
+      const ok = importSave(pasted);
+      await choose({ title: ok ? '✓ Save loaded' : 'That code didn\'t work', html: ok ? `<p>Welcome back${state.profile ? `, <b>${state.profile.name}</b>` : ''} — level ${level()}.</p>` : '<p>Make sure you copied the whole code, starting with <b>TR1:</b>.</p>', buttons: [{ id: 'ok', label: 'OK' }] });
+    }
+    Story.title();
+  }
+
+  // ---------- install to home screen & play offline (only when hosted on its own site) ----------
+  try {
+    const own = /^https?:$/.test(location.protocol) && window.top === window && !/claude\.ai$|claudeusercontent\.com$/.test(location.hostname);
+    if (own && 'serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  } catch (e) { /* not available */ }
 
   // ---------- levels ----------
   const level = () => Data.levelFromXp(state.xp);
@@ -532,7 +580,7 @@ window.App = (() => {
   }
 
   return {
-    ENEMY_NAME, grantSpecial, addXP, bountyEvent: (id, n) => Bounty.event(id, n), levelPerks, get level() { return level(); }, boot, go, save, newGame, tripDone, get cloudReady() { return cloudReady; }, cloudStatus: () => Cloud.statusText(), choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
+    moveSave, exportSave, importSave, ENEMY_NAME, grantSpecial, addXP, bountyEvent: (id, n) => Bounty.event(id, n), levelPerks, get level() { return level(); }, boot, go, save, newGame, tripDone, get cloudReady() { return cloudReady; }, cloudStatus: () => Cloud.statusText(), choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
     addGear, gearCount, equip, unequip, wear, captureWeapon, recoverWeapons, grantShard, grantChart, heal, hurtPlayer, eatFood, eatMeal, foodTotal, spendFood, get maxHp() { return maxHp(); },
     get state() { return state; },
   };

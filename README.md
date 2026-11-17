@@ -236,3 +236,8 @@ The Items screen and the Beyond seal on the map show how much of the chart you'v
 
 ## Not built yet
 Real PvP (needs a server), Deep Tunnels (dark mine + lamp), post-dragon lands beyond the known realm (swamp giants, spiders, frost, barrows), uses for dragon scales, a sea-monster level out on the Sunlit Sea, and a hidden island off the edge of the map to discover.
+
+## Playing outside claude.ai (installable, offline)
+- `manifest.json`, `sw.js` and `icons/` make the game installable: open it on its own website, then **Share → Add to Home Screen** (iPhone) or **Install app** (Android/Chrome). After the first visit it also works offline.
+- Off claude.ai, progress saves on the device. **💾 Move your save** on the title screen gives a copy-and-paste code to carry a game to another phone or browser.
+- **Hosting on GitHub Pages:** `.github/workflows/pages.yml` publishes the game whenever `main` is updated. One-time setup: repo Settings → Pages → Source: **GitHub Actions**.
