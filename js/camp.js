@@ -10,9 +10,9 @@ window.Camp = (() => {
     wall:      { pts: 2, mat: 'stone', hard: 2, hp: 4, icon: '🧱', name: 'Stone wall' },
     palisade:  { pts: 2, mat: 'wood',  hard: 1, hp: 3, icon: '🔱', name: 'Spiked palisade', spiked: true },
     tower:     { pts: 2, mat: 'wood',  hard: 1, hp: 3, icon: '🗼', name: 'Watchtower', tower: true },
-    gate:      { pts: 3, mat: 'iron',  hard: 3, hp: 4, icon: '🚪', name: 'Iron gate', max: 2 },
+    gate:      { pts: 3, mat: 'iron',  hard: 3, hp: 4, icon: '🚪', name: 'Iron gate', max: 4 },
     runestone: { pts: 1, mat: 'stone', hard: 2, hp: 1, icon: '🪨', name: 'Runestone', rune: true },
-    bulwark:   { pts: 4, mat: 'steel', hard: 4, hp: 5, icon: '🛡️', name: 'Steel bulwark', max: 2 },
+    bulwark:   { pts: 4, mat: 'steel', hard: 4, hp: 5, icon: '🛡️', name: 'Steel bulwark', max: 4 },
   };
   // How each attacker plays your board.
   const AI = {
@@ -20,7 +20,14 @@ window.Camp = (() => {
     dwarf:  { name: 'Dwarves', march: 8, miss: 0.25, big: 0.25 },
   };
 
-  const budget = L => Math.min(16, 5 + L);
+  // Fortify points keep growing with your level (they used to stop at 16).
+  const budget = L => Math.min(45, 6 + L);
+  // Your Storehouse keep is rebuilt stronger each era: more HP, and harder material
+  // (wood → iron → steel → mythic), so low-tier raiders barely dent it.
+  const KEEP_BY_ERA = { 1: { hp: 8, hard: 1, name: 'timber' }, 2: { hp: 10, hard: 2, name: 'iron-bound' }, 3: { hp: 12, hard: 3, name: 'steel-banded' }, 4: { hp: 15, hard: 4, name: 'starsilver-clad' } };
+  const keepNow = () => KEEP_BY_ERA[Data.ERA(App.level)];
+  // War parties never come more than one rank above your era — they send what you can fight.
+  const raidTier = enemy => Math.min(Data.enemyTier(App.state.enemyWins[enemy]), Data.ERA(App.level) + 1);
   const key = (r, c) => `${r},${c}`;
   const isKeep = (r, c) => r === 0 && c >= 2 && c <= 4;
   const inB = (r, c) => r >= 0 && r < ROWS && c >= 0 && c < COLS;
@@ -36,7 +43,7 @@ window.Camp = (() => {
   const owned = kind => App.state.inventory[kind] || 0;
 
   // ---------- attack simulation ----------
-  function newAttack(enemy, dry = false, tier = Data.enemyTier(App.state.enemyWins[enemy])) {
+  function newAttack(enemy, dry = false, tier = raidTier(enemy)) {
     const L = layout();
     const pieces = Object.entries(L.cells).map(([k, kind]) => {
       const [r, c] = k.split(',').map(Number);
@@ -50,7 +57,8 @@ window.Camp = (() => {
     // Iron-banded loot chest: once opened it stays put and still blocks the way.
     const chest = { kind: 'chest', r: L.chest[0], c: L.chest[1], hp: 2, max: 2, mat: 'wood', hard: 1, alive: true, opened: false };
     // The keep is your Storehouse: break it and they carry off a share of everything you've banked.
-    const keep = { kind: 'keep', hp: KEEP_HP, max: KEEP_HP, alive: true };
+    const K = keepNow();
+    const keep = { kind: 'keep', hp: K.hp, max: K.hp, hard: K.hard, alive: true };
     // Higher-ranked raiders hit harder and arrive sooner.
     const base = AI[enemy], t = tier - 1;
     const P = { ...base, name: `${enemy === 'dwarf' ? 'Dwarf' : 'Goblin'} ${Data.TIER_NAMES[enemy][tier - 1]}`,
@@ -195,7 +203,7 @@ window.Camp = (() => {
   async function revengeIfDue() {
     const st = App.state;
     if (!st.revenge || st.revenge.trips > 0) return;
-    const enemy = st.revenge.enemy, tier = Data.enemyTier(st.enemyWins[enemy]);
+    const enemy = st.revenge.enemy, tier = raidTier(enemy);
     const who = `${enemy === 'dwarf' ? 'Dwarf' : 'Goblin'} ${Data.TIER_NAMES[enemy][tier - 1]}`;
     Sound.sfx('drums');
     await App.choose({
@@ -208,7 +216,10 @@ window.Camp = (() => {
     // Aftermath: lost defenses, plunder.
     const lost = [];
     const L = layout();
-    a.pieces.filter(p => !p.alive && !p.trap).forEach(p => {
+    // Smashed defenses: if your camp held, your people rebuild them all. If it fell, half are lost for good.
+    const smashed = a.pieces.filter(p => !p.alive && !p.trap);
+    smashed.forEach((p, i) => {
+      if (!a.done || i % 2 === 1) { lost.push(`${DEF[p.kind].icon} ${DEF[p.kind].name} smashed — rebuilt`); return; }
       delete L.cells[key(p.r, p.c)];
       st.inventory[p.kind] = Math.max(0, (st.inventory[p.kind] || 0) - 1);
       lost.push(`${DEF[p.kind].icon} ${DEF[p.kind].name} destroyed`);
@@ -231,7 +242,7 @@ window.Camp = (() => {
       title: a.done ? '💥 They broke into your Storehouse' : '🛡️ Your camp held!',
       html: `<p>${a.done ? `${who} smashed their way in after ${a.moves} moves and carried off ${Math.round(((enemy === 'dwarf' ? 0.12 : 0.1) + 0.03 * (tier - 1)) * 100)}% of everything you'd banked.`
         : `${who} hammered at your walls for ${a.moves} moves and gave up. Their grudge is spent — for now.`}</p>
-        ${lost.length ? `<div class="sum-spoils lost"><b>Lost</b><br>${lost.join('<br>')}</div>` : '<p>Nothing lost!</p>'}
+        ${lost.length ? `<div class="sum-spoils lost"><b>Aftermath</b><br>${lost.join('<br>')}</div>` : '<p>Nothing lost!</p>'}
         <p class="hint">Stronger walls, gates and traps make them give up sooner.</p>`,
       buttons: [{ id: 'fortify', label: '🏰 Rebuild & fortify' }, { id: 'home', label: 'Back to the map', cls: 'alt' }],
     }).then(c => { if (c === 'fortify') App.go('fortify'); });
@@ -272,7 +283,7 @@ window.Camp = (() => {
       if (isKeep(r, c)) {
         if (c !== 2) continue;
         cls += ' keep' + (a.keep.alive && !a.done ? '' : ' down') + (a.hit === a.keep ? ' struck' : '');
-        content = Art.piece('pkeep'); hp = `<span class="sh">${'♥'.repeat(a.keep.hp)}</span>`;
+        content = Art.piece('pkeep'); hp = `<span class="sh">♥${a.keep.hp}</span>`;
       } else if (a.chest.r === r && a.chest.c === c) {
         cls += ' chest' + (a.chest.opened ? ' down' : '') + (a.hit === a.chest ? ' struck' : '');
         content = Art.piece('chest');
@@ -360,10 +371,10 @@ window.Camp = (() => {
     grid.querySelectorAll('.fc').forEach(el => { el.onclick = () => tapCell(+el.dataset.r, +el.dataset.c); });
 
     const st = App.state;
-    const rank = e => Data.TIER_NAMES[e][Data.enemyTier(st.enemyWins[e]) - 1];
+    const rank = e => Data.TIER_NAMES[e][raidTier(e) - 1];
     const meter = e => { const n = Math.min(Data.GRUDGE_FULL, Math.floor(st.grudge[e])); return '■'.repeat(n) + '□'.repeat(Data.GRUDGE_FULL - n); };
     document.getElementById('fort-test').innerHTML =
-      `🧪 If they attacked now, your camp would hold <b>${holdChance('goblin')}%</b> of the time against Goblin ${rank('goblin')} and <b>${holdChance('dwarf')}%</b> against Dwarf ${rank('dwarf')}.
+      `🏰 Your Storehouse keep is <b>${keepNow().name}</b>: <b>${keepNow().hp} HP</b>, ${Data.TIER_LABEL[keepNow().hard].toLowerCase()}-hard — it's rebuilt stronger each era.<br>🧪 If they attacked now, your camp would hold <b>${holdChance('goblin')}%</b> of the time against Goblin ${rank('goblin')} and <b>${holdChance('dwarf')}%</b> against Dwarf ${rank('dwarf')}.
       <div class="grudge">😠 Goblin grudge <span>${meter('goblin')}</span> · Dwarf grudge <span>${meter('dwarf')}</span></div>
       ${st.revenge ? `<p class="warn-note">⚔️ A ${st.revenge.enemy} war party is ${st.revenge.trips > 0 ? `${st.revenge.trips} trip${st.revenge.trips > 1 ? 's' : ''} away` : 'at the gates'}!</p>` : ''}
       <span class="hint">Win raids (or leave goblins alive) and their grudge grows. When it's full, they come for your Storehouse — you'll get a warning a couple of trips ahead.</span>`;
@@ -435,5 +446,5 @@ window.Camp = (() => {
     Sound.sfx('nope');
   }
 
-  return { giveStarterKit, DEF, budget, layout, newAttack, step, holdChance, tickTrip, revengeIfDue, miniMap, render, KEEP_HP };
+  return { giveStarterKit, DEF, budget, layout, newAttack, step, holdChance, tickTrip, revengeIfDue, miniMap, render, KEEP_HP, keepNow, raidTier };
 })();
