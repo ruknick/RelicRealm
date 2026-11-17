@@ -123,7 +123,7 @@ window.Gather = (() => {
   }
   const starsNow = () => {
     const done = run.goals.filter(x => x.have >= x.need);
-    return done.length === 2 ? (done.every(x => x.doneAt >= 5) ? 3 : 2) : done.length;
+    return done.length === 2 ? (done.every(x => x.doneAt >= 5) && !run.extraUsed ? 3 : 2) : done.length;
   };
   function hudGoals() {
     const el = document.getElementById('g-goals');
@@ -524,8 +524,9 @@ window.Gather = (() => {
   // ---------- board hooks ----------
   const hooks = {
     canPlay: () => !!run && !run.ended && run.moves > 0,
-    onMove: () => { run.moves--; run.movesMade++; hud(); },
+    onMove: () => { run.moves--; run.movesMade++; hud(); coach('move'); },
     onMatch(runs, step) {
+      coach('match');
       for (const ri of runs) {
         const res = land.gives[ri.type];
         if (!res) {   // filler tiles — but a rare one hidden among them (eggs in the hay) still counts
@@ -547,6 +548,7 @@ window.Gather = (() => {
       }
     },
     onPieceHit(p, n, src, w) {
+      if (src !== 'match') coach('swing');
       const dmg = src === 'match' ? n * Data.matchDamage(p) : n;
       if (dmg <= 0) {
         const tip = p.toolOnly === 'axe' ? '🪓 Matches can\'t clear that — wield a wood-axe (🛠️ slot) and tap it.'
@@ -703,10 +705,65 @@ window.Gather = (() => {
       hud();
       if (run.moves <= 0 && !run.ended) {
         await board.wait(500);
-        finish('moves');
+        if (await offerMore()) hud();
+        else finish('moves');
       }
     },
   };
+
+  // ---------- one more go? ----------
+  // Out of moves with a goal almost done: offer 5 more (the first each day is free).
+  async function offerMore() {
+    if (run.extraUsed || run.ended) return false;
+    const left = run.goals.filter(g => g.have < g.need);
+    if (!left.length || !left.every(g => g.need - g.have <= Math.max(2, Math.ceil(g.need * 0.3)))) return false;
+    const today = new Date().toDateString(), free = App.state.freeMoves !== today;
+    const cost = 10 + run.landLv, gold = App.state.stockpile.gold;
+    if (!free && gold < cost) return false;
+    run.extraUsed = true;
+    const c = await App.choose({
+      title: 'So close!',
+      html: `<div class="trip-goals">${left.map(g => `<div>○ ${g.text(g.need)} <b>${g.have}/${g.need}</b> — just ${g.need - g.have} to go</div>`).join('')}</div>
+        <p>Keep going with <b>5 more moves</b>?</p>${free ? '<p class="reward">Your first one today is free!</p>' : `<p class="hint">You have ${gold} gold.</p>`}`,
+      buttons: [{ id: 'more', label: free ? '+5 moves — free' : `+5 moves — ${cost} gold` }, { id: 'home', label: 'Head home', cls: 'alt' }],
+    });
+    if (c !== 'more') return false;
+    if (free) App.state.freeMoves = today; else App.state.stockpile.gold -= cost;
+    run.moves += 5;
+    App.save();
+    Sound.sfx('coin');
+    board.toast('+5 moves — finish it!', 'win', 1600);
+    board.scheduleHint();
+    return true;
+  }
+
+  // ---------- first-trip coaching ----------
+  const COACH = [
+    { text: '<b>Swap two touching tiles</b> to line up 3 or more of a kind. Try the glowing pair on the board!', until: 'match' },
+    { text: 'Matches fill your <b>backpack</b> and charge your <b>⚡ energy</b>. With enough energy, <b>tap a stump</b> to chop it with your axe — or tap a goblin to fight it.', until: 'swing', moves: 8 },
+    { text: 'Meet the <b>🎯 goals</b> at the top for stars and rewards. Tap <b>Head home</b> any time — everything in your backpack goes to your Storehouse.', until: 'none', moves: 5 },
+  ];
+  function coach(ev) {
+    const s = App.state;
+    if (!run || s.tut == null || s.tut >= COACH.length || land.key !== 'forest') return;
+    if (ev === 'start') { run.coachAt = run.movesMade; showCoach(); return; }
+    const step = COACH[s.tut];
+    if (ev === step.until || ev === 'ok' || (ev === 'move' && step.moves && run.movesMade - run.coachAt >= step.moves)) {
+      s.tut++;
+      App.save();
+      run.coachAt = run.movesMade;
+      showCoach();
+    }
+  }
+  function showCoach() {
+    const el = document.getElementById('coach'), step = run && !run.ended && land.key === 'forest' && COACH[App.state.tut];
+    if (!step) { el.classList.add('hidden'); return; }
+    el.innerHTML = `<span class="coach-n">${App.state.tut + 1}/${COACH.length}</span><p>${step.text}</p><button class="small" id="coach-ok">Got it</button>`;
+    el.classList.remove('hidden');
+    el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+    document.getElementById('coach-ok').onclick = () => coach('ok');
+    if (App.state.tut === 0) board.scheduleHint(600);
+  }
 
   // ---------- end of run ----------
   const tripReward = r => (r.stars ? `<p class="reward">Goal reward: ${[
@@ -715,6 +772,7 @@ window.Gather = (() => {
     if (run.ended) return;
     run.ended = true;
     board.stop();
+    showCoach();
     land.bag.forEach(t => { App.state.stockpile[t] += run.backpack[t]; });
     App.save();
     if (reason === 'raid') { App.prepareRaid(land.discover.enemy, { fromField: true }); return; }
@@ -789,6 +847,7 @@ window.Gather = (() => {
       mon: Data.monsterPlan(landLv), sinceMon: 0, slain: 0, sinceSpread: 0, extra: {},
     };
     run.goals = makeGoals(landLv);
+    document.getElementById('coach').classList.add('hidden');
     // Obstacles first (rows 1-6), then tiles, then buried finds under random tiles.
     const used = new Set();
     for (const kind of land.obstacles(lv.startObstacles)) {
@@ -826,6 +885,7 @@ window.Gather = (() => {
     hud();
     hudLevel();
     hudGoals();
+    coach('start');
     Sound.music(land.music);
     if (App.state.debug.discoverNow && land.discover) {
       run.discoverSpawned = true;

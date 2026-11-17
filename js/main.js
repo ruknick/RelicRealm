@@ -450,6 +450,7 @@ window.App = (() => {
   function newGame(profile) {
     state = fresh();
     state.profile = profile;
+    state.tut = 0;   // first-trip coaching
     starterKit();
     save();
   }

@@ -26,6 +26,7 @@ window.World = (() => {
     const st = App.state;
     document.getElementById('world-map').innerHTML = Art.WORLD;
 
+    const beckon = Story.nextSpot();
     document.getElementById('world-spots').innerHTML = SPOTS.map(s => {
       let cls = 'spot', sub = s.sub || '';
       const marks = [];
@@ -37,6 +38,7 @@ window.World = (() => {
       if (s.boss) { const wins = (st.bossWins || {})[s.boss] || 0; cls += ' bossspot'; sub = wins ? `slain ×${wins}` : s.sub; }
       if (s.id === 'beyond') sub = st.chart >= Data.CHART_PIECES ? 'the chart is whole!' : `chart ${st.chart || 0}/${Data.CHART_PIECES}`;
       if (s.locked) cls += ' locked';
+      if (s.id === beckon) cls += ' beckon';
       return `<button class="${cls}" data-id="${s.id}" style="left:${s.x}%;top:${s.y}%">
         <span class="sp-seal">${s.art ? Art.piece(s.art) : s.icon}</span><span class="sp-name">${s.name}</span><span class="sp-sub">${sub}${marks.length ? ' ' + marks.join('') : ''}</span></button>`;
     }).join('');
@@ -62,6 +64,21 @@ window.World = (() => {
     const st = App.state, L = App.level, a = Data.xpForLevel(L), b = Data.xpForLevel(L + 1);
     document.getElementById('home-level').innerHTML =
       `<b>${st.profile ? `${Story.ORIGINS[st.profile.origin].icon} ${st.profile.name} · ` : ''}⭐ ${L}</b><span class="xpbar"><i style="width:${Math.round((st.xp - a) / (b - a) * 100)}%"></i></span><small>${st.xp - a}/${b - a} XP</small>`;
+    document.getElementById('next-up').innerHTML = nextUp();
+  }
+  // The very next thing you'll unlock: gear or a station by level, or a boss lair by trips.
+  function nextUp() {
+    const L = App.level, bits = [];
+    for (let n = L + 1; n <= L + 25; n++) {
+      const got = Object.values(Data.STATIONS).filter(s => s.lv === n).map(s => `<b>${s.name}</b>`)
+        .concat(Data.RECIPES.filter(r => r.lv === n).map(r => `<b>${Data.ITEMS[r.id].name}</b>`));
+      if (got.length) { bits.push(`Next at ⭐ ${n}: ${got.slice(0, 2).join(', ')}${got.length > 2 ? ` +${got.length - 2} more` : ''}`); break; }
+    }
+    const lairs = Object.values(Boss.CONFIG).filter(c => c.unlock && !Boss.unlocked(Object.keys(Boss.CONFIG).find(k => Boss.CONFIG[k] === c)))
+      .map(c => ({ c, trips: Math.ceil((c.unlock.lv - 1) * 3 / 2) - App.state.lands[c.unlock.land].runs }))
+      .filter(x => x.trips > 0).sort((a, b) => a.trips - b.trips);
+    if (lairs[0]) bits.push(`${lairs[0].trips} more ${LAND_NAME[lairs[0].c.unlock.land]} trip${lairs[0].trips > 1 ? 's' : ''} to find ${lairs[0].c.place}`);
+    return bits.length ? `🔓 ${bits.join(' · ')}` : '';
   }
 
   function travel(id) {

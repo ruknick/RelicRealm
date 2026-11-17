@@ -36,9 +36,9 @@ window.Story = (() => {
       id: 'prologue', title: 'Prologue · From the Ashes',
       intro: 'Ashford is gone, but the forest still stands, and so do you. Start again: gather what you can, forge something useful, and raise a camp the raiders can\'t simply walk into.',
       goals: [
-        { text: 'Gather in the 🌲 Forest', done: () => st().lands.forest.runs >= 1 },
-        { text: 'Craft anything at the ⚒ Workshop', done: () => !!st().story.flags.crafted },
-        { text: 'Fortify 🏰 Your Camp', done: () => !!st().story.flags.fortify },
+        { text: 'Gather in the 🌲 Forest', spot: 'forest', done: () => st().lands.forest.runs >= 1 },
+        { text: 'Craft anything at the ⚒ Workshop', spot: 'craft', done: () => !!st().story.flags.crafted },
+        { text: 'Fortify 🏰 Your Camp', spot: 'camp', done: () => !!st().story.flags.fortify },
       ],
       reward: { label: '🧢 Leather cap + 20 XP', give: () => { App.addGear('helmet1'); App.addXP(20); } },
       outro: 'Smoke rises from your new camp. As you bank the fire, you notice small, clawed footprints in the mud by the trees, and a stolen Ashford cooking pot dropped beside them. Goblins.',
@@ -266,5 +266,8 @@ window.Story = (() => {
     await App.choose({ title: p.title, html: `<p class="story-text">${fill(p.text)}</p>`, buttons: [{ id: 'ok', label: 'Go on' }] });
   }
 
-  return { GAME, ORIGINS, title, create, intro, check, banner, journal, visit, flag, ensure };
+  // Which map spot the story wants you at next (it glows on the map early on).
+  const nextSpot = () => { const g = chapter().goals.find(x => !x.done()); return g && g.spot; };
+
+  return { nextSpot, GAME, ORIGINS, title, create, intro, check, banner, journal, visit, flag, ensure };
 })();
