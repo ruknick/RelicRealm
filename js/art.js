@@ -929,7 +929,7 @@ window.Art = (() => {
   const scattered = [];
   for (let i = 0; i < 40; i++) {
     const x = 120 + rnd() * 100, y = 190 + rnd() * 120;
-    if (x < coastX(y) - 14 && !(x > 112 && x < 220 && y > 212 && y < 298)) scattered.push([x, y, 0.7 + rnd() * 0.3]);
+    if (x < coastX(y) - 14 && !(x > 150 && x < 238 && y > 176 && y < 240)) scattered.push([x, y, 0.7 + rnd() * 0.3]);
   }
   const waves = [];
   for (let i = 0; i < 70; i++) {
@@ -988,35 +988,16 @@ window.Art = (() => {
     <!-- the Whispering Wood and scattered copses -->
     <g>${woodTrees.map(([x, y, sc]) => tree(x, y, sc)).join('')}</g>
     <g>${scattered.map(([x, y, sc]) => tree(x, y, sc)).join('')}</g>
-    <!-- the Golden Fields: a patchwork of plots, hedgerows, a farmstead and a windmill -->
-    <g filter="url(#wmWash)"><ellipse cx="168" cy="250" rx="58" ry="34" fill="#d8c070" opacity=".55"/></g>
-    ${(() => {
-      const plots = [
-        ['M118 232 L150 222 L156 246 L124 254 Z', '#e2c46a', 20], ['M150 222 L184 218 L188 240 L156 246 Z', '#a8b46a', -30],
-        ['M184 218 L214 226 L210 248 L188 240 Z', '#e8d080', 70], ['M124 254 L156 246 L160 270 L130 276 Z', '#9a7a4a', 0],
-        ['M156 246 L188 240 L192 264 L160 270 Z', '#d8b85a', -60], ['M188 240 L210 248 L206 272 L192 264 Z', '#b8c070', 40],
-        ['M130 276 L160 270 L164 290 L140 292 Z', '#e0c870', 90], ['M160 270 L192 264 L194 284 L164 290 Z', '#8a6a3e', 15],
-      ];
-      return plots.map(([d, f, ang], i) => {
-        const id = 'wmPlot' + i;
-        const furrows = Array.from({ length: 16 }, (_, k) => `<path d="M${100 + k * 8} 190 v130" stroke="${f === '#9a7a4a' || f === '#8a6a3e' ? '#5a3e20' : '#8a6a20'}" stroke-width=".55" opacity=".6"/>`).join('');
-        return `<clipPath id="${id}"><path d="${d}"/></clipPath><path d="${d}" fill="${f}"/>
-          <g clip-path="url(#${id})"><g transform="rotate(${ang} 160 255)">${furrows}</g></g>`;
-      }).join('');
-    })()}
-    <g fill="none" stroke="#3e5a2a" stroke-width="2.2" stroke-linecap="round" stroke-dasharray=".1 3.2">
-      <path d="M118 232 L150 222 L184 218 L214 226 L210 248 L206 272 L194 284 L164 290 L140 292 L130 276 L124 254 Z"/>
-      <path d="M150 222 L160 270 L164 290 M184 218 L194 284 M124 254 L210 248 M130 276 L206 272"/></g>
-    <path d="M118 232 L150 222 L184 218 L214 226 L210 248 L206 272 L194 284 L164 290 L140 292 L130 276 L124 254 Z" fill="none" stroke="${INK}" stroke-width=".7" opacity=".7"/>
-    <!-- farmstead -->
-    <g transform="translate(196 230)" stroke="${INK}" stroke-width=".7"><path d="M0 10V3l6-4 6 4v7z" fill="#e6dcc4"/><path d="M-1 3l7-5 7 5" fill="none" stroke="#8a3a2a" stroke-width="1.6"/><path d="M4 10V6h3v4z" fill="${INK}"/>
-      <path d="M14 10V5h8v5z" fill="#a8483a"/><path d="M13 5l5-3 5 3" fill="#7a2e1a"/></g>
-    <!-- windmill -->
-    <g transform="translate(142 226)" stroke="${INK}" stroke-width=".7"><path d="M-3 12 L-2 0 h4 L3 12z" fill="#e6dcc4"/><path d="M-2 0 L0 -2.5 L2 0z" fill="#8a3a2a"/>
-      <g stroke-width=".9"><path d="M0 -1 L-8 -9M0 -1 L8 -9M0 -1 L-8 7M0 -1 L8 7"/></g>
-      <g fill="#efe6d0" stroke-width=".5"><path d="M-2 -3 L-8 -9 L-6 -11z"/><path d="M2 -3 L8 -9 L10 -7z"/><path d="M-2 1 L-8 7 L-10 5z"/><path d="M2 1 L8 7 L6 9z"/></g></g>
-    <!-- haystacks -->
-    ${[[172, 258], [178, 260], [146, 282]].map(([x, y]) => `<path d="M${x - 3} ${y} q3 -7 6 0z" fill="#e8cc78" stroke="${INK}" stroke-width=".5"/>`).join('')}
+    <!-- the Golden Fields: one golden wheat field with a windmill -->
+    <g filter="url(#wmWash)"><ellipse cx="194" cy="208" rx="40" ry="26" fill="#e0c060" opacity=".5"/></g>
+    <clipPath id="wmField"><path d="M162 196 L196 184 L230 194 L226 224 L190 232 L160 222 Z"/></clipPath>
+    <path d="M162 196 L196 184 L230 194 L226 224 L190 232 L160 222 Z" fill="#e6c868"/>
+    <g clip-path="url(#wmField)" stroke="#a88428" stroke-width=".6" opacity=".75">${Array.from({ length: 22 }, (_, k) => `<path d="M${150 + k * 4} 236 L${170 + k * 4} 178"/>`).join('')}</g>
+    <path d="M162 196 L196 184 L230 194 L226 224 L190 232 L160 222 Z" fill="none" stroke="#5a6a2a" stroke-width="2" stroke-dasharray=".1 3" stroke-linecap="round"/>
+    <path d="M162 196 L196 184 L230 194 L226 224 L190 232 L160 222 Z" fill="none" stroke="${INK}" stroke-width=".7" opacity=".8"/>
+    <g transform="translate(176 194)" stroke="${INK}" stroke-width=".7"><path d="M-3.5 13 L-2.4 0 h4.8 L3.5 13z" fill="#e6dcc4"/><path d="M-2.6 0 L0 -3 L2.6 0z" fill="#8a3a2a"/>
+      <g stroke-width=".9"><path d="M0 -1 L-9 -10M0 -1 L9 -10M0 -1 L-9 8M0 -1 L9 8"/></g>
+      <g fill="#efe6d0" stroke-width=".5"><path d="M-2 -3 L-9 -10 L-7 -12z"/><path d="M2 -3 L9 -10 L11 -8z"/><path d="M-2 1 L-9 8 L-11 6z"/><path d="M2 1 L9 8 L7 10z"/></g></g>
     <!-- roads -->
     <path d="M196 384 C170 360 130 340 100 310 M200 380 C190 320 150 200 110 120 M206 384 C226 370 252 340 268 300 M200 380 C240 300 268 180 282 110 M184 396 C150 420 120 440 104 450"
       stroke="#7a4a2a" stroke-width="1.1" stroke-dasharray="3 3" stroke-linecap="round" fill="none" opacity=".8"/>

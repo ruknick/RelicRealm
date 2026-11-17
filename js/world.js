@@ -6,7 +6,7 @@ window.World = (() => {
     { id: 'lair',   x: 80, y: 25.5, icon: '🐉', name: 'Dragon\'s Lair', sub: 'Emberwyrm', boss: 'dragon' },
     { id: 'mine',   x: 24, y: 32.5, icon: '⛏️', name: 'Iron Hills', land: 'mine', raid: 'dwarf', lair: 'golem' },
     { id: 'forest', x: 23, y: 67.5, icon: '🌲', name: 'Whispering Wood', land: 'forest', raid: 'goblin', lair: 'warchief' },
-    { id: 'farm',   x: 47, y: 58, icon: '🌾', name: 'Golden Fields', land: 'farm' },
+    { id: 'farm',   x: 55, y: 51, icon: '🌾', name: 'Golden Fields', land: 'farm' },
     { id: 'ocean',  x: 78, y: 61.5, icon: '🌊', name: 'Sunlit Coast', land: 'ocean', lair: 'siren' },
     { id: 'camp',   x: 56, y: 81.5, icon: '🏰', name: 'Your Camp', sub: 'fortify', screen: 'fortify' },
     { id: 'craft',  x: 30, y: 90.5, icon: '⚒', art: 'smithhammer', name: 'Workshop', sub: 'craft', screen: 'craft' },

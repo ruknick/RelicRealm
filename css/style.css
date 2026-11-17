@@ -1338,3 +1338,36 @@ body[data-scene="ocean"] .hint, body[data-scene="ocean"] p.hint { color: #e6dcc4
 body[data-scene="farm"] { background-color: #c8a850; }
 body[data-scene="farm"] p.hint, body[data-scene="farm"] .hint { color: #3a2a10; }
 body[data-scene="farm"] #gather-hint { color: #3a2a10; font-weight: 600; }
+
+/* ---------- Workshop, tidied ---------- */
+#screen-craft .st-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; overflow: visible; padding: 0 0 8px; }
+#screen-craft .st-chip { min-width: 0; padding: 5px 2px 4px; border-radius: 8px; }
+#screen-craft .st-chip .sc-icon, #screen-craft .st-chip .sc-icon svg { width: 30px; height: 30px; }
+#screen-craft .st-chip .sc-name { font-size: .66rem; white-space: normal; line-height: 1.05; text-align: center; }
+#screen-craft .st-chip small { font-size: .58rem; }
+#screen-craft .ctabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; overflow: visible; padding: 6px 0; }
+#screen-craft .ctab { position: relative; flex-direction: column; justify-content: center; gap: 1px; padding: 5px 2px 4px; font-size: .72rem; min-width: 0; }
+#screen-craft .ctab .ti { width: 22px; height: 22px; }
+#screen-craft .ctab .tl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+#screen-craft .ctab b { position: absolute; top: 2px; right: 3px; font-size: .6rem; padding: 0 4px; }
+#screen-craft .tab-sub { margin: 0 2px 4px; font-size: .74rem; }
+#screen-craft .tier-h { display: flex; align-items: center; gap: 8px; margin: 10px 2px 5px; font-size: .7rem; letter-spacing: 2px; }
+#screen-craft .tier-h::after { content: ''; flex: 1; height: 1px; background: rgba(242,228,194,.2); }
+.recipe.wk { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 10px; padding: 8px 10px; margin-bottom: 6px;
+  border: 1px solid var(--ink-faint); box-shadow: 0 1px 0 rgba(43,27,13,.3), 0 2px 6px rgba(0,0,0,.25); }
+.recipe.wk.ready { border-color: var(--ink-faint); box-shadow: inset 4px 0 0 #4a6a20, 0 2px 6px rgba(0,0,0,.25); }
+.recipe.wk.locked { opacity: .78; }
+.recipe.wk .r-icon { position: relative; width: 44px; height: 44px; border-radius: 8px; }
+.recipe.wk .r-icon svg { width: 100%; height: 100%; }
+.recipe.wk .wk-badge { position: absolute; right: -5px; bottom: -5px; background: #3b2a18; color: #f2e4c2; font-size: .62rem; font-weight: 700; border-radius: 8px; padding: 0 4px; line-height: 1.5; }
+.recipe.wk .r-name { font-size: .95rem; line-height: 1.15; }
+.recipe.wk .r-cost { display: flex; flex-wrap: wrap; gap: 3px 6px; margin-top: 3px; font-size: .76rem; }
+.recipe.wk .cost { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; padding: 1px 6px 1px 2px; border-radius: 10px; background: rgba(43,27,13,.07); }
+.recipe.wk .cost .cost-gem { width: 15px; height: 15px; }
+.recipe.wk .cost .have { margin-left: 2px; font-size: .9em; color: var(--ink-soft); }
+.recipe.wk .cost .have::before { content: '· '; }
+.recipe.wk .cost.short { background: rgba(142,42,26,.1); }
+.recipe.wk .wk-lock { font-size: .76rem; color: var(--wax); }
+.recipe.wk .r-btns { display: flex; flex-direction: column; gap: 4px; }
+.recipe.wk .craft-btn { min-width: 66px; padding: 7px 10px; font-size: .85rem; border-radius: 7px; }
+.recipe.wk .craft-all { padding: 3px 6px; font-size: .72rem; min-width: 0; }

@@ -20,7 +20,7 @@ window.Craft = (() => {
   function costHtml(cost, items = {}) {
     const sp = st().stockpile;
     return Object.entries(cost).map(([k, n]) =>
-      `<span class="cost ${sp[k] >= n ? '' : 'short'}"><span class="gem art g-${tileFor(k)} cost-gem">${Art.tile(tileFor(k))}</span>${n} ${Data.RESOURCES[k].label} <small class="have">(${sp[k]})</small></span>`).join('')
+      `<span class="cost ${sp[k] >= n ? '' : 'short'}" title="${Data.RESOURCES[k].label}: need ${n}, have ${sp[k]}"><span class="gem art g-${tileFor(k)} cost-gem">${Art.tile(tileFor(k))}</span>${n} ${Data.RESOURCES[k].label}<small class="have">${sp[k]}</small></span>`).join('')
       + Object.entries(items).map(([k, n]) =>
       `<span class="cost ${has(k, n) ? '' : 'short'}"><span class="wicon">${iconOf(Data.ITEMS[k])}</span>${n} ${Data.ITEMS[k].name}</span>`).join('');
   }
@@ -29,20 +29,24 @@ window.Craft = (() => {
 
   function card(r) {
     const it = info(r);
-    const owned = r.makes ? null : it.gear ? App.gearCount(r.id) : st().inventory[r.id];
-    const ownedTxt = r.makes ? `have ${Object.keys(r.makes).map(k => st().stockpile[k]).join('')}` : isKit(r) ? (owned ? '✓ Owned' : '') : owned ? `owned ×${owned}` : '';
+    const owned = r.makes ? st().stockpile[Object.keys(r.makes)[0]] : it.gear ? App.gearCount(r.id) : st().inventory[r.id];
     const ready = canAfford(r) && !ownedKit(r);
-    const tag = it.gear ? `<span class="tag t${it.tier}">${Data.tierLabel(r.id)}${it.dur ? ` · ${it.dur} blocks` : ''}</span>` : '';
-    return `<div class="recipe compact ${ready ? 'ready' : ''}" data-id="${r.id}">
-      <div class="r-icon">${r.makes ? `<div class="gem art g-${tileFor(Object.keys(r.makes)[0])}" style="position:relative;width:40px;height:40px">${Art.tile(tileFor(Object.keys(r.makes)[0]))}</div>` : iconOf(it)}</div>
+    const pic = r.makes ? Art.tile(tileFor(Object.keys(r.makes)[0])) : iconOf(it);
+    const badge = isKit(r) ? (owned ? '✓' : '') : owned ? `×${owned}` : '';
+    const lock = !stationOk(r) ? `🔒 Needs the ${stationName(r.station)}`
+      : !levelOk(r) ? `🔒 Unlocks at Level ${r.lv}`
+      : locked(r) ? '🔒 Needs the Palisade blueprint' : '';
+    const costs = lock ? `<span class="wk-lock">${lock}</span>` : costHtml(r.cost, r.items)
+      + (r.shards ? `<span class="cost ${st().shards >= r.shards ? '' : 'short'}">💎 ${r.shards}<small>/${st().shards}</small></span>` : '');
+    const all = r.makes && ready && maxTimes(r) >= 2 ? `<button class="craft-btn craft-all" data-id="${r.id}" data-n="${maxTimes(r)}">×${maxTimes(r)}</button>` : '';
+    return `<div class="recipe compact wk${ready ? ' ready' : ''}${lock ? ' locked' : ''}" data-id="${r.id}">
+      <div class="r-icon">${pic}${badge ? `<span class="wk-badge">${badge}</span>` : ''}</div>
       <div class="r-body">
-        <div class="r-name">${it.name} ${tag}${ownedTxt ? ` <span class="r-owned">${ownedTxt}</span>` : ''}</div>
-        <div class="r-effect">${it.desc}${ownedTxt ? ` <b>${ownedTxt}</b>` : ''}</div>
-        <div class="r-cost">${stationOk(r) && !levelOk(r) ? `<span class="cost short">🔒 Unlocks at Level ${r.lv}</span>` : !stationOk(r) ? `<span class="cost short">🔒 Requires the ${stationName(r.station)} (Lv ${Data.STATIONS[r.station].lv})</span>`
-          : locked(r) ? '<span class="cost short">🔒 Needs the Palisade blueprint (goblin spoil)</span>' : costHtml(r.cost, r.items)}${r.shards ? `<span class="cost ${st().shards >= r.shards ? '' : 'short'}">💎 ${st().shards}/${r.shards} Relic shards</span>` : ''}</div>
+        <div class="r-name">${it.name}</div>
+        <div class="r-effect">${it.desc}</div>
+        <div class="r-cost">${costs}</div>
       </div>
-      <div class="r-btns"><button class="craft-btn" data-id="${r.id}" ${ready ? '' : 'disabled'}>${ownedKit(r) ? 'Owned' : r.makes ? 'Make' : 'Craft'}</button>
-      ${r.makes && ready && maxTimes(r) >= 2 ? `<button class="craft-btn craft-all" data-id="${r.id}" data-n="${maxTimes(r)}">All ×${maxTimes(r)}</button>` : ''}</div>
+      <div class="r-btns"><button class="craft-btn" data-id="${r.id}" ${ready ? '' : 'disabled'}>${ownedKit(r) ? 'Owned' : r.makes ? 'Make' : 'Craft'}</button>${all}</div>
     </div>`;
   }
 
@@ -88,8 +92,8 @@ window.Craft = (() => {
   function stationsStrip() {
     return `<div class="st-strip">${Data.STATION_ORDER.map(id => {
       const S = Data.STATIONS[id], built = !!st().stations[id];
-      const state = built ? '✓' : stationReady(id) ? 'Build!' : `Lv ${S.lv}`;
-      return `<button class="st-chip${built ? ' built' : stationReady(id) ? ' ready' : ''}" data-st="${id}"><span class="sc-icon">${Art.stationArt(id)}</span><span class="sc-name">${S.name}</span><small>${state}</small></button>`;
+      const state = built ? '✓ built' : stationReady(id) ? 'Build!' : `Lv ${S.lv}`;
+      return `<button class="st-chip${built ? ' built' : stationReady(id) ? ' ready' : ''}" data-st="${id}"><span class="sc-icon">${Art.stationArt(id)}</span><span class="sc-name">${S.short || S.name}</span><small>${state}</small></button>`;
     }).join('')}</div>`;
   }
   async function stationInfo(id) {
@@ -143,7 +147,7 @@ window.Craft = (() => {
       }).join('') || '<p class="hint">Nothing here yet.</p>';
     }
     document.getElementById('craft-list').innerHTML = stationsStrip()
-      + `<div class="ctabs">${tabs.map(t => { const n = t.id === 'repair' ? reps.length : readyCount(t.list()); return `<button class="ctab${t.id === tab ? ' on' : ''}" data-tab="${t.id}"><span class="ti">${t.tile ? Art.tile(t.tile) : Art.piece(t.art)}</span>${t.label}${n ? `<b>${n}</b>` : ''}</button>`; }).join('')}</div>`
+      + `<div class="ctabs">${tabs.map(t => { const n = t.id === 'repair' ? reps.length : readyCount(t.list()); return `<button class="ctab${t.id === tab ? ' on' : ''}" data-tab="${t.id}"><span class="ti">${t.tile ? Art.tile(t.tile) : Art.piece(t.art)}</span><span class="tl">${t.label}</span>${n ? `<b>${n}</b>` : ''}</button>`; }).join('')}</div>`
       + `<p class="tab-sub">${T.sub}</p>` + body;
     const root = document.getElementById('craft-list');
     root.querySelectorAll('.ctab').forEach(b => { b.onclick = () => { tab = b.dataset.tab; render(); }; });

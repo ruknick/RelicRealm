@@ -441,10 +441,10 @@ window.Data = (() => {
 
   // ---------- crafting stations (built at your camp) ----------
   const STATIONS = {
-    workbench: { icon: '🪵', name: 'Workbench', lv: 1, cost: {}, desc: 'Wood & stone tools, leather, fences, traps, meals.' },
+    workbench: { icon: '🪵', name: 'Workbench', short: 'Bench', lv: 1, cost: {}, desc: 'Wood & stone tools, leather, fences, traps, meals.' },
     smelter:   { icon: '🔥', name: 'Smelter', lv: 8, cost: { stone: 10, coal: 4 }, desc: 'Smelt ore into bars: iron, silver and gold. Burns charcoal.' },
     forge:     { icon: '⚒️', name: 'Forge', lv: 10, cost: { stone: 12, ironbar: 4, coal: 4 }, desc: 'Iron weapons, tools & armor, gates, amulets, the Crown.' },
-    dforge:    { icon: '🏔️', name: 'Dwarven Forge', lv: 20, cost: { stone: 20, ironbar: 10, coal: 10 }, needs: 'dwarfwin',
+    dforge:    { icon: '🏔️', name: 'Dwarven Forge', short: 'Dwarf Forge', lv: 20, cost: { stone: 20, ironbar: 10, coal: 10 }, needs: 'dwarfwin',
       desc: 'Thrain Ironbeard teaches you the dwarven way: steel bars, steel gear, bulwarks.' },
     staranvil: { icon: '✨', name: 'Star Anvil', lv: 35, cost: { stone: 30, starbar: 4, coal: 15 },
       desc: 'Mythic starsilver & elderwood gear — the only metal that bites through dragon scale.' },
