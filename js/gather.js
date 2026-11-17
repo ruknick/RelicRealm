@@ -246,7 +246,7 @@ window.Gather = (() => {
   // ---------- backpack ----------
   function addToBackpack(type, n, cell, delay = 0) {
     goalProgress('collect', type, n);
-    if (!(type in run.backpack)) { App.state.stockpile[type] += n; App.save(); board.float(cell, `+${n} ${label(type)}`, 'gain', delay); return; }
+    if (!(type in run.backpack)) { run.extra[type] = (run.extra[type] || 0) + n; App.state.stockpile[type] += n; App.save(); board.float(cell, `+${n} ${label(type)}`, 'gain', delay); return; }
     const add = Math.min(n, run.cap - bagTotal());
     if (add > 0) {
       run.backpack[type] += add;
@@ -310,8 +310,9 @@ window.Gather = (() => {
     document.getElementById('g-moves').textContent = run.moves;
     document.querySelector('#screen-gather .moves').classList.toggle('low', run.moves <= 5);
     document.getElementById('bp-total').textContent = bagTotal();
-    document.getElementById('bp-btn').classList.toggle('full', bagTotal() >= run.cap);
-    if (!document.getElementById('bp-pop').classList.contains('hidden')) renderPack();
+    document.getElementById('bp-drawer').classList.toggle('full', bagTotal() >= run.cap);
+    document.getElementById('bp-fill').style.width = Math.min(100, bagTotal() / run.cap * 100) + '%';
+    if (packOpen) renderPack();
     document.getElementById('g-exit').classList.toggle('glow', run.fullWarned);
     const keyHere = [...board.buried.values()].includes('key');
     const chest = board.piecesOf('locked')[0];
@@ -326,19 +327,29 @@ window.Gather = (() => {
 
   function buildBackpack() {
     document.getElementById('bp-cap').textContent = `/${Data.backpackSize(App.level)}`;
-    document.getElementById('bp-pop').classList.add('hidden');
-    document.getElementById('bp-btn').onclick = () => { const pop = document.getElementById('bp-pop'); pop.classList.toggle('hidden'); if (!pop.classList.contains('hidden')) renderPack(); };
-    document.getElementById('bp-pop').onclick = () => document.getElementById('bp-pop').classList.add('hidden');
+    setPack(packOpen);
+    document.getElementById('bp-btn').onclick = () => { setPack(!packOpen); };
+  }
+  // The backpack drawer under the board: open or closed (remembered on this device).
+  let packOpen = (() => { try { return localStorage.getItem('rr-pack-open') !== '0'; } catch (e) { return true; } })();
+  function setPack(open) {
+    packOpen = open;
+    try { localStorage.setItem('rr-pack-open', open ? '1' : '0'); } catch (e) { /* ignore */ }
+    document.getElementById('bp-drawer').classList.toggle('open', open);
+    document.getElementById('bp-chev').textContent = open ? '▾' : '▴';
+    if (open && run) renderPack();
   }
 
   // The backpack, opened over the board.
-  const TILE_OF = { herring: 'fish', wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water' };
+  const TILE_OF = { apple: 'apple', wheat: 'wheat', meat: 'meat', herring: 'fish', wood: 'wood', stone: 'stone', hide: 'hide', food: 'berries', gold: 'gold', iron: 'ore', coal: 'coal', water: 'water' };
+  // Everything you've picked up this trip, one stack per kind.
   function renderPack() {
-    const total = bagTotal(), pct = Math.min(100, Math.round(total / run.cap * 100));
-    document.getElementById('bp-pop').innerHTML = `<div class="bp-card"><div class="bp-head"><b>🎒 Backpack</b><span>${total}/${run.cap}</span></div>
-      <div class="bp-bar"><i style="width:${pct}%"></i></div>
-      <div class="bp-grid">${land.bag.map(t => `<div class="bp-slot${run.backpack[t] ? '' : ' empty'}"><span class="gem art g-${TILE_OF[t]}">${Art.tile(TILE_OF[t])}</span><b>${run.backpack[t]}</b><small>${label(t)}</small></div>`).join('')}</div>
-      <p class="bp-note">${run.overflow ? `${run.overflow} more didn't fit. ` : ''}Head home to bank it all in your Storehouse.${land.key ? '' : ''}</p><p class="bp-close">tap to close</p></div>`;
+    const stack = (t, n, extra) => `<div class="bp-stack${extra ? ' sent' : ''}" title="${label(t)}"><span class="gem art g-${TILE_OF[t] || t}">${Art.tile(TILE_OF[t] || t)}</span><b>${n}</b><small>${label(t)}</small></div>`;
+    const bag = land.bag.filter(t => run.backpack[t] > 0).map(t => stack(t, run.backpack[t]));
+    const extra = Object.entries(run.extra || {}).filter(([, n]) => n > 0).map(([t, n]) => stack(t, n, true));
+    document.getElementById('bp-pop').innerHTML = (bag.length || extra.length)
+      ? `<div class="bp-stacks">${bag.join('')}${extra.join('')}</div>${run.overflow ? `<p class="bp-note">${run.overflow} more didn't fit.</p>` : ''}`
+      : '<p class="bp-note">Empty — make matches to fill it.</p>';
   }
 
   // First time you collect a rare material: a big reveal explaining what it's for.
@@ -775,7 +786,7 @@ window.Gather = (() => {
       moves: MOVES, movesMade: 0, backpack: Object.fromEntries(land.bag.map(t => [t, 0])), overflow: 0, fullWarned: false,
       finds: [], told: {}, eventPiece: null, eventSpawned: false,
       discoverSpawned: false, followed: false, discovered: false, marked: false, ended: false,
-      mon: Data.monsterPlan(landLv), sinceMon: 0, slain: 0, sinceSpread: 0,
+      mon: Data.monsterPlan(landLv), sinceMon: 0, slain: 0, sinceSpread: 0, extra: {},
     };
     run.goals = makeGoals(landLv);
     // Obstacles first (rows 1-6), then tiles, then buried finds under random tiles.
