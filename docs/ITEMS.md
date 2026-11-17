@@ -92,45 +92,45 @@ This removes about 8 items and fixes every "does nothing" case, without touching
 
 | Makes | Station | Level | Cost | What it does |
 |---|---|---|---|---|
-| Tan leather → 1 Leather | Workbench | — | 2 Hide, 1 Pine | Cure hides over an oak-bark fire into tough leather. |
-| Smelt iron bars → 1 Iron bar | Smelter | — | 2 Iron ore, 1 Coal | Melt iron ore down into a bar for the forge. |
-| Smelt scrap iron → 1 Iron bar | Smelter | — | 3 Scrap iron, 1 Coal | Goblin junk melts down into good iron. |
-| Smelt silver bars → 1 Silver bar | Smelter | — | 2 Silver, 1 Coal | For amulet chains and crystal keys. |
-| Smelt a gold bar → 1 Gold bar | Smelter | — | 6 Gold, 1 Coal | Melt gold nuggets down into a bar fit for a crown. |
-| Burn charcoal → 3 Charcoal | Smelter | — | 2 Oak | Slow-burn oak into charcoal for steel. |
-| Smelt starsilver bars → 1 Starsilver bar | Dwarven Forge | — | 3 Starsilver, 2 Charcoal | The mythic metal — only a dwarven fire can melt it. |
-| Forge steel bars → 1 Steel bar | Dwarven Forge | — | 2 Iron bar, 2 Charcoal, 1 Water | Iron bars + charcoal, folded and quenched — the dwarven way. |
+| Tan leather → 1 Leather | Workbench | 1 | 2 Hide, 1 Pine | Cure hides over an oak-bark fire into tough leather. |
+| Smelt iron bars → 1 Iron bar | Smelter | 8 | 2 Iron ore, 1 Coal | Melt iron ore down into a bar for the forge. |
+| Smelt scrap iron → 1 Iron bar | Smelter | 8 | 3 Scrap iron, 1 Coal | Goblin junk melts down into good iron. |
+| Smelt silver bars → 1 Silver bar | Smelter | 11 | 2 Silver, 1 Coal | For amulet chains and crystal keys. |
+| Smelt a gold bar → 1 Gold bar | Smelter | 14 | 6 Gold, 1 Coal | Melt gold nuggets down into a bar fit for a crown. |
+| Burn charcoal → 3 Charcoal | Smelter | 9 | 2 Oak | Slow-burn oak into charcoal for steel. |
+| Smelt starsilver bars → 1 Starsilver bar | Dwarven Forge | 35 | 3 Starsilver, 2 Charcoal | The mythic metal — only a dwarven fire can melt it. |
+| Forge steel bars → 1 Steel bar | Dwarven Forge | 20 | 2 Iron bar, 2 Charcoal, 1 Water | Iron bars + charcoal, folded and quenched — the dwarven way. |
 
 ### Weapons
 
 | Makes | Station | Level | Cost | What it does |
 |---|---|---|---|---|
-| Wooden battle-axe | Workbench | — | 4 Pine, 1 Leather | Wood tier · monsters only · cleaves half damage into monsters beside the target. |
-| Pine short bow | Workbench | — | 3 Pine, 1 Leather | Wood tier · monsters only · hits every monster in the column. |
-| Iron battle-axe | Forge | — | 3 Iron bar, 2 Oak | Iron tier · monsters only · cleaves half damage into monsters beside the target. |
-| Iron sword | Forge | — | 3 Iron bar, 1 Oak, 1 Leather | Iron tier · monsters only · +1 damage on every hit. |
-| Oak longbow | Forge | — | 4 Oak, 1 Leather, 1 Iron bar | Iron tier · monsters only · hits every monster in the column. |
-| Steel battle-axe | Dwarven Forge | — | 3 Steel bar, 2 Ironwood | Steel tier · monsters only · cleaves half damage into monsters beside the target. |
-| Steel sword | Dwarven Forge | — | 3 Steel bar, 1 Ironwood, 1 Leather | Steel tier · monsters only · +1 damage on every hit. |
-| Ironwood war bow | Dwarven Forge | — | 4 Ironwood, 1 Leather, 1 Steel bar | Steel tier · monsters only · hits every monster in the column. |
-| Starsilver blade | Star Anvil | — | 4 Starsilver bar, 1 Elderwood, 1 Leather | Mythic tier · monsters only · +1 damage on every hit. |
-| Elderwood greatbow | Star Anvil | — | 5 Elderwood, 1 Starsilver bar, 1 Leather | Mythic tier · monsters only · hits every monster in the column. |
-| Coral spear | Workbench | — | 5 Coral, 2 Pine, 1 Leather | Sea gear · iron strength, no forge needed · pierces the monsters above & below · bane of sea creatures (crabs now, worse things later). |
-| Pearl sabre | Forge | — | 3 Pearl, 2 Iron bar, 1 Oak | Sea gear · light: swings cost 1 less ⚡ · +1 damage · its pearl glows — bane of creatures of the dark (Deep Tunnels, coming). |
+| Wooden battle-axe | Workbench | 2 | 4 Pine, 1 Leather | Wood tier · monsters only · cleaves half damage into monsters beside the target. |
+| Pine short bow | Workbench | 3 | 3 Pine, 1 Leather | Wood tier · monsters only · hits every monster in the column. |
+| Iron battle-axe | Forge | 13 | 3 Iron bar, 2 Oak | Iron tier · monsters only · cleaves half damage into monsters beside the target. |
+| Iron sword | Forge | 11 | 3 Iron bar, 1 Oak, 1 Leather | Iron tier · monsters only · +1 damage on every hit. |
+| Oak longbow | Forge | 15 | 4 Oak, 1 Leather, 1 Iron bar | Iron tier · monsters only · hits every monster in the column. |
+| Steel battle-axe | Dwarven Forge | 25 | 3 Steel bar, 2 Ironwood | Steel tier · monsters only · cleaves half damage into monsters beside the target. |
+| Steel sword | Dwarven Forge | 22 | 3 Steel bar, 1 Ironwood, 1 Leather | Steel tier · monsters only · +1 damage on every hit. |
+| Ironwood war bow | Dwarven Forge | 27 | 4 Ironwood, 1 Leather, 1 Steel bar | Steel tier · monsters only · hits every monster in the column. |
+| Starsilver blade | Star Anvil | 36 | 4 Starsilver bar, 1 Elderwood, 1 Leather | Mythic tier · monsters only · +1 damage on every hit. |
+| Elderwood greatbow | Star Anvil | 39 | 5 Elderwood, 1 Starsilver bar, 1 Leather | Mythic tier · monsters only · hits every monster in the column. |
+| Coral spear | Workbench | 6 | 5 Coral, 2 Pine, 1 Leather | Sea gear · iron strength, no forge needed · pierces the monsters above & below · bane of sea creatures (crabs now, worse things later). |
+| Pearl sabre | Forge | 15 | 3 Pearl, 2 Iron bar, 1 Oak | Sea gear · light: swings cost 1 less ⚡ · +1 damage · its pearl glows — bane of creatures of the dark (Deep Tunnels, coming). |
 
 ### Tools
 
 | Makes | Station | Level | Cost | What it does |
 |---|---|---|---|---|
-| Stone wood-axe | Workbench | — | 3 Pine, 3 Stone | Wood tier · obstacles & defenses only · chops stumps, bushes, kelp & wooden defenses. |
-| Stone pick | Workbench | — | 3 Pine, 4 Stone | Wood tier · obstacles & defenses only · breaks rock, ore veins, coral & stone defenses. |
-| Stone hammer | Workbench | — | 2 Pine, 5 Stone | Wood tier · obstacles & defenses only · smashes any built defense: walls, gates, towers, keeps. |
-| Iron wood-axe | Forge | — | 2 Iron bar, 1 Oak | Iron tier · obstacles & defenses only · chops stumps, bushes, kelp & wooden defenses. |
-| Iron pick | Forge | — | 2 Iron bar, 1 Oak | Iron tier · obstacles & defenses only · breaks rock, ore veins, coral & stone defenses. |
-| Iron hammer | Forge | — | 3 Iron bar, 1 Oak | Iron tier · obstacles & defenses only · smashes any built defense: walls, gates, towers, keeps. |
-| Steel wood-axe | Dwarven Forge | — | 2 Steel bar, 1 Ironwood | Steel tier · obstacles & defenses only · chops stumps, bushes, kelp & wooden defenses. |
-| Steel pick | Dwarven Forge | — | 2 Steel bar, 1 Ironwood | Steel tier · obstacles & defenses only · breaks rock, ore veins, coral & stone defenses. |
-| Steel hammer | Dwarven Forge | — | 3 Steel bar, 1 Ironwood | Steel tier · obstacles & defenses only · smashes any built defense: walls, gates, towers, keeps. |
+| Stone wood-axe | Workbench | 1 | 3 Pine, 3 Stone | Wood tier · obstacles & defenses only · chops stumps, bushes, kelp & wooden defenses. |
+| Stone pick | Workbench | 1 | 3 Pine, 4 Stone | Wood tier · obstacles & defenses only · breaks rock, ore veins, coral & stone defenses. |
+| Stone hammer | Workbench | 4 | 2 Pine, 5 Stone | Wood tier · obstacles & defenses only · smashes any built defense: walls, gates, towers, keeps. |
+| Iron wood-axe | Forge | 10 | 2 Iron bar, 1 Oak | Iron tier · obstacles & defenses only · chops stumps, bushes, kelp & wooden defenses. |
+| Iron pick | Forge | 10 | 2 Iron bar, 1 Oak | Iron tier · obstacles & defenses only · breaks rock, ore veins, coral & stone defenses. |
+| Iron hammer | Forge | 12 | 3 Iron bar, 1 Oak | Iron tier · obstacles & defenses only · smashes any built defense: walls, gates, towers, keeps. |
+| Steel wood-axe | Dwarven Forge | 21 | 2 Steel bar, 1 Ironwood | Steel tier · obstacles & defenses only · chops stumps, bushes, kelp & wooden defenses. |
+| Steel pick | Dwarven Forge | 21 | 2 Steel bar, 1 Ironwood | Steel tier · obstacles & defenses only · breaks rock, ore veins, coral & stone defenses. |
+| Steel hammer | Dwarven Forge | 24 | 3 Steel bar, 1 Ironwood | Steel tier · obstacles & defenses only · smashes any built defense: walls, gates, towers, keeps. |
 
 ### Armor
 
@@ -141,7 +141,7 @@ This removes about 8 items and fixes every "does nothing" case, without touching
 | Leather leggings | Workbench | 6 | 3 Leather | Leather tier · armor (hardness 1) · takes blows to the legs. |
 | Leather gloves | Workbench | 2 | 1 Leather | Leather tier · armor (hardness 1) · start every board with +1 ⚡. |
 | Wooden buckler | Workbench | 4 | 4 Pine, 1 Leather | Leather tier · armor (hardness 1) · catches blows before they reach you. |
-| Shellback buckler | Workbench | — | 5 Crab shell, 1 Leather | Sea gear · iron-strong crab shell, no forge needed · catches blows before they reach you. |
+| Shellback buckler | Workbench | 7 | 5 Crab shell, 1 Leather | Sea gear · iron-strong crab shell, no forge needed · catches blows before they reach you. |
 | Iron helm | Forge | 10 | 2 Iron bar, 1 Leather | Iron tier · armor (hardness 2) · takes blows to the head. |
 | Iron mail | Forge | 18 | 5 Iron bar, 2 Leather | Iron tier · armor (hardness 2) · takes most of the blows aimed at you. |
 | Iron greaves | Forge | 16 | 3 Iron bar, 1 Leather | Iron tier · armor (hardness 2) · takes blows to the legs. |
@@ -162,62 +162,62 @@ This removes about 8 items and fixes every "does nothing" case, without touching
 
 | Makes | Station | Level | Cost | What it does |
 |---|---|---|---|---|
-| Rootstone amulet | Forge | — | 2 Emerald, 1 Silver bar, 1 Leather | Emerald · earth power: your matches chip ANY obstacle or defense beside them — stumps, rocks, coral, even iron. |
-| Tidestone amulet | Forge | — | 2 Sapphire, 2 Silver bar, 1 Leather | Sapphire · tide power: matches of 4+ and chains give +1 more ⚡, blasts give +1 more. |
-| Emberstone amulet | Forge | — | 2 Ruby, 2 Silver bar, 1 Gold bar | Ruby · fury power: when a match strikes a monster beside it, your weapon hits for +2. |
+| Rootstone amulet | Forge | 13 | 2 Emerald, 1 Silver bar, 1 Leather | Emerald · earth power: your matches chip ANY obstacle or defense beside them — stumps, rocks, coral, even iron. |
+| Tidestone amulet | Forge | 17 | 2 Sapphire, 2 Silver bar, 1 Leather | Sapphire · tide power: matches of 4+ and chains give +1 more ⚡, blasts give +1 more. |
+| Emberstone amulet | Forge | 19 | 2 Ruby, 2 Silver bar, 1 Gold bar | Ruby · fury power: when a match strikes a monster beside it, your weapon hits for +2. |
 
 ### Keys
 
 | Makes | Station | Level | Cost | What it does |
 |---|---|---|---|---|
-| Gold key | Workbench | — | 6 Gold, 2 Old key | Opens gold & bronze chests and iron gates. |
-| Crystal key | Forge | — | 1 Silver bar, 3 Water, 2 Gold key | Opens any chest — crystal chests hold the rarest loot. |
+| Gold key | Workbench | 3 | 6 Gold, 2 Old key | Opens gold & bronze chests and iron gates. |
+| Crystal key | Forge | 15 | 1 Silver bar, 3 Water, 2 Gold key | Opens any chest — crystal chests hold the rarest loot. |
 
 ### The Crown
 
 | Makes | Station | Level | Cost | What it does |
 |---|---|---|---|---|
-| Old King's Crown | Forge | — | 3 Gold bar, 5 relic shards | Legendary. Forged from the five relic shards and gold. On raids their defenders wait 2 moves longer, and the way to Emberwyrm opens. |
+| Old King's Crown | Forge | 30 | 3 Gold bar, 5 relic shards | Legendary. Forged from the five relic shards and gold. On raids their defenders wait 2 moves longer, and the way to Emberwyrm opens. |
 
 ### Camp defenses
 
 | Makes | Station | Level | Cost | What it does |
 |---|---|---|---|---|
-| Wooden fence | Workbench | — | 6 Pine | Defense: wood (hardness 1), 2 HP. 1 pt. |
-| Pit trap | Workbench | — | 4 Pine, 2 Hide | Defense: hidden — an attacker who finds it loses a move. 1 pt. |
-| Stone wall | Workbench | — | 12 Stone | Defense: stone (hardness 2), 4 HP — wood-armed goblins can barely scratch it. 2 pts. |
-| Watchtower | Workbench | — | 8 Pine, 1 Leather | Defense: wood, 3 HP. Every 3 moves it may drive attackers back. 2 pts. |
-| Spiked palisade | Workbench | — | 6 Pine, 1 Iron bar | Defense: wood, 3 HP. Every hit costs the attacker a move. 2 pts. |
-| Iron gate | Forge | — | 3 Iron bar, 1 Oak | Defense: iron (hardness 3), 4 HP. Only steel can dent it. 3 pts, max 2. |
-| Steel bulwark | Dwarven Forge | — | 2 Steel bar, 6 Stone | Defense: steel (hardness 4), 5 HP. Stops even steel-armed dwarves. 4 pts, max 2. |
+| Wooden fence | Workbench | 1 | 6 Pine | Defense: wood (hardness 1), 2 HP. 1 pt. |
+| Pit trap | Workbench | 2 | 4 Pine, 2 Hide | Defense: hidden — an attacker who finds it loses a move. 1 pt. |
+| Stone wall | Workbench | 4 | 12 Stone | Defense: stone (hardness 2), 4 HP — wood-armed goblins can barely scratch it. 2 pts. |
+| Watchtower | Workbench | 5 | 8 Pine, 1 Leather | Defense: wood, 3 HP. Every 3 moves it may drive attackers back. 2 pts. |
+| Spiked palisade | Workbench | 9 | 6 Pine, 1 Iron bar | Defense: wood, 3 HP. Every hit costs the attacker a move. 2 pts. |
+| Iron gate | Forge | 13 | 3 Iron bar, 1 Oak | Defense: iron (hardness 3), 4 HP. Only steel can dent it. 3 pts, max 2. |
+| Steel bulwark | Dwarven Forge | 28 | 2 Steel bar, 6 Stone | Defense: steel (hardness 4), 5 HP. Stops even steel-armed dwarves. 4 pts, max 2. |
 
 ### Kit (passive helpers)
 
 | Makes | Station | Level | Cost | What it does |
 |---|---|---|---|---|
-| Hatchet | Workbench | — | 6 Pine, 1 Iron bar | +1 pine on every wood match. |
-| Skinning knife | Workbench | — | 2 Pine, 1 Iron bar | +1 hide on every hide match. |
-| Miner's lamp | Workbench | — | 4 Coal, 1 Iron bar, 2 Gold | Buried finds glimmer so you can dig them up. |
+| Hatchet | Workbench | 7 | 6 Pine, 1 Iron bar | +1 pine on every wood match. |
+| Skinning knife | Workbench | 5 | 2 Pine, 1 Iron bar | +1 hide on every hide match. |
+| Miner's lamp | Workbench | 9 | 4 Coal, 1 Iron bar, 2 Gold | Buried finds glimmer so you can dig them up. |
 
-### Food
+### Food (Kitchen)
 
 | Makes | Station | Level | Cost | What it does |
 |---|---|---|---|---|
-| Trail bread | Workbench | 1 | 2 Wheat, 1 Water | Plain wheat bread: +5 ❤️. |
-| Roast chicken | Workbench | 5 | 2 Meat, 1 Pine | Spit-roasted over a wood fire: +10 ❤️. |
-| Farmhouse pie | Workbench | 15 | 2 Meat, 2 Wheat, 1 Eggs | Meat, wheat and egg under a golden crust: +18 ❤️. |
-| Fish chowder | Workbench | 3 | 3 Herring, 2 Water | Herring chowder in a bottle: +8 ❤️. |
-| Honey cake | Workbench | 9 | 2 Wild honey, 1 Wheat, 1 Eggs | Sweet and filling: +12 ❤️. |
-| Salmon & mushroom pie | Workbench | 12 | 2 Salmon, 2 Wild mushrooms, 1 Pine | A proper hot pie: +15 ❤️. |
-| Swordfish steak | Workbench | 20 | 1 Swordfish, 1 Coal | Grilled over coals: +20 ❤️. |
-| Kingfish feast | Workbench | 28 | 1 Golden kingfish, 1 Wild honey, 1 Salmon | A feast fit for the Old King: +40 ❤️. |
+| Trail bread | Kitchen hearth | 1 | 2 Wheat, 1 Water | Plain wheat bread: +5 ❤️. |
+| Roast chicken | Kitchen hearth | 5 | 2 Meat, 1 Pine | Spit-roasted over a wood fire: +10 ❤️. |
+| Farmhouse pie | Kitchen hearth | 15 | 2 Meat, 2 Wheat, 1 Eggs | Meat, wheat and egg under a golden crust: +18 ❤️. |
+| Fish chowder | Kitchen hearth | 3 | 3 Herring, 2 Water | Herring chowder in a bottle: +8 ❤️. |
+| Honey cake | Kitchen hearth | 9 | 2 Wild honey, 1 Wheat, 1 Eggs | Sweet and filling: +12 ❤️. |
+| Salmon & mushroom pie | Kitchen hearth | 12 | 2 Salmon, 2 Wild mushrooms, 1 Pine | A proper hot pie: +15 ❤️. |
+| Swordfish steak | Kitchen hearth | 20 | 1 Swordfish, 1 Coal | Grilled over coals: +20 ❤️. |
+| Kingfish feast | Kitchen hearth | 28 | 1 Golden kingfish, 1 Wild honey, 1 Salmon | A feast fit for the Old King: +40 ❤️. |
 
 ### Boss prep
 
 | Makes | Station | Level | Cost | What it does |
 |---|---|---|---|---|
-| Water flask | Workbench | — | 4 Water, 1 Leather | Throw it to douse lava and flood-water in a 3x3 area. |
-| Elderwood ward | Workbench | — | 3 Elderwood, 2 Water | Carry it into the Dragon's Lair: dragonfire burns you for half. |
+| Water flask | Workbench | 6 | 4 Water, 1 Leather | Throw it to douse lava and flood-water in a 3x3 area. |
+| Elderwood ward | Workbench | 35 | 3 Elderwood, 2 Water | Carry it into the Dragon's Lair: dragonfire burns you for half. |
 
 ### Not craftable (won, found or starter)
 

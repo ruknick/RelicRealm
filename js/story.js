@@ -109,6 +109,7 @@ window.Story = (() => {
     goblin: { title: '🔥 Goblin Village', text: 'A ramshackle camp of stolen timber, still smelling of Ashford smoke. Their keep is hidden in the fog, so scout it out before they break your camp.' },
     dwarf:  { title: '⚒️ Dwarf Stronghold', text: 'Stone halls behind iron gates. The dwarves wear iron and steel; bring a weapon that can bite through it.' },
     camp:   { title: '🏰 Your Camp', text: 'All that\'s left of Ashford: a keep, a loot chest, and room to build. Raiders will come while you\'re away. Make them work for it.' },
+    kitchen: { title: '🍲 The Kitchen', text: 'A cook-fire, a pot and a bread oven, rescued from the old Ashford inn. Raw berries keep you going; a hot meal keeps you alive.' },
     craft:  { title: '⚒ The Workshop', text: 'An old anvil pulled from the ashes, a forge, a bench. Everything you gather becomes something here.' },
   };
 

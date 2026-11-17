@@ -10,6 +10,7 @@ window.World = (() => {
     { id: 'ocean',  x: 78, y: 61.5, icon: '🌊', name: 'Sunlit Coast', land: 'ocean', lair: 'siren' },
     { id: 'camp',   x: 56, y: 81.5, icon: '🏰', name: 'Your Camp', sub: 'fortify', screen: 'fortify' },
     { id: 'craft',  x: 30, y: 90.5, icon: '⚒', art: 'smithhammer', name: 'Workshop', sub: 'craft', screen: 'craft' },
+    { id: 'kitchen', x: 12, y: 84, icon: '🍲', art: 'chowder', name: 'Kitchen', sub: 'cook', screen: 'craft', opts: { kitchen: true } },
     { id: 'beyond', x: 34, y: 9, icon: '❓', name: 'Beyond the Known Realm', sub: 'uncharted', locked: true },
   ];
   const RAID = { goblin: { icon: '🔥', name: 'Raid the goblin village', how: 'follow 🐾 tracks in the Forest' }, dwarf: { icon: '⚒️', name: 'Raid the dwarf stronghold', how: 'find a ᚱ rune stone in the Iron Hills' } };
@@ -71,7 +72,7 @@ window.World = (() => {
     const L = App.level, bits = [];
     for (let n = L + 1; n <= L + 25; n++) {
       const got = Object.values(Data.STATIONS).filter(s => s.lv === n).map(s => `<b>${s.name}</b>`)
-        .concat(Data.RECIPES.filter(r => r.lv === n).map(r => `<b>${Data.ITEMS[r.id].name}</b>`));
+        .concat(Data.RECIPES.filter(r => r.lv === n).map(r => `<b>${Data.recipeName(r)}</b>`));
       if (got.length) { bits.push(`Next at ⭐ ${n}: ${got.slice(0, 2).join(', ')}${got.length > 2 ? ` +${got.length - 2} more` : ''}`); break; }
     }
     const lairs = Object.values(Boss.CONFIG).filter(c => c.unlock && !Boss.unlocked(Object.keys(Boss.CONFIG).find(k => Boss.CONFIG[k] === c)))
@@ -108,7 +109,7 @@ window.World = (() => {
       travelling = false;
       if (s.land) landMenu(s);
       else if (s.boss) Boss.prepare(s.boss);
-      else if (s.screen) App.go(s.screen);
+      else if (s.screen) App.go(s.screen, s.opts);
     }, 750);
   }
 

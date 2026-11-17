@@ -23,7 +23,7 @@ window.App = (() => {
       equip: { weapon: null, tool: null, helmet: null, amulet: null, body: null, gloves: null, legs: null, shield: null },
       captured: { goblin: [], dwarf: [] },   // your weapons the enemy carried off
       hp: 10,                                // your warrior's health (carries between trips)
-      stations: { workbench: true },         // crafting stations built at camp
+      stations: { workbench: true, kitchen: true },         // crafting stations built at camp
       grudge: { goblin: 0, dwarf: 0 },       // how angry each enemy is; full = revenge raid
       revenge: null,                         // { enemy, trips } — a war party on its way
       sinceRevenge: 99,                      // trips since the last revenge raid
@@ -92,6 +92,7 @@ window.App = (() => {
         if (L >= Data.STATIONS.dforge.lv && state.enemyWins.dwarf > 0) state.stations.dforge = true;
       }
       if (state.hp == null) state.hp = Data.maxHp(Data.levelFromXp(state.xp));
+      state.stations.kitchen = true;
     } catch (e) { /* ignore broken saves */ }
   }
 
@@ -329,7 +330,7 @@ window.App = (() => {
     if (Data.backpackSize(L) > Data.backpackSize(L - 1)) out.push(`🎒 backpack ${Data.backpackSize(L)}`);
     const st = Object.values(Data.STATIONS).find(s => s.lv === L && s.lv > 1);
     if (st) out.push(`${st.icon} you can now build the <b>${st.name}</b> in the Workshop`);
-    Data.RECIPES.filter(r => r.lv === L && L > 1).forEach(r => out.push(r.tier === 'food' ? `🍲 you can now cook <b>${Data.ITEMS[r.id].name}</b>` : `🛡️ you can now craft the <b>${Data.ITEMS[r.id].name}</b>`));
+    Data.RECIPES.filter(r => r.lv === L && L > 1).forEach(r => out.push(r.tier === 'food' ? `🍲 you can now cook <b>${Data.recipeName(r)}</b> in the Kitchen` : `⚒ you can now make <b>${Data.recipeName(r)}</b>`));
     if (Data.ERA(L) > Data.ERA(L - 1)) out.unshift(`<b>The ${Data.ERA_NAME[Data.ERA(L)]} era begins!</b>`);
     if (Data.maxHp(L) > Data.maxHp(L - 1)) state.hp = Math.min(Data.maxHp(L), state.hp + 2);
     return out.join(' · ') || 'Your legend grows.';
@@ -521,7 +522,7 @@ window.App = (() => {
     if (screen === 'journal') { Story.journal(); Art.setScene('craft'); }
     if (screen === 'fortify') Story.flag('fortify');
     if (screen === 'items') { Items.render(); Art.setScene('craft'); }
-    if (screen === 'craft') { Craft.render(); Sound.music('home'); Art.setScene('craft'); }
+    if (screen === 'craft') { Craft.render(opts || {}); Sound.music('home'); Art.setScene('craft'); }
     if (screen === 'fortify') { Camp.render(); Sound.music('home'); Art.setScene('craft'); }
     if (screen === 'gather') Gather.start(opts);
     if (screen === 'battle') Battle.start(opts);

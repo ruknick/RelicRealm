@@ -4,7 +4,7 @@ window.Craft = (() => {
   const st = () => App.state;
   const locked = r => !!r.needs && !st().unlocks[r.needs];
   const has = (k, n) => (Data.ITEMS[k] && Data.ITEMS[k].gear ? App.gearCount(k) : st().inventory[k]) >= n;
-  const stationOk = r => !r.station || !!st().stations[r.station];
+  const stationOk = r => !r.station || r.station === 'kitchen' || !!st().stations[r.station];
   // How many times a smelting recipe could run with what's in the Storehouse.
   const maxTimes = r => Math.min(...Object.entries(r.cost).map(([k, n]) => Math.floor(st().stockpile[k] / n)));
   const levelOk = r => !r.lv || App.level >= r.lv;
@@ -83,7 +83,6 @@ window.Craft = (() => {
     { id: 'tool', art: 'gear:pick:2', icon: '🛠️', label: 'Tools', sub: 'obstacles & defenses only', list: () => gearOf('tool') },
     { id: 'armor', art: 'gear:body:2', icon: '🛡️', label: 'Armor', sub: 'wear it in 🧍 Warrior', list: () => gearOf('armor') },
     { id: 'smelt', tile: 'ironbar', icon: '🔥', label: 'Smelt', sub: 'ore → bars · hide → leather', list: () => R().filter(r => r.tier === 'smelt') },
-    { id: 'food', art: 'chowder', icon: '🍲', label: 'Kitchen', sub: 'cook finer food into bigger heals', list: () => R().filter(r => r.tier === 'food') },
     { id: 'def', art: 'swall', icon: '🏰', label: 'Defenses', sub: 'place them in 🏰 Fortify', list: () => R().filter(r => r.defense) },
     { id: 'other', art: 'gear:amulet:1', icon: '✨', label: 'Other', sub: 'amulets · keys · kit · the Crown · dragon prep', list: () => R().filter(r => ['amulet', 'keys', 'kit', 'crown', 'prep'].includes(r.tier)) },
   ];
@@ -127,7 +126,29 @@ window.Craft = (() => {
     })();
   }
 
-  function render() {
+  // ---------- the Kitchen: its own place on the map ----------
+  let mode = 'workshop';
+  const RAW_NAME = k => Data.RESOURCES[k].label;
+  function renderKitchen() {
+    const sp = st().stockpile;
+    const raw = Data.FOOD_ORDER.filter(k => sp[k] > 0);
+    const larder = raw.length
+      ? `<div class="larder">${raw.map(k => `<span class="cost"><span class="gem art g-${tileFor(k)} cost-gem">${Art.tile(tileFor(k))}</span>${sp[k]} ${RAW_NAME(k)}<small class="have">+${Data.FOODS[k]}❤️</small></span>`).join('')}</div>`
+      : '<p class="hint">Your larder is empty — gather in the Golden Fields, Forest or Coast.</p>';
+    const meals = R().filter(r => r.tier === 'food').sort((a, b) => a.lv - b.lv);
+    document.getElementById('craft-list').innerHTML =
+      `<div class="tier-h">🧺 Larder <small>· raw food, eaten automatically</small></div>${larder}
+       <div class="tier-h">🍲 Meals <small>· carry into fights, tap to eat</small></div>${meals.map(card).join('')}`;
+    const root = document.getElementById('craft-list');
+    root.querySelectorAll('.recipe.compact').forEach(el => { el.onclick = e => { if (!e.target.closest('button')) el.classList.toggle('open'); }; });
+    root.querySelectorAll('.craft-btn').forEach(b => { b.onclick = () => craft(b.dataset.id, 1); });
+  }
+
+  function render(opts) {
+    if (opts) mode = opts.kitchen ? 'kitchen' : 'workshop';
+    document.getElementById('craft-title-text').textContent = mode === 'kitchen' ? 'Kitchen' : 'Workshop';
+    document.getElementById('craft-title-art').innerHTML = Art.piece(mode === 'kitchen' ? 'chowder' : 'smithhammer');
+    if (mode === 'kitchen') { renderKitchen(); return; }
     const reps = repairList();
     const tabs = [...TABS];
     if (reps.length) tabs.push({ id: 'repair', art: 'smithhammer', icon: '🔧', label: 'Repair', sub: 'mend battered armor for half its materials' });
@@ -243,7 +264,7 @@ window.Craft = (() => {
     let label;
     if (r.makes) { Object.entries(r.makes).forEach(([k, n]) => { st().stockpile[k] += n * times; App.bountyEvent(`smelt:${k}`, n * times); }); label = `+${Object.entries(r.makes).map(([k, n]) => `${n * times} ${Data.RESOURCES[k].label}`).join(', ')}!`; }
     else if (it.gear) { App.addGear(id); label = `${it.name} forged!`; }
-    else { st().inventory[id] += 1; label = `${it.name} ${isKit(r) ? 'made' : 'crafted'}!`; }
+    else { st().inventory[id] += 1; label = `${it.name} ${r.tier === 'food' ? 'cooked' : isKit(r) ? 'made' : 'crafted'}!`; }
     // First weapon / tool? Wield it straight away.
     if (it.gear) {
       const slot = Data.slotOf(id);

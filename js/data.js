@@ -427,21 +427,44 @@ window.Data = (() => {
     { id: 'elderward', tier: 'prep', station: 'workbench', cost: { elderwood: 3, water: 2 } },
   ];
 
-  // Armor unlocks piece by piece within each tier: helmet first, body armor last.
-  const ARMOR_LV = {
-    helmet: [1, 10, 20, 35], gloves: [2, 12, 23, 36], shield: [4, 14, 26, 37], legs: [6, 16, 29, 38], body: [8, 18, 32, 40],
+  // Every recipe has a level. The rule: each era's station opens at the era's first level
+  // (Workbench 1, Smelter 8, Forge 10, Dwarven Forge 20, Star Anvil 35), and inside an era things
+  // unlock in a steady order: tools first, then weapons, then armor piece by piece (helmet → body),
+  // then the specials. Nothing ever unlocks before the station that makes it.
+  const RECIPE_LV = {
+    // Wood & Leather era (Workbench)
+    leather: 1, waxe1: 1, pick1: 1, helmet1: 1, fence: 1,
+    baxe1: 2, gloves1: 2, trap: 2,
+    bow1: 3, goldkey: 3,
+    shield1: 4, hammer1: 4, wall: 4,
+    knife: 5, tower: 5,
+    legs1: 6, coralspear: 6, flask: 6,
+    hatchet: 7, shellshield: 7,
+    body1: 8,
+    // Smelter (Lv 8)
+    ironbar: 8, scrapbar: 8, charcoal: 9, lamp: 9, palisade: 9, silverbar: 11, goldbar: 14,
+    // Iron era (Forge)
+    waxe2: 10, pick2: 10, helmet2: 10,
+    sword2: 11,
+    gloves2: 12, hammer2: 12,
+    baxe2: 13, gate: 13, amulet1: 13,
+    shield2: 14,
+    bow2: 15, pearlsabre: 15, crystalkey: 15,
+    legs2: 16, amulet2: 17, body2: 18, amulet3: 19,
+    // Steel era (Dwarven Forge)
+    steel: 20, helmet3: 20, waxe3: 21, pick3: 21, sword3: 22, gloves3: 23, hammer3: 24, baxe3: 25,
+    shield3: 26, bow3: 27, bulwark: 28, legs3: 29, crown: 30, body3: 32,
+    // Mythic era (Star Anvil)
+    starbar: 35, helmet4: 35, elderward: 35, gloves4: 36, sword4: 36, shield4: 37, legs4: 38, bow4: 39, body4: 40,
+    // Kitchen: plain food first, the finest feast last
+    bread: 1, chowder: 3, roastchicken: 5, honeycake: 9, salmonpie: 12, farmpie: 15, swordsteak: 20, feast: 28,
   };
-  // Kitchen dishes unlock by level too: simple bread first, the Kingfish feast last.
-  const FOOD_LV = { bread: 1, chowder: 3, roastchicken: 5, honeycake: 9, salmonpie: 12, farmpie: 15, swordsteak: 20, feast: 28 };
-  RECIPES.forEach(r => { if (FOOD_LV[r.id]) r.lv = FOOD_LV[r.id]; });
-  RECIPES.forEach(r => {
-    const it = ITEMS[r.id];
-    if (it && it.gear === 'armor' && !it.sea && ARMOR_LV[it.type]) r.lv = ARMOR_LV[it.type][it.tier - 1];
-  });
+  RECIPES.forEach(r => { r.lv = RECIPE_LV[r.id] || 1; if (r.tier === 'food') r.station = 'kitchen'; });
 
   // ---------- crafting stations (built at your camp) ----------
   const STATIONS = {
-    workbench: { icon: '🪵', name: 'Workbench', short: 'Bench', lv: 1, cost: {}, desc: 'Wood & stone tools, leather, fences, traps, meals.' },
+    kitchen:   { icon: '🍲', name: 'Kitchen hearth', short: 'Hearth', lv: 1, cost: {}, desc: 'Cook what you gather into meals that heal far more than raw food.' },
+    workbench: { icon: '🪵', name: 'Workbench', short: 'Bench', lv: 1, cost: {}, desc: 'Wood & stone tools, leather, fences, traps.' },
     smelter:   { icon: '🔥', name: 'Smelter', lv: 8, cost: { stone: 10, coal: 4 }, desc: 'Smelt ore into bars: iron, silver and gold. Burns charcoal.' },
     forge:     { icon: '⚒️', name: 'Forge', lv: 10, cost: { stone: 12, ironbar: 4, coal: 4 }, desc: 'Iron weapons, tools & armor, gates, amulets, the Crown.' },
     dforge:    { icon: '🏔️', name: 'Dwarven Forge', short: 'Dwarf Forge', lv: 20, cost: { stone: 20, ironbar: 10, coal: 10 }, needs: 'dwarfwin',
@@ -549,6 +572,7 @@ window.Data = (() => {
     RESOURCES, ITEMS, FOODS, FOOD_ORDER, CHART_PIECES, TIER_LABEL, ARMOR_LABEL, gloveEnergy, STATIONS, STATION_ORDER, ERA, ERA_NAME, LAND_MAX, maxHp, maxEnergy, startEnergy, strength, ATTACK, TROOP_HP, underGeared, landEra,
     GRUDGE_FULL, REVENGE_WARN_TRIPS, REVENGE_COOLDOWN, REVENGE_MOVES, SHARDS, SLOTS, slotOf, tierLabel, amuletPower, RARE_LAND, DURABILITY, TYPE_INFO, hardness, gearDamage, gearRefusal, matchDamage, MATCH_DMG,
     WEAPONS, weaponDamage, MAT_LABEL, FAMILY, family, RARE, RARE_INFO, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES,
+    recipeName: r => (r.makes ? RESOURCES[Object.keys(r.makes)[0]].label + (r.id === 'scrapbar' ? ' (from scrap)' : '') : ITEMS[r.id] ? ITEMS[r.id].name : r.id), RECIPE_LV,
     backpackSize, landLevel, enemyTier, monsterPlan, TIER_NAMES, ENEMY_GEAR, ENEMY_ARMOR, CHEST_TIERS, xpForLevel, levelFromXp, levelInfo, XP, MATERIAL_INFO,
   };
 })();
