@@ -1419,3 +1419,20 @@ body[data-scene="farm"] #gather-hint { color: #3a2a10; font-weight: 600; }
 .larder { background: var(--paper); border: 1.5px solid var(--ink); border-radius: 8px; padding: 6px; color: var(--ink); }
 .larder .cost { color: var(--ink); }
 .tier-h small { text-transform: none; letter-spacing: 0; font-size: .72rem; }
+
+.food-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px 3px 3px; border-radius: 14px; background: rgba(43,27,13,.08); border: 1px solid var(--ink-faint); color: var(--ink); font: inherit; font-size: .8rem; }
+.food-chip small { color: var(--ink-soft); } .food-chip b { margin-left: 2px; color: #3d5a14; }
+.food-chip[data-unpack] b { color: #8e2a1a; }
+.food-chip .cost-gem, .food-chip .wicon { width: 22px; height: 22px; }
+.larder.dim .food-chip { opacity: .5; }
+.lv-tag { display: inline-block; font-size: .66rem; font-weight: 700; padding: 0 5px; border-radius: 6px; background: rgba(61,90,20,.15); color: #3d5a14; vertical-align: 2px; font-family: system-ui, sans-serif; }
+.lv-tag.no { background: rgba(142,42,26,.12); color: #8e2a1a; }
+.spec.eat.none { opacity: .55; }
+.pouch-pop { position: absolute; inset: 0; z-index: 6; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.45); }
+.pp-card { width: 82%; background: var(--paper); color: var(--ink); border: 2px solid var(--ink); border-radius: 10px; padding: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.5); font-family: Georgia, serif; }
+.pp-head { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.pp-item { width: 100%; display: flex; align-items: center; gap: 6px; padding: 8px 10px; margin: 4px 0; border-radius: 8px; border: 1.5px solid var(--ink-faint); background: rgba(255,250,235,.7); color: var(--ink); font: inherit; }
+.pp-item span { flex: 1; text-align: left; } .pp-item small { color: var(--ink-soft); } .pp-item b { color: #3d5a14; }
+.pp-item:disabled { opacity: .5; }
+.pp-empty { font-size: .85rem; font-style: italic; margin: 6px 0; }
+.pp-close { width: 100%; margin-top: 6px; padding: 7px; border-radius: 8px; border: 1.5px solid var(--ink); background: none; color: var(--ink); font: inherit; }

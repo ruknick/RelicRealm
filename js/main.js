@@ -170,6 +170,45 @@ window.App = (() => {
     save();
     return true;
   }
+  // ---------- the food pouch: what you choose to carry on a trip ----------
+  // Everything you gather goes to the bank (Storehouse). Before heading out you pack food
+  // into your pouch in the Kitchen; on the board you can only eat what's in the pouch.
+  // Whatever's left over you put back in the Kitchen.
+  const POUCH_MAX = 10;
+  const isMeal = k => !!(Data.ITEMS[k] && Data.ITEMS[k].heal);
+  const healOf = k => (isMeal(k) ? Data.ITEMS[k].heal : Data.FOODS[k] || 0);
+  const foodName = k => (isMeal(k) ? Data.ITEMS[k].name : Data.RESOURCES[k].label);
+  const bankOf = k => (isMeal(k) ? state.inventory : state.stockpile);
+  const pouch = () => (state.pouch ||= {});
+  const pouchTotal = () => Object.values(pouch()).reduce((a, b) => a + b, 0);
+  function pouchPut(k, n = 1) {
+    n = Math.min(n, bankOf(k)[k] || 0, POUCH_MAX - pouchTotal());
+    if (n <= 0) return 0;
+    bankOf(k)[k] -= n;
+    pouch()[k] = (pouch()[k] || 0) + n;
+    save();
+    return n;
+  }
+  function pouchTake(k, n = 1) {
+    n = Math.min(n, pouch()[k] || 0);
+    if (n <= 0) return 0;
+    pouch()[k] -= n;
+    if (!pouch()[k]) delete pouch()[k];
+    bankOf(k)[k] = (bankOf(k)[k] || 0) + n;
+    save();
+    return n;
+  }
+  const pouchEmpty = () => Object.keys(pouch()).forEach(k => pouchTake(k, pouch()[k]));
+  function eatPouch(k) {
+    if (state.hp >= maxHp() || !(pouch()[k] > 0)) return 0;
+    pouch()[k]--;
+    if (!pouch()[k]) delete pouch()[k];
+    return heal(healOf(k));
+  }
+  // Pouch contents in a fixed order: biggest heal first.
+  const pouchLine = () => (pouchTotal() ? `🎒 Food pouch: <b>${pouchList().map(k => `${pouch()[k]} ${foodName(k)}`).join(', ')}</b>` : '🎒 <b>Your food pouch is empty</b> — pack food in the 🍲 Kitchen so you can heal.');
+  const pouchList = () => Object.keys(pouch()).filter(k => pouch()[k] > 0).sort((a, b) => healOf(b) - healOf(a));
+
   // Eat one piece of food (a given kind, or the plainest you have). Returns { got, kind }.
   function eatFood(kind) {
     if (state.hp >= maxHp()) return 0;
@@ -415,7 +454,6 @@ window.App = (() => {
     prepareRaid.last = [enemy, { fromField }];
     App.reprep = () => prepareRaid(enemy, { fromField });
     const cfg = Battle.CONFIG[enemy];
-    const food = foodTotal();
     const inv = state.inventory;
     const eq = state.equip;
     const armor = Data.ENEMY_ARMOR[enemy][Data.enemyTier(state.enemyWins[enemy]) - 1];
@@ -426,7 +464,7 @@ window.App = (() => {
     weapons.push(worn ? `🛡 ${worn} armor piece${worn > 1 ? 's' : ''}` : '🛡 no armor');
     const armorNote = wTier >= armor ? '' : `<p class="warn-note">⚠️ Their troops wear <b>${Data.TIER_LABEL[armor]}</b> armor — your ${wTier ? Data.TIER_LABEL[wTier].toLowerCase() + ' weapon only does a fraction of its damage' : 'bare hands do nothing'}. It can be done, but it'll take many more swings.</p>`;
     const lowHp = state.hp < maxHp() * 0.5 ? `<p class="warn-note">❤️ You're hurt (${state.hp}/${maxHp()}). Eat something first — tap 🧍 Warrior.</p>` : '';
-    const canGo = food >= cfg.foodCost;
+    const canGo = state.hp > 0;
     const boosts = ['drum', 'ale'].filter(k => inv[k] > 0)
       .map(k => `<label class="check"><input type="checkbox" id="use-${k}"> ${Data.ITEMS[k].icon} Use ${Data.ITEMS[k].name} (their defenders wait 3 moves longer)</label>`).join('');
     const choice = await choose({
@@ -436,12 +474,12 @@ window.App = (() => {
           <small>Win and they'll want revenge on your camp — <a href="#" id="prep-fortify">fortify it</a>.</small></p>${lowHp}
         <p class="hint">Rank ${Data.enemyTier(state.enemyWins[enemy])}/4 — every 2 wins they send tougher troops (and better loot).</p>
         <p>${cfg.prep}</p>
-        <p>Costs <b>${cfg.foodCost} food</b> — you have <b>${food}</b>.</p>
+        <p>${pouchLine()}</p>
         <p class="hint">Equipped: ${weapons.join(' · ')}</p>${armorNote}
         ${inv.crown > 0 ? '<p class="hint">👑 The Crown: their defenders wait 2 moves longer.</p>' : ''}
         ${boosts}`,
       buttons: [
-        { id: 'go', label: canGo ? '⚔️ Attack!' : `Need ${cfg.foodCost} food`, cls: 'danger', disabled: !canGo || state.hp <= 0 },
+        { id: 'go', label: canGo ? '⚔️ Attack!' : 'Too hurt — eat first', cls: 'danger', disabled: !canGo },
         { id: 'later', label: fromField ? '📍 Not now — mark it' : 'Not yet', cls: 'alt' },
       ],
     });
@@ -452,7 +490,6 @@ window.App = (() => {
       go('home');
       return;
     }
-    spendFood(cfg.foodCost);
     if (!fromField) state.marked[enemy] = Math.max(0, state.marked[enemy] - 1);
     let headStart = inv.crown > 0 ? 2 : 0;
     ['drum', 'ale'].forEach(k => { if (extra['use-' + k] && inv[k] > 0) { inv[k]--; headStart += 3; } });
@@ -500,6 +537,7 @@ window.App = (() => {
     state = fresh();
     state.profile = profile;
     state.tut = 0;   // first-trip coaching
+    state.pouch = { food: 4 };   // a few berries packed for the road
     starterKit();
     save();
   }
@@ -582,6 +620,7 @@ window.App = (() => {
 
   return {
     moveSave, exportSave, importSave, ENEMY_NAME, grantSpecial, addXP, bountyEvent: (id, n) => Bounty.event(id, n), levelPerks, get level() { return level(); }, boot, go, save, newGame, tripDone, get cloudReady() { return cloudReady; }, cloudStatus: () => Cloud.statusText(), choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
+    POUCH_MAX, pouch, pouchTotal, pouchPut, pouchTake, pouchEmpty, eatPouch, pouchList, healOf, foodName, pouchLine: () => pouchLine(),
     addGear, gearCount, equip, unequip, wear, captureWeapon, recoverWeapons, grantShard, grantChart, heal, hurtPlayer, eatFood, eatMeal, foodTotal, spendFood, get maxHp() { return maxHp(); },
     get state() { return state; },
   };

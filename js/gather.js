@@ -479,13 +479,11 @@ window.Gather = (() => {
     board.smoke();
     board.toast(cfg.foundBanner, 'alert', 2200);
     await board.wait(1400);
-    const food = App.foodTotal() + (run.backpack.food || 0) + (run.backpack.herring || 0);
-    const canRaid = food >= cfg.foodCost;
+    const canRaid = App.state.hp > 0;
     const choice = await App.choose({
       title: `${cfg.icon} ${cfg.foundTitle}`,
       html: `<p>${cfg.foundText}</p>
-             <p>Raiding costs <b>${cfg.foodCost} food</b> — you have <b>${food}</b>.</p>
-             ${canRaid ? '' : '<p class="hint">Not enough food to raid now. Mark it and come back.</p>'}`,
+             <p>${App.pouchLine()}</p>`,
       buttons: [
         { id: 'raid', label: '⚔️ Raid now', cls: 'danger', disabled: !canRaid },
         { id: 'mark', label: '📍 Mark it on the map' },
@@ -886,6 +884,7 @@ window.Gather = (() => {
     hudLevel();
     hudGoals();
     coach('start');
+    if (!App.pouchTotal()) { const r0 = run; setTimeout(() => { if (run === r0 && !run.ended) board.toast('🎒 Your food pouch is empty — you can\'t heal on this trip. Pack food in the 🍲 Kitchen.', 'alert', 3200); }, 2700); }
     Sound.music(land.music);
     if (App.state.debug.discoverNow && land.discover) {
       run.discoverSpawned = true;

@@ -443,7 +443,7 @@ window.Battle = (() => {
         ${gained.length ? `<div class="sum-spoils"><b>Brought home</b><br>${gained.join('<br>')}</div>` : ''}
         ${lost.length ? `<div class="sum-spoils lost"><b>Lost</b><br>${lost.join('<br>')}</div>` : ''}
         <p class="sum-notes">★ break their keep · ★ open their loot chest · ★ finish above half health<br>
-        Food spent: ${cfg.foodCost}${run.weaponsUsed ? ` · Weapon uses: ${run.weaponsUsed}` : ''}</p>`,
+        ${run.weaponsUsed ? `Weapon uses: ${run.weaponsUsed}` : ''}</p>`,
       buttons: [{ id: 'home', label: 'Back to the map' }, { id: 'fortify', label: '🏰 Fortify my camp', cls: 'alt' }],
     }).then(c => App.go(c));
   }

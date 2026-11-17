@@ -82,8 +82,10 @@ Each blow wears that piece down. It lasts 4 / 8 / 14 / 25 blows by tier; repair 
 
 ## Food
 
-- **Raw food** (larder) is eaten automatically, smallest first. Each piece heals: Berries/Apples/Eggs 2 · Herring/Mushrooms/Meat 3 · Salmon/Honey 5 · Swordfish 8 · Golden kingfish 12.
-- **Meals** (Kitchen) are carried into fights and tapped to eat:
+- **Everything you gather goes to the bank.** Before a trip, open the 🍲 **Kitchen** and tap food to pack it into your **🎒 food pouch** (up to 10 pieces). On a board you tap 🍖 and choose exactly what to eat, and only from the pouch. Tap a pouch item (or **Put it all back**) to return it to the bank.
+- Raids and bosses no longer take food on the way in.
+- **Raw food** heals: Berries/Apples/Eggs 2 · Herring/Mushrooms/Meat 3 · Salmon/Honey 5 · Swordfish 8 · Golden kingfish 12.
+- **Meals** are cooked in the Kitchen and packed the same way:
 
 | Meal | Heals | Level |
 |---|---|---|
@@ -114,7 +116,7 @@ Each blow wears that piece down. It lasts 4 / 8 / 14 / 25 blows by tier; repair 
 3. **Two items do the same thing** (drum and ale) and **two do "stops dragonfire"** (elderwood ward and ward-shield). *Fix:* merge them.
 4. **Hammers overlap** with the axe and pick on raids. *Fix:* drop hammers; the axe breaks wooden defenses and the pick breaks stone and iron ones.
 5. **Coal and charcoal** are two fuels. *Fix:* keep only coal, and have steel cost coal + oak.
-6. **Too many raw foods to think about.** *Fix (done):* they now sit together in the Kitchen's **Larder**, which shows what each heals.
+6. **Food felt random.** *Fix (done):* nothing is eaten automatically any more; you pack a food pouch in the Kitchen and pick what to eat.
 
 ## Unlock levels for everything
 

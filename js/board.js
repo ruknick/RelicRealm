@@ -404,8 +404,8 @@ window.Board = (() => {
         const it = Data.ITEMS[g.id];
         return `<span class="gb-item t${it.tier}">${Art.piece(it.art)}</span>`;
       };
-      const hp = st.hp, mx = App.maxHp, food = App.foodTotal();
-      const specials = Object.keys(Data.ITEMS).filter(k => Data.ITEMS[k].special && inv[k] > 0).map(k => {
+      const hp = st.hp, mx = App.maxHp, food = App.pouchTotal();
+      const specials = Object.keys(Data.ITEMS).filter(k => Data.ITEMS[k].special && !Data.ITEMS[k].heal && inv[k] > 0).map(k => {
         const it = Data.ITEMS[k];
         return `<button class="spec${this.armed === k ? ' armed' : ''}" data-w="${k}" title="${it.name}">${it.art ? Art.piece(it.art) : it.icon}<b>${inv[k]}</b></button>`;
       }).join('');
@@ -413,19 +413,38 @@ window.Board = (() => {
           <span class="en-bolt">⚡</span><b class="en-num">${this.energy}</b><span class="en-bar"><i style="height:${this.energy / energyMax() * 100}%"></i></span></div>
         <div class="health${hp <= mx * 0.3 ? ' low' : ''}" title="Your health: monsters wear it down, food heals it"><span class="hp-ico">❤️</span><b class="hp-num">${hp}</b><span class="hp-bar"><i style="height:${hp / mx * 100}%"></i></span></div>
         <button class="gearbtn">${mini('weapon', '⚔️')}${mini('tool', '🛠️')}<span class="gb-label">🧍 Gear</span></button>
-        <div class="specials"><button class="spec eat" title="Eat: your plainest food first (berries +2, herring +3 … kingfish +12)">🍖<b>${food}</b></button>${specials}</div></div>`;
+        <div class="specials"><button class="spec eat${food ? '' : ' none'}" title="Eat from your food pouch">🍖<b>${food}</b></button>${specials}</div></div>`;
       this.tray.querySelector('.spec.eat').onclick = () => {
         if (this.busy) return;
-        const got = App.eatFood();
-        if (got) { this.float(this.centerCell(), `${Data.RESOURCES[App.eatFood.last].label} +${got} ❤️`, 'gain'); window.Sound?.sfx('found'); }
-        else this.toast(App.foodTotal() < 1 ? '🍖 No food left in your Storehouse.' : '❤️ You\'re already at full health.', '', 1800);
-        this.renderWeapons();
+        this.openPouch();
       };
       this.tray.querySelector('.gearbtn').onclick = () => {
         if (this.busy) return;
-        Hero.open({ onClose: () => { this.renderWeapons(); this.hooks.onArm?.(); } });
+        Hero.open({ away: true, onClose: () => { this.renderWeapons(); this.hooks.onArm?.(); } });
       };
       this.tray.querySelectorAll('.spec:not(.eat)').forEach(b => { b.onclick = () => this.arm(b.dataset.w); });
+    }
+
+    // The food pouch: pick exactly what to eat.
+    openPouch() {
+      const pop = this.wrap.querySelector('.pouch-pop') || this.wrap.appendChild(Object.assign(document.createElement('div'), { className: 'pouch-pop' }));
+      const list = App.pouchList(), full = App.state.hp >= App.maxHp;
+      const close = () => pop.remove();
+      pop.innerHTML = `<div class="pp-card"><div class="pp-head"><b>🎒 Food pouch</b><span>❤️ ${App.state.hp}/${App.maxHp}</span></div>
+        ${list.length ? list.map(k => `<button class="pp-item" data-k="${k}" ${full ? 'disabled' : ''}><span>${App.foodName(k)}</span><small>×${App.pouch()[k]}</small><b>+${App.healOf(k)} ❤️</b></button>`).join('')
+          : '<p class="pp-empty">Your pouch is empty. Pack food in the 🍲 Kitchen before you head out.</p>'}
+        ${full && list.length ? '<p class="pp-empty">You\'re at full health.</p>' : ''}
+        <button class="pp-close">Close</button></div>`;
+      pop.querySelector('.pp-close').onclick = close;
+      pop.onclick = e => { if (e.target === pop) close(); };
+      pop.querySelectorAll('.pp-item').forEach(b => {
+        b.onclick = () => {
+          const got = App.eatPouch(b.dataset.k);
+          if (got) { this.float(this.centerCell(), `${App.foodName(b.dataset.k)} +${got} ❤️`, 'gain'); window.Sound?.sfx('found'); }
+          this.renderWeapons();
+          if (App.state.hp >= App.maxHp || !App.pouchTotal()) close(); else this.openPouch();
+        };
+      });
     }
 
     centerCell() { return [Math.floor(this.rows / 2), Math.floor(this.cols / 2)]; }

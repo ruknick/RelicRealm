@@ -161,13 +161,14 @@ window.Hero = (() => {
       <span class="hs-icon">${Art.piece(it.art)}</span><small>${it.name}</small>${durBar(g)}</button>`;
   }
 
+  let away = false;   // opened from a board: eat only from the pouch
   function stats() {
     const S = st(), mx = App.maxHp, L = App.level;
     const worn = ['helmet', 'body', 'legs', 'shield'].filter(k => eq(k));
     const meals = Object.keys(Data.ITEMS).filter(k => Data.ITEMS[k].heal).filter(k => S.inventory[k] > 0)
       .map(k => `<button class="small eat-btn" data-meal="${k}">${Data.ITEMS[k].icon} ${Data.ITEMS[k].name} ×${S.inventory[k]} (+${Data.ITEMS[k].heal})</button>`).join('');
     return `<div class="hp-line"><b>❤️ Health ${S.hp}/${mx}</b><span class="hp-wide"><i style="width:${S.hp / mx * 100}%"></i></span></div>
-      <div class="eat-row">${Data.FOOD_ORDER.filter(k => S.stockpile[k] > 0).map(k => `<button class="small eat-btn" data-food="${k}" ${S.hp < mx ? '' : 'disabled'}>${Data.RESOURCES[k].label} ×${S.stockpile[k]} (+${Data.FOODS[k]})</button>`).join('') || '<span class="hint">No food in your Storehouse — gather berries or fish.</span>'}${meals}</div>
+      ${away ? `<div class="eat-row"><span class="hint">On a trip you eat from your 🎒 food pouch:</span>${App.pouchList().map(k => `<button class="small eat-btn" data-pouch="${k}" ${S.hp < mx ? '' : 'disabled'}>${App.foodName(k)} ×${App.pouch()[k]} (+${App.healOf(k)})</button>`).join('') || '<span class="hint">— empty.</span>'}</div>` : `<div class="eat-row">${Data.FOOD_ORDER.filter(k => S.stockpile[k] > 0).map(k => `<button class="small eat-btn" data-food="${k}" ${S.hp < mx ? '' : 'disabled'}>${Data.RESOURCES[k].label} ×${S.stockpile[k]} (+${Data.FOODS[k]})</button>`).join('') || '<span class="hint">No food in your Storehouse — gather berries or fish.</span>'}${meals}</div>`}
       <div><b>🛡 Armor:</b> ${worn.length ? `${worn.length} piece${worn.length > 1 ? 's' : ''} — blows that land on armored spots are softened, or turned aside by better metal` : 'none — every blow lands in full'}</div>
       <div><b>💪 Strength:</b> +${Data.strength(L)} weapon damage (grows every 5 levels) · <b>⚡ Energy:</b> start ${Data.startEnergy(L, eq('gloves'))} · max ${Data.maxEnergy(L)}</div>
       <div><b>💎 Amulet:</b> ${eq('amulet') ? Data.ITEMS[eq('amulet').id].desc : 'none — set a gem in silver at the Workshop'}</div>
@@ -200,6 +201,7 @@ window.Hero = (() => {
     document.querySelectorAll('.hslot').forEach(b => { b.onclick = () => { current = b.dataset.s; render(); }; });
     document.querySelectorAll('#hero-pick [data-i]').forEach(b => { b.onclick = () => { App.equip(current, +b.dataset.i); changed(); }; });
     document.querySelectorAll('#hero-stats [data-food]').forEach(b => { b.onclick = () => { if (App.eatFood(b.dataset.food)) Sound.sfx('found'); render(); }; });
+    document.querySelectorAll('#hero-stats [data-pouch]').forEach(b => { b.onclick = () => { if (App.eatPouch(b.dataset.pouch)) Sound.sfx('found'); render(); }; });
     document.querySelectorAll('#hero-stats [data-meal]').forEach(b => { b.onclick = () => { if (App.eatMeal(b.dataset.meal)) Sound.sfx('found'); render(); }; });
     document.querySelectorAll('#hero-pick [data-off]').forEach(b => { b.onclick = () => { App.unequip(current); changed(); }; });
   }
@@ -207,6 +209,7 @@ window.Hero = (() => {
 
   function open(opts = {}) {
     onClose = opts.onClose || null;
+    away = !!opts.away;
     if (opts.slot) current = opts.slot;
     document.getElementById('hero-panel').classList.remove('hidden');
     render();

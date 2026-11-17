@@ -254,7 +254,7 @@ window.Boss = (() => {
   function prepare(kind) {
     const c = CONFIG[kind], s = st();
     App.reprep = () => prepare(kind);
-    const food = App.foodTotal(), canGo = food >= c.foodCost && s.hp > 0;
+    const canGo = s.hp > 0;
     const wins = (s.bossWins || {})[kind] || 0;
     const w = s.equip.weapon ? Data.ITEMS[s.equip.weapon.id] : null;
     const armor = c.boss.armor - (kind === 'dragon' && s.inventory.crown > 0 ? 1 : 0);
@@ -264,17 +264,16 @@ window.Boss = (() => {
       html: `<p class="story-text">${c.intro}</p>
         <p class="race-rules">${c.prep}</p>
         <p class="${!w || w.tier < armor ? 'warn-note' : 'hint'}">⚔️ ${under}</p>
-        <p>❤️ <b>${s.hp}/${App.maxHp}</b> · Costs <b>${c.foodCost} food</b> (you have ${food}) · <a href="#" id="prep-hero">Armor up / eat</a></p>
+        <p>❤️ <b>${s.hp}/${App.maxHp}</b> · <a href="#" id="prep-hero">Armor up / eat</a></p><p>${App.pouchLine()}</p>
         ${kind === 'dragon' ? `<p class="hint">${s.inventory.flask || 0} water flask${s.inventory.flask === 1 ? '' : 's'} · ${s.inventory.elderward ? 'Elderwood ward ✓' : 'no Elderwood ward'} · ${s.inventory.crown ? 'the Crown ✓' : 'no Crown'}</p>` : ''}
         ${c.firstItem && !wins ? `<p class="hint">🎁 First victory: <b>${Data.ITEMS[c.firstItem].name}</b></p>` : ''}
         ${wins ? `<p class="hint">Defeated ${wins} time${wins > 1 ? 's' : ''} — they return, and the rewards are smaller now.</p>` : ''}`,
       buttons: [
-        { id: 'go', label: canGo ? `${c.icon} Enter` : s.hp <= 0 ? 'Too hurt — eat first' : `Need ${c.foodCost} food`, cls: 'danger', disabled: !canGo },
+        { id: 'go', label: canGo ? `${c.icon} Enter` : 'Too hurt — eat first', cls: 'danger', disabled: !canGo },
         { id: 'later', label: 'Not yet', cls: 'alt' },
       ],
     }).then(ch => {
       if (ch !== 'go') { App.go('home'); return; }
-      App.spendFood(c.foodCost);
       App.save();
       App.go('boss', { kind });
     });

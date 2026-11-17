@@ -42,7 +42,7 @@ window.Craft = (() => {
     return `<div class="recipe compact wk${ready ? ' ready' : ''}${lock ? ' locked' : ''}" data-id="${r.id}">
       <div class="r-icon">${pic}${badge ? `<span class="wk-badge">${badge}</span>` : ''}</div>
       <div class="r-body">
-        <div class="r-name">${it.name}</div>
+        <div class="r-name">${it.name} <span class="lv-tag${levelOk(r) ? '' : ' no'}">Lv ${r.lv}</span></div>
         <div class="r-effect">${it.desc}</div>
         <div class="r-cost">${costs}</div>
       </div>
@@ -130,16 +130,26 @@ window.Craft = (() => {
   let mode = 'workshop';
   const RAW_NAME = k => Data.RESOURCES[k].label;
   function renderKitchen() {
-    const sp = st().stockpile;
-    const raw = Data.FOOD_ORDER.filter(k => sp[k] > 0);
-    const larder = raw.length
-      ? `<div class="larder">${raw.map(k => `<span class="cost"><span class="gem art g-${tileFor(k)} cost-gem">${Art.tile(tileFor(k))}</span>${sp[k]} ${RAW_NAME(k)}<small class="have">+${Data.FOODS[k]}❤️</small></span>`).join('')}</div>`
-      : '<p class="hint">Your larder is empty — gather in the Golden Fields, Forest or Coast.</p>';
+    const sp = st().stockpile, inv = st().inventory;
+    const pic = k => (Data.ITEMS[k] && Data.ITEMS[k].heal ? `<span class="wicon">${iconOf(Data.ITEMS[k])}</span>` : `<span class="gem art g-${tileFor(k)} cost-gem">${Art.tile(tileFor(k))}</span>`);
+    const chip = (k, n, act) => `<button class="food-chip" data-${act}="${k}">${pic(k)}<span>${n} ${App.foodName(k)}</span><small>+${App.healOf(k)}❤️</small><b>${act === 'pack' ? '＋' : '−'}</b></button>`;
+    const pouch = App.pouchList(), full = App.pouchTotal() >= App.POUCH_MAX;
+    const bank = Data.FOOD_ORDER.filter(k => sp[k] > 0).map(k => [k, sp[k]])
+      .concat(Object.keys(Data.ITEMS).filter(k => Data.ITEMS[k].heal && inv[k] > 0).map(k => [k, inv[k]]))
+      .sort((a, b) => App.healOf(b[0]) - App.healOf(a[0]));
     const meals = R().filter(r => r.tier === 'food').sort((a, b) => a.lv - b.lv);
     document.getElementById('craft-list').innerHTML =
-      `<div class="tier-h">🧺 Larder <small>· raw food, eaten automatically</small></div>${larder}
-       <div class="tier-h">🍲 Meals <small>· carry into fights, tap to eat</small></div>${meals.map(card).join('')}`;
+      `<div class="tier-h">🎒 Food pouch <small>· ${App.pouchTotal()}/${App.POUCH_MAX} · the only food you can eat on a trip</small></div>
+       <div class="larder">${pouch.length ? pouch.map(k => chip(k, App.pouch()[k], 'unpack')).join('') : '<span class="hint">Empty — tap food below to pack it.</span>'}
+         ${pouch.length ? '<button class="small alt" id="pouch-back">Put it all back</button>' : ''}</div>
+       <div class="tier-h">🏦 In the bank <small>· tap to pack${full ? ' (pouch full)' : ''}</small></div>
+       <div class="larder${full ? ' dim' : ''}">${bank.length ? bank.map(([k, n]) => chip(k, n, 'pack')).join('') : '<span class="hint">No food yet — gather in the Golden Fields, Forest or Coast.</span>'}</div>
+       <div class="tier-h">🍲 Cook <small>· meals heal far more than raw food</small></div>${meals.map(card).join('')}`;
     const root = document.getElementById('craft-list');
+    root.querySelectorAll('[data-pack]').forEach(b => { b.onclick = () => { if (App.pouchPut(b.dataset.pack)) Sound.sfx('tick'); renderKitchen(); }; });
+    root.querySelectorAll('[data-unpack]').forEach(b => { b.onclick = () => { App.pouchTake(b.dataset.unpack); Sound.sfx('tick'); renderKitchen(); }; });
+    const back = document.getElementById('pouch-back');
+    if (back) back.onclick = () => { App.pouchEmpty(); renderKitchen(); };
     root.querySelectorAll('.recipe.compact').forEach(el => { el.onclick = e => { if (!e.target.closest('button')) el.classList.toggle('open'); }; });
     root.querySelectorAll('.craft-btn').forEach(b => { b.onclick = () => craft(b.dataset.id, 1); });
   }
