@@ -413,10 +413,14 @@ window.Board = (() => {
           <span class="en-bolt">⚡</span><b class="en-num">${this.energy}</b><span class="en-bar"><i style="height:${this.energy / energyMax() * 100}%"></i></span></div>
         <div class="health${hp <= mx * 0.3 ? ' low' : ''}" title="Your health: monsters wear it down, food heals it"><span class="hp-ico">❤️</span><b class="hp-num">${hp}</b><span class="hp-bar"><i style="height:${hp / mx * 100}%"></i></span></div>
         <button class="gearbtn">${mini('weapon', '⚔️')}${mini('tool', '🛠️')}<span class="gb-label">🧍 Gear</span></button>
-        <div class="specials"><button class="spec eat${food ? '' : ' none'}" title="Eat from your food pouch">🍖<b>${food}</b></button>${specials}</div></div>`;
+        <div class="specials"><button class="spec eat${food ? '' : ' none'}" title="Eat: the packed food that best fits your missing health">🍖<b>${food}</b></button>${specials}</div></div>`;
       this.tray.querySelector('.spec.eat').onclick = () => {
         if (this.busy) return;
-        this.openPouch();
+        const r = App.eatBest();
+        if (r && r.got) { this.float(this.centerCell(), `${App.foodName(r.k)} +${r.got} ❤️`, 'gain'); window.Sound?.sfx('found'); }
+        else this.toast(!App.pouchTotal() ? '🍖 You packed no food. Pack some at Your Camp\'s Storehouse before you head out.' : '❤️ You\'re already at full health.', '', 2200);
+        this.renderWeapons();
+        this.hooks.onAte?.();
       };
       this.tray.querySelector('.gearbtn').onclick = () => {
         if (this.busy) return;

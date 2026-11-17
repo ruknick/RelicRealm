@@ -172,9 +172,9 @@ window.App = (() => {
   }
   // ---------- the food pouch: what you choose to carry on a trip ----------
   // Everything you gather goes to the bank (Storehouse). Before heading out you pack food
-  // into your pouch in the Kitchen; on the board you can only eat what's in the pouch.
-  // Whatever's left over you put back in the Kitchen.
-  const POUCH_MAX = 10;
+  // at Your Camp's Storehouse; it takes backpack slots. One tap of 🍖 on a board eats from it.
+  // Leftovers stay packed until you unpack them at camp.
+  const POUCH_MAX = 10;   // (legacy name) — packing is limited by your backpack size instead
   const isMeal = k => !!(Data.ITEMS[k] && Data.ITEMS[k].heal);
   const healOf = k => (isMeal(k) ? Data.ITEMS[k].heal : Data.FOODS[k] || 0);
   const foodName = k => (isMeal(k) ? Data.ITEMS[k].name : Data.RESOURCES[k].label);
@@ -182,7 +182,7 @@ window.App = (() => {
   const pouch = () => (state.pouch ||= {});
   const pouchTotal = () => Object.values(pouch()).reduce((a, b) => a + b, 0);
   function pouchPut(k, n = 1) {
-    n = Math.min(n, bankOf(k)[k] || 0, POUCH_MAX - pouchTotal());
+    n = Math.min(n, bankOf(k)[k] || 0, Data.backpackSize(level()) - pouchTotal());
     if (n <= 0) return 0;
     bankOf(k)[k] -= n;
     pouch()[k] = (pouch()[k] || 0) + n;
@@ -205,8 +205,16 @@ window.App = (() => {
     if (!pouch()[k]) delete pouch()[k];
     return heal(healOf(k));
   }
+  // One tap to eat: the packed food that heals the most without going over your max (or the smallest).
+  function eatBest() {
+    const list = pouchList(), miss = maxHp() - state.hp;
+    if (!list.length || miss <= 0) return null;
+    const fit = list.filter(k => healOf(k) <= miss);
+    const k = fit.length ? fit[0] : list[list.length - 1];
+    return { k, got: eatPouch(k) };
+  }
   // Pouch contents in a fixed order: biggest heal first.
-  const pouchLine = () => (pouchTotal() ? `🎒 Food pouch: <b>${pouchList().map(k => `${pouch()[k]} ${foodName(k)}`).join(', ')}</b>` : '🎒 <b>Your food pouch is empty</b> — pack food in the 🍲 Kitchen so you can heal.');
+  const pouchLine = () => (pouchTotal() ? `🍖 Packed food: <b>${pouchList().map(k => `${pouch()[k]} ${foodName(k)}`).join(', ')}</b>` : '🍖 <b>You packed no food</b> — pack some at Your Camp\'s Storehouse so you can heal.');
   const pouchList = () => Object.keys(pouch()).filter(k => pouch()[k] > 0).sort((a, b) => healOf(b) - healOf(a));
 
   // Eat one piece of food (a given kind, or the plainest you have). Returns { got, kind }.
@@ -620,7 +628,7 @@ window.App = (() => {
 
   return {
     moveSave, exportSave, importSave, ENEMY_NAME, grantSpecial, addXP, bountyEvent: (id, n) => Bounty.event(id, n), levelPerks, get level() { return level(); }, boot, go, save, newGame, tripDone, get cloudReady() { return cloudReady; }, cloudStatus: () => Cloud.statusText(), choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
-    POUCH_MAX, pouch, pouchTotal, pouchPut, pouchTake, pouchEmpty, eatPouch, pouchList, healOf, foodName, pouchLine: () => pouchLine(),
+    eatBest, POUCH_MAX, pouch, pouchTotal, pouchPut, pouchTake, pouchEmpty, eatPouch, pouchList, healOf, foodName, pouchLine: () => pouchLine(),
     addGear, gearCount, equip, unequip, wear, captureWeapon, recoverWeapons, grantShard, grantChart, heal, hurtPlayer, eatFood, eatMeal, foodTotal, spendFood, get maxHp() { return maxHp(); },
     get state() { return state; },
   };

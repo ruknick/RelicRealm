@@ -369,15 +369,40 @@ window.Camp = (() => {
       <span class="hint">Win raids (or leave goblins alive) and their grudge grows. When it's full, they come for your Storehouse — you'll get a warning a couple of trips ahead.</span>`;
     const sp = App.state;
     // The Storehouse: everything banked at camp.
-    const TILE = { food: 'berries', iron: 'ore', herring: 'fish' };
-    const keys = Object.keys(Data.RESOURCES).sort((x, y) => (sp.stockpile[y] > 0) - (sp.stockpile[x] > 0));
-    document.getElementById('fort-store').innerHTML = keys.map(k => `<div class="st-item${sp.stockpile[k] ? '' : ' none'}">
-      <span class="gem art g-${TILE[k] || k}">${Art.tile(TILE[k] || k)}</span><b>${sp.stockpile[k]}</b><small>${Data.RESOURCES[k].label}</small></div>`).join('');
+    renderStore();
     document.getElementById('fort-chest').innerHTML =
       `📦 Your loot chest holds your valuables: 🟨 ${sp.stockpile.goldbar} gold bar${sp.stockpile.goldbar === 1 ? '' : 's'} · 🗺️ ${sp.scraps.goblin + sp.scraps.dwarf} map scraps · 🗝️ ${sp.inventory.key} key${sp.inventory.key === 1 ? '' : 's'}. If raiders open it, they take some.`;
     document.getElementById('fort-hint').textContent = selected === 'chest' ? 'Tap an empty spot in your camp to move the loot chest.'
       : selected ? `Tap your camp (top 4 rows) to place a ${DEF[selected].name}. Tap a placed defense to remove it.`
       : 'Pick a defense, then tap your camp. Tap the 📦 chest to move it. Raiders come from the bottom.';
+  }
+
+  // ---------- the Storehouse (bank) and packing food for the road ----------
+  const TILE = { food: 'berries', iron: 'ore', herring: 'fish' };
+  const isFood = k => App.healOf(k) > 0;
+  const picOf = k => (Data.RESOURCES[k] ? `<span class="gem art g-${TILE[k] || k}">${Art.tile(TILE[k] || k)}</span>`
+    : `<span class="wicon">${Data.ITEMS[k].art ? Art.piece(Data.ITEMS[k].art) : Data.ITEMS[k].icon}</span>`);
+  const nameOf = k => (Data.RESOURCES[k] ? Data.RESOURCES[k].label : Data.ITEMS[k].name);
+  const slots = (filled, min) => { const n = Math.max(min, Math.ceil((filled + 1) / 5) * 5); return n - filled; };
+  function renderStore() {
+    const S = App.state;
+    // Everything banked: resources, plus meals and usable items (gear lives in 🧍 Warrior, defenses on the camp grid).
+    const banked = Object.keys(Data.RESOURCES).filter(k => S.stockpile[k] > 0).map(k => [k, S.stockpile[k]])
+      .concat(Object.keys(Data.ITEMS).filter(k => S.inventory[k] > 0 && !Data.ITEMS[k].gear && !Data.ITEMS[k].kit && !DEF[k]).map(k => [k, S.inventory[k]]));
+    banked.sort((a, b) => isFood(b[0]) - isFood(a[0]));
+    const empty = n => '<div class="slot empty"></div>'.repeat(n);
+    const packed = App.pouchList(), size = Data.backpackSize(App.level), used = App.pouchTotal();
+    document.getElementById('fort-store').innerHTML =
+      `<div class="pack-h"><b>🎒 Packed for the road</b><small>${used}/${size} backpack slots · tap to unpack</small></div>
+       <div class="slots">${packed.map(k => `<button class="slot food" data-unpack="${k}">${picOf(k)}<b>${App.pouch()[k]}</b><small>${nameOf(k)}</small></button>`).join('')}${empty(slots(packed.length, 5))}</div>
+       <p class="hint pack-note">Food you pack comes with you on every trip, raid and boss fight — tap 🍖 on the board to eat. It takes up backpack space, so pack only what you'll need.${used ? ' <button class="link" id="unpack-all">Unpack all</button>' : ''}</p>
+       <div class="pack-h"><b>🏦 Storehouse</b><small>${banked.length} kinds · tap food to pack it</small></div>
+       <div class="slots">${banked.map(([k, n]) => `<button class="slot${isFood(k) ? ' food' : ''}" ${isFood(k) ? `data-pack="${k}"` : 'disabled'} title="${nameOf(k)}">${picOf(k)}<b>${n}</b><small>${nameOf(k)}</small></button>`).join('')}${empty(slots(banked.length, 20))}</div>`;
+    const root = document.getElementById('fort-store');
+    root.querySelectorAll('[data-pack]').forEach(b => { b.onclick = () => { if (App.pouchPut(b.dataset.pack)) Sound.sfx('tick'); else flash('Your backpack is full.'); renderStore(); }; });
+    root.querySelectorAll('[data-unpack]').forEach(b => { b.onclick = () => { App.pouchTake(b.dataset.unpack); Sound.sfx('tick'); renderStore(); }; });
+    const all = document.getElementById('unpack-all');
+    if (all) all.onclick = () => { App.pouchEmpty(); renderStore(); };
   }
 
   function tapCell(r, c) {

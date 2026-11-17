@@ -247,7 +247,7 @@ window.Gather = (() => {
   function addToBackpack(type, n, cell, delay = 0) {
     goalProgress('collect', type, n);
     if (!(type in run.backpack)) { run.extra[type] = (run.extra[type] || 0) + n; App.state.stockpile[type] += n; App.save(); board.float(cell, `+${n} ${label(type)}`, 'gain', delay); return; }
-    const add = Math.min(n, run.cap - bagTotal());
+    const add = Math.min(n, run.cap - used());
     if (add > 0) {
       run.backpack[type] += add;
       board.float(cell, `+${add} ${label(type)}`, type === 'gold' ? 'gold' : 'gain', delay);
@@ -256,7 +256,7 @@ window.Gather = (() => {
       run.overflow += n - add;
       if (add === 0) board.float(cell, 'Full!', 'loss', delay);
     }
-    if (bagTotal() >= run.cap && !run.fullWarned) {
+    if (used() >= run.cap && !run.fullWarned) {
       run.fullWarned = true;
       board.toast('Backpack full! Head home when you\'re ready.', 'win', 2600);
     }
@@ -305,13 +305,16 @@ window.Gather = (() => {
     board.renderPieces();
   }
 
+  // Backpack slots in use: what you've gathered plus the food you packed at camp.
+  const used = () => bagTotal() + App.pouchTotal();
+
   // ---------- HUD ----------
   function hud() {
     document.getElementById('g-moves').textContent = run.moves;
     document.querySelector('#screen-gather .moves').classList.toggle('low', run.moves <= 5);
-    document.getElementById('bp-total').textContent = bagTotal();
-    document.getElementById('bp-drawer').classList.toggle('full', bagTotal() >= run.cap);
-    document.getElementById('bp-fill').style.width = Math.min(100, bagTotal() / run.cap * 100) + '%';
+    document.getElementById('bp-total').textContent = used();
+    document.getElementById('bp-drawer').classList.toggle('full', used() >= run.cap);
+    document.getElementById('bp-fill').style.width = Math.min(100, used() / run.cap * 100) + '%';
     if (packOpen) renderPack();
     document.getElementById('g-exit').classList.toggle('glow', run.fullWarned);
     const keyHere = [...board.buried.values()].includes('key');
@@ -347,8 +350,9 @@ window.Gather = (() => {
     const stack = (t, n, extra) => `<div class="bp-stack${extra ? ' sent' : ''}" title="${label(t)}"><span class="gem art g-${TILE_OF[t] || t}">${Art.tile(TILE_OF[t] || t)}</span><b>${n}</b><small>${label(t)}</small></div>`;
     const bag = land.bag.filter(t => run.backpack[t] > 0).map(t => stack(t, run.backpack[t]));
     const extra = Object.entries(run.extra || {}).filter(([, n]) => n > 0).map(([t, n]) => stack(t, n, true));
-    document.getElementById('bp-pop').innerHTML = (bag.length || extra.length)
-      ? `<div class="bp-stacks">${bag.join('')}${extra.join('')}</div>${run.overflow ? `<p class="bp-note">${run.overflow} more didn't fit.</p>` : ''}`
+    const food = App.pouchList().map(k => `<div class="bp-stack packed" title="${App.foodName(k)}">${Data.ITEMS[k] ? `<span class="wicon">${Data.ITEMS[k].art ? Art.piece(Data.ITEMS[k].art) : Data.ITEMS[k].icon}</span>` : `<span class="gem art g-${TILE_OF[k] || k}">${Art.tile(TILE_OF[k] || k)}</span>`}<b>${App.pouch()[k]}</b><small>${App.foodName(k)}</small></div>`);
+    document.getElementById('bp-pop').innerHTML = (bag.length || extra.length || food.length)
+      ? `<div class="bp-stacks">${food.join('')}${bag.join('')}${extra.join('')}</div>${run.overflow ? `<p class="bp-note">${run.overflow} more didn't fit.</p>` : ''}`
       : '<p class="bp-note">Empty — make matches to fill it.</p>';
   }
 
@@ -523,6 +527,7 @@ window.Gather = (() => {
   const hooks = {
     canPlay: () => !!run && !run.ended && run.moves > 0,
     onMove: () => { run.moves--; run.movesMade++; hud(); coach('move'); },
+    onAte: () => hud(),
     onMatch(runs, step) {
       coach('match');
       for (const ri of runs) {
@@ -884,7 +889,7 @@ window.Gather = (() => {
     hudLevel();
     hudGoals();
     coach('start');
-    if (!App.pouchTotal()) { const r0 = run; setTimeout(() => { if (run === r0 && !run.ended) board.toast('🎒 Your food pouch is empty — you can\'t heal on this trip. Pack food in the 🍲 Kitchen.', 'alert', 3200); }, 2700); }
+    if (!App.pouchTotal()) { const r0 = run; setTimeout(() => { if (run === r0 && !run.ended) board.toast('🍖 You packed no food — you can\'t heal on this trip. Pack some at Your Camp\'s Storehouse.', 'alert', 3200); }, 2700); }
     Sound.music(land.music);
     if (App.state.debug.discoverNow && land.discover) {
       run.discoverSpawned = true;

@@ -1436,3 +1436,19 @@ body[data-scene="farm"] #gather-hint { color: #3a2a10; font-weight: 600; }
 .pp-item:disabled { opacity: .5; }
 .pp-empty { font-size: .85rem; font-style: italic; margin: 6px 0; }
 .pp-close { width: 100%; margin-top: 6px; padding: 7px; border-radius: 8px; border: 1.5px solid var(--ink); background: none; color: var(--ink); font: inherit; }
+
+/* bank & packing: slot grids that fill up */
+.pack-h { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 8px 0 4px; color: var(--ink); font-family: Georgia, serif; }
+.pack-h small { color: var(--ink-soft); font-style: italic; font-size: .72rem; }
+.slots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+.slot { position: relative; aspect-ratio: 1; border-radius: 8px; border: 1.5px solid rgba(43,27,13,.45); background: rgba(255,250,235,.55); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2px; color: var(--ink); font: inherit; min-width: 0; }
+.slot.empty { border-style: dashed; border-color: rgba(43,27,13,.25); background: rgba(43,27,13,.05); }
+.slot .gem, .slot .wicon { position: relative; inset: auto; width: 60%; height: 60%; }
+.slot .gem svg, .slot .wicon svg { width: 100%; height: 100%; }
+.slot b { position: absolute; top: 1px; right: 4px; font-size: .78rem; text-shadow: 0 0 3px #fff8e6; }
+.slot small { font-size: .55rem; line-height: 1.05; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--ink-soft); }
+.slot:disabled { opacity: 1; }
+.slot.food:not(:disabled) { border-color: #6a8a2a; box-shadow: inset 0 0 0 1px rgba(106,138,42,.35); }
+.pack-note { text-align: left; margin: 4px 0 2px; }
+.bp-stack.packed { border-color: #6a8a2a; } .bp-stack.packed small::after { content: ' · packed'; color: #3d5a14; }
+.bp-stack .wicon { width: 22px; height: 22px; }
