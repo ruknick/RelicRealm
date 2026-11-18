@@ -571,7 +571,7 @@ window.App = (() => {
     if (screen === 'home') { renderHome(); Sound.music('home'); Art.setScene('home'); homeEvents(); }
     if (screen === 'title' || screen === 'create') Art.setScene('home');
     if (screen === 'journal') { Story.journal(); Art.setScene('craft'); }
-    if (screen === 'fair') { Fair.open(); Sound.music('home'); Art.setScene('craft'); }
+    if (screen === 'fair') { Fair.open(); Sound.music('fair'); Art.setScene('craft'); }
     if (screen === 'fairplay') { Fair.startRound(); Art.setScene('craft'); }
     if (screen === 'fortify') Story.flag('fortify');
     if (screen === 'items') { Items.render(); Art.setScene('craft'); }

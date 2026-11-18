@@ -231,6 +231,36 @@ window.Sound = (() => {
       if (s === 3 && Math.random() < 0.15) gull(t, musicBus);
     },
   };
+  // Harvest Fair: a bouncy carousel-organ polka in C. Oom-pah bass, calliope melody, glockenspiel sparkle.
+  const calliope = (m, t, d, vol, bus) => {
+    tone(midi(m), t, d, { type: 'square', vol: vol * 0.55, bus, lp: 2600 });
+    tone(midi(m + 12), t, d * 0.9, { type: 'triangle', vol: vol * 0.5, bus });
+    tone(midi(m) * 1.004, t, d, { type: 'sawtooth', vol: vol * 0.18, bus, lp: 1800 });
+  };
+  TRACKS.fair = {
+    bpm: 132,
+    roots: [36, 43, 36, 43, 41, 36, 43, 36],
+    chords: [[60, 64, 67], [59, 62, 65], [60, 64, 67], [59, 62, 67], [57, 60, 65], [60, 64, 67], [59, 62, 65], [60, 64, 67]],
+    melody: [
+      79, _, 76, _, 77, 79, 76, _,   74, _, 77, _, 76, 74, 71, _,
+      72, 76, 79, 84, _, 79, 76, _,  74, _, 79, _, 78, 79, _, _,
+      81, _, 77, _, 81, 79, 77, _,   79, _, 76, _, 79, 77, 76, _,
+      77, 76, 74, _, 71, 74, 77, _,  76, _, 74, _, 72, _, _, _,
+    ],
+    play(i, t, d) {
+      const bar = Math.floor(i / 8) % 8, s = i % 8;
+      const root = this.roots[bar];
+      // oom-pah: bass on the beat, chord on the off-beat
+      if (s === 0 || s === 4) tone(midi(root + (s === 4 ? 7 : 0)), t, d * 1.4, { type: 'triangle', vol: 0.17, bus: musicBus });
+      if (s === 2 || s === 6) this.chords[bar].forEach(n => tone(midi(n), t, d * 0.8, { type: 'square', vol: 0.022, bus: musicBus, lp: 1600 }));
+      if (s === 0) kick(t, musicBus, 0.18);
+      if (s === 2 || s === 6) hat(t, musicBus, 0.02);
+      const m = this.melody[i % this.melody.length];
+      if (m) calliope(m, t, d * 1.7, 0.085, musicBus);
+      // glockenspiel sparkle at the end of every other bar
+      if (s === 7 && bar % 2 === 1) bell(root + 36, t, d * 2, 0.05, musicBus);
+    },
+  };
   TRACKS.dwarf = TRACKS.battle;
   TRACKS.craft = TRACKS.home;
 

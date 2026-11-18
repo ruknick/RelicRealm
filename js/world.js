@@ -5,13 +5,13 @@ window.World = (() => {
   const SPOTS = [
     { id: 'lair',   x: 80, y: 25.5, icon: '🐉', name: 'Dragon\'s Lair', sub: 'Emberwyrm', boss: 'dragon' },
     { id: 'mine',   x: 24, y: 32.5, icon: '⛏️', name: 'Iron Hills', land: 'mine', raid: 'dwarf', lair: 'golem' },
-    { id: 'forest', x: 23, y: 67.5, icon: '🌲', name: 'Whispering Wood', land: 'forest', raid: 'goblin', lair: 'warchief' },
+    { id: 'forest', x: 22, y: 66, icon: '🌲', name: 'Whispering Wood', land: 'forest', raid: 'goblin', lair: 'warchief' },
     { id: 'farm',   x: 55, y: 51, icon: '🌾', name: 'Golden Fields', land: 'farm' },
-    { id: 'ocean',  x: 78, y: 61.5, icon: '🌊', name: 'Sunlit Coast', land: 'ocean', lair: 'siren' },
-    { id: 'camp',   x: 56, y: 81.5, icon: '🏰', name: 'Your Camp', sub: 'fortify', screen: 'fortify' },
-    { id: 'craft',  x: 30, y: 90.5, icon: '⚒', art: 'smithhammer', name: 'Workshop', sub: 'craft', screen: 'craft' },
-    { id: 'fair',   x: 43, y: 61, icon: '🎪', art: 'fairtent', name: 'Harvest Fair', sub: 'just for fun', screen: 'fair' },
-    { id: 'kitchen', x: 12, y: 84, icon: '🍲', art: 'chowder', name: 'Kitchen', sub: 'cook', screen: 'craft', opts: { kitchen: true } },
+    { id: 'ocean',  x: 85, y: 60, icon: '🌊', name: 'Sunlit Coast', land: 'ocean', lair: 'siren' },
+    { id: 'camp',   x: 64, y: 77, icon: '🏰', name: 'Your Camp', sub: 'fortify', screen: 'fortify' },
+    { id: 'craft',  x: 31, y: 89, icon: '⚒', art: 'smithhammer', name: 'Workshop', sub: 'craft', screen: 'craft' },
+    { id: 'fair',   x: 54, y: 90, icon: '🎪', art: 'fairtent', name: 'Harvest Fair', sub: 'just for fun', screen: 'fair' },
+    { id: 'kitchen', x: 12, y: 84.5, icon: '🍲', art: 'chowder', name: 'Kitchen', sub: 'cook', screen: 'craft', opts: { kitchen: true } },
     { id: 'beyond', x: 34, y: 9, icon: '❓', name: 'Beyond the Known Realm', sub: 'uncharted', locked: true },
   ];
   const RAID = { goblin: { icon: '🔥', name: 'Raid the goblin village', how: 'follow 🐾 tracks in the Forest' }, dwarf: { icon: '⚒️', name: 'Raid the dwarf stronghold', how: 'find a ᚱ rune stone in the Iron Hills' } };

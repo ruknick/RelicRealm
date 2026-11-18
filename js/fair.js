@@ -303,7 +303,7 @@ window.Fair = (() => {
     board.render();
     board.scheduleHint();
     hudRound();
-    Sound.music('home');
+    Sound.music('fair');
     board.toast('🎪 Match the gold ★ tokens — 3 stars win a spin!', '', 2600);
   }
   async function endRound() {

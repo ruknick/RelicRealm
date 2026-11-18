@@ -935,11 +935,11 @@ window.Art = (() => {
   const peaks = (pts, c1, c2, snow) => pts.map(([x, y, w, h]) => `<path d="M${x} ${y} l${w / 2} ${-h} l${w / 2} ${h}z" fill="${c1}"/><path d="M${x + w / 2} ${y - h} l${w / 2} ${h} h${-w / 2}z" fill="${c2}"/>${snow ? `<path d="M${x + w / 2} ${y - h} l${w * 0.12} ${h * 0.24} l${-w * 0.06} ${-h * 0.04} l${-w * 0.06} ${h * 0.06} l${-w * 0.06} ${-h * 0.06} l${-w * 0.04} ${h * 0.04}z" fill="#eef3f8"/>` : ''}`).join('');
   // ---------- world map: an antique atlas page, drawn procedurally ----------
   const INK = '#3b2a18';
-  const COAST = 'M300 0 C280 40 300 80 270 120 C240 160 250 200 236 240 C222 290 252 330 230 380 C214 420 236 450 220 480 C206 520 236 550 214 580';
+  const COAST = 'M330 0 C316 40 336 80 306 120 C278 160 288 200 274 240 C262 290 290 330 270 380 C256 420 276 450 262 480 C250 520 276 550 256 580';
   const coastX = y => { // rough x of the coastline at height y (for keeping land things on land)
-    const pts = [[0, 300], [60, 288], [120, 270], [180, 244], [240, 236], [300, 238], [340, 244], [380, 230], [430, 222], [480, 220], [530, 220], [580, 214]];
+    const pts = [[0, 330], [60, 322], [120, 306], [180, 282], [240, 274], [300, 276], [340, 282], [380, 270], [430, 262], [480, 262], [530, 262], [580, 256]];
     for (let i = 1; i < pts.length; i++) if (y <= pts[i][0]) { const [y0, x0] = pts[i - 1], [y1, x1] = pts[i]; return x0 + (x1 - x0) * (y - y0) / (y1 - y0); }
-    return 214;
+    return 256;
   };
   const rnd = (seed => () => (seed = (seed * 9301 + 49297) % 233280) / 233280)(11);
   const f1 = n => Math.round(n * 10) / 10;
@@ -971,16 +971,16 @@ window.Art = (() => {
   }
   range.sort((p, q) => p[1] - q[1]);
   const woodTrees = [];
-  for (let i = 0; i < 420; i++) {
+  for (let i = 0; i < 300; i++) {
     const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd());
-    const x = 92 + Math.cos(a) * r * 88, y = 316 + Math.sin(a) * r * 66;
+    const x = 80 + Math.cos(a) * r * 66, y = 302 + Math.sin(a) * r * 48;
     if (x > 8 && x < coastX(y) - 16 && y > 240 && !(x > 150 && y < 270)) woodTrees.push([x, y, 0.75 + rnd() * 0.5]);
   }
   woodTrees.sort((p, q) => p[1] - q[1]);
   const scattered = [];
   for (let i = 0; i < 40; i++) {
     const x = 120 + rnd() * 100, y = 190 + rnd() * 120;
-    if (x < coastX(y) - 14 && !(x > 150 && x < 238 && y > 176 && y < 240)) scattered.push([x, y, 0.7 + rnd() * 0.3]);
+    if (x < coastX(y) - 14 && !(x > 150 && x < 238 && y > 176 && y < 240) && y < 330) scattered.push([x, y, 0.7 + rnd() * 0.3]);
   }
   const waves = [];
   for (let i = 0; i < 70; i++) {
@@ -1009,8 +1009,8 @@ window.Art = (() => {
     <g transform="translate(0 90)">
     <!-- land washes: meadows, the wood, the hills, the scorched north-east -->
     <g filter="url(#wmWash)">
-      <path d="M0 40 C60 30 150 40 230 60 L250 300 C200 340 160 420 210 470 L0 470 Z" fill="#b9b47a" opacity=".45"/>
-      <ellipse cx="92" cy="318" rx="98" ry="76" fill="#6f8a4a" opacity=".55"/>
+      <path d="M0 40 C60 30 150 40 270 60 L290 300 C260 340 250 420 262 470 L0 470 Z" fill="#b9b47a" opacity=".45"/>
+      <ellipse cx="80" cy="302" rx="74" ry="56" fill="#6f8a4a" opacity=".55"/>
       <ellipse cx="100" cy="130" rx="118" ry="70" fill="#a89a74" opacity=".5"/>
       <ellipse cx="282" cy="60" rx="80" ry="58" fill="#7a4a36" opacity=".55"/>
     </g>
@@ -1024,8 +1024,8 @@ window.Art = (() => {
     ${[4, 9, 15].map((d, i) => `<path d="${COAST}" transform="translate(${d} 0)" fill="none" stroke="${INK}" stroke-width=".55" opacity="${0.42 - i * 0.12}"/>`).join('')}
     <path d="${COAST}" fill="none" stroke="${INK}" stroke-width="1.7"/>
     <!-- river from the hills to the sea -->
-    <path d="M128 150 C136 190 120 214 142 240 C164 266 150 300 176 330 C196 352 200 372 226 392" fill="none" stroke="#5d8f9c" stroke-width="3" stroke-linecap="round"/>
-    <path d="M128 150 C136 190 120 214 142 240 C164 266 150 300 176 330 C196 352 200 372 226 392" fill="none" stroke="#a9cbd0" stroke-width="1" stroke-linecap="round"/>
+    <path d="M128 150 C136 190 120 214 142 240 C164 266 150 300 176 330 C196 352 210 340 236 344 C254 348 260 360 276 362" fill="none" stroke="#5d8f9c" stroke-width="3" stroke-linecap="round"/>
+    <path d="M128 150 C136 190 120 214 142 240 C164 266 150 300 176 330 C196 352 210 340 236 344 C254 348 260 360 276 362" fill="none" stroke="#a9cbd0" stroke-width="1" stroke-linecap="round"/>
     <path d="M168 120 C170 150 152 170 150 200 C148 222 140 232 142 240" fill="none" stroke="#5d8f9c" stroke-width="1.8" stroke-linecap="round"/>
     <!-- the fire mountain -->
     <ellipse cx="290" cy="56" rx="86" ry="56" fill="url(#wmFire)"/>
@@ -1035,7 +1035,7 @@ window.Art = (() => {
     <text x="234" y="124" font-family="Georgia, serif" font-style="italic" font-size="8.5" fill="#7a2e1a">Here be dragons</text>
     <!-- the Iron Hills -->
     ${range.map(([x, y, w, h], i) => peak(x, y, w, h, { snow: h > 44 })).join('')}
-    ${hill(18, 200, 26)}${hill(56, 210, 30)}${hill(108, 196, 24)}${hill(190, 214, 22)}${hill(150, 222, 20)}${hill(160, 412, 22)}${hill(120, 420, 18)}
+    ${hill(18, 200, 26)}${hill(56, 210, 30)}${hill(108, 196, 24)}${hill(190, 214, 22)}${hill(150, 222, 20)}
     <!-- the Whispering Wood and scattered copses -->
     <g>${woodTrees.map(([x, y, sc]) => tree(x, y, sc)).join('')}</g>
     <g>${scattered.map(([x, y, sc]) => tree(x, y, sc)).join('')}</g>
@@ -1049,23 +1049,38 @@ window.Art = (() => {
     <g transform="translate(176 194)" stroke="${INK}" stroke-width=".7"><path d="M-3.5 13 L-2.4 0 h4.8 L3.5 13z" fill="#e6dcc4"/><path d="M-2.6 0 L0 -3 L2.6 0z" fill="#8a3a2a"/>
       <g stroke-width=".9"><path d="M0 -1 L-9 -10M0 -1 L9 -10M0 -1 L-9 8M0 -1 L9 8"/></g>
       <g fill="#efe6d0" stroke-width=".5"><path d="M-2 -3 L-9 -10 L-7 -12z"/><path d="M2 -3 L9 -10 L11 -8z"/><path d="M-2 1 L-9 8 L-11 6z"/><path d="M2 1 L9 8 L7 10z"/></g></g>
-    <!-- roads -->
-    <path d="M196 384 C170 360 130 340 100 310 M200 380 C190 320 150 200 110 120 M206 384 C226 370 252 340 268 300 M200 380 C240 300 268 180 282 110 M184 396 C150 420 120 440 104 450"
+    <!-- roads out of town -->
+    <path d="M214 370 C186 352 130 330 92 304 M214 366 C196 300 150 190 92 112 M240 366 C262 340 290 304 304 270 M236 360 C262 290 282 180 288 80"
       stroke="#7a4a2a" stroke-width="1.1" stroke-dasharray="3 3" stroke-linecap="round" fill="none" opacity=".8"/>
+    <!-- Ashford: the town lanes join camp, kitchen, workshop and fair -->
+    <path d="M218 384 C196 404 160 418 124 424 M124 426 C150 436 172 440 196 436 M112 422 C90 414 66 404 48 398"
+      stroke="#8a6a3a" stroke-width="2.4" stroke-linecap="round" fill="none" opacity=".55"/>
+    <text x="158" y="392" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="9" letter-spacing="2" fill="${INK}" opacity=".6">ASHFORD</text>
     <!-- your camp: a small walled keep -->
-    <g transform="translate(184 368)" stroke="${INK}" stroke-width=".8">
+    <g transform="translate(212 346)" stroke="${INK}" stroke-width=".8">
       <path d="M0 22 V10 h4 v-3 h3 v3 h4 v-3 h3 v3 h4 v-3 h3 v3 h4 v-3 h3 v3 h4 v12 z" fill="#d8ccb0"/>
       <rect x="11" y="-2" width="12" height="24" fill="#e6dcc4"/><path d="M11 -2 h3 v-3 h3 v3 h3 v-3 h3 v3" fill="#e6dcc4"/>
       <path d="M15 22 v-6 a2 2 0 0 1 4 0 v6" fill="${INK}"/><path d="M17 -5 v-8" fill="none"/><path d="M17 -13 h7 l-2 2 2 2 h-7" fill="#8e2a1a"/>
       <path d="M23 2 v18" stroke="#a8977a" stroke-width="2.4"/></g>
     <!-- the workshop: a smithy with a smoking chimney -->
-    <g transform="translate(86 440)" stroke="${INK}" stroke-width=".8"><path d="M0 14 V6 L9 0 L18 6 V14 Z" fill="#d8ccb0"/><path d="M0 6 L9 0 L18 6" fill="#8a5a3a"/>
+    <g transform="translate(96 420)" stroke="${INK}" stroke-width=".8"><path d="M0 14 V6 L9 0 L18 6 V14 Z" fill="#d8ccb0"/><path d="M0 6 L9 0 L18 6" fill="#8a5a3a"/>
       <rect x="12" y="-4" width="3" height="7" fill="#a8977a"/><path d="M7 14 v-5 h4 v5" fill="${INK}"/></g>
-    <g fill="#8a8078" opacity=".45" filter="url(#wmSoft)"><circle cx="100" cy="430" r="3"/><circle cx="103" cy="424" r="4"/></g>
+    <g fill="#8a8078" opacity=".45" filter="url(#wmSoft)"><circle cx="110" cy="410" r="3"/><circle cx="113" cy="404" r="4"/></g>
+    <!-- the kitchen: a cottage with a bread oven -->
+    <g transform="translate(26 386)" stroke="${INK}" stroke-width=".8"><path d="M0 14 V5 L8 -1 L16 5 V14 Z" fill="#e6dcc4"/><path d="M-1 5 L8 -2 L17 5" fill="#b0763a"/>
+      <path d="M17 14 v-5 a4 4 0 0 1 8 0 v5z" fill="#c9a07a"/><path d="M6 14 v-4 h4 v4" fill="${INK}"/></g>
+    <!-- the harvest fair: striped tents, bunting and a little wheel -->
+    <g transform="translate(176 418)" stroke="${INK}" stroke-width=".7">
+      <path d="M-2 4 C10 10 22 10 34 4" fill="none" stroke-width=".5"/>
+      ${[2, 8, 14, 20, 26].map((x, i) => `<path d="M${x} ${5 + (i === 2 ? 2.5 : i % 4 ? 1.8 : .6)} l2 3.5 2 -3.5z" fill="${['#c0392b', '#e2b53a', '#2e6f9e', '#c0392b', '#e2b53a'][i]}" stroke-width=".3"/>`).join('')}
+      <path d="M0 22 L7 10 L14 22z" fill="#f3e2b8"/><path d="M7 10 L4 22 h2zM7 10 L9 22 h2z" fill="#c0392b" stroke="none"/><path d="M0 22 L7 10 L14 22z" fill="none"/>
+      <path d="M16 22 L24 8 L32 22z" fill="#f3e2b8"/><path d="M24 8 L20 22 h2.5zM24 8 L26 22 h2.5z" fill="#2e6f9e" stroke="none"/><path d="M16 22 L24 8 L32 22z" fill="none"/>
+      <path d="M24 8 v-4" /><path d="M24 4 l4 1.5 -4 1.5z" fill="#c0392b" stroke-width=".4"/>
+      <circle cx="42" cy="12" r="8" fill="none"/><path d="M42 4 V20 M34 12 H50 M36.4 6.4 L47.6 17.6 M47.6 6.4 L36.4 17.6" stroke-width=".4"/><path d="M38 22 L42 12 L46 22" fill="none"/></g>
     <!-- a ship and a sea serpent -->
-    <g transform="translate(286 346)" stroke="${INK}" stroke-width=".9" fill="#e6dcc4"><path d="M0 0h26l-5 7H5z" fill="#7a5a3a"/><path d="M12 0v-22" fill="none"/><path d="M13 -21c9 5 9 13 0 18z"/><path d="M11 -19c-7 5-7 10 0 15z"/></g>
-    <g fill="none" stroke="${INK}" stroke-width="1.2" stroke-linecap="round" opacity=".75"><path d="M292 232c3-8 9-8 11 0M306 234c3-9 10-9 12 0M321 234c2-6 8-6 9 0"/><path d="M330 230c4-5 9-5 9 0 0 3-3 3-5 2"/></g>
-    <text x="296" y="190" font-family="Georgia, serif" font-style="italic" font-size="10" letter-spacing="3" fill="#2f5a66" opacity=".75" transform="rotate(78 296 190)">THE SUNLIT SEA</text>
+    <g transform="translate(300 346)" stroke="${INK}" stroke-width=".9" fill="#e6dcc4"><path d="M0 0h26l-5 7H5z" fill="#7a5a3a"/><path d="M12 0v-22" fill="none"/><path d="M13 -21c9 5 9 13 0 18z"/><path d="M11 -19c-7 5-7 10 0 15z"/></g>
+    <g fill="none" stroke="${INK}" stroke-width="1.2" stroke-linecap="round" opacity=".75"><path d="M296 214c3-8 9-8 11 0M310 216c3-9 10-9 12 0M325 216c2-6 8-6 9 0"/><path d="M334 212c4-5 9-5 9 0 0 3-3 3-5 2"/></g>
+    <text x="324" y="150" font-family="Georgia, serif" font-style="italic" font-size="10" letter-spacing="3" fill="#2f5a66" opacity=".75" transform="rotate(84 324 150)">THE SUNLIT SEA</text>
     <!-- compass rose -->
     <g transform="translate(318 438)" stroke="${INK}" stroke-width=".8">
       <circle r="21" fill="#ede0bd" opacity=".7"/><circle r="21" fill="none"/><circle r="17" fill="none" stroke-dasharray="1 2"/>
