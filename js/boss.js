@@ -251,8 +251,34 @@ window.Boss = (() => {
   }
 
   // ---------- start & finish ----------
+  // Bosses match what you bring. Their hide and health rise to meet your weapon's tier, and their
+  // band's weapons rise to meet your armor — so better gear always earns a real fight (and richer
+  // loot) without punishing a half-finished armor set. Every rematch adds a little more health.
+  const ERA_GEAR = { 2: 'iron', 3: 'steel', 4: 'starsilver' };
+  function scaled(kind) {
+    const base = CONFIG[kind], S = st(), wins = ((S.bossWins || {})[kind]) || 0;
+    const wTier = S.equip.weapon ? Data.ITEMS[S.equip.weapon.id].tier : 1;
+    const worn = ['helmet', 'body', 'legs', 'shield'].map(k => (S.equip[k] ? Data.ITEMS[S.equip[k].id].tier : 0));
+    const aTier = Math.floor(worn.reduce((a, b) => a + b, 0) / worn.length);
+    const lift = kind === 'dragon' ? 0 : Math.max(0, Math.min(4, wTier) - base.boss.armor);       // hide & health
+    const arm = kind === 'dragon' ? 0 : Math.max(0, Math.min(4, aTier) - base.boss.weapon);      // their weapons
+    const re = 1 + 0.1 * Math.min(wins, 5);
+    const c = { ...base, lift,
+      boss: { ...base.boss, armor: base.boss.armor + lift, weapon: base.boss.weapon + arm, hp: Math.round(base.boss.hp * (1 + 0.35 * lift) * re) },
+      minion: { ...base.minion, armor: base.minion.armor + lift, weapon: base.minion.weapon + arm, hp: Math.round(base.minion.hp * (1 + 0.4 * lift)) } };
+    const mult = 1 + 0.5 * Math.max(lift, arm);
+    c.firstReward = Object.fromEntries(Object.entries(base.firstReward).map(([k, n]) => [k, Math.round(n * mult)]));
+    c.reward = Object.fromEntries(Object.entries(base.reward).map(([k, n]) => [k, Math.round(n * mult)]));
+    c.xp = base.xp.map(x => Math.round(x * mult));
+    const bits = [];
+    if (lift) bits.push(`${ERA_GEAR[base.boss.armor + lift]}-hard hide to match your weapon`);
+    if (arm) bits.push(`${ERA_GEAR[base.boss.weapon + arm]} blades to match your armor`);
+    c.gearNote = bits.length ? `${base.short}'s band has looted ${bits.join(' and ')} — a real fight, with richer loot.` : '';
+    return c;
+  }
+
   function prepare(kind) {
-    const c = CONFIG[kind], s = st();
+    const c = scaled(kind), s = st();
     App.reprep = () => prepare(kind);
     const canGo = s.hp > 0;
     const wins = (s.bossWins || {})[kind] || 0;
@@ -263,6 +289,7 @@ window.Boss = (() => {
       title: `${c.icon} ${c.place}`,
       html: `<p class="story-text">${c.intro}</p>
         <p class="race-rules">${c.prep}</p>
+        ${c.gearNote ? `<p class="warn-note">⚔️ ${c.gearNote}</p>` : ''}
         <p class="${!w || w.tier < armor ? 'warn-note' : 'hint'}">⚔️ ${under}</p>
         <p>❤️ <b>${s.hp}/${App.maxHp}</b> · <a href="#" id="prep-hero">Armor up / eat</a></p><p>${App.pouchLine()}</p>
         ${kind === 'dragon' ? `<p class="hint">${s.inventory.flask || 0} water flask${s.inventory.flask === 1 ? '' : 's'} · ${s.inventory.elderward ? 'Elderwood ward ✓' : 'no Elderwood ward'} · ${s.inventory.crown ? 'the Crown ✓' : 'no Crown'}</p>` : ''}
@@ -280,7 +307,7 @@ window.Boss = (() => {
   }
 
   function start({ kind = 'dragon' } = {}) {
-    cfg = CONFIG[kind];
+    cfg = scaled(kind);
     document.getElementById('screen-boss').dataset.boss = kind;
     document.getElementById('boss-name').textContent = `${cfg.icon} ${cfg.name}`;
     board.reset();
