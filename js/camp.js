@@ -390,7 +390,7 @@ window.Camp = (() => {
 
   // ---------- the Storehouse (bank) and packing food for the road ----------
   const TILE = { food: 'berries', iron: 'ore', herring: 'fish' };
-  const isFood = k => App.healOf(k) > 0;
+  const isFood = k => App.healOf(k) > 0 || !!(Data.ITEMS[k] && Data.ITEMS[k].potion);   // packable for the road
   const picOf = k => (Data.RESOURCES[k] ? `<span class="gem art g-${TILE[k] || k}">${Art.tile(TILE[k] || k)}</span>`
     : `<span class="wicon">${Data.ITEMS[k].art ? Art.piece(Data.ITEMS[k].art) : Data.ITEMS[k].icon}</span>`);
   const nameOf = k => (Data.RESOURCES[k] ? Data.RESOURCES[k].label : Data.ITEMS[k].name);
@@ -406,8 +406,8 @@ window.Camp = (() => {
     document.getElementById('fort-store').innerHTML =
       `<div class="pack-h"><b>🎒 Packed for the road</b><small>${used}/${size} backpack slots · tap to unpack</small></div>
        <div class="slots">${packed.map(k => `<button class="slot food" data-unpack="${k}">${picOf(k)}<b>${App.pouch()[k]}</b><small>${nameOf(k)}</small></button>`).join('')}${empty(slots(packed.length, 5))}</div>
-       <p class="hint pack-note">Food you pack comes with you on every trip, raid and boss fight — tap 🍖 on the board to eat. It takes up backpack space, so pack only what you'll need.${used ? ' <button class="link" id="unpack-all">Unpack all</button>' : ''}</p>
-       <div class="pack-h"><b>🏦 Storehouse</b><small>${banked.length} kinds · tap food to pack it</small></div>
+       <p class="hint pack-note">Food and potions you pack come with you on every trip, raid and boss fight — tap 🍖 on the board to eat, tap a potion to drink it. It takes up backpack space, so pack only what you'll need.${used ? ' <button class="link" id="unpack-all">Unpack all</button>' : ''}</p>
+       <div class="pack-h"><b>🏦 Storehouse</b><small>${banked.length} kinds · tap food or potions to pack</small></div>
        <div class="slots">${banked.map(([k, n]) => `<button class="slot${isFood(k) ? ' food' : ''}" ${isFood(k) ? `data-pack="${k}"` : 'disabled'} title="${nameOf(k)}">${picOf(k)}<b>${n}</b><small>${nameOf(k)}</small></button>`).join('')}${empty(slots(banked.length, 20))}</div>`;
     const root = document.getElementById('fort-store');
     root.querySelectorAll('[data-pack]').forEach(b => { b.onclick = () => { if (App.pouchPut(b.dataset.pack)) Sound.sfx('tick'); else flash('Your backpack is full.'); renderStore(); }; });

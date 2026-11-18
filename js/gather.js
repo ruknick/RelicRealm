@@ -28,6 +28,7 @@ window.Gather = (() => {
     crab:    { kind: 'crab',    label: '', mat: 'creature', hp: 1, art: 'crab', kin: 'sea' },
     monster: { kind: 'monster', label: '', mat: 'creature', hp: 1 },
     tracks:  { kind: 'tracks',  label: '', mat: 'other',    hp: 1, art: 'tracks' },
+    fairticket: { kind: 'fairticket', label: '', mat: 'other', hp: 1, art: 'fairticket' },
     rune:    { kind: 'rune',    label: '', mat: 'other',    hp: 1, art: 'rune' },
   };
 
@@ -437,7 +438,7 @@ window.Gather = (() => {
       // Every few moves, each one swings at you.
       if (m.age % run.mon.attackEvery === 0) {
         const hit = App.hurtPlayer(m.weapon || 1);
-        board.float([m.r, m.c], hit.dmg ? `⚔️ −${hit.dmg} ❤️` : '🛡️ blocked', hit.dmg ? 'loss' : 'gain');
+        board.float([m.r, m.c], hit.asleep ? '💤' : hit.dmg ? `⚔️ −${hit.dmg} ❤️` : '🛡️ blocked', hit.dmg ? 'loss' : 'gain');
         stole += hit.dmg;
         if (!run.told.armorNote && hit.note) { run.told.armorNote = true; setTimeout(() => board.toast(`🛡️ ${hit.note[0].toUpperCase() + hit.note.slice(1)}.`, '', 2000), 700); }
         if (hit.down) break;
@@ -586,6 +587,12 @@ window.Gather = (() => {
             if (wood !== 'wood') discoverMaterial(wood, cell);
           }
           break;
+        case 'fairticket':
+          Fair.earn(1);
+          run.finds.push('🎟️ A golden fair ticket — play it at the Harvest Fair!');
+          board.toast('🎟️ Golden ticket! Play it at the 🎪 Harvest Fair.', 'win', 2400);
+          Sound.sfx('rare');
+          break;
         case 'thorn':
         case 'kelp': applyFind(Data.rollFrom(Data.FINDS[land.finds]), cell, 150); break;
         case 'coral':
@@ -655,6 +662,7 @@ window.Gather = (() => {
         thief: 'A goblin thief! Only a weapon can stop it — Club, Sling, Sword… before it escapes!',
         cart: 'A runaway cart full of ore! Stop it before it rolls off.',
         tracks: 'Goblin tracks — match next to them to follow.',
+        fairticket: 'A golden fair ticket! Match right next to it to grab it.',
         rune: 'A cracked rune stone — match next to it to read it.',
         coral: `Coral (${p.hp} HP). Only a pick can break it — gives coral for sea gear, sometimes an oyster.`,
         kelp: `Kelp tangle (${p.hp} HP) — something's caught in it! Only an axe can cut it.`,
@@ -698,6 +706,11 @@ window.Gather = (() => {
             Sound.sfx(kind === 'boulder' ? 'break' : 'reveal');
             await board.wait(450);
           }
+        }
+        // About one trip in three, a golden fair ticket blows onto the board.
+        if (run.ticketAt && !run.ticketSpawned && run.movesMade >= run.ticketAt) {
+          run.ticketSpawned = true;
+          spawnOn('fairticket', (r, c) => r >= 1 && r <= 5, '🎟️ A golden fair ticket blew in! Match next to it to grab it.', 'win');
         }
         if (land.discover && !run.discoverSpawned && run.movesMade >= DISCOVER_AFTER && Math.random() < DISCOVER_CHANCE) {
           run.discoverSpawned = true;
@@ -798,7 +811,7 @@ window.Gather = (() => {
     const L = run.landLv, rew = [];
     if (stars >= 1) { App.state.stockpile.gold += 5 + Math.floor(L / 2); rew.push(`${5 + Math.floor(L / 2)} gold`); }
     if (stars >= 2) { const x = 15 + L * 2; App.addXP(x); run.xp += x; rew.push(`${x} XP`); }
-    if (stars >= 3) { const rr = STAR_RARE[land.key]; App.state.stockpile[rr] += 2; App.state.stockpile.gold += 10; rew.push(`a reward chest: 10 gold + 2 ${Data.RESOURCES[rr].label}`); Fair.earn(1); rew.push('🎟 a fair ticket'); }
+    if (stars >= 3) { const rr = STAR_RARE[land.key]; App.state.stockpile[rr] += 2; App.state.stockpile.gold += 10; rew.push(`a reward chest: 10 gold + 2 ${Data.RESOURCES[rr].label}`); }
     run.stars = stars;
     const best = App.state.bestStars = App.state.bestStars || {};
     best[land.key] = Math.max(best[land.key] || 0, stars);
@@ -848,6 +861,7 @@ window.Gather = (() => {
       finds: [], told: {}, eventPiece: null, eventSpawned: false,
       discoverSpawned: false, followed: false, discovered: false, marked: false, ended: false,
       mon: Data.monsterPlan(landLv), sinceMon: 0, slain: 0, sinceSpread: 0, extra: {},
+      ticketAt: Math.random() < 0.34 ? 3 + Math.floor(Math.random() * 10) : 0, ticketSpawned: false,
     };
     run.goals = makeGoals(landLv);
     document.getElementById('coach').classList.add('hidden');

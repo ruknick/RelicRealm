@@ -131,8 +131,11 @@ window.Craft = (() => {
   const RAW_NAME = k => Data.RESOURCES[k].label;
   function renderKitchen() {
     const meals = R().filter(r => r.tier === 'food').sort((a, b) => a.lv - b.lv);
+    const potions = R().filter(r => r.tier === 'potion').sort((a, b) => a.lv - b.lv);
     document.getElementById('craft-list').innerHTML =
-      `<p class="tab-sub">Cook what you gather into meals that heal far more than raw food. Meals go to your bank — pack them at 🏰 Your Camp before a trip.</p>${meals.map(card).join('')}`;
+      `<p class="tab-sub">Meals and potions go to your bank — pack them at 🏰 Your Camp before a trip. Each one takes a backpack slot.</p>
+       <div class="tier-h">🍲 Cook <small>· meals heal far more than raw food</small></div>${meals.map(card).join('')}
+       <div class="tier-h">⚗️ Cauldron <small>· potions, drunk from the board tray</small></div>${potions.map(card).join('')}`;
     const root = document.getElementById('craft-list');
     root.querySelectorAll('.recipe.compact').forEach(el => { el.onclick = e => { if (!e.target.closest('button')) el.classList.toggle('open'); }; });
     root.querySelectorAll('.craft-btn').forEach(b => { b.onclick = () => craft(b.dataset.id, 1); });
@@ -258,7 +261,7 @@ window.Craft = (() => {
     let label;
     if (r.makes) { Object.entries(r.makes).forEach(([k, n]) => { st().stockpile[k] += n * times; App.bountyEvent(`smelt:${k}`, n * times); }); label = `+${Object.entries(r.makes).map(([k, n]) => `${n * times} ${Data.RESOURCES[k].label}`).join(', ')}!`; }
     else if (it.gear) { App.addGear(id); label = `${it.name} forged!`; }
-    else { st().inventory[id] += 1; label = `${it.name} ${r.tier === 'food' ? 'cooked' : isKit(r) ? 'made' : 'crafted'}!`; }
+    else { st().inventory[id] = (st().inventory[id] || 0) + 1; label = `${it.name} ${r.tier === 'potion' ? 'brewed' : r.tier === 'food' ? 'cooked' : isKit(r) ? 'made' : 'crafted'}!`; }
     // First weapon / tool? Wield it straight away.
     if (it.gear) {
       const slot = Data.slotOf(id);

@@ -294,7 +294,7 @@ window.Battle = (() => {
     let total = 0, note = '';
     for (const m of troops) {
       const hit = App.hurtPlayer(m.weapon || 1);
-      board.float([m.r, m.c], hit.dmg ? `⚔️ −${hit.dmg} ❤️` : '🛡️ blocked', hit.dmg ? 'loss' : 'gain');
+      board.float([m.r, m.c], hit.asleep ? '💤' : hit.dmg ? `⚔️ −${hit.dmg} ❤️` : '🛡️ blocked', hit.dmg ? 'loss' : 'gain');
       total += hit.dmg; note = note || hit.note;
       if (hit.down) break;
     }

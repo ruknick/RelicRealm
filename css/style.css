@@ -1488,3 +1488,33 @@ body[data-scene="farm"] #gather-hint { color: #3a2a10; font-weight: 600; }
 .fortune .story-text { font-style: italic; }
 
 .fair-panel .hint { color: var(--ink-soft); opacity: 1; }
+
+/* ---------- fairground board ---------- */
+.g-candyapple { --g1: #ffe3a8; --g2: #f4b860; }
+.g-balloon    { --g1: #c8ecff; --g2: #7cc4ef; }
+.g-pinwheel   { --g1: #fff7d6; --g2: #f1d98c; }
+.g-popcorn    { --g1: #ffd0d6; --g2: #f08a98; }
+.g-ribbon     { --g1: #e7d4ff; --g2: #b98ce8; }
+.g-fairtoken  { --g1: #fff1b0; --g2: #e6b230; }
+.g-fairtoken.art { box-shadow: 0 0 10px rgba(255,214,90,.8), inset 0 2px 0 rgba(255,255,255,.4), inset 0 -4px 0 rgba(0,0,0,.2); }
+[data-frame="fair"] .frame { background: repeating-linear-gradient(90deg, #d6283a 0 14px, #fff4dc 14px 28px); box-shadow: 0 10px 24px rgba(0,0,0,.5), inset 0 0 0 3px #2b1b0d; border-radius: 14px; }
+[data-frame="fair"] .board { background: radial-gradient(circle at 50% 35%, #fff8e6, #f2d9a8); }
+.fp-title { font-family: Georgia, serif; font-weight: 700; display: flex; align-items: center; gap: 6px; color: #f3e2b8; }
+.fp-title small { font-weight: 400; }
+.fp-meter { display: inline-flex; gap: 3px; }
+.fp-meter i { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid #e6b230; background: rgba(0,0,0,.25); }
+.fp-meter i.on { background: #ffd65a; box-shadow: 0 0 6px #ffd65a; }
+.fp-won { width: 80px; margin: 0 auto; } .fp-won svg { width: 100%; }
+.play-row { display: flex; gap: 8px; align-items: center; }
+.play-row p { margin: 0; font-size: .85rem; text-align: left; }
+.play-pic { display: flex; flex: none; } .play-pic svg { width: 34px; height: 34px; margin-left: -6px; }
+.play-panel .big { margin-top: 8px; width: 100%; }
+.fair-tickets { display: inline-flex; align-items: center; gap: 4px; }
+.fair-tickets .tk-ico svg { width: 26px; height: 26px; display: block; }
+/* ---------- potions in the board tray ---------- */
+.spec.potion { position: relative; }
+.spec.potion svg { width: 26px; height: 26px; }
+.spec.potion .rank { position: absolute; top: -3px; left: 3px; font-size: .55rem; font-style: normal; font-weight: 800; color: #6d3fa0; }
+.fx-chips { display: inline-flex; gap: 3px; align-items: center; }
+.fx-chip { padding: 1px 5px; border-radius: 8px; font-size: .72rem; font-weight: 700; background: #efe6ff; color: #43358f; border: 1px solid #7c6ad8; }
+.fx-chip.giant { background: #ffe4e4; color: #7a1020; border-color: #d6283a; }

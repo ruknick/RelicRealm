@@ -80,6 +80,21 @@ Each blow wears that piece down. It lasts 4 / 8 / 14 / 25 blows by tier; repair 
 | **Goblin firepot** | Burns a 3×3 area: hurts wood, plants and monsters, clears fog. Can't touch stone or iron. |
 | **Water flask** | Douses lava and flood-water in a 3×3 area (Siren and Dragon fights). |
 
+## Potions (Kitchen cauldron)
+
+Brewed in the Kitchen, banked, then packed at camp like food (each takes a backpack slot). Tap one in the board tray to drink it.
+
+| Potion | Effect | Strengths unlock at |
+|---|---|---|
+| **Sleeping draught** | Monsters can't strike you for 2 / 3 / 4 moves | Lv 6 / 16 / 26 |
+| **Quicksilver tonic** | +5 ⚡ / +10 ⚡ / fills ⚡ to full | Lv 9 / 19 / 29 |
+| **Giant's brew** | Your next 3 weapon swings hit ×1.5 / ×2 / ×2.5 | Lv 12 / 22 / 32 |
+
+## The Harvest Fair
+- **Golden tickets** blow onto about one gathering trip in three. Match next to one to grab it.
+- A ticket plays one **fairground round**: 15 moves, no monsters. Every 3 gold ★ tokens matched wins a **wheel spin** (at least 1 per round).
+- The **Prize Wheel** gives flair (hats and capes, just for looks), meals, gold, another golden ticket, or rarely the **Golden Horseshoe** (rare finds +15%). Plus one free spin each day you visit.
+
 ## Food
 
 - **Everything you gather goes to the bank** (the Storehouse at 🏰 Your Camp). Before a trip, tap food there to **pack it**. Packed food takes up **backpack slots**. On a board, one tap of 🍖 eats the packed food that best fits your missing health. Tap packed food at camp to unpack it.

@@ -148,6 +148,7 @@ window.App = (() => {
   // A blow from an attacker with this weapon tier. It lands on a random part of you; armor there softens it
   // (better armor than their weapon turns it aside) and takes a little wear.
   function hurtPlayer(weaponTier, extra = 0) {
+    if (fx.sleep > 0) return { dmg: 0, note: '', down: false, asleep: true };   // Sleeping draught
     const base = Data.ATTACK[weaponTier] + extra;
     const slots = [['body', 40], ['helmet', 20], ['legs', 20], [state.equip.shield ? 'shield' : 'body', 20]];
     const slot = Data.rollFrom(slots), g = state.equip[slot];
@@ -176,11 +177,13 @@ window.App = (() => {
   // Everything you gather goes to the bank (Storehouse). Before heading out you pack food
   // at Your Camp's Storehouse; it takes backpack slots. One tap of 🍖 on a board eats from it.
   // Leftovers stay packed until you unpack them at camp.
+  // Potion effects active on the current board (reset whenever a board starts).
+  const fx = { sleep: 0, giant: null };
   const POUCH_MAX = 10;   // (legacy name) — packing is limited by your backpack size instead
   const isMeal = k => !!(Data.ITEMS[k] && Data.ITEMS[k].heal);
   const healOf = k => (isMeal(k) ? Data.ITEMS[k].heal : Data.FOODS[k] || 0);
   const foodName = k => (isMeal(k) ? Data.ITEMS[k].name : Data.RESOURCES[k].label);
-  const bankOf = k => (isMeal(k) ? state.inventory : state.stockpile);
+  const bankOf = k => (Data.ITEMS[k] ? state.inventory : state.stockpile);
   const pouch = () => (state.pouch ||= {});
   const pouchTotal = () => Object.values(pouch()).reduce((a, b) => a + b, 0);
   function pouchPut(k, n = 1) {
@@ -209,7 +212,7 @@ window.App = (() => {
   }
   // One tap to eat: the packed food that heals the most without going over your max (or the smallest).
   function eatBest() {
-    const list = pouchList(), miss = maxHp() - state.hp;
+    const list = pouchList().filter(k => healOf(k) > 0), miss = maxHp() - state.hp;
     if (!list.length || miss <= 0) return null;
     const fit = list.filter(k => healOf(k) <= miss);
     const k = fit.length ? fit[0] : list[list.length - 1];
@@ -569,6 +572,7 @@ window.App = (() => {
     if (screen === 'title' || screen === 'create') Art.setScene('home');
     if (screen === 'journal') { Story.journal(); Art.setScene('craft'); }
     if (screen === 'fair') { Fair.open(); Sound.music('home'); Art.setScene('craft'); }
+    if (screen === 'fairplay') { Fair.startRound(); Art.setScene('craft'); }
     if (screen === 'fortify') Story.flag('fortify');
     if (screen === 'items') { Items.render(); Art.setScene('craft'); }
     if (screen === 'craft') { Craft.render(opts || {}); Sound.music('home'); Art.setScene('craft'); }
@@ -632,7 +636,7 @@ window.App = (() => {
 
   return {
     moveSave, exportSave, importSave, ENEMY_NAME, grantSpecial, addXP, bountyEvent: (id, n) => Bounty.event(id, n), levelPerks, get level() { return level(); }, boot, go, save, newGame, tripDone, get cloudReady() { return cloudReady; }, cloudStatus: () => Cloud.statusText(), choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
-    eatBest, POUCH_MAX, pouch, pouchTotal, pouchPut, pouchTake, pouchEmpty, eatPouch, pouchList, healOf, foodName, pouchLine: () => pouchLine(),
+    fx, eatBest, POUCH_MAX, pouch, pouchTotal, pouchPut, pouchTake, pouchEmpty, eatPouch, pouchList, healOf, foodName, pouchLine: () => pouchLine(),
     addGear, gearCount, equip, unequip, wear, captureWeapon, recoverWeapons, grantShard, grantChart, heal, hurtPlayer, eatFood, eatMeal, foodTotal, spendFood, get maxHp() { return maxHp(); },
     get state() { return state; },
   };

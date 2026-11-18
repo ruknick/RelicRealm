@@ -153,6 +153,16 @@ window.Data = (() => {
     // Kit — passive, permanent
     hatchet: { name: 'Hatchet', icon: '🪚', kit: true, desc: '+1 pine on every wood match.' },
     knife:   { name: 'Skinning knife', icon: '🔪', kit: true, desc: '+1 hide on every hide match.' },
+    // Potions: brewed in the Kitchen cauldron, packed at camp (each takes a backpack slot), drunk from the board tray.
+    sleep1: { name: 'Sleeping draught', icon: '💤', art: 'psleep', potion: 'sleep', power: 2, rank: 1, desc: 'Monsters near you fall asleep: they can\'t strike you for 2 moves.' },
+    sleep2: { name: 'Strong sleeping draught', icon: '💤', art: 'psleep', potion: 'sleep', power: 3, rank: 2, desc: 'Monsters can\'t strike you for 3 moves.' },
+    sleep3: { name: 'Deep sleeping draught', icon: '💤', art: 'psleep', potion: 'sleep', power: 4, rank: 3, desc: 'Monsters can\'t strike you for 4 moves.' },
+    giant1: { name: 'Giant\'s brew', icon: '💪', art: 'pgiant', potion: 'giant', power: 1.5, rank: 1, desc: 'Your next 3 weapon swings hit 50% harder.' },
+    giant2: { name: 'Strong giant\'s brew', icon: '💪', art: 'pgiant', potion: 'giant', power: 2, rank: 2, desc: 'Your next 3 weapon swings hit twice as hard.' },
+    giant3: { name: 'Titan\'s brew', icon: '💪', art: 'pgiant', potion: 'giant', power: 2.5, rank: 3, desc: 'Your next 3 weapon swings hit 2½ times as hard. Made for dragons.' },
+    quick1: { name: 'Quicksilver tonic', icon: '⚡', art: 'pquick', potion: 'quick', power: 5, rank: 1, desc: '+5 ⚡ energy at once.' },
+    quick2: { name: 'Strong quicksilver tonic', icon: '⚡', art: 'pquick', potion: 'quick', power: 10, rank: 2, desc: '+10 ⚡ energy at once.' },
+    quick3: { name: 'Pure quicksilver', icon: '⚡', art: 'pquick', potion: 'quick', power: 99, rank: 3, desc: 'Fills your ⚡ energy to the brim.' },
     horseshoe: { name: 'Golden Horseshoe', icon: '🧲', art: 'horseshoe', kit: true, desc: 'Won at the Harvest Fair. Rare finds turn up 15% more often on every trip.' },
     lamp:    { name: 'Miner\'s lamp', icon: '🏮', kit: true, desc: 'Buried finds glimmer so you can dig them up.' },
     // Specials (one use, tap to arm)
@@ -426,6 +436,16 @@ window.Data = (() => {
     { id: 'feast',   tier: 'food', station: 'workbench', cost: { kingfish: 1, honey: 1, salmon: 1 } },
     { id: 'flask',   tier: 'prep', station: 'workbench', cost: { water: 4, leather: 1 } },
     { id: 'elderward', tier: 'prep', station: 'workbench', cost: { elderwood: 3, water: 2 } },
+    // Potions (Kitchen cauldron). Each comes in three strengths that unlock by level.
+    { id: 'sleep1', tier: 'potion', station: 'kitchen', cost: { mushroom: 2, water: 1 } },
+    { id: 'sleep2', tier: 'potion', station: 'kitchen', cost: { mushroom: 3, honey: 1, water: 1 } },
+    { id: 'sleep3', tier: 'potion', station: 'kitchen', cost: { mushroom: 3, honey: 2, pearl: 1 } },
+    { id: 'quick1', tier: 'potion', station: 'kitchen', cost: { food: 3, silver: 1, water: 1 } },
+    { id: 'quick2', tier: 'potion', station: 'kitchen', cost: { silver: 2, honey: 2, water: 1 } },
+    { id: 'quick3', tier: 'potion', station: 'kitchen', cost: { starsilver: 1, honey: 2, water: 1 } },
+    { id: 'giant1', tier: 'potion', station: 'kitchen', cost: { meat: 2, coal: 1, water: 1 } },
+    { id: 'giant2', tier: 'potion', station: 'kitchen', cost: { meat: 2, ruby: 1, water: 1 } },
+    { id: 'giant3', tier: 'potion', station: 'kitchen', cost: { meat: 3, ruby: 2, water: 1 } },
   ];
 
   // Every recipe has a level. The rule: each era's station opens at the era's first level
@@ -459,6 +479,8 @@ window.Data = (() => {
     starbar: 35, helmet4: 35, elderward: 35, gloves4: 36, sword4: 36, shield4: 37, legs4: 38, bow4: 39, body4: 40,
     // Kitchen: plain food first, the finest feast last
     bread: 1, chowder: 3, roastchicken: 5, honeycake: 9, salmonpie: 12, farmpie: 15, swordsteak: 20, feast: 28,
+    // Kitchen cauldron: potions, three strengths each
+    sleep1: 6, quick1: 9, giant1: 12, sleep2: 16, quick2: 19, giant2: 22, sleep3: 26, quick3: 29, giant3: 32,
   };
   RECIPES.forEach(r => { r.lv = RECIPE_LV[r.id] || 1; if (r.tier === 'food') r.station = 'kitchen'; });
 

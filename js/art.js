@@ -257,6 +257,28 @@ window.Art = (() => {
       <g stroke="#8a6a1a" stroke-width="1.6" fill="none" stroke-linecap="round"><path d="M32 58V20M26 58l2-30M38 58l-2-30"/></g>
       ${[[32, 10], [24, 16], [40, 16]].map(([x, y]) => `<g transform="translate(${x} ${y})">${[0, 5, 10, 15].map(d => `<ellipse cx="-2.6" cy="${d}" rx="2.8" ry="4.2" fill="#e8c050" stroke="#9a7418" stroke-width=".7" transform="rotate(-24 -2.6 ${d})"/><ellipse cx="2.6" cy="${d}" rx="2.8" ry="4.2" fill="#d8a838" stroke="#9a7418" stroke-width=".7" transform="rotate(24 2.6 ${d})"/>`).join('')}<path d="M0 -4v-6" stroke="#c8a040" stroke-width=".8"/></g>`).join('')}
       <path d="M24 44h16" stroke="#7a4a1a" stroke-width="3"/>`;
+  // ---- Harvest Fair tiles: bright and festive ----
+  TILES.candyapple = `<ellipse cx="32" cy="57" rx="15" ry="3" fill="#000" opacity=".3"/><path d="M32 22V6" stroke="#c9a46a" stroke-width="3" stroke-linecap="round"/>
+    <path d="M32 22c-14-6-22 4-20 16s10 18 20 16c10 2 18-4 20-16s-6-22-20-16z" fill="#d6283a" stroke="#2b1b0d" stroke-width="1.6"/>
+    <path d="M14 42q18 8 36 0l-2 6q-16 7-32 0z" fill="#8e1420" opacity=".55"/><path d="M20 30q2-6 8-7" stroke="#fff" stroke-width="2.4" opacity=".7" fill="none" stroke-linecap="round"/>`;
+  TILES.balloon = `<ellipse cx="32" cy="58" rx="9" ry="2.5" fill="#000" opacity=".25"/><path d="M32 44q-3 6 1 10t-1 4" stroke="#2b1b0d" stroke-width="1" fill="none"/>
+    <path d="M32 6c11 0 18 8 18 18 0 11-9 20-18 20S14 35 14 24c0-10 7-18 18-18z" fill="#2f8fd8" stroke="#2b1b0d" stroke-width="1.6"/><path d="M29 44h6l-3 4z" fill="#2f8fd8" stroke="#2b1b0d" stroke-width="1"/>
+    <path d="M22 16q4-5 10-5" stroke="#fff" stroke-width="3" opacity=".7" fill="none" stroke-linecap="round"/>`;
+  TILES.pinwheel = `<path d="M32 32v26" stroke="#8a5a30" stroke-width="3" stroke-linecap="round"/>
+    <path d="M32 32L32 8q14 4 0 24z" fill="#f3d36a" stroke="#2b1b0d" stroke-width="1.3"/><path d="M32 32L56 32q-4 14-24 0z" fill="#e05a8a" stroke="#2b1b0d" stroke-width="1.3"/>
+    <path d="M32 32L32 56q-14-4 0-24z" fill="#4ab36a" stroke="#2b1b0d" stroke-width="1.3"/><path d="M32 32L8 32q4-14 24 0z" fill="#3d7bff" stroke="#2b1b0d" stroke-width="1.3"/>
+    <circle cx="32" cy="32" r="3.5" fill="#fff" stroke="#2b1b0d" stroke-width="1.2"/>`;
+  TILES.popcorn = `<ellipse cx="32" cy="58" rx="14" ry="3" fill="#000" opacity=".3"/><path d="M18 26h28l-4 30H22z" fill="#fff" stroke="#2b1b0d" stroke-width="1.5"/>
+    <path d="M23 26l2 30M30 26l1 30M37 26l-1 30M43 26l-2 30" stroke="#d6283a" stroke-width="3"/>
+    <g fill="#fff6d0" stroke="#2b1b0d" stroke-width="1"><circle cx="21" cy="23" r="5"/><circle cx="29" cy="18" r="5.5"/><circle cx="37" cy="19" r="5"/><circle cx="44" cy="24" r="4.5"/><circle cx="32" cy="25" r="4.5"/></g>
+    <circle cx="28" cy="16" r="1.5" fill="#f3c34a"/><circle cx="38" cy="18" r="1.4" fill="#f3c34a"/>`;
+  TILES.ribbon = `<ellipse cx="32" cy="57" rx="13" ry="3" fill="#000" opacity=".3"/>
+    <path d="M32 30L12 20q-4 10 0 20z" fill="#8e44ad" stroke="#2b1b0d" stroke-width="1.4"/><path d="M32 30l20-10q4 10 0 20z" fill="#8e44ad" stroke="#2b1b0d" stroke-width="1.4"/>
+    <path d="M30 32l-8 22 6-3 3 6 3-24zM34 32l8 22-6-3-3 6-3-24z" fill="#a95fd0" stroke="#2b1b0d" stroke-width="1.2"/>
+    <circle cx="32" cy="30" r="5" fill="#c37ce6" stroke="#2b1b0d" stroke-width="1.4"/><path d="M15 24q4 2 5 8" stroke="#fff" stroke-width="1.6" opacity=".5" fill="none"/>`;
+  TILES.fairtoken = `<ellipse cx="32" cy="57" rx="15" ry="3" fill="#000" opacity=".3"/><circle cx="32" cy="30" r="21" fill="#f3c34a" stroke="#6b4a10" stroke-width="2"/>
+    <circle cx="32" cy="30" r="16" fill="none" stroke="#b8860b" stroke-width="1.4" stroke-dasharray="2 2"/>
+    <path d="M32 17l3.8 8 8.7 1.1-6.4 6 1.7 8.6-7.8-4.3-7.8 4.3 1.7-8.6-6.4-6 8.7-1.1z" fill="#fff6c8" stroke="#6b4a10" stroke-width="1.2"/>`;
   TILES.apple = `<ellipse cx="32" cy="57" rx="17" ry="3" fill="#000" opacity=".3"/>
       <path d="M32 18c-6-6-20-4-20 12 0 14 10 24 20 24s20-10 20-24c0-16-14-18-20-12z" fill="#b8302a" stroke="#5a1410" stroke-width="1.2"/>
       <path d="M20 26c2-6 8-8 12-6" stroke="#ff9a8a" stroke-width="2.4" fill="none" opacity=".6" stroke-linecap="round"/><path d="M40 40c4-4 5-10 4-14" stroke="#7a1a14" stroke-width="2" fill="none" opacity=".5"/>
@@ -533,6 +555,23 @@ window.Art = (() => {
     clam: `<ellipse cx="32" cy="54" rx="22" ry="4" fill="#000" opacity=".3"/><path d="M8 40c2-16 14-24 24-24s22 8 24 24z" fill="url(#lgShell)" stroke="#5e5446" stroke-width="1.2"/>
       <path d="M8 40c6 10 42 10 48 0" fill="#d8cdb8" stroke="#5e5446" stroke-width="1.2"/><path d="M32 18v20M20 22l6 18M44 22l-6 18" stroke="#7a6e5c" stroke-width="1" opacity=".6"/>
       <circle cx="32" cy="40" r="5" fill="url(#rgPearl)" filter="url(#fGlow)"/>`,
+    fairticket: `<ellipse cx="32" cy="57" rx="20" ry="3" fill="#000" opacity=".3"/>
+      <g transform="rotate(-12 32 32)"><path d="M8 20h48v7a5 5 0 000 10v7H8v-7a5 5 0 000-10z" fill="#f3c34a" stroke="#6b4a10" stroke-width="2"/>
+      <path d="M20 20v24" stroke="#6b4a10" stroke-width="1.2" stroke-dasharray="2 2"/><path d="M13 27v10" stroke="#c0392b" stroke-width="2.4"/>
+      <path d="M38 25l2 4.4 4.8.6-3.5 3.3.9 4.7-4.2-2.3-4.2 2.3.9-4.7-3.5-3.3 4.8-.6z" fill="#c0392b"/><path d="M26 40h22" stroke="#6b4a10" stroke-width="1" opacity=".6"/></g>
+      <g class="glow"><path d="M54 8l1.4 3 3 .4-2.2 2 .6 3-2.8-1.5-2.8 1.5.6-3-2.2-2 3-.4z" fill="#fff6c8"/></g>`,
+    psleep: `<ellipse cx="32" cy="58" rx="14" ry="3" fill="#000" opacity=".3"/>
+      <path d="M26 6h12v4h-2v8c10 3 16 11 16 21 0 11-9 18-20 18S12 50 12 39c0-10 6-18 16-21v-8h-2z" fill="#e8f1f4" stroke="#2b1b0d" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M14.5 36h35c.5 1 .5 2 .5 3 0 9.5-8 16-18 16s-18-6.5-18-16c0-1 0-2 .5-3z" fill="#7c6ad8"/><path d="M15 40q17 5 34 0" stroke="#43358f" stroke-width="1.4" fill="none" opacity=".6"/>
+      <path d="M25 4h14v4H25z" fill="#9a6a3a" stroke="#2b1b0d" stroke-width="1.2"/><path d="M19 30q2-6 8-9" stroke="#fff" stroke-width="2.4" opacity=".7" fill="none" stroke-linecap="round"/><text x="34" y="51" font-size="10" text-anchor="middle" fill="#fff" font-family="Georgia" font-weight="700">z</text><text x="41" y="45" font-size="7" text-anchor="middle" fill="#fff" font-family="Georgia">z</text>`,
+    pgiant: `<ellipse cx="32" cy="58" rx="14" ry="3" fill="#000" opacity=".3"/>
+      <path d="M26 6h12v4h-2v8c10 3 16 11 16 21 0 11-9 18-20 18S12 50 12 39c0-10 6-18 16-21v-8h-2z" fill="#e8f1f4" stroke="#2b1b0d" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M14.5 36h35c.5 1 .5 2 .5 3 0 9.5-8 16-18 16s-18-6.5-18-16c0-1 0-2 .5-3z" fill="#d6283a"/><path d="M15 40q17 5 34 0" stroke="#7a1020" stroke-width="1.4" fill="none" opacity=".6"/>
+      <path d="M25 4h14v4H25z" fill="#9a6a3a" stroke="#2b1b0d" stroke-width="1.2"/><path d="M19 30q2-6 8-9" stroke="#fff" stroke-width="2.4" opacity=".7" fill="none" stroke-linecap="round"/><path d="M27 47l3-6h4l-1 3h4l-6 8 1-5h-4z" fill="#f3d36a"/>`,
+    pquick: `<ellipse cx="32" cy="58" rx="14" ry="3" fill="#000" opacity=".3"/>
+      <path d="M26 6h12v4h-2v8c10 3 16 11 16 21 0 11-9 18-20 18S12 50 12 39c0-10 6-18 16-21v-8h-2z" fill="#e8f1f4" stroke="#2b1b0d" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M14.5 36h35c.5 1 .5 2 .5 3 0 9.5-8 16-18 16s-18-6.5-18-16c0-1 0-2 .5-3z" fill="#c9d4dc"/><path d="M15 40q17 5 34 0" stroke="#6e7a86" stroke-width="1.4" fill="none" opacity=".6"/>
+      <path d="M25 4h14v4H25z" fill="#9a6a3a" stroke="#2b1b0d" stroke-width="1.2"/><path d="M19 30q2-6 8-9" stroke="#fff" stroke-width="2.4" opacity=".7" fill="none" stroke-linecap="round"/><path d="M33 40l-5 8h4l-2 7 7-9h-4l2-6z" fill="#f3d36a" stroke="#6b4a10" stroke-width=".6"/><circle cx="24" cy="44" r="1.4" fill="#fff"/><circle cx="41" cy="48" r="1.2" fill="#fff"/>`,
     fairtent: `<ellipse cx="32" cy="57" rx="22" ry="3" fill="#000" opacity=".3"/>
       <path d="M32 6v8" stroke="#2b1b0d" stroke-width="1.6"/><path d="M32 6l10 3-10 3z" fill="#c0392b" stroke="#2b1b0d" stroke-width=".9"/>
       <path d="M32 14L8 34h48z" fill="#f3e2b8" stroke="#2b1b0d" stroke-width="1.6" stroke-linejoin="round"/>

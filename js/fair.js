@@ -64,7 +64,9 @@ window.Fair = (() => {
   };
 
   // ---------- tickets ----------
-  const fair = () => (st().fair ||= { tickets: 0, spins: 0, sinceShoe: 0, lastDay: '', welcomed: false, rot: 0 });
+  // tickets = golden fair tickets (found on gathering boards; one plays a fairground round)
+  // wheel = Prize Wheel spins (won on the fairground board, plus one free each day)
+  const fair = () => { const f = (st().fair ||= { tickets: 0, wheel: 0, spun: 0, sinceShoe: 0, lastDay: '', welcomed: false, rot: 0 }); f.wheel ??= 0; f.spun ??= 0; return f; };
   const flairState = () => (st().flair ||= { owned: {}, worn: {} });
   function earn(n) { fair().tickets += n; App.save(); return n; }
   const today = () => new Date().toDateString();
@@ -99,7 +101,7 @@ window.Fair = (() => {
 
   function rollPrize() {
     const f = fair(), inv = st().inventory;
-    f.spins++; f.sinceShoe++;
+    f.spun++; f.sinceShoe++;
     if (!inv.horseshoe && (Math.random() < SHOE_ODDS || f.sinceShoe >= SHOE_PITY)) return 'shoe';
     if (inv.horseshoe && Math.random() < SHOE_ODDS) return 'jackpot';
     const W = [['flair', 40], ['meal', 25], ['gold', 20], ['ticket', 15]];
@@ -111,9 +113,9 @@ window.Fair = (() => {
   function give(prize) {
     const S = st(), L = App.level;
     if (prize === 'shoe') { S.inventory.horseshoe = 1; fair().sinceShoe = 0; return { big: true, text: '<b>The Golden Horseshoe!</b> Rare finds turn up 15% more often on every trip, forever.' }; }
-    if (prize === 'jackpot') { S.stockpile.gold += 40; fair().tickets += 3; return { big: true, text: '<b>Jackpot!</b> 40 gold and 3 tickets.' }; }
+    if (prize === 'jackpot') { S.stockpile.gold += 40; fair().tickets += 2; return { big: true, text: '<b>Jackpot!</b> 40 gold and 2 golden tickets.' }; }
     if (prize === 'gold') { const n = 8 + Math.floor(Math.random() * 8) + Math.floor(L / 2); S.stockpile.gold += n; return { text: `${n} gold for your bank.` }; }
-    if (prize === 'ticket') { fair().tickets += 2; return { text: '2 tickets back — spin again!' }; }
+    if (prize === 'ticket') { fair().tickets += 1; return { text: 'A golden ticket — another round on the fairground!' }; }
     if (prize === 'meal') {
       const ok = ['feast', 'swordsteak', 'farmpie', 'salmonpie', 'honeycake', 'roastchicken', 'chowder', 'bread'].filter(k => Data.RECIPES.find(r => r.id === k).lv <= L);
       const k = ok[Math.floor(Math.random() * Math.min(3, ok.length))];
@@ -122,7 +124,7 @@ window.Fair = (() => {
     }
     // flair: something you don't have yet (rare pieces come up half as often)
     const left = Object.keys(FLAIR).filter(k => !flairState().owned[k]);
-    if (!left.length) { fair().tickets += 2; return { text: 'A costume you already own — traded back for 2 tickets.' }; }
+    if (!left.length) { fair().wheel += 2; return { text: 'A costume you already own — traded for 2 more spins.' }; }
     const pool = left.flatMap(k => (FLAIR[k].rare ? [k] : [k, k]));
     const k = pool[Math.floor(Math.random() * pool.length)];
     flairState().owned[k] = true;
@@ -132,9 +134,9 @@ window.Fair = (() => {
   let spinning = false, lastWin = null;
   async function spin() {
     const f = fair();
-    if (spinning || f.tickets < 1) return;
+    if (spinning || f.wheel < 1) return;
     spinning = true;
-    f.tickets--;
+    f.wheel--;
     const prize = rollPrize();
     const sliceKind = prize === 'shoe' || prize === 'jackpot' ? 'star' : prize;
     const options = SLICES.map((k, i) => [k, i]).filter(([k]) => k === sliceKind).map(([, i]) => i);
@@ -197,8 +199,8 @@ window.Fair = (() => {
   function open() {
     const f = fair();
     welcomeNote = '';
-    if (!f.welcomed) { f.welcomed = true; f.lastDay = today(); f.tickets += 3; welcomeNote = '🎟 Welcome to the fair! Here are <b>3 tickets</b> to start you off.'; }
-    else if (f.lastDay !== today()) { f.lastDay = today(); f.tickets += 1; welcomeNote = '🎟 Your free ticket for today!'; }
+    if (!f.welcomed) { f.welcomed = true; f.lastDay = today(); f.tickets += 1; f.wheel += 2; welcomeNote = 'Welcome to the fair! Here\'s a <b>golden ticket</b> for the fairground and <b>2 spins</b> to start you off.'; }
+    else if (f.lastDay !== today()) { f.lastDay = today(); f.wheel += 1; welcomeNote = '🎡 Your free spin for today!'; }
     App.save();
     lastWin = null;
     render();
@@ -215,15 +217,22 @@ window.Fair = (() => {
     const shoe = inv.horseshoe
       ? `<div class="shoe-card owned"><span class="shoe-pic">${Art.piece('horseshoe')}</span><div><b>Golden Horseshoe</b> <span class="rare-tag">owned</span><br><small>Rare finds turn up 15% more often on every trip.</small></div></div>`
       : `<div class="shoe-card"><span class="shoe-pic">${Art.piece('horseshoe')}</span><div><b>Golden Horseshoe</b> <span class="rare-tag">very rare</span><br><small>Rare finds turn up 15% more often, forever. About 1 spin in 100 lands on the golden slice — and it's guaranteed by spin ${SHOE_PITY} (${f.sinceShoe}/${SHOE_PITY}).</small></div></div>`;
-    document.getElementById('fair-tickets').innerHTML = `🎟 <b>${f.tickets}</b>`;
+    document.getElementById('fair-tickets').innerHTML = `<span class="tk-ico">${Art.piece('fairticket')}</span><b>${f.tickets}</b>`;
     document.getElementById('fair-body').innerHTML = `
       ${welcomeNote ? `<p class="fair-note">${welcomeNote}</p>` : ''}
+      <div class="fair-panel play-panel">
+        <h3>🎪 The Fairground</h3>
+        <div class="play-row"><span class="play-pic">${Art.tile('candyapple')}${Art.tile('balloon')}${Art.tile('fairtoken')}</span>
+          <p>A quick, bright round: <b>15 moves</b>, no monsters. Match <b>gold star tokens</b> — every 3 wins a spin of the wheel. Matches of 5 and long chain reactions add a star too.</p></div>
+        <button class="big" id="play-btn" ${f.tickets >= 1 ? '' : 'disabled'}>${f.tickets >= 1 ? `Play a round (1 golden ticket · you have ${f.tickets})` : 'No golden tickets'}</button>
+        <p class="hint">Golden tickets turn up on gathering boards in every land — match next to one to grab it.</p>
+      </div>
       <div class="fair-panel wheel-panel">
-        <h3>🎡 The Prize Wheel</h3>
+        <h3>🎡 The Prize Wheel <small>${f.wheel} spin${f.wheel === 1 ? '' : 's'}</small></h3>
         ${wheelSvg()}
         <div class="wheel-result">${lastWin ? `<p class="${lastWin.big ? 'reward' : ''}">${lastWin.text}</p>` : '<p class="hint">Flair, gold, pies, more tickets… or the golden slice.</p>'}</div>
-        <button class="big" id="spin-btn" ${f.tickets >= 1 ? '' : 'disabled'}>${f.tickets >= 1 ? 'Spin! (1 ticket)' : 'No tickets'}</button>
-        <p class="hint">Earn tickets: <b>1</b> for every ★★★ trip · <b>1</b> per bounty claimed · <b>1</b> free each day you visit.</p>
+        <button class="big" id="spin-btn" ${f.wheel >= 1 ? '' : 'disabled'}>${f.wheel >= 1 ? `Spin! (${f.wheel} left)` : 'No spins — play the fairground'}</button>
+        <p class="hint">Spins come from the fairground board, plus <b>1 free</b> each day you visit.</p>
         ${shoe}
       </div>
       <div class="fair-panel">
@@ -239,8 +248,79 @@ window.Fair = (() => {
         <p class="story-text">“${fortune()}”</p><p class="hint">A new fortune each day.</p>
       </div>`;
     document.getElementById('spin-btn').onclick = spin;
+    document.getElementById('play-btn').onclick = () => { if (fair().tickets < 1) return; fair().tickets--; App.save(); App.go('fairplay'); };
     document.querySelectorAll('[data-wear]').forEach(b => { b.onclick = () => wear(b.dataset.wear); });
   }
 
-  return { FLAIR, layer, earn, open, render, get tickets() { return fair().tickets; } };
+  // ---------- the fairground board: a short, bright bonus round ----------
+  const ROUND_MOVES = 15, TOKENS_PER_SPIN = 3;
+  const TYPES = ['candyapple', 'balloon', 'pinwheel', 'popcorn', 'ribbon'];
+  let board = null, round = null;
+  const randType = () => (Math.random() < 0.11 ? 'fairtoken' : TYPES[Math.floor(Math.random() * TYPES.length)]);
+  function addTokens(n, cell) {
+    round.tokens += n;
+    board.float(cell || [3, 3], `+${n} ★`, 'bonus');
+    while (round.tokens >= TOKENS_PER_SPIN) {
+      round.tokens -= TOKENS_PER_SPIN;
+      round.spins++;
+      setTimeout(() => { board.toast(`🎡 +1 spin! (${round.spins} this round)`, 'win', 1200); Sound.sfx('coin'); }, 250);
+    }
+    hudRound();
+  }
+  const hooks = {
+    canPlay: () => !!round && !round.ended && round.moves > 0,
+    onMove: () => { round.moves--; hudRound(); },
+    onMatch(runs, step) {
+      runs.forEach(ri => {
+        let n = 0;
+        if (ri.type === 'fairtoken') n += ri.cells.length;
+        if (ri.cells.length >= 5) n += 1;
+        if (n) addTokens(n, ri.cells[Math.floor(ri.cells.length / 2)]);
+      });
+      if (step === 3) addTokens(1, null);   // a long chain reaction earns a bonus star
+    },
+    onPieceHit() {}, onPieceTap() {}, onArm() {}, onFind() {},
+    async afterAction() {
+      hudRound();
+      if (round.moves <= 0 && !round.ended) { await board.wait(700); endRound(); }
+    },
+  };
+  function hudRound() {
+    if (!round) return;
+    document.getElementById('fp-moves').textContent = round.moves;
+    document.getElementById('fp-spins').textContent = round.spins;
+    document.getElementById('fp-meter').innerHTML = Array.from({ length: TOKENS_PER_SPIN }, (_, i) => `<i class="${i < round.tokens ? 'on' : ''}"></i>`).join('');
+  }
+  function startRound() {
+    if (!board) {
+      board = new Board({ rows: 7, cols: 7, wrap: document.getElementById('fairplay-wrap'), randType, hooks });
+      document.getElementById('fp-exit').onclick = () => { if (round && !round.ended && !board.busy) endRound(); };
+    }
+    round = { moves: ROUND_MOVES, tokens: 0, spins: 0, ended: false };
+    board.reset();
+    board.setFrame('fair');
+    board.fillEmpty();
+    board.render();
+    board.scheduleHint();
+    hudRound();
+    Sound.music('home');
+    board.toast('🎪 Match the gold ★ tokens — 3 stars win a spin!', '', 2600);
+  }
+  async function endRound() {
+    if (!round || round.ended) return;
+    round.ended = true;
+    board.stop();
+    const won = Math.max(1, round.spins);   // a ticket always wins at least one spin
+    fair().wheel += won;
+    App.save();
+    Sound.sfx('victory');
+    await App.choose({
+      title: '🎪 Round over!',
+      html: `<div class="fp-won">${Art.tile('fairtoken')}</div><p>You won <b>${won} spin${won > 1 ? 's' : ''}</b> of the Prize Wheel${round.spins ? '' : ' (the fair never sends anyone home empty-handed)'}.</p>`,
+      buttons: [{ id: 'wheel', label: '🎡 To the wheel!' }],
+    });
+    App.go('fair');
+  }
+
+  return { FLAIR, layer, earn, open, render, startRound, get tickets() { return fair().tickets; }, get board() { return board; }, get round() { return round; } };
 })();

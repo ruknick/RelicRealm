@@ -180,7 +180,7 @@ window.Boss = (() => {
     let total = 0;
     for (const m of board.piecesOf('minion').slice(0, 3)) {
       const hit = App.hurtPlayer(m.weapon || 1);
-      board.float([m.r, m.c], hit.dmg ? `⚔️ −${hit.dmg} ❤️` : '🛡️ blocked', hit.dmg ? 'loss' : 'gain');
+      board.float([m.r, m.c], hit.asleep ? '💤' : hit.dmg ? `⚔️ −${hit.dmg} ❤️` : '🛡️ blocked', hit.dmg ? 'loss' : 'gain');
       total += hit.dmg;
     }
     if (total) { msg += ` · ${cfg.minion.name}s hit you for ${total}`; ouch(); }

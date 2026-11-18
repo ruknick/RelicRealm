@@ -81,7 +81,8 @@ window.Board = (() => {
       this.pieces = [];
       this.buried = new Map();
       this.showBuried = false;
-      this.energy = Data.startEnergy(window.App?.level || 1, window.App?.state?.equip?.gloves);   // ⚡ built by matching, spent on tap-swings (gloves add more)
+      this.energy = Data.startEnergy(window.App?.level || 1, window.App?.state?.equip?.gloves);
+      if (window.App?.fx) { App.fx.sleep = 0; App.fx.giant = null; }   // ⚡ built by matching, spent on tap-swings (gloves add more)
       this.grid = Array.from({ length: this.rows }, () => Array(this.cols).fill(null));
     }
 
@@ -413,7 +414,7 @@ window.Board = (() => {
           <span class="en-bolt">⚡</span><b class="en-num">${this.energy}</b><span class="en-bar"><i style="height:${this.energy / energyMax() * 100}%"></i></span></div>
         <div class="health${hp <= mx * 0.3 ? ' low' : ''}" title="Your health: monsters wear it down, food heals it"><span class="hp-ico">❤️</span><b class="hp-num">${hp}</b><span class="hp-bar"><i style="height:${hp / mx * 100}%"></i></span></div>
         <button class="gearbtn">${mini('weapon', '⚔️')}${mini('tool', '🛠️')}<span class="gb-label">🧍 Gear</span></button>
-        <div class="specials"><button class="spec eat${food ? '' : ' none'}" title="Eat: the packed food that best fits your missing health">🍖<b>${food}</b></button>${specials}</div></div>`;
+        <div class="specials"><span class="fx-chips"></span>${App.pouchList().filter(k => Data.ITEMS[k]?.potion).map(k => `<button class="spec potion" data-potion="${k}" title="${Data.ITEMS[k].name}: ${Data.ITEMS[k].desc}">${Art.piece(Data.ITEMS[k].art)}<b>${App.pouch()[k]}</b><i class="rank">${'I'.repeat(Data.ITEMS[k].rank)}</i></button>`).join('')}<button class="spec eat${food ? '' : ' none'}" title="Eat: the packed food that best fits your missing health">🍖<b>${food}</b></button>${specials}</div></div>`;
       this.tray.querySelector('.spec.eat').onclick = () => {
         if (this.busy) return;
         const r = App.eatBest();
@@ -426,7 +427,37 @@ window.Board = (() => {
         if (this.busy) return;
         Hero.open({ away: true, onClose: () => { this.renderWeapons(); this.hooks.onArm?.(); } });
       };
-      this.tray.querySelectorAll('.spec:not(.eat)').forEach(b => { b.onclick = () => this.arm(b.dataset.w); });
+      this.tray.querySelectorAll('.spec:not(.eat):not(.potion)').forEach(b => { b.onclick = () => this.arm(b.dataset.w); });
+      this.tray.querySelectorAll('.spec.potion').forEach(b => { b.onclick = () => this.drink(b.dataset.potion); });
+      this.renderFx();
+    }
+
+    // ---------- potions ----------
+    drink(k) {
+      if (this.busy || !this.hooks.canPlay() || !(App.pouch()[k] > 0)) return;
+      const P = Data.ITEMS[k];
+      if (P.potion === 'quick' && this.energy >= energyMax()) { this.toast('⚡ Your energy is already full.', '', 1600); return; }
+      App.pouch()[k]--;
+      if (!App.pouch()[k]) delete App.pouch()[k];
+      App.save();
+      if (P.potion === 'sleep') { App.fx.sleep = Math.max(App.fx.sleep, P.power); this.toast(`💤 A sleepy mist spreads — monsters can't strike you for ${P.power} moves!`, 'win', 2200); }
+      if (P.potion === 'giant') { App.fx.giant = { swings: 3, mult: P.power }; this.toast(`💪 Giant's strength! Your next 3 swings hit ×${P.power}.`, 'win', 2200); }
+      if (P.potion === 'quick') { const before = this.energy; this.gainEnergy(P.power); this.toast(`⚡ Quicksilver! +${this.energy - before} energy.`, 'win', 1800); }
+      this.float(this.centerCell(), P.potion === 'sleep' ? '💤' : P.potion === 'giant' ? '💪' : '⚡', 'bonus');
+      window.Sound?.sfx('rare');
+      this.renderWeapons();
+      this.hooks.onAte?.();
+    }
+    // Active potion effects, shown as little chips in the tray.
+    renderFx() {
+      const el = this.tray && this.tray.querySelector('.fx-chips');
+      if (!el || !window.App?.fx) return;
+      el.innerHTML = (App.fx.sleep > 0 ? `<span class="fx-chip sleep" title="Monsters asleep">💤${App.fx.sleep}</span>` : '')
+        + (App.fx.giant ? `<span class="fx-chip giant" title="Giant's strength: swings left">💪${App.fx.giant.swings}</span>` : '');
+    }
+    tickFx() {
+      if (window.App?.fx?.sleep > 0) { App.fx.sleep--; if (!App.fx.sleep) this.toast('The monsters are waking up…', '', 1400); }
+      this.renderFx();
     }
 
     // The food pouch: pick exactly what to eat.
@@ -559,6 +590,12 @@ window.Board = (() => {
           }
         });
         if (targets.length > 1) this.toast('🔱 The spear runs them through!', 'win');
+      }
+      if (slot === 'weapon' && App.fx?.giant?.swings > 0) {
+        const G2 = App.fx.giant;
+        targets = targets.map(([t, d]) => [t, Math.round(d * G2.mult)]);
+        if (--G2.swings <= 0) App.fx.giant = null;
+        this.float([p.r, p.c], '💪', 'bonus');
       }
       const el = this.pieceEls.get(p.id);
       if (el) { el.classList.remove('struck'); void el.offsetWidth; el.classList.add('struck'); }
@@ -855,6 +892,7 @@ window.Board = (() => {
       await this.resolve([a, b]);
       await this.ensurePlayable();
       await this.hooks.afterAction(true);
+      this.tickFx();
       this.busy = false;
       this.scheduleHint();
     }
