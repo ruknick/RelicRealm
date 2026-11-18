@@ -6,7 +6,7 @@ window.Boss = (() => {
   // Each boss: who it is, what the board looks like, and the cycle of things it does on its turn.
   const CONFIG = {
     warchief: {
-      name: 'Grak the Goblin Warchief', short: 'Grak', place: 'Warchief\'s Clearing', icon: '👺', foodCost: 3,
+      name: 'Grak the Goblin Warchief', short: 'Grak', place: 'Warchief\'s Clearing', icon: `<span class="ico">${Art.piece('goblin')}</span>`, foodCost: 3,
       unlock: { land: 'forest', lv: 6 }, frame: 'forest', scene: 'goblin', music: 'battle',
       types: ['wood', 'stone', 'hide', 'berries', 'leaves'], loot: { wood: 'wood', hide: 'hide', berries: 'food' },
       boss: { hp: 90, armor: 1, weapon: 1, art: 'warchief', h: 2, scale: 1.6 },
@@ -177,13 +177,8 @@ window.Boss = (() => {
     let msg = ACTIONS[act]();
     if (act === 'warcry' || act === 'crabs' || act === 'whelp' || act === 'cave') Sound.sfx('drums');
     // Its minions strike too (at most three reach you).
-    let total = 0;
-    for (const m of board.piecesOf('minion').slice(0, 3)) {
-      const hit = App.hurtPlayer(m.weapon || 1);
-      board.float([m.r, m.c], hit.asleep ? '💤' : hit.dmg ? `⚔️ −${hit.dmg} ❤️` : '🛡️ blocked', hit.dmg ? 'loss' : 'gain');
-      total += hit.dmg;
-    }
-    if (total) { msg += ` · ${cfg.minion.name}s hit you for ${total}`; ouch(); }
+    const total = minionsStrike();
+    if (total) msg += ` · ${cfg.minion.name}s hit you for ${total}`;
     board.renderHealth(true);
     board.render();
     run.hint = msg;
@@ -191,6 +186,18 @@ window.Boss = (() => {
     hud();
     await board.wait(900);
     await board.ensurePlayable();
+  }
+  // Every minion on the board swings at you (at most three reach you at once). Returns damage dealt.
+  function minionsStrike() {
+    let total = 0;
+    for (const m of board.piecesOf('minion').slice(0, 3)) {
+      const hit = App.hurtPlayer(m.weapon || 1);
+      board.float([m.r, m.c], hit.asleep ? '💤' : hit.dmg ? `⚔️ −${hit.dmg} ❤️` : '🛡️ blocked', hit.dmg ? 'loss' : 'gain');
+      total += hit.dmg;
+    }
+    if (total) ouch();
+    board.renderHealth(true);
+    return total;
   }
   function ouch() {
     const wrap = document.getElementById('boss-wrap');
@@ -227,6 +234,12 @@ window.Boss = (() => {
       if (run.won) { await board.wait(900); finish('win'); return; }
       if (run.ended) return;
       if (!wasMove) { run.moves++; run.since++; }
+      // Between the boss's turns, its band gets a swing of its own.
+      if ((cfg.lift || cfg.arm) && run.since === run.every - 1 && board.piecesOf('minion').length) {
+        const t = minionsStrike();
+        if (t) board.toast(`⚔️ The ${cfg.minion.name}s hit you for ${t}!`, 'alert', 1600);
+        if (st().hp <= 0) { await board.wait(600); finish('lost'); return; }
+      }
       if (run.since >= run.every) {
         run.since = 0;
         await bossTurn();
@@ -259,11 +272,11 @@ window.Boss = (() => {
     const base = CONFIG[kind], S = st(), wins = ((S.bossWins || {})[kind]) || 0;
     const wTier = S.equip.weapon ? Data.ITEMS[S.equip.weapon.id].tier : 1;
     const worn = ['helmet', 'body', 'legs', 'shield'].map(k => (S.equip[k] ? Data.ITEMS[S.equip[k].id].tier : 0));
-    const aTier = Math.floor(worn.reduce((a, b) => a + b, 0) / worn.length);
+    const aTier = Math.ceil(worn.reduce((a, b) => a + b, 0) / worn.length);
     const lift = kind === 'dragon' ? 0 : Math.max(0, Math.min(4, wTier) - base.boss.armor);       // hide & health
     const arm = kind === 'dragon' ? 0 : Math.max(0, Math.min(4, aTier) - base.boss.weapon);      // their weapons
     const re = 1 + 0.1 * Math.min(wins, 5);
-    const c = { ...base, lift,
+    const c = { ...base, lift, arm,
       boss: { ...base.boss, armor: base.boss.armor + lift, weapon: base.boss.weapon + arm, hp: Math.round(base.boss.hp * (1 + 0.35 * lift) * re) },
       minion: { ...base.minion, armor: base.minion.armor + lift, weapon: base.minion.weapon + arm, hp: Math.round(base.minion.hp * (1 + 0.4 * lift)) } };
     const mult = 1 + 0.5 * Math.max(lift, arm);
@@ -273,6 +286,7 @@ window.Boss = (() => {
     const bits = [];
     if (lift) bits.push(`${ERA_GEAR[base.boss.armor + lift]}-hard hide to match your weapon`);
     if (arm) bits.push(`${ERA_GEAR[base.boss.weapon + arm]} blades to match your armor`);
+    if (lift || arm) c.prep = base.prep.split('<br>')[0];   // drop the "only wood-tough" line once they've armed up
     c.gearNote = bits.length ? `${base.short}'s band has looted ${bits.join(' and ')} — a real fight, with richer loot.` : '';
     return c;
   }
@@ -309,7 +323,7 @@ window.Boss = (() => {
   function start({ kind = 'dragon' } = {}) {
     cfg = scaled(kind);
     document.getElementById('screen-boss').dataset.boss = kind;
-    document.getElementById('boss-name').textContent = `${cfg.icon} ${cfg.name}`;
+    document.getElementById('boss-name').innerHTML = `${cfg.icon} ${cfg.name}`;
     board.reset();
     board.setFrame(cfg.frame);
     Art.setScene(cfg.scene);

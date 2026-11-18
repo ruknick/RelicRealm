@@ -443,7 +443,7 @@ window.App = (() => {
   // ---------- popup ----------
   function choose({ title, html, buttons }) {
     const m = document.getElementById('modal');
-    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-title').innerHTML = title;
     document.getElementById('modal-body').innerHTML = html;
     const box = document.getElementById('modal-btns');
     box.innerHTML = buttons.map(b =>

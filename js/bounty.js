@@ -6,7 +6,7 @@ window.Bounty = (() => {
 
   // Every kind of job the board can post, and when it makes sense to post it.
   const JOBS = [
-    { id: 'kill:forest', icon: '👺', need: [4, 8], text: n => `Slay ${n} goblin raiders in the Forest` },
+    { id: 'kill:forest', icon: `<span class="ico">${Art.piece('goblin')}</span>`, need: [4, 8], text: n => `Slay ${n} goblin raiders in the Forest` },
     { id: 'kill:mine', icon: '👹', need: [4, 7], text: n => `Slay ${n} cave goblins in the Iron Hills` },
     { id: 'kill:farm', icon: '🐔', need: [3, 6], text: n => `Catch ${n} chickens in the Golden Fields` },
     { id: 'trip:farm', icon: '🌾', need: [2, 3], text: n => `Gather in the Golden Fields ${n} times` },
@@ -19,7 +19,7 @@ window.Bounty = (() => {
     { id: 'smelt:steel', icon: '🔩', need: [2, 4], text: n => `Forge ${n} steel bars`, ok: () => st().stations.dforge },
     { id: 'raid:goblin', icon: '🔥', need: [1, 1], text: () => 'Win a raid on a goblin village', ok: () => marked('goblin') },
     { id: 'raid:dwarf', icon: '⚒️', need: [1, 1], text: () => 'Win a raid on a dwarf stronghold', ok: () => marked('dwarf') },
-    { id: 'boss:warchief', icon: '👺', need: [1, 1], text: () => 'Defeat Grak the Goblin Warchief', ok: () => Boss.unlocked('warchief') },
+    { id: 'boss:warchief', icon: `<span class="ico">${Art.piece('goblin')}</span>`, need: [1, 1], text: () => 'Defeat Grak the Goblin Warchief', ok: () => Boss.unlocked('warchief') },
     { id: 'boss:golem', icon: '🗿', need: [1, 1], text: () => 'Defeat the Stone Golem', ok: () => Boss.unlocked('golem') },
     { id: 'boss:siren', icon: '🧜‍♀️', need: [1, 1], text: () => 'Defeat the Siren Queen', ok: () => Boss.unlocked('siren') },
   ];

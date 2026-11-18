@@ -332,7 +332,7 @@ window.Board = (() => {
     }
 
     toast(msg, kind = '', ms = 1900) {
-      this.toastEl.textContent = msg;
+      this.toastEl.innerHTML = msg;
       this.toastEl.className = 'toast show ' + kind;
       clearTimeout(this.toastTimer);
       this.toastTimer = setTimeout(() => this.toastEl.classList.remove('show'), ms);

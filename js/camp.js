@@ -276,7 +276,7 @@ window.Camp = (() => {
   }
   function drawSiege(a, msg) {
     const reach = a.march > 0 ? new Set() : reachable(a);
-    const icon = a.enemy === 'dwarf' ? '🧔' : '👺';
+    const icon = a.enemy === 'dwarf' ? '🧔' : Art.piece('goblin');
     let cells = '';
     for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
       let cls = 'sc' + (r >= BASE_ROWS ? ' approach' : ''), content = '', hp = '';

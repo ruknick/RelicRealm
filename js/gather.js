@@ -44,7 +44,7 @@ window.Gather = (() => {
       growMsg: { thorn: '🌿 A thornbush sprouts up!', stump: '🌳 A tree falls — a new stump!' },
       event: { piece: 'thief', msg: '🏃 A goblin thief grabbed a sack and is running! Catch it →', loot: ['wood', 'stone', 'hide', 'food'] },
       discover: { piece: 'tracks', enemy: 'goblin', spot: '🐾 Fresh goblin tracks! Match next to them to follow.' },
-      monster: { name: 'goblin raider', art: 'goblin', icon: '👺' },
+      monster: { name: 'goblin raider', art: 'goblin', icon: `<span class="ico">${Art.piece('goblin')}</span>` },
       finds: 'forest',
       hint: 'Match 3+ to gather. Wield a wood-axe for stumps & thornbushes. Oak & rarer woods sparkle among the logs.',
     },
