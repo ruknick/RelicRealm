@@ -208,15 +208,21 @@ window.Craft = (() => {
     stage.querySelectorAll('.spark').forEach(e => e.remove());
     forge.querySelectorAll('.fly-chip').forEach(e => e.remove());
     forge.classList.remove('hidden', 'done');
-    forge.classList.toggle('hot', tier >= 2);
+    // The Kitchen bakes and brews; the Workshop hammers.
+    const mode = r.tier === 'food' ? 'cook' : r.tier === 'potion' ? 'brew' : '';
+    forge.classList.toggle('hot', tier >= 2 && !mode);
+    forge.classList.toggle('cook', mode === 'cook');
+    forge.classList.toggle('brew', mode === 'brew');
+    const pot = forge.querySelector(mode === 'brew' ? '.cauldron' : '.oven');
+    if (!mode) anvil.innerHTML = Art.stationArt(tier >= 4 ? 'staranvil' : tier >= 3 ? 'dforge' : 'forge');
     const cardEl = document.querySelector(`.recipe[data-id="${id}"]`);
     void forge.offsetWidth;
     forge.classList.add('show');
     Sound.sfx('whoosh');
 
     // 1) Materials fly onto the anvil (from the stockpile bar, or from the recipe card).
-    const target = anvil.getBoundingClientRect();
-    const tx = target.left + target.width / 2, ty = target.top + 6;
+    const target = (mode ? pot : anvil).getBoundingClientRect();
+    const tx = target.left + target.width / 2, ty = target.top + (mode === 'cook' ? target.height * 0.62 : mode === 'brew' ? target.height * 0.3 : target.height * 0.36);
     const chips = [];
     let i = 0;
     for (const [k, n0] of Object.entries(r.cost)) {
@@ -244,8 +250,18 @@ window.Craft = (() => {
     App.save();
     await sleep(60 * i + 450);
 
+    // 2) Into the oven / the cauldron: it puffs and bubbles a few times.
+    if (mode) {
+      for (let s = 0; s < 3; s++) {
+        pot.classList.remove('puff'); void pot.getBoundingClientRect(); pot.classList.add('puff');
+        Sound.sfx(mode === 'cook' ? 'whoosh' : 'reveal');
+        steam(stage, pot, mode);
+        chips.forEach(c => { c.style.opacity = String(Math.max(0, 0.7 - s * 0.3)); });
+        await sleep(420);
+      }
+    }
     // 2) Hammer strikes — more for better metal.
-    const strikes = 2 + tier;
+    const strikes = mode ? 0 : 2 + tier;
     for (let s = 0; s < strikes; s++) {
       hammer.classList.remove('strike'); void hammer.offsetWidth; hammer.classList.add('strike');
       await sleep(210);
@@ -300,6 +316,21 @@ window.Craft = (() => {
     const S = Data.STATIONS[id];
     App.choose({ title: `${S.name} built!`, html: `<div class="st-big">${Art.stationArt(id)}</div><p>${id === 'dforge' ? 'Thrain Ironbeard shows you how the dwarves fold iron and charcoal into steel. "Don\'t waste it, surface-dweller."' : S.desc}</p>`, buttons: [{ id: 'ok', label: 'To work' }] })
       .then(() => render());
+  }
+
+  // Puffs of steam from the oven, or bubbles popping off the cauldron.
+  function steam(stage, pot, mode) {
+    const a = pot.getBoundingClientRect(), s = stage.getBoundingClientRect();
+    for (let n = 0; n < 6; n++) {
+      const sp = document.createElement('div');
+      sp.className = mode === 'brew' ? 'bubble' : 'steam';
+      sp.style.left = (a.left - s.left + a.width * (mode === 'brew' ? 0.3 + Math.random() * 0.4 : 0.7 + Math.random() * 0.12)) + 'px';
+      sp.style.top = (a.top - s.top + (mode === 'brew' ? a.height * 0.3 : a.height * 0.08)) + 'px';
+      sp.style.setProperty('--dx', (Math.random() * 30 - 15) + 'px');
+      sp.style.animationDelay = (n * 0.06) + 's';
+      stage.appendChild(sp);
+      setTimeout(() => sp.remove(), 1200);
+    }
   }
 
   function sparks(stage, anvil, count) {

@@ -1524,3 +1524,31 @@ body[data-scene="farm"] #gather-hint { color: #3a2a10; font-weight: 600; }
 .ico svg { width: 100%; height: 100%; display: block; }
 .mk.boss .ico { width: 1.1em; height: 1.1em; }
 .raider svg { width: 100%; height: 100%; }
+
+/* ---------- Kitchen animations: a bread oven for meals, a cauldron for potions ---------- */
+.cookware { position: absolute; left: 50%; bottom: 40px; width: 220px; transform: translateX(-50%); display: none; }
+.cookware svg { width: 100%; height: auto; display: none; filter: drop-shadow(0 6px 10px rgba(0,0,0,.5)); }
+.forge.cook .cookware, .forge.brew .cookware { display: block; }
+.forge.cook .oven, .forge.brew .cauldron { display: block; }
+.forge.cook .anvil, .forge.cook .hammer, .forge.brew .anvil, .forge.brew .hammer { display: none; }
+.forge.cook { background: radial-gradient(circle at 50% 60%, rgba(150,80,30,.93), rgba(20,10,5,.96) 70%); }
+.forge.brew { background: radial-gradient(circle at 50% 60%, rgba(40,110,70,.9), rgba(8,14,10,.96) 70%); }
+.oven-flames, .pot-flames { animation: flicker .35s ease-in-out infinite alternate; transform-origin: 50% 100%; transform-box: fill-box; }
+@keyframes flicker { from { transform: scaleY(.88); opacity: .85; } to { transform: scaleY(1.08); opacity: 1; } }
+.oven.puff .oven-glow { animation: ovenGlow .42s ease-out; }
+@keyframes ovenGlow { 40% { filter: brightness(1.6); } }
+.cauldron.puff .brew { animation: brewSurge .42s ease-out; }
+@keyframes brewSurge { 40% { transform: translateY(-2px); fill: #8ef0a8; } }
+.cauldron .brew, .cauldron .brew-bubbles { transform-box: fill-box; }
+.brew-bubbles { animation: bubbleBob .8s ease-in-out infinite alternate; }
+@keyframes bubbleBob { to { transform: translateY(-3px); } }
+.steam, .bubble { position: absolute; z-index: 2; border-radius: 50%; pointer-events: none; animation: rise 1.1s ease-out forwards; }
+.steam { width: 22px; height: 22px; background: radial-gradient(circle, rgba(255,255,255,.75), rgba(255,255,255,0) 70%); }
+.bubble { width: 12px; height: 12px; border: 2px solid #b8f5c8; background: rgba(106,208,138,.35); }
+@keyframes rise { from { transform: translate(0, 0) scale(.6); opacity: .9; } to { transform: translate(var(--dx), -90px) scale(1.6); opacity: 0; } }
+.forge.cook .forge-item, .forge.brew .forge-item { bottom: 170px; }
+
+/* the Workshop anvil: the hand-drawn station anvil instead of a grey CSS block */
+.anvil { background: none; clip-path: none; width: 170px; height: 170px; bottom: 18px; }
+.anvil::after { display: none; }
+.anvil svg { width: 100%; height: 100%; filter: drop-shadow(0 6px 10px rgba(0,0,0,.55)); }
