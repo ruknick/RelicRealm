@@ -76,8 +76,9 @@ window.Bounty = (() => {
     ensure();
     App.save();
     Sound.sfx('coin');
+    Fair.earn(1);
     const lv = App.addXP(b.reward.xp);
-    return `✓ Claimed: ${rewardText(b.reward)}${lv ? ` — ⭐ <b>Level ${lv}!</b> ${App.levelPerks(lv)}` : ''}`;
+    return `✓ Claimed: ${rewardText(b.reward)} · 🎟 1 fair ticket${lv ? ` — ⭐ <b>Level ${lv}!</b> ${App.levelPerks(lv)}` : ''}`;
   }
 
   function banner() {

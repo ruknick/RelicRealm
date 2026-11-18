@@ -234,7 +234,7 @@ window.Gather = (() => {
     for (const [t, w] of Object.entries(W)) if ((x -= w) < 0) { type = t; break; }
     // Rarer woods / ores sprinkle in, more often as the land levels up.
     if (run) {
-      let y = Math.random() * 100;
+      let y = Math.random() * 100 / (App.state.inventory.horseshoe ? 1.15 : 1);   // Golden Horseshoe: rares 15% more often
       for (const [rare, fam] of Object.entries(Data.FAMILY)) {
         if (fam !== type || (Data.RARE_LAND[rare] && Data.RARE_LAND[rare] !== land.key)) continue;
         if ((y -= Data.RARE[rare](run.landLv)) < 0) return rare;
@@ -798,7 +798,7 @@ window.Gather = (() => {
     const L = run.landLv, rew = [];
     if (stars >= 1) { App.state.stockpile.gold += 5 + Math.floor(L / 2); rew.push(`${5 + Math.floor(L / 2)} gold`); }
     if (stars >= 2) { const x = 15 + L * 2; App.addXP(x); run.xp += x; rew.push(`${x} XP`); }
-    if (stars >= 3) { const rr = STAR_RARE[land.key]; App.state.stockpile[rr] += 2; App.state.stockpile.gold += 10; rew.push(`a reward chest: 10 gold + 2 ${Data.RESOURCES[rr].label}`); }
+    if (stars >= 3) { const rr = STAR_RARE[land.key]; App.state.stockpile[rr] += 2; App.state.stockpile.gold += 10; rew.push(`a reward chest: 10 gold + 2 ${Data.RESOURCES[rr].label}`); Fair.earn(1); rew.push('🎟 a fair ticket'); }
     run.stars = stars;
     const best = App.state.bestStars = App.state.bestStars || {};
     best[land.key] = Math.max(best[land.key] || 0, stars);

@@ -533,6 +533,18 @@ window.Art = (() => {
     clam: `<ellipse cx="32" cy="54" rx="22" ry="4" fill="#000" opacity=".3"/><path d="M8 40c2-16 14-24 24-24s22 8 24 24z" fill="url(#lgShell)" stroke="#5e5446" stroke-width="1.2"/>
       <path d="M8 40c6 10 42 10 48 0" fill="#d8cdb8" stroke="#5e5446" stroke-width="1.2"/><path d="M32 18v20M20 22l6 18M44 22l-6 18" stroke="#7a6e5c" stroke-width="1" opacity=".6"/>
       <circle cx="32" cy="40" r="5" fill="url(#rgPearl)" filter="url(#fGlow)"/>`,
+    fairtent: `<ellipse cx="32" cy="57" rx="22" ry="3" fill="#000" opacity=".3"/>
+      <path d="M32 6v8" stroke="#2b1b0d" stroke-width="1.6"/><path d="M32 6l10 3-10 3z" fill="#c0392b" stroke="#2b1b0d" stroke-width=".9"/>
+      <path d="M32 14L8 34h48z" fill="#f3e2b8" stroke="#2b1b0d" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M32 14L14 34h6zM32 14L26 34h6zM32 14L38 34h6zM32 14L50 34h6z" fill="#c0392b"/>
+      <path d="M8 34h48l-3 6h-42z" fill="#2e6f9e" stroke="#2b1b0d" stroke-width="1.2"/><path d="M13 40l-1 2M21 40l-1 2M29 40l-1 2M37 40l-1 2M45 40l-1 2" stroke="#f3d36a" stroke-width="1.6"/>
+      <path d="M12 40h40v16H12z" fill="#f3e2b8" stroke="#2b1b0d" stroke-width="1.4"/><path d="M18 40v16M26 40v16M38 40v16M46 40v16" stroke="#c0392b" stroke-width="3" opacity=".85"/>
+      <path d="M27 56v-9q5-5 10 0v9z" fill="#3a2412" stroke="#2b1b0d" stroke-width="1"/>`,
+    horseshoe: `<ellipse cx="32" cy="58" rx="16" ry="3" fill="#000" opacity=".3"/>
+      <path d="M14 52V30a18 18 0 0136 0v22h-9V30a9 9 0 00-18 0v22z" fill="#e9be43" stroke="#6b4a10" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M17 49V30a15 15 0 018-13" stroke="#fff6c8" stroke-width="2" fill="none" opacity=".75" stroke-linecap="round"/>
+      <g fill="#6b4a10"><circle cx="18.5" cy="44" r="1.6"/><circle cx="18" cy="34" r="1.6"/><circle cx="22" cy="23" r="1.6"/><circle cx="45.5" cy="44" r="1.6"/><circle cx="46" cy="34" r="1.6"/><circle cx="42" cy="23" r="1.6"/></g>
+      <path d="M50 10l1.4 3 3 .4-2.2 2 .6 3-2.8-1.5-2.8 1.5.6-3-2.2-2 3-.4z" fill="#fff6c8"/><path d="M10 14l.9 2 2 .3-1.5 1.3.4 2-1.8-1-1.8 1 .4-2-1.5-1.3 2-.3z" fill="#fff6c8"/>`,
     chowder: `<ellipse cx="32" cy="58" rx="14" ry="3" fill="#000" opacity=".3"/>
       <path d="M26 6h12v6l2 6c8 4 10 10 10 18v14c0 6-4 8-10 8H24c-6 0-10-2-10-8V36c0-8 2-14 10-18l2-6z" fill="#9fc8c0" opacity=".55" stroke="#3a5a54" stroke-width="1.4"/>
       <path d="M16 36c0-2 4-4 16-4s16 2 16 4v14c0 4-3 6-8 6H24c-5 0-8-2-8-6z" fill="#d89a48"/><path d="M16 36c4 2 28 2 32 0" stroke="#f2c27a" stroke-width="2" fill="none"/>

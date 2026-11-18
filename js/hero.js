@@ -31,7 +31,11 @@ window.Hero = (() => {
   // Drawn like an ink illustration: inked outlines, muted dyes, hatched shadow on the right side.
   function figure(opts = {}) {
     const look = { skin: '#e0b089', hair: '#5a3a1e', style: 'short', beard: 'none', ...(opts.look || App.state.profile?.look || {}) };
-    const eq = s => (opts.bare ? null : App.state.equip[s]);
+    const eq = s => (opts.bare || opts.plain ? null : App.state.equip[s]);
+    // Fair flair (just for looks): a hat replaces the helmet's look, capes hang behind.
+    const flairSet = opts.bare ? {} : (opts.flair || (App.state.flair && App.state.flair.worn) || {});
+    const hatId = flairSet.hat || null;
+    const flair = where => (opts.bare || !window.Fair ? '' : Fair.layer(where, opts.flair));
     const tierOf = s => (eq(s) ? Data.ITEMS[eq(s).id].tier : 0);
     const K = '#2b1b0d', skin = look.skin, hairC = look.hair;
     const METAL = { 1: ['#8a5a30', '#4a2a10'], 2: ['#8b939c', '#3e454d'], 3: ['#d5dce3', '#6e7a86'], 4: ['#c4b5fd', '#6d5bd0'] };
@@ -64,6 +68,7 @@ window.Hero = (() => {
         + (legT >= 3 ? `<path d="M64 122h14l-1 42h-12z" fill="${m}" ${ink()}/><path d="M66 126v34" stroke="#fff" stroke-width="1.4" opacity=".5"/><path d="M64 140h14M64 152h14" stroke="${e}" stroke-width=".8"/>` : '');
       html += g + mirror(g);
     }
+    html += flair('back');
     // long hair falls behind the shoulders
     if (look.style === 'long') html += `<path d="M66 24C66 6 94 6 94 24l1 30q-5 4-9-1H74q-4 5-9 1z" fill="${hairC}" ${ink(1)}/>`;
     // tool slung across the back, poking up over the left shoulder
@@ -104,6 +109,7 @@ window.Hero = (() => {
       const gem = { emerald: '#2fbf71', sapphire: '#3d7bff', ruby: '#e0324b' }[Data.ITEMS[eq('amulet').id].gem];
       html += `<path d="M72 50q8 14 16 0" stroke="#c9cfd6" stroke-width="1" fill="none"/><path d="M80 60l4 4-4 6-4-6z" fill="${gem}" stroke="#fff" stroke-width=".8" filter="url(#fGlow)"/>`;
     }
+    html += flair('front');
     // neck & head
     html += `<path d="M75 38h10v13h-10z" fill="${skin}" ${ink(1)}/><path d="M75 46h10" stroke="${K}" stroke-width=".6" opacity=".4"/>`
       + `<ellipse cx="69.5" cy="29" rx="2.2" ry="3.5" fill="${skin}" ${ink(.9)}/><ellipse cx="90.5" cy="29" rx="2.2" ry="3.5" fill="${skin}" ${ink(.9)}/>`
@@ -117,23 +123,24 @@ window.Hero = (() => {
     if (look.beard === 'short') html += `<path d="M70 30q1 12 10 12t10-12q-2 8-10 8t-10-8z" fill="${hairC}" opacity=".45"/>`;
     if (look.beard === 'full') html += `<path d="M69.5 29q0 18 10.5 20 10.5-2 10.5-20-2 8-6 8-2 2-4.5 1.5-2.5.5-4.5-1.5-4 0-6-8z" fill="${hairC}" ${ink(.8)}/><path d="M75.5 36.5q4.5-2 9 0" stroke="${hairC}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
     // hair (under any helmet)
-    if (!helmT) {
+    if (!helmT || hatId) {
       const top = `<path d="M68.5 27C67 9 93 9 91.5 27q-2-9-11.5-9.5T68.5 27z" fill="${hairC}" ${ink(1)}/>`;
       if (look.style === 'short' || look.style === 'long') html += top;
       if (look.style === 'tied') html += top + `<circle cx="80" cy="9" r="4.5" fill="${hairC}" ${ink(.9)}/>`;
     }
     // helmet
-    if (helmT === 1) {
+    if (!hatId && helmT === 1) {
       const [m, e] = METAL[1];
       html += `<path d="M68 25C68 9 92 9 92 25v2H68z" fill="${m}" ${ink()}/><path d="M68 23h24" stroke="${e}" stroke-width="1" stroke-dasharray="2 1.5"/><path d="M80 10v13" stroke="${e}" stroke-width=".9"/>`;
     }
-    if (helmT >= 2) {
+    if (!hatId && helmT >= 2) {
       const [m, e] = METAL[helmT];
       html += `<path d="M67 27C67 15 73 6 80 3c7 3 13 12 13 24z" fill="${m}" ${ink()}/><path d="M66.5 24h27v4h-27z" fill="${e}" ${ink(.8)}/>`
         + `<path d="M79 26h2v12h-2z" fill="${e}" ${ink(.6)}/><path d="M73 9q-4 6-4 14" stroke="#fff" stroke-width="1.6" opacity=".55" fill="none"/>`
         + `<g fill="${K}"><circle cx="70" cy="26" r=".7"/><circle cx="75" cy="26" r=".7"/><circle cx="85" cy="26" r=".7"/><circle cx="90" cy="26" r=".7"/></g>`
         + (helmT >= 3 ? `<path d="M67 27h4v12l-4-3z" fill="${m}" ${ink(.8)}/><path d="M93 27h-4v12l4-3z" fill="${m}" ${ink(.8)}/>` : '');
     }
+    html += flair('hat');
     // weapon raised in the right hand, then the hands over the grips
     html += inset('weapon', 66, 72, 72, true);
     html += hand(gloveT) + mirror(hand(gloveT));

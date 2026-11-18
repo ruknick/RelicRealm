@@ -1452,3 +1452,39 @@ body[data-scene="farm"] #gather-hint { color: #3a2a10; font-weight: 600; }
 .pack-note { text-align: left; margin: 4px 0 2px; }
 .bp-stack.packed { border-color: #6a8a2a; } .bp-stack.packed small::after { content: ' · packed'; color: #3d5a14; }
 .bp-stack .wicon { width: 22px; height: 22px; }
+
+/* ---------- Harvest Fair ---------- */
+.fair-tickets { margin-left: auto; padding: 3px 10px; border-radius: 14px; background: #e9c46a; color: #2b1b0d; border: 1.5px solid #2b1b0d; font-family: Georgia, serif; }
+.fair-note { background: #fff4cf; color: var(--ink); border: 1.5px solid var(--brass); border-radius: 8px; padding: 6px 10px; margin: 6px 0; text-align: center; }
+.fair-panel { margin: 8px 0; padding: 10px; border-radius: 10px; color: var(--ink); border: 1.5px solid var(--ink);
+  background: repeating-linear-gradient(90deg, rgba(192,57,43,.06) 0 18px, transparent 18px 36px), var(--paper); box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+.fair-panel h3 { margin: 0 0 6px; font-family: Georgia, serif; font-size: 1.05rem; display: flex; align-items: baseline; gap: 8px; }
+.fair-panel h3 small { font-weight: 400; font-style: italic; color: var(--ink-soft); font-size: .75rem; }
+.wheel-panel { text-align: center; }
+.wheel-box { position: relative; width: 230px; height: 230px; margin: 4px auto 6px; }
+.wheel { width: 100%; height: 100%; transition: transform 3.2s cubic-bezier(.12,.8,.18,1); filter: drop-shadow(0 4px 6px rgba(0,0,0,.4)); }
+.wheel-pin { position: absolute; top: -10px; left: 50%; width: 30px; margin-left: -15px; filter: drop-shadow(0 2px 2px rgba(0,0,0,.4)); }
+.wheel-result { min-height: 2.6em; }
+.wheel-result p { margin: 4px 0; }
+.rare-tag { display: inline-block; font-size: .65rem; padding: 0 6px; border-radius: 6px; background: #6d3fa0; color: #fff; font-family: system-ui, sans-serif; vertical-align: 1px; }
+.shoe-card { display: flex; gap: 10px; align-items: center; text-align: left; margin-top: 8px; padding: 8px; border-radius: 8px; border: 1.5px dashed #a37a10; background: rgba(233,190,67,.12); }
+.shoe-card.owned { border-style: solid; background: rgba(233,190,67,.3); box-shadow: 0 0 12px rgba(233,190,67,.6); }
+.shoe-card:not(.owned) .shoe-pic { filter: grayscale(.7) brightness(.85); }
+.shoe-pic { flex: none; width: 46px; height: 46px; } .shoe-pic svg { width: 100%; height: 100%; }
+.shoe-reveal { width: 120px; margin: 0 auto; animation: coachPop .6s ease-out; } .shoe-reveal svg { width: 100%; }
+.tent-row { display: flex; gap: 10px; align-items: center; }
+.tent-fig { flex: none; width: 96px; } .tent-fig svg { width: 100%; height: auto; }
+.tent-note { font-size: .85rem; } .tent-note p { margin: 4px 0; }
+.flair-h { margin: 8px 0 4px; font-family: Georgia, serif; font-weight: 700; font-size: .85rem; }
+.flair-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.flair-card { display: flex; flex-direction: column; align-items: center; padding: 4px 2px 5px; border-radius: 8px; border: 1.5px solid rgba(43,27,13,.45); background: rgba(255,250,235,.7); color: var(--ink); font: inherit; min-width: 0; }
+.flair-card .fc-pic { width: 100%; aspect-ratio: 68 / 46; display: block; } .flair-card .fc-pic svg { width: 100%; height: 100%; }
+.flair-grid.capes .flair-card .fc-pic { aspect-ratio: 100 / 110; }
+.flair-card .fc-name { font-size: .68rem; font-weight: 700; line-height: 1.1; text-align: center; }
+.flair-card small { font-size: .56rem; color: var(--ink-soft); text-align: center; line-height: 1.1; }
+.flair-card.locked { border-style: dashed; background: rgba(43,27,13,.06); }
+.flair-card.locked .fc-pic { filter: grayscale(1) brightness(.6) opacity(.55); }
+.flair-card.on { border-color: #6a8a2a; box-shadow: 0 0 0 2px rgba(106,138,42,.45); background: #f4f8e4; }
+.fortune .story-text { font-style: italic; }
+
+.fair-panel .hint { color: var(--ink-soft); opacity: 1; }

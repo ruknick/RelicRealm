@@ -153,6 +153,7 @@ window.Data = (() => {
     // Kit — passive, permanent
     hatchet: { name: 'Hatchet', icon: '🪚', kit: true, desc: '+1 pine on every wood match.' },
     knife:   { name: 'Skinning knife', icon: '🔪', kit: true, desc: '+1 hide on every hide match.' },
+    horseshoe: { name: 'Golden Horseshoe', icon: '🧲', art: 'horseshoe', kit: true, desc: 'Won at the Harvest Fair. Rare finds turn up 15% more often on every trip.' },
     lamp:    { name: 'Miner\'s lamp', icon: '🏮', kit: true, desc: 'Buried finds glimmer so you can dig them up.' },
     // Specials (one use, tap to arm)
     key:        { name: 'Old key', icon: '🗝️', art: 'key1', special: true, desc: 'Opens bronze chests and iron gates.' },

@@ -82,6 +82,8 @@ window.App = (() => {
         profile: s.profile || null,
         story: s.story || { chapter: 0, flags: {}, places: {}, introSeen: false },
       };
+      // Keep everything else the save holds (packed food, bounties, fair tickets, flair…) as-is.
+      Object.keys(s).forEach(k => { if (!(k in state)) state[k] = s[k]; });
       migrateGear(s);
       // Saves from before stations: grant what your level already earned.
       if (!state.stations) {
@@ -566,6 +568,7 @@ window.App = (() => {
     if (screen === 'home') { renderHome(); Sound.music('home'); Art.setScene('home'); homeEvents(); }
     if (screen === 'title' || screen === 'create') Art.setScene('home');
     if (screen === 'journal') { Story.journal(); Art.setScene('craft'); }
+    if (screen === 'fair') { Fair.open(); Sound.music('home'); Art.setScene('craft'); }
     if (screen === 'fortify') Story.flag('fortify');
     if (screen === 'items') { Items.render(); Art.setScene('craft'); }
     if (screen === 'craft') { Craft.render(opts || {}); Sound.music('home'); Art.setScene('craft'); }
@@ -610,6 +613,7 @@ window.App = (() => {
     starterKit();
     on('btn-journal', () => go('journal'));
     on('journal-back', () => go('home'));
+    on('fair-back', () => go('home'));
     Story.title();
     Cloud.connect().then(json => {
       const localAt = loadedAt;
