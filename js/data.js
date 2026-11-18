@@ -272,7 +272,7 @@ window.Data = (() => {
   const family = t => FAMILY[t] || t;
   // Spawn weight (per 100 of that family) for each rare type by land level: a teaser first, then common.
   const RARE = {
-    oak:        L => (L <= 5 ? 3 : L <= 9 ? 12 : L <= 15 ? 22 : 30),
+    oak:        L => (L <= 5 ? 10 : L <= 9 ? 18 : L <= 15 ? 26 : 32),
     ironwood:   L => (L <= 12 ? 0 : L <= 19 ? 3 : L <= 26 ? 16 : 26),
     elderwood:  L => (L <= 24 ? 0 : L <= 30 ? 3 : 12),
     silver:     L => (L <= 5 ? 3 : L <= 9 ? 12 : L <= 15 ? 20 : 28),
@@ -359,7 +359,8 @@ window.Data = (() => {
     { id: 'scrapbar', tier: 'smelt', station: 'smelter', name: 'Smelt scrap iron', icon: '▬', cost: { scrapiron: 3, coal: 1 }, makes: { ironbar: 1 }, desc: 'Goblin junk melts down into good iron.' },
     { id: 'silverbar', tier: 'smelt', station: 'smelter', name: 'Smelt silver bars', icon: '▬', cost: { silver: 2, coal: 1 }, makes: { silverbar: 1 }, desc: 'For amulet chains and crystal keys.' },
     { id: 'goldbar',  tier: 'smelt', station: 'smelter', name: 'Smelt a gold bar', icon: '🟨', cost: { gold: 6, coal: 1 }, makes: { goldbar: 1 }, desc: 'Melt gold nuggets down into a bar fit for a crown.' },
-    { id: 'charcoal', tier: 'smelt', station: 'smelter', name: 'Burn charcoal', icon: '⚫', cost: { oak: 2 }, makes: { charcoal: 3 }, desc: 'Slow-burn oak into charcoal for steel.' },
+    { id: 'charcoal', tier: 'smelt', station: 'smelter', name: 'Burn charcoal', icon: '⚫', cost: { oak: 2 }, makes: { charcoal: 4 }, desc: 'Slow-burn oak into charcoal for steel.' },
+    { id: 'pinecoal', tier: 'smelt', station: 'smelter', name: 'Burn pine charcoal', icon: '⚫', cost: { wood: 6 }, makes: { charcoal: 2 }, desc: 'Pine burns fast and smoky — more wood for less charcoal, but you always have pine.' },
     { id: 'starbar',  tier: 'smelt', station: 'dforge', name: 'Smelt starsilver bars', icon: '✨', cost: { starsilver: 3, charcoal: 2 }, makes: { starbar: 1 }, desc: 'The mythic metal — only a dwarven fire can melt it.' },
     { id: 'steel',    tier: 'smelt', station: 'dforge', name: 'Forge steel bars', icon: '🔩', cost: { ironbar: 2, charcoal: 2, water: 1 }, makes: { steel: 1 }, desc: 'Iron bars + charcoal, folded and quenched — the dwarven way.' },
     { id: 'goldkey',    tier: 'keys', station: 'workbench', cost: { gold: 6 }, items: { key: 2 } },
@@ -463,7 +464,7 @@ window.Data = (() => {
     hatchet: 7, shellshield: 7,
     body1: 8,
     // Smelter (Lv 8)
-    ironbar: 8, scrapbar: 8, charcoal: 9, lamp: 9, palisade: 9, silverbar: 11, goldbar: 14,
+    ironbar: 8, scrapbar: 8, charcoal: 9, pinecoal: 9, lamp: 9, palisade: 9, silverbar: 11, goldbar: 14,
     // Iron era (Forge)
     waxe2: 10, pick2: 10, helmet2: 10,
     sword2: 11,
@@ -595,7 +596,7 @@ window.Data = (() => {
     RESOURCES, ITEMS, FOODS, FOOD_ORDER, CHART_PIECES, TIER_LABEL, ARMOR_LABEL, gloveEnergy, STATIONS, STATION_ORDER, ERA, ERA_NAME, LAND_MAX, maxHp, maxEnergy, startEnergy, strength, ATTACK, TROOP_HP, underGeared, landEra,
     GRUDGE_FULL, REVENGE_WARN_TRIPS, REVENGE_COOLDOWN, REVENGE_MOVES, SHARDS, SLOTS, slotOf, tierLabel, amuletPower, RARE_LAND, DURABILITY, TYPE_INFO, hardness, gearDamage, gearRefusal, matchDamage, MATCH_DMG,
     WEAPONS, weaponDamage, MAT_LABEL, FAMILY, family, RARE, RARE_INFO, FINDS, FIND_INFO, rollFrom, SPOILS, RECIPES,
-    recipeName: r => (r.makes ? RESOURCES[Object.keys(r.makes)[0]].label + (r.id === 'scrapbar' ? ' (from scrap)' : '') : ITEMS[r.id] ? ITEMS[r.id].name : r.id), RECIPE_LV,
+    recipeName: r => (r.makes ? RESOURCES[Object.keys(r.makes)[0]].label + (r.id === 'scrapbar' ? ' (from scrap)' : r.id === 'pinecoal' ? ' (from pine)' : '') : ITEMS[r.id] ? ITEMS[r.id].name : r.id), RECIPE_LV,
     backpackSize, landLevel, enemyTier, monsterPlan, TIER_NAMES, ENEMY_GEAR, ENEMY_ARMOR, CHEST_TIERS, xpForLevel, levelFromXp, levelInfo, XP, MATERIAL_INFO,
   };
 })();

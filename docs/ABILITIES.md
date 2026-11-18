@@ -145,7 +145,7 @@ Brewed in the Kitchen, banked, then packed at camp like food (each takes a backp
 | 6 | Leather leggings, Coral spear, Water flask |
 | 7 | Hatchet, Shellback buckler |
 | 8 | **Smelter** · Iron bars, Scrap → iron, Leather jerkin |
-| 9 | Charcoal, Miner's lamp, Spiked palisade · *Kitchen:* Honey cake |
+| 9 | Charcoal (from oak or pine), Miner's lamp, Spiked palisade · *Kitchen:* Honey cake |
 | 10 | **Forge** · Iron wood-axe, Iron pick, Iron helm |
 | 11 | Iron sword, Silver bars |
 | 12 | Iron gauntlets, Iron hammer · *Kitchen:* Salmon & mushroom pie |
