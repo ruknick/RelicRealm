@@ -141,6 +141,22 @@ window.Gather = (() => {
     const [lo, hi] = BLOCKERS[land.key].rows;
     return board.tileCells(r => r >= lo && r <= hi);
   }
+  // A "clear the blockers" goal must always be finishable: while it's unfinished and fewer are left on
+  // the board than you still need, a fresh one pushes up every couple of moves.
+  async function topUpBlockers() {
+    const B = BLOCKERS[land.key], gl = run.goals.find(g => g.type === 'blocker' && g.have < g.need);
+    if (!gl) return;
+    const left = gl.need - gl.have, onBoard = board.piecesOf(B.kind).length;
+    if (onBoard >= Math.min(left, 3) || ++run.sinceTopUp < 2) return;
+    run.sinceTopUp = 0;
+    const spots = blockerSpots();
+    if (!spots.length) return;
+    const [r, c] = pick(spots);
+    addBlocker(r, c, true);
+    board.render();
+    board.toast({ forest: '🌿 Fresh vines creep in!', farm: '🌱 A new thistle sprouts!', ocean: '🐚 The tide drops a barnacle rock!', mine: '💎 A crystal cluster pushes up through the rock!' }[land.key], 'alert', 1400);
+    await board.wait(250);
+  }
   async function spreadBlockers() {
     const B = BLOCKERS[land.key];
     if (!B.spreads || run.landLv < BLOCKER_LV || ++run.sinceSpread < spreadEvery(run.landLv)) return;
@@ -698,6 +714,7 @@ window.Gather = (() => {
         await monstersAct();
         if (run.ended) return;
         await spreadBlockers();
+        await topUpBlockers();
         if (!run.eventSpawned && run.movesMade >= EVENT_AFTER && Math.random() < EVENT_CHANCE) {
           run.eventSpawned = true;
           run.eventPiece = spawnOn(land.event.piece, (r, c) => c === 0 && r >= 1, land.event.msg);
@@ -873,7 +890,7 @@ window.Gather = (() => {
       moves: MOVES, movesMade: 0, backpack: Object.fromEntries(land.bag.map(t => [t, 0])), overflow: 0, fullWarned: false,
       finds: [], told: {}, eventPiece: null, eventSpawned: false,
       discoverSpawned: false, followed: false, discovered: false, marked: false, ended: false,
-      mon: Data.monsterPlan(landLv), sinceMon: 0, slain: 0, sinceSpread: 0, extra: {},
+      mon: Data.monsterPlan(landLv), sinceMon: 0, slain: 0, sinceSpread: 0, sinceTopUp: 0, extra: {},
       ticketAt: Math.random() < 0.34 ? 3 + Math.floor(Math.random() * 10) : 0, ticketSpawned: false,
     };
     run.goals = makeGoals(landLv);
