@@ -72,6 +72,21 @@ In order of impact:
 5. **Dungeons with floors** (the Deep Tunnels): 3–5 boards in a row, health and food carry over, mini-boss at the bottom.
 - Skip: hand-spent stat points (more numbers, little change to play).
 
+## 6. After the dragon: the Lost Regalia (end-game idea, not built)
+After Emberwyrm, the King's journal in the hoard reveals the Crown was one of the Old King's royal regalia; the rest were carried **beyond the known realm**. The finished Wayfarer's Chart opens the way. One relic per Beyond land, each guarded by a boss:
+
+| Land | Guardian | Relic | Power |
+|---|---|---|---|
+| Drowned Swamp | Bog Giant | Sceptre of Roots | matches break stumps & boulders without a tool |
+| Deep Tunnels | Spider Queen | Lantern of the Deep | buried finds always show; fog lifts |
+| Frozen Peaks | Frost Wyrm | Orb of Winter | every 5th move monsters freeze for a turn |
+| Haunted Barrows | Barrow King | Ring of the Dead King | once per fight, survive a killing blow at 1 ❤️ |
+| Deep Sea (by boat) | Siren Queen | Pearl of the Tides | start every board with full ⚡ |
+
+- Each land has its own tiles, monsters and a post-mythic material (frost-iron, bog-oak); dragon scales finally get a use.
+- Relics go in a Regalia slot (or are permanent passives).
+- All five + the Crown → re-found the kingdom of Valdmoor: the true ending, and Ashford becomes a city on the map.
+
 ## 5. Release
 - Merge to `main` and switch on GitHub Pages (see README) to get the game its own website.
 - Later: wrap it for Google Play first ($25 once), then the App Store ($99/year, needs a Mac or cloud build).
