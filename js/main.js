@@ -504,12 +504,15 @@ window.App = (() => {
     box.innerHTML = buttons.map(b =>
       `<button class="big ${b.cls || ''}" data-id="${b.id}" ${b.disabled ? 'disabled' : ''}>${b.label}</button>`).join('');
     m.classList.remove('hidden');
+    document.body.classList.add('modal-open');   // the page behind stays put while a pop-up is open
+    m.querySelector('.card').scrollTop = 0;
     return new Promise(res => {
       box.querySelectorAll('button').forEach(btn => {
         btn.onclick = () => {
           const extra = {};
           m.querySelectorAll('input[type=checkbox]').forEach(i => { extra[i.id] = i.checked; });
           m.classList.add('hidden');
+          document.body.classList.remove('modal-open');
           choose.last = extra;
           res(btn.dataset.id);
         };
