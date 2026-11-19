@@ -85,6 +85,12 @@ window.App = (() => {
       // Keep everything else the save holds (packed food, bounties, fair tickets, flair…) as-is.
       Object.keys(s).forEach(k => { if (!(k in state)) state[k] = s[k]; });
       migrateGear(s);
+      // Raids are land milestones now (a keep every 5 land levels): trim raids banked under the old
+      // rules (random tracks, map scraps) down to what the land has actually earned.
+      [['goblin', 'forest'], ['dwarf', 'mine']].forEach(([e, land]) => {
+        const earned = Math.max(0, Math.floor(Data.landLevel(state.lands[land].runs) / 5) - state.enemyWins[e]);
+        state.marked[e] = Math.min(state.marked[e] || 0, earned);
+      });
       // Saves from before stations: grant what your level already earned.
       if (!state.stations) {
         state.stations = { workbench: true };

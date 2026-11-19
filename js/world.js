@@ -14,7 +14,7 @@ window.World = (() => {
     { id: 'kitchen', x: 12, y: 84.5, icon: '🍲', art: 'chowder', name: 'Kitchen', sub: 'cook', screen: 'craft', opts: { kitchen: true } },
     { id: 'beyond', x: 34, y: 9, icon: '❓', name: 'Beyond the Known Realm', sub: 'uncharted', locked: true },
   ];
-  const RAID = { goblin: { icon: '🔥', name: 'Raid the goblin village', how: 'its 🐾 tracks appear on your next trip after that' }, dwarf: { icon: '⚒️', name: 'Raid the dwarf stronghold', how: 'its ᚱ rune stone appears on your next trip after that' } };
+  const RAID = { goblin: { icon: '🔥', name: 'Raid the goblin keep', how: 'its 🐾 tracks appear on your next trip after that' }, dwarf: { icon: '⚒️', name: 'Raid the dwarf stronghold', how: 'its ᚱ rune stone appears on your next trip after that' } };
   let travelling = false;
   const LAND_NAME = { farm: 'Golden Fields', forest: 'Forest', mine: 'Iron Hills', ocean: 'Sunlit Coast' };
   // Before a boss's lair is found, the map only has rumors.
@@ -124,7 +124,7 @@ window.World = (() => {
     const notes = [];
     if (s.raid) {
       const R = RAID[s.raid], rank = Data.TIER_NAMES[s.raid][Data.enemyTier(st.enemyWins[s.raid]) - 1];
-      if (st.marked[s.raid] > 0) buttons.push({ id: 'raid', label: `${R.icon} ${R.name} · ${rank}`, cls: 'danger' });
+      if (st.marked[s.raid] > 0) buttons.push({ id: 'raid', label: `${R.icon} ${R.name} · ${rank}${st.marked[s.raid] > 1 ? ` (${st.marked[s.raid]} found)` : ''}`, cls: 'danger' });
       else {
         const next = 5 * (st.enemyWins[s.raid] + st.marked[s.raid] + 1);
         notes.push(next <= 30 ? (lv >= next ? `${R.icon} <i>A ${s.raid === 'goblin' ? 'goblin keep' : 'dwarf stronghold'} is out there — ${s.raid === 'goblin' ? 'its 🐾 tracks' : 'its ᚱ rune stone'} will turn up on your next trip here.</i>` : `${R.icon} <i>The next ${s.raid === 'goblin' ? 'goblin keep' : 'dwarf stronghold'} turns up at ${LAND_NAME[s.land]} Lv ${next} — ${R.how}.</i>`) : `${R.icon} <i>You've taken every ${s.raid === 'goblin' ? 'goblin keep' : 'dwarf stronghold'}. Only their King remains.</i>`);
@@ -132,7 +132,7 @@ window.World = (() => {
     }
     (s.lairs || []).forEach(k => {
       const C = Boss.CONFIG[k];
-      if (Boss.unlocked(k)) buttons.push({ id: 'boss:' + k, label: `${C.icon} ${C.place}`, cls: 'danger' });
+      if (Boss.unlocked(k)) buttons.push({ id: 'boss:' + k, label: `${C.icon} ${C.place}${(st.bossWins || {})[k] ? ' · rematch' : ''}`, cls: (st.bossWins || {})[k] ? 'alt' : 'danger' });
       else notes.push(`${C.icon} <i>${RUMOR[k].text}</i> <small>(${LAND_NAME[s.land]} Lv ${C.unlock.lv})</small>`);
     });
     if (buttons.length === 1 && !st.seenLandMenu?.[s.land]) {

@@ -287,11 +287,13 @@ window.Gather = (() => {
       case 'scrap': {
         const enemy = id === 'runescrap' ? 'dwarf' : 'goblin';
         st.scraps[enemy]++;
-        detail = `${st.scraps[enemy]}/3 to a ${App.ENEMY_NAME[enemy]}`;
-        if (st.scraps[enemy] >= 3) {
+        detail = `${st.scraps[enemy]}/3 to a hidden ${enemy === 'dwarf' ? 'dwarf cache' : 'goblin stash'}`;
+        if (st.scraps[enemy] >= 3) {   // a full map leads to their loot, not a new keep (keeps come every 5 land levels)
           st.scraps[enemy] -= 3;
-          st.marked[enemy]++;
-          detail = `map complete — a ${App.ENEMY_NAME[enemy]} is marked!`;
+          const spoil = App.rollSpoil(enemy);
+          App.grantSpoil(spoil);
+          addToBackpack('gold', 10, cell, delay + 200);
+          detail = `map complete — you dig up their stash: 10 gold + ${App.spoilName(spoil)}!`;
         }
         break;
       }
