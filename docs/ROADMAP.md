@@ -72,6 +72,19 @@ In order of impact:
 5. **Dungeons with floors** (the Deep Tunnels): 3–5 boards in a row, health and food carry over, mini-boss at the bottom.
 - Skip: hand-spent stat points (more numbers, little change to play).
 
+## 5b. The boat and Cyclops Isle (idea, not built — open questions below)
+**Boatyard** on the Sunlit Coast after the King Crab (~Coast Lv 15). Build in parts: keel (oak + ironwood), hull (pine + iron nails), rigging (leather rope), simple sail (hide). When done, a sea route and a new island appear on the map.
+
+**Cyclops Isle** (new land, volcanic island):
+- Tiles: coconuts & bananas (food), bamboo (light wood), obsidian, sea salt; the cyclops's **giant sheep** wander the board.
+- Helpful finds: **giant's wool** → sailcloth (needed for the deep sea) and later warm cloaks (Frozen Peaks); **obsidian** → obsidian blades; **sea salt & spices** → better meals.
+- **The Cyclops** (boss): his one eye sweeps a column and he throws boulders where he looks (hide behind rocks); sheep block the board; a **firebrand** (bamboo + coal) blinds him for a few turns. Reward: his **sea chart** (the way to the deep water and the Siren) + a unique item (e.g. eye-stone amulet: buried finds always show).
+- Optional twist: **befriend him** (bring a feast, spare his sheep) for the chart and free shearing — or anger him by hurting the flock.
+
+Chain: **boat → Cyclops Isle → sailcloth + chart → Deep Sea → Siren → Pearl of the Tides**.
+
+Open questions: fight, befriend, or player's choice? Before the dragon (steel era, Lv 20–30, suggested) or after?
+
 ## 6. After the dragon: the Lost Regalia (end-game idea, not built)
 After Emberwyrm, the King's journal in the hoard reveals the Crown was one of the Old King's royal regalia; the rest were carried **beyond the known realm**. The finished Wayfarer's Chart opens the way. One relic per Beyond land, each guarded by a boss:
 
