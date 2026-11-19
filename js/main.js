@@ -368,12 +368,59 @@ window.App = (() => {
   function addXP(n) {
     const before = level();
     state.xp += n;
-    save();
     const after = level();
+    if (after > before) {
+      state.hp = maxHp();                 // a new level: fully rested
+      queueLevelUp(before, after);
+    }
+    save();
     return after > before ? after : 0;
   }
+
+  // ---------- the level-up celebration ----------
+  // Shown over everything (boards keep running underneath). Several levels at once share one card.
+  const lvQueue = [];
+  function queueLevelUp(from, to) {
+    for (let L = from + 1; L <= to; L++) lvQueue.push(L);
+    clearTimeout(queueLevelUp.t);
+    queueLevelUp.t = setTimeout(showLevelUp, 450);
+  }
+  function showLevelUp() {
+    if (!lvQueue.length) return;
+    const levels = lvQueue.splice(0), top = levels[levels.length - 1];
+    const eraLv = levels.find(L => Data.ERA(L) > Data.ERA(L - 1));
+    const perks = levels.flatMap(L => levelPerkList(L).filter(p => !/era begins/.test(p)));
+    const name = state.profile ? state.profile.name : 'You';
+    const el = document.getElementById('levelup');
+    const colors = ['#f3d36a', '#e0604a', '#6ad08a', '#7cc4ef', '#c37ce6', '#fff4d6'];
+    el.innerHTML = `<div class="lu-rays"></div>
+      ${Array.from({ length: 40 }, (_, i) => `<i class="lu-conf" style="left:${Math.random() * 100}%;background:${colors[i % colors.length]};animation-delay:${(Math.random() * 0.9).toFixed(2)}s;animation-duration:${(2.2 + Math.random() * 1.6).toFixed(2)}s;--spin:${Math.round(Math.random() * 720 - 360)}deg"></i>`).join('')}
+      <div class="lu-card">
+        <div class="lu-kicker">✦ Level up ✦</div>
+        <div class="lu-badge"><svg viewBox="0 0 120 120" aria-hidden="true">
+          <path d="M60 4l15 33 36 4-27 24 8 35-32-18-32 18 8-35L9 41l36-4z" fill="#f3d36a" stroke="#6b4a10" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M60 16l10 22 24 3-18 16 5 23-21-12" fill="none" stroke="#fff6c8" stroke-width="2.4" opacity=".7" stroke-linejoin="round"/>
+          <text x="60" y="${top >= 10 ? 76 : 78}" text-anchor="middle" font-family="Georgia, serif" font-weight="900" font-size="${top >= 10 ? 34 : 40}" fill="#5a3a08">${top}</text></svg></div>
+        <h2>${name} reached level ${top}!</h2>
+        ${levels.length > 1 ? `<p class="lu-sub">${levels.length} levels at once!</p>` : ''}
+        ${eraLv ? `<div class="lu-era">The ${Data.ERA_NAME[Data.ERA(eraLv)]} era begins!</div>` : ''}
+        <ul class="lu-perks">${(perks.length ? perks : ['✨ Your legend grows.']).map(p => `<li>${p}</li>`).join('')}</ul>
+        <p class="lu-heal">❤️ Fully rested — your health is restored.</p>
+        <button class="big" id="lu-ok">Onward!</button>
+      </div>`;
+    el.classList.remove('hidden');
+    void el.offsetWidth;
+    el.classList.add('show');
+    Sound.sfx('levelup');
+    document.getElementById('lu-ok').onclick = () => {
+      el.classList.remove('show');
+      setTimeout(() => { el.classList.add('hidden'); el.innerHTML = ''; }, 250);
+      if (!document.getElementById('screen-home').classList.contains('hidden')) renderHome();
+    };
+  }
   // What each new level brings: small boosts every level, big unlocks at era thresholds.
-  function levelPerks(L) {
+  const levelPerks = L => levelPerkList(L).join(' · ') || 'Your legend grows.';
+  function levelPerkList(L) {
     const out = [];
     if (Data.maxHp(L) > Data.maxHp(L - 1)) out.push(`❤️ max health ${Data.maxHp(L)}`);
     if (Data.strength(L) > Data.strength(L - 1)) out.push(`💪 +1 weapon damage`);
@@ -384,8 +431,7 @@ window.App = (() => {
     if (st) out.push(`${st.icon} you can now build the <b>${st.name}</b> in the Workshop`);
     Data.RECIPES.filter(r => r.lv === L && L > 1).forEach(r => out.push(r.tier === 'food' ? `🍲 you can now cook <b>${Data.recipeName(r)}</b> in the Kitchen` : `⚒ you can now make <b>${Data.recipeName(r)}</b>`));
     if (Data.ERA(L) > Data.ERA(L - 1)) out.unshift(`<b>The ${Data.ERA_NAME[Data.ERA(L)]} era begins!</b>`);
-    if (Data.maxHp(L) > Data.maxHp(L - 1)) state.hp = Math.min(Data.maxHp(L), state.hp + 2);
-    return out.join(' · ') || 'Your legend grows.';
+    return out;
   }
 
   // ---------- spoils ----------

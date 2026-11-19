@@ -56,7 +56,16 @@ See [ITEMS.md](ITEMS.md) for the full breakdown. Short version:
 - **Companions:** a helper that acts every few moves.
 - **Replace the last emoji** (energy/health meters, bounty icons, some item icons) with hand-drawn art.
 
-## 4. Release
+## 4. Making it more of an RPG (ideas, not built yet)
+In order of impact:
+1. **Talents:** every 5 levels choose one of two (e.g. Lumberjack +1 wood per match *or* Brawler +2 weapon damage; Cook's instinct food heals 50% more *or* Iron hide armor wears half as fast). Shown as a small tree on the Warrior screen. Origin tilts the first pick. **Top pick.**
+2. **Townsfolk and choice quests:** named people in Ashford (blacksmith, cook, fortune teller, Thrain) give chapters and side quests in their own voice; some quests have a choice with a consequence (spare a goblin scout → lower goblin grudge, or turn him in for a reward).
+3. **Loot rarity / named gear:** uncommon and rare versions with one bonus (*Iron sword of Embers* +2 vs goblins, *Lucky leather cap* +5% rare finds), coloured names, from chests and bosses.
+4. **A companion** that acts on the board every few moves and levels with you (could merge with the villagers idea).
+5. **Dungeons with floors** (the Deep Tunnels): 3–5 boards in a row, health and food carry over, mini-boss at the bottom.
+- Skip: hand-spent stat points (more numbers, little change to play).
+
+## 5. Release
 - Merge to `main` and switch on GitHub Pages (see README) to get the game its own website.
 - Later: wrap it for Google Play first ($25 once), then the App Store ($99/year, needs a Mac or cloud build).
 - Check that the name "Tile Realm" / "Shattered Crown" isn't trademarked before submitting.

@@ -213,9 +213,7 @@ window.Gather = (() => {
     const lv = App.addXP(n);
     run.xp += n;
     hudLevel();
-    if (lv) {
-      board.celebrate([3, 3], { icon: '⭐', title: `Level ${lv}!`, sub: App.levelPerks(lv), rare: true, kicker: '✦ Level up ✦' });
-    }
+    if (lv) board.renderHealth(true);   // the level-up card (shown by App) also restores your health
   }
   function hudLevel() {
     const st = App.state, L = App.level;

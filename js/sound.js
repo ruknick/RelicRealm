@@ -302,6 +302,12 @@ window.Sound = (() => {
     coin: t => { tone(1319, t, 0.1, { type: 'sine', vol: 0.12 }); tone(1760, t + 0.08, 0.25, { type: 'sine', vol: 0.12 }); },
     reveal: t => noise(t, 0.45, { filter: 'bandpass', freq: 300, sweep: 2500, vol: 0.12 }),
     drums: t => [0, 0.13, 0.26, 0.45].forEach((o, i) => tone(i === 3 ? 70 : 95, t + o, 0.2, { type: 'sine', glide: 45, vol: 0.4 })),
+    levelup: t => {
+      [60, 64, 67, 72, 76, 79].forEach((m, i) => tone(midi(m), t + i * 0.08, 0.28, { type: 'square', vol: 0.05, lp: 2600 }));
+      [72, 76, 79, 84].forEach(m => tone(midi(m), t + 0.55, 1.4, { type: 'triangle', vol: 0.07 }));
+      [84, 88, 91, 96].forEach((m, i) => bell(m, t + 0.6 + i * 0.09, 1.2, 0.05));
+      tone(midi(48), t + 0.55, 1.2, { type: 'sine', vol: 0.12 });
+    },
     victory: t => {
       [72, 76, 79, 84].forEach((m, i) => tone(midi(m), t + i * 0.11, 0.3, { type: 'square', vol: 0.06, lp: 2500 }));
       [72, 76, 79, 84].forEach(m => tone(midi(m), t + 0.5, 1.1, { type: 'triangle', vol: 0.08 }));
