@@ -397,11 +397,7 @@ window.Battle = (() => {
       const nt = Data.enemyTier(App.state.enemyWins[run.enemy]);
       if (nt > run.tier) rankUp = `⚠️ They'll send <b>${Data.TIER_NAMES[run.enemy][nt - 1]}</b> next time — tougher, bigger, richer loot.`;
     }
-    // Beat their mightiest rank and their relic shard is yours.
-    if (won && run.tier >= 4 && App.grantShard(run.enemy)) {
-      rankUp = (rankUp ? rankUp + '<br>' : '') + `💎 <b>Relic shard!</b> The ${cfg.name}'s shard is yours (${App.state.shards}/5).`;
-      Sound.sfx('rare');
-    }
+    // (Their relic shard now comes from beating their King — see Boss.)
     const keepLoot = won || reason === 'retreat' || reason === 'cap';
     const gained = [], lost = [];
     if (keepLoot) {

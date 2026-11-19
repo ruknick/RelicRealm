@@ -540,7 +540,7 @@ window.App = (() => {
       html: `<p class="race-rules">⚔️ <b>Raid:</b> break their keep before their defenders wear you down. Every few moves their troops strike at you — your armor takes the blows, food heals you.
           ❤️ <b>${state.hp}/${maxHp()}</b> · <a href="#" id="prep-hero">Armor up / eat</a><br>
           <small>Win and they'll want revenge on your camp — <a href="#" id="prep-fortify">fortify it</a>.</small></p>${lowHp}
-        <p class="hint">Rank ${Data.enemyTier(state.enemyWins[enemy])}/4 — every 2 wins they send tougher troops (and better loot).</p>
+        <p class="hint">Rank ${Data.enemyTier(state.enemyWins[enemy])}/4 — each keep you take, the next one (every 5 ${enemy === 'goblin' ? 'Forest' : 'Iron Hills'} levels) is held by tougher troops with better loot. Their King waits at Lv 35.</p>
         <p>${cfg.prep}</p>
         <p>${pouchLine()}</p>
         <p class="hint">Equipped: ${weapons.join(' · ')}</p>${armorNote}

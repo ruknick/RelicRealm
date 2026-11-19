@@ -73,7 +73,7 @@ window.Gather = (() => {
     growMsg: { coral: '🪸 Coral grows over the rocks!', kelp: '🌿 A tangle of kelp washes ashore!' },
     event: { piece: 'crab', msg: '🦀 A giant crab snatched some loot! Only a weapon can stop it →', loot: ['water', 'herring', 'gold'] },
     discover: null,
-    monster: { name: 'shore crab', art: 'crab', icon: '🦀', kin: 'sea' },
+    monster: { name: 'shore crab', art: 'crab', icon: '🦀', kin: 'sea', hpMul: 1.2 },
     finds: 'ocean',
     hint: 'Water quenches iron; fish feed your raids. Pick coral for coral, cut kelp for oysters. Pearls shimmer among the fish.',
   };
@@ -366,13 +366,19 @@ window.Gather = (() => {
   }
 
   // ---------- roaming monsters ----------
+  // A new enemy keep waits to be found at every 5th land level (Lv 5, 10, 15 …), one at a time.
+  const keepWaiting = (enemy, L) => Math.floor(L / 5) > App.state.enemyWins[enemy] + App.state.marked[enemy];
+  const DWARF = { name: 'dwarf guard', art: 'guard', icon: '⚒️', hpMul: 1.35 };
   function spawnMonster(appear = true) {
     const spots = board.tileCells(r => r >= 1);
     if (!spots.length) return null;
-    const [r, c] = pick(spots), M = land.monster, plan = run.mon;
+    const [r, c] = pick(spots), plan = run.mon;
+    // Deeper in the Iron Hills, dwarf guards patrol alongside the cave goblins.
+    const M = land.key === 'mine' && run.landLv >= 8 && Math.random() < 0.5 ? DWARF : land.monster;
     const carries = run.keyCarrier && !board.piecesOf('monster').some(x => x.carriesKey);
     if (carries) run.keyCarrier = false;
-    const p = board.addPiece({ ...P.monster, hp: M.harmless ? 3 + Math.floor(run.landLv / 6) : plan.hp, armor: M.harmless ? 1 : plan.armor, weapon: plan.weapon, art: M.art, kin: M.kin, name: M.name, age: 1, carriesKey: carries }, r, c, 1, appear);
+    const hp = M.harmless ? 3 + Math.floor(run.landLv / 6) : Math.round(plan.hp * (M.hpMul || 1));
+    const p = board.addPiece({ ...P.monster, hp, armor: M.harmless ? 1 : plan.armor, weapon: plan.weapon, art: M.art, kin: M.kin, name: M.name, age: 1, carriesKey: carries }, r, c, 1, appear);
     monLabel(p);
     if (carries && appear) setTimeout(() => board.toast(`🗝️ That ${M.name} has the chest key! Take it down.`, 'alert', 2600), 1500);
     if (appear) {
@@ -436,7 +442,7 @@ window.Gather = (() => {
       }
       // Every few moves, each one swings at you.
       if (m.age % run.mon.attackEvery === 0) {
-        const hit = App.hurtPlayer(m.weapon || 1);
+        const hit = App.hurtPlayer(m.weapon || 1, run.mon.extra || 0);
         board.float([m.r, m.c], hit.asleep ? '💤' : hit.dmg ? `⚔️ −${hit.dmg} ❤️` : '🛡️ blocked', hit.dmg ? 'loss' : 'gain');
         stole += hit.dmg;
         if (!run.told.armorNote && hit.note) { run.told.armorNote = true; setTimeout(() => board.toast(`🛡️ ${hit.note[0].toUpperCase() + hit.note.slice(1)}.`, '', 2000), 700); }
@@ -711,7 +717,8 @@ window.Gather = (() => {
           run.ticketSpawned = true;
           spawnOn('fairticket', (r, c) => r >= 1 && r <= 5, '🎟️ A golden fair ticket blew in! Match next to it to grab it.', 'win');
         }
-        if (land.discover && !run.discoverSpawned && run.movesMade >= DISCOVER_AFTER && Math.random() < DISCOVER_CHANCE) {
+        // Every 5 land levels a new enemy keep can be found: its tracks (or rune stone) turn up on the next trip.
+        if (land.discover && !run.discoverSpawned && run.movesMade >= DISCOVER_AFTER && keepWaiting(land.discover.enemy, run.landLv)) {
           run.discoverSpawned = true;
           spawnOn(land.discover.piece, (r, c) => r >= 1 && r <= 4 && c >= 1 && c <= 5, land.discover.spot);
         }
@@ -816,10 +823,12 @@ window.Gather = (() => {
     best[land.key] = Math.max(best[land.key] || 0, stars);
     notes.unshift(`⭐ +${run.xp} XP · Level ${App.level}`);
     const rec = App.state.lands[land.key];
-    rec.runs++;
+    rec.runs += stars >= 3 ? 2 : 1;   // a ★★★ trip tames the land twice as fast
     const newLv = Data.landLevel(rec.runs);
     if (newLv > run.landLv) notes.unshift(`${land.icon} <b>The ${land.name} grows wilder — now Lv ${newLv}!</b> More obstacles, tougher chests, richer finds.`);
-    Object.values(Boss.CONFIG).filter(c => c.unlock && c.unlock.land === land.key && run.landLv < c.unlock.lv && newLv >= c.unlock.lv)
+    if (land.discover && Math.floor(newLv / 5) > Math.floor(run.landLv / 5) && keepWaiting(land.discover.enemy, newLv))
+      notes.unshift(`${land.discover.enemy === 'goblin' ? '🐾 <b>Goblins are on the move!</b> Their tracks will turn up on your next Forest trip — follow them to a new keep.' : 'ᚱ <b>Dwarf runes glow in the hills!</b> Find the rune stone on your next Iron Hills trip to locate a new stronghold.'}`);
+    Object.values(Boss.CONFIG).filter(c => c.unlock && !c.deep && c.unlock.land === land.key && run.landLv < c.unlock.lv && newLv >= c.unlock.lv)
       .forEach(c => notes.unshift(`${c.icon} <b>${c.place} found!</b> Tap the ${land.name} on the map to face ${c.short}.`));
     if (newLv >= Data.LAND_MAX && Data.SHARDS.some(x => x.id === land.key) && App.grantShard(land.key)) { notes.unshift(`💎 <b>Relic shard!</b> You've mastered the ${land.name} — its shard reveals itself to you (${App.state.shards}/5).`); Sound.sfx('rare'); }
     App.save();

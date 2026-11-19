@@ -47,8 +47,8 @@ window.Story = (() => {
       id: 'goblins', title: 'Chapter 1 · Goblin Trouble',
       intro: 'The goblins who looted Ashford are still out there. Follow their tracks through the forest, find their village, and take back what\'s yours.',
       goals: [
-        { text: 'Find a 🔥 Goblin Village (follow 🐾 tracks in the Forest)', done: () => st().marked.goblin > 0 || st().enemyWins.goblin > 0 },
-        { text: 'Win a raid on the Goblin Village', done: () => st().enemyWins.goblin >= 1 },
+        { text: 'Find a goblin keep (reach Forest Lv 5, then follow the 🐾 tracks)', done: () => st().marked.goblin > 0 || st().enemyWins.goblin > 0 },
+        { text: 'Win a raid on the goblin keep', done: () => st().enemyWins.goblin >= 1 },
       ],
       reward: { label: '🗝️ Old key + 30 XP', give: () => { st().inventory.key++; App.addXP(30); } },
       outro: 'Among the goblin loot you find a torn map with a dwarf rune scratched on it and a note in goblin scrawl: "shards only show for the strongest." Whatever it means, the dwarves in the hills may know more.',
@@ -79,7 +79,7 @@ window.Story = (() => {
       id: 'crown', title: 'Chapter 4 · The Old King\'s Crown',
       intro: 'The relic shards are bound to the land itself. Each one reveals itself only to someone who has mastered its place: the deepest forest, the richest hills, the farthest coast, and the mightiest goblin and dwarf war-bands. Master them all, melt gold into bars, and forge the Crown anew.',
       goals: [
-        { text: 'Earn all 5 💎 relic shards (Lv 35 in each land, beat the goblin & dwarf top ranks)', done: () => Object.keys(st().shardFrom || {}).length >= 5 || st().inventory.crown > 0 },
+        { text: 'Earn all 5 💎 relic shards (Lv 35 in each land, defeat the Goblin King & the Dwarf King)', done: () => Object.keys(st().shardFrom || {}).length >= 5 || st().inventory.crown > 0 },
         { text: 'Forge the 👑 Old King\'s Crown (5 shards + 3 gold bars)', done: () => st().inventory.crown > 0 },
         { text: 'Forge any steel gear', done: () => ownsTier(3) },
         { text: 'Wear armor in every slot (helmet, body, gloves, legs, shield)', done: () => ['helmet', 'body', 'gloves', 'legs', 'shield'].every(s => st().equip[s]) },

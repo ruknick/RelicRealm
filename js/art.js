@@ -1106,6 +1106,21 @@ window.Art = (() => {
     <rect x="11" y="11" width="338" height="558" fill="none" stroke="${INK}" stroke-width=".55" opacity=".7"/>
   `, '0 0 360 580');
 
+  // ---- the Kings: big versions of their people, each wearing a crown (boss portraits, 192×128) ----
+  const kingCrown = (cx, top, w = 36) => {
+    const x = cx - w / 2, h = w * 0.55;
+    return `<path d="M${x} ${top + h}V${top + h * 0.3}l${w * 0.17} ${h * 0.35} ${w * 0.16} ${-h * 0.65} ${w * 0.17} ${h * 0.6} ${w * 0.17} ${-h * 0.6} ${w * 0.16} ${h * 0.65} ${w * 0.17} ${-h * 0.35}V${top + h}z" fill="#f3c34a" stroke="#5a3a08" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M${x} ${top + h * 0.82}h${w}" stroke="#c0392b" stroke-width="2.4"/>
+      <circle cx="${cx}" cy="${top + h * 0.1}" r="2.6" fill="#c0392b" stroke="#5a3a08" stroke-width=".8"/><circle cx="${x + w * 0.33}" cy="${top + h * 0.62}" r="1.8" fill="#2e86c1"/><circle cx="${x + w * 0.67}" cy="${top + h * 0.62}" r="1.8" fill="#27ae60"/>
+      <path d="M${x + 3} ${top + h * 0.45}l2 ${h * 0.35}" stroke="#fff6c8" stroke-width="1.4" opacity=".7"/>`;
+  };
+  const bigPiece = (k, tx, ty, sc = 2) => `<g transform="translate(${tx} ${ty}) scale(${sc})">${PIECES[k].replace(/<ellipse cx="3[0-9]" cy="5[6-9]"[^>]*\/>/, '')}</g>`;
+  TALL.kingcrab = `<ellipse cx="96" cy="122" rx="62" ry="5" fill="#000" opacity=".35"/>${bigPiece('crab', 44, -6)}${kingCrown(96, 18, 34)}`;
+  TALL.goblinking = `<ellipse cx="96" cy="122" rx="56" ry="5" fill="#000" opacity=".35"/>
+    <path d="M60 66q36-12 72 0l8 56H52z" fill="#5b2a7a" stroke="#2b1b0d" stroke-width="2"/><path d="M50 118h92" stroke="#fbf8ef" stroke-width="5"/>${bigPiece('gbrute', 48, 14, 1.75)}${kingCrown(96, 24, 34)}`;
+  TALL.dwarfking = `<ellipse cx="96" cy="122" rx="56" ry="5" fill="#000" opacity=".35"/>
+    <path d="M56 64q40-12 80 0l8 58H48z" fill="#8e2a1a" stroke="#2b1b0d" stroke-width="2"/><path d="M48 118h96" stroke="#c9a227" stroke-width="5"/>${bigPiece('guard', 46, -2)}${kingCrown(96, 14, 36)}`;
+
   function setScene(scene) {
     document.body.dataset.scene = scene || 'home';
     document.body.style.setProperty('--scene-art', SCENES[scene] || 'none');

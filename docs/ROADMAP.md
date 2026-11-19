@@ -47,6 +47,13 @@ See [ITEMS.md](ITEMS.md) for the full breakdown. Short version:
 - Merge the duplicates (drum/ale, the two elderwood wards, the scrap variants), and consider dropping the hammer line.
 - Fill the weapon grid so every tier is a clear upgrade.
 
+## Pacing (built)
+- Lands gain **1 level per trip** (2 for ★★★), so they keep up with your character level.
+- **Raids are milestones:** a new goblin keep / dwarf stronghold every 5 Forest / Iron Hills levels (tracks or a rune stone turn up on the next trip). Ranks climb one per keep taken.
+- **Kings are the land bosses at Lv 35:** the Goblin King (Forest) and Dwarf King (Iron Hills) give the goblin / dwarf relic shards.
+- **King Crab** is the Sunlit Coast boss (Lv 8). The **Siren Queen** is saved for the deep-water boat voyage.
+- More monsters on gathering boards, swinging every 2 moves and harder deeper in; dwarf guards in the Iron Hills from Lv 8; tougher crabs.
+
 ## 3. Gameplay ideas not built yet
 - **Board shapes and harder trips:** non-rectangular boards, plus an occasional "hard" trip with better loot.
 - **Collection book:** monsters, rare finds and map pieces, filled in as you discover them.

@@ -21,7 +21,7 @@ window.Bounty = (() => {
     { id: 'raid:dwarf', icon: '⚒️', need: [1, 1], text: () => 'Win a raid on a dwarf stronghold', ok: () => marked('dwarf') },
     { id: 'boss:warchief', icon: `<span class="ico">${Art.piece('goblin')}</span>`, need: [1, 1], text: () => 'Defeat Grak the Goblin Warchief', ok: () => Boss.unlocked('warchief') },
     { id: 'boss:golem', icon: '🗿', need: [1, 1], text: () => 'Defeat the Stone Golem', ok: () => Boss.unlocked('golem') },
-    { id: 'boss:siren', icon: '🧜‍♀️', need: [1, 1], text: () => 'Defeat the Siren Queen', ok: () => Boss.unlocked('siren') },
+    { id: 'boss:kingcrab', icon: `<span class="ico">${Art.piece('crab')}</span>`, need: [1, 1], text: () => 'Defeat the King Crab', ok: () => Boss.unlocked('kingcrab') },
   ];
   const BONUS = ['key', 'bread', 'chowder', 'flask'];
 

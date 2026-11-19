@@ -77,8 +77,8 @@ window.Data = (() => {
     { id: 'forest', icon: '🌲', name: 'Forest', how: 'Reach Lv 35 in the Forest' },
     { id: 'mine',   icon: '⛏️', name: 'Iron Hills', how: 'Reach Lv 35 in the Iron Hills' },
     { id: 'ocean',  icon: '🌊', name: 'Sunlit Coast', how: 'Reach Lv 35 on the Sunlit Coast' },
-    { id: 'goblin', icon: '🔥', name: 'Goblin Village', how: 'Beat the Goblin Warband (their top rank)' },
-    { id: 'dwarf',  icon: '⚒️', name: 'Dwarf Stronghold', how: 'Beat the Dwarf Lords (their top rank)' },
+    { id: 'goblin', icon: '👑', name: 'The Goblin King', how: 'Defeat the Goblin King (Forest Lv 35)' },
+    { id: 'dwarf',  icon: '👑', name: 'The Dwarf King', how: 'Defeat the Dwarf King (Iron Hills Lv 35)' },
   ];
   const SLOTS = ['helmet', 'amulet', 'body', 'gloves', 'legs', 'shield', 'weapon', 'tool'];
   const slotOf = id => { const it = ITEMS[id]; return it.gear === 'armor' ? it.type : it.gear === 'trinket' ? 'amulet' : it.gear; };
@@ -163,6 +163,8 @@ window.Data = (() => {
     quick1: { name: 'Quicksilver tonic', icon: '⚡', art: 'pquick', potion: 'quick', power: 5, rank: 1, desc: '+5 ⚡ energy at once.' },
     quick2: { name: 'Strong quicksilver tonic', icon: '⚡', art: 'pquick', potion: 'quick', power: 10, rank: 2, desc: '+10 ⚡ energy at once.' },
     quick3: { name: 'Pure quicksilver', icon: '⚡', art: 'pquick', potion: 'quick', power: 99, rank: 3, desc: 'Fills your ⚡ energy to the brim.' },
+    kingclaw: gear('King\'s claw', 'baxe', 2, { sea: true, bane: 'sea', art: 'gear:baxe:2',
+      desc: 'Torn from the King Crab · sea gear: iron-strong, no forge needed · cleaves into monsters beside the target · bane of sea creatures.' }),
     horseshoe: { name: 'Golden Horseshoe', icon: '🧲', art: 'horseshoe', kit: true, desc: 'Won at the Harvest Fair. Rare finds turn up 15% more often on every trip.' },
     lamp:    { name: 'Miner\'s lamp', icon: '🏮', kit: true, desc: 'Buried finds glimmer so you can dig them up.' },
     // Specials (one use, tap to arm)
@@ -513,8 +515,10 @@ window.Data = (() => {
   // Energy grows with you: +1 max every 5 levels, +1 starting energy each new era.
   const maxEnergy = L => 10 + Math.floor(L / 5);
   const startEnergy = (L, gloves) => 3 + (ERA(L) - 1) + gloveEnergy(gloves);
-  const landLevel = runs => Math.min(LAND_MAX, 1 + Math.floor(runs * 2 / 3));
-  const enemyTier = wins => Math.min(4, 1 + Math.floor(wins / 2));
+  // A land gains a level every trip (a ★★★ trip counts double — see Gather.finish).
+  const landLevel = runs => Math.min(LAND_MAX, 1 + runs);
+  // Each keep you take is a step up the ladder: their next keep is held by tougher troops.
+  const enemyTier = wins => Math.min(4, 1 + wins);
   const TIER_NAMES = { goblin: ['Scouts', 'Warriors', 'Raiders', 'Warband'], dwarf: ['Miners', 'Guards', 'Ironclads', 'Lords'] };
   // What enemies carry at each rank: goblins wood → iron, dwarves iron → steel. Armor is their hardness.
   const ENEMY_GEAR = { goblin: [1, 1, 2, 2], dwarf: [2, 2, 3, 3] };
@@ -527,12 +531,13 @@ window.Data = (() => {
   // Roaming monsters on gathering boards: more of them, sooner, tougher as the land levels up (1–35).
   const landEra = L => (L < 10 ? 1 : L < 20 ? 2 : 3);
   const monsterPlan = L => ({
-    start: Math.min(3, Math.floor(L / 6)),                // on the board when you arrive
-    every: Math.max(3, 8 - Math.floor(L / 6)),            // a new one every N moves
-    max: Math.min(6, 2 + Math.floor(L / 7)),              // most on the board at once
-    hp: Math.round(7 + L * 0.5),
+    start: Math.min(3, 1 + Math.floor(L / 8)),            // on the board when you arrive
+    every: Math.max(3, 6 - Math.floor(L / 7)),            // a new one every N moves
+    max: Math.min(6, 2 + Math.floor(L / 6)),              // most on the board at once
+    hp: Math.round(8 + L * 0.6),
     armor: landEra(L), weapon: landEra(L),                // wood → iron (Lv 10) → steel (Lv 20)
-    attackEvery: 3,                                       // each one swings at you every N moves (first swing 2 moves after it appears)
+    attackEvery: 2,                                       // each one swings at you every N moves — pack food!
+    extra: Math.floor(L / 12),                            // and hits a little harder deeper in
   });
 
   // Revenge: win raids (or leave goblins alive) and they'll come for your Storehouse.

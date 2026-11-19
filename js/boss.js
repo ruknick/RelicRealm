@@ -39,6 +39,7 @@ window.Boss = (() => {
     },
     siren: {
       name: 'Nerissa, the Siren Queen', short: 'Nerissa', place: 'Siren\'s Grotto', icon: '🧜‍♀️', foodCost: 4,
+      deep: true,   // saved for the deep-water voyage (needs a boat) — not reachable from the shore
       unlock: { land: 'ocean', lv: 8 }, frame: 'ocean', scene: 'ocean', music: 'ocean',
       types: ['water', 'fish', 'seaweed', 'sand', 'driftwood'], loot: { water: 'water', fish: 'herring', driftwood: 'wood' },
       boss: { hp: 130, armor: 2, weapon: 2, kin: 'sea', art: 'siren', h: 2, scale: 1.08 },
@@ -52,6 +53,54 @@ window.Boss = (() => {
         <br>🌊 Coral spears and sea gear hit her harder · 💧 Water flasks clear flood-water.`,
       firstReward: { pearl: 8, coral: 8, shell: 6, gold: 30 }, reward: { pearl: 4, coral: 4, shell: 3 },
       firstItem: 'sirenpearl', xp: [120, 60],
+    },
+    kingcrab: {
+      name: 'the King Crab', short: 'The King Crab', place: 'King Crab\'s Reef', icon: `<span class="ico">${Art.piece('crab')}</span>`, foodCost: 4,
+      unlock: { land: 'ocean', lv: 8 }, frame: 'ocean', scene: 'ocean', music: 'ocean',
+      types: ['water', 'fish', 'seaweed', 'sand', 'driftwood'], loot: { water: 'water', fish: 'herring', driftwood: 'wood' },
+      boss: { hp: 140, armor: 2, weapon: 2, kin: 'sea', art: 'kingcrab', h: 2, scale: 1.2 },
+      minion: { name: 'shore crab', hp: 12, armor: 2, weapon: 1, kin: 'sea', art: 'crab' }, maxMinions: 3,
+      every: 3, cycle: ['pinch', 'crabs', 'harden', 'tide'],
+      hazard: { kind: 'tide', art: 'tide', mat: 'other', tip: 'Flood-water. Match beside it to clear it, or throw a 💧 Water flask.' },
+      side: { art: 'clam', give: { pearl: 1 }, tip: 'A giant clam. Match beside it to pry out a pearl.' },
+      startHazards: 1,
+      intro: 'The reef heaves. A crab the size of a cart rises out of the surf, a crown of barnacles on its shell.',
+      prep: `The King Crab rules the shore. It <b>snaps</b> its great claw, calls <b>crabs</b> to its side, <b>hunkers</b> into its shell to heal, and drags the <b>tide</b> over the board.
+        <br>🌊 Coral spears and sea gear hit it harder · 💧 Water flasks clear flood-water.`,
+      firstReward: { pearl: 6, coral: 8, shell: 10, gold: 30 }, reward: { pearl: 3, coral: 4, shell: 5 },
+      firstItem: 'kingclaw', xp: [120, 60],
+    },
+    goblinking: {
+      name: 'the Goblin King', short: 'The Goblin King', place: 'The Goblin King\'s Hall', icon: `<span class="ico">${Art.piece('gbrute')}</span>`, foodCost: 6,
+      unlock: { land: 'forest', lv: 35 }, frame: 'forest', scene: 'goblin', music: 'battle',
+      types: ['wood', 'stone', 'hide', 'berries', 'leaves'], loot: { wood: 'wood', hide: 'hide', berries: 'food' },
+      boss: { hp: 320, armor: 3, weapon: 3, art: 'goblinking', h: 2, scale: 1.25 },
+      minion: { name: 'goblin guard', hp: 22, armor: 3, weapon: 3, art: 'gbrute' }, maxMinions: 3,
+      every: 3, cycle: ['royalcry', 'barricade', 'charge', 'rally'],
+      hazard: { kind: 'barricade', art: 'fence', mat: 'wood', tip: 'A goblin barricade. Match beside it to knock it down.' },
+      side: { art: 'chest', give: { gold: 8, scrapiron: 4 }, tip: 'The king\'s plunder. Match beside it to crack it open.' },
+      startHazards: 3,
+      intro: 'Deep in the oldest part of the wood, on a throne of stolen Ashford timber, sits the one every goblin answers to.',
+      prep: `The Goblin King commands every goblin in the realm. He <b>calls his guard</b>, throws up <b>barricades</b>, <b>charges</b> you, and <b>rallies</b> to heal.
+        <br>👑 Beat him and the goblins' relic shard is yours.`,
+      firstReward: { gold: 120, goldbar: 2, ironwood: 8, oak: 10, leather: 8 }, reward: { gold: 40, ironwood: 3, leather: 3 },
+      shard: 'goblin', xp: [300, 120],
+    },
+    dwarfking: {
+      name: 'the Dwarf King', short: 'The Dwarf King', place: 'The Dwarf King\'s Throne', icon: `<span class="ico">${Art.piece('guard')}</span>`, foodCost: 6,
+      unlock: { land: 'mine', lv: 35 }, frame: 'mine', scene: 'dwarf', music: 'dwarf',
+      types: ['stone', 'ore', 'coal', 'gravel', 'bones'], loot: { ore: 'iron', coal: 'coal', stone: 'stone' },
+      boss: { hp: 360, armor: 4, weapon: 3, art: 'dwarfking', h: 2, scale: 1.25 },
+      minion: { name: 'dwarf guard', hp: 26, armor: 3, weapon: 3, art: 'guard' }, maxMinions: 3,
+      every: 3, cycle: ['stomp', 'royalcry', 'quake', 'rally'],
+      hazard: { kind: 'rockfall', art: 'boulder', mat: 'stone', tip: 'Fallen rock. Match beside it to clear it.' },
+      side: { art: 'vein', give: { iron: 6, silver: 2, starsilver: 1 }, tip: 'A rich vein in the throne room. Match beside it to mine it.' },
+      startHazards: 3,
+      intro: 'Behind the last sealed door of the Iron Hills, the Dwarf King rises from a throne of black iron, hammer in hand.',
+      prep: `The Dwarf King wears <b>mythic-hard</b> plate. He <b>brings down his hammer</b>, <b>calls his guard</b>, <b>shakes the hall</b>, and <b>rallies</b> to heal.
+        <br>👑 Beat him and the dwarves' relic shard is yours.`,
+      firstReward: { steel: 6, starsilver: 8, goldbar: 3, ruby: 2, sapphire: 2 }, reward: { steel: 2, starsilver: 3, silver: 3 },
+      shard: 'dwarf', xp: [320, 130],
     },
     dragon: {
       name: 'Emberwyrm', short: 'Emberwyrm', place: 'Dragon\'s Lair', icon: '🐉', foodCost: 6,
@@ -72,7 +121,7 @@ window.Boss = (() => {
     },
   };
   // Can this boss be fought yet? (Its land must be grown enough.)
-  const unlocked = kind => { const u = CONFIG[kind].unlock; return !u || Data.landLevel(App.state.lands[u.land].runs) >= u.lv; };
+  const unlocked = kind => { const C = CONFIG[kind], u = C.unlock; return !C.deep && (!u || Data.landLevel(App.state.lands[u.land].runs) >= u.lv); };
   const SIREN_LV = CONFIG.siren.unlock.lv;
 
   let board = null, run = null, cfg = CONFIG.dragon;
@@ -154,15 +203,22 @@ window.Boss = (() => {
       Sound.sfx('reveal');
       return `🎶 Nerissa sings… your will slips away (−${lost} ⚡)`;
     },
-    crabs() { const a = spawnMinion(), b = spawnMinion(); return a || b ? '🦀 Crabs scuttle to her side!' : '🦀 The crabs clack their claws…'; },
-    tide() { hazards(3, r => r >= ROWS - 3); return `🌊 The tide floods in and her trident lashes out! −${strikeYou()} ❤️`; },
+    crabs() { const a = spawnMinion(), b = spawnMinion(); return a || b ? `🦀 Crabs scuttle to ${cfg.short === 'Nerissa' ? 'her' : 'its'} side!` : '🦀 The crabs clack their claws…'; },
+    tide() { hazards(3, r => r >= ROWS - 3); return `🌊 The tide floods in and ${cfg.short} lashes out! −${strikeYou()} ❤️`; },
+    // The King Crab
+    pinch() { return `🦀 ${cfg.short} snaps its great claw! −${strikeYou(2)} ❤️`; },
+    harden() { const b = run.boss, heal = Math.min(12, b.maxHp - b.hp); b.hp += heal; board.renderPieces(); return heal ? `🐚 ${cfg.short} hunkers into its shell and heals (+${heal})!` : `🐚 ${cfg.short} clacks its shell…`; },
+    // The Kings
+    royalcry() { const a = spawnMinion(), b = spawnMinion(); Sound.sfx('drums'); return a || b ? `📯 ${cfg.short} calls the guard — ${cfg.minion.name}s rush in!` : `📯 ${cfg.short} roars — the hall shakes!`; },
+    rally() { const b = run.boss, heal = Math.min(20, b.maxHp - b.hp); b.hp += heal; board.renderPieces(); return heal ? `👑 ${cfg.short} rallies (+${heal})!` : `👑 ${cfg.short} glares down at you…`; },
+    stomp() { hazards(2); Sound.sfx('break'); return `⚒️ ${cfg.short} brings down his hammer! −${strikeYou(2)} ❤️`; },
     // Grak the Warchief
     warcry() { const a = spawnMinion(), b = Math.random() < 0.4 && spawnMinion(); Sound.sfx('drums'); return a || b ? '📯 Grak bellows a war-cry — raiders rush in!' : '📯 Grak bellows — his raiders roar back!'; },
     barricade() { hazards(3); return '🪵 Goblins throw up barricades across the clearing!'; },
-    charge() { return `💢 Grak charges you with his axe! −${strikeYou(1)} ❤️`; },
+    charge() { return `💢 ${cfg.short} charges you! −${strikeYou(1)} ❤️`; },
     // The Stone Golem
     quake() { hazards(3); const d = strikeYou(-2); Sound.sfx('break'); return `🪨 The ground quakes — rocks tumble down! −${d} ❤️`; },
-    slam() { return `👊 The Golem slams its fist down! −${strikeYou(3)} ❤️`; },
+    slam() { return `👊 ${cfg.short} slams its fist down! −${strikeYou(3)} ❤️`; },
     mend() {
       const b = run.boss, heal = Math.min(15, b.maxHp - b.hp);
       b.hp += heal;
@@ -357,6 +413,7 @@ window.Boss = (() => {
       Object.entries(first ? cfg.firstReward : cfg.reward).forEach(([k, n]) => { s.stockpile[k] += n; gained.push(`+${n} ${Data.RESOURCES[k].label}`); });
       if (first && cfg.firstItem) { App.addGear(cfg.firstItem); gained.push(`✨ <b>${Data.ITEMS[cfg.firstItem].name}</b> — ${Data.ITEMS[cfg.firstItem].desc}`); }
       if (kind === 'dragon') s.story.flags.dragonSlain = true;
+      if (cfg.shard && App.grantShard(cfg.shard)) { gained.push(`💎 <b>Relic shard!</b> The ${cfg.shard === 'goblin' ? 'goblins\'' : 'dwarves\''} shard is yours (${s.shards}/5).`); Sound.sfx('rare'); }
       if (first || Math.random() < 0.25) gained.push(`✦ <b>Wayfarer's Chart fragment</b> — ${App.grantChart()}`);
       App.bountyEvent?.(`boss:${kind}`);
       xp = cfg.xp[first ? 0 : 1];

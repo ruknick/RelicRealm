@@ -4,23 +4,26 @@ window.World = (() => {
   // raid target and boss lair are reached from inside it.
   const SPOTS = [
     { id: 'lair',   x: 80, y: 25.5, icon: '🐉', name: 'Dragon\'s Lair', sub: 'Emberwyrm', boss: 'dragon' },
-    { id: 'mine',   x: 24, y: 32.5, icon: '⛏️', name: 'Iron Hills', land: 'mine', raid: 'dwarf', lair: 'golem' },
-    { id: 'forest', x: 22, y: 66, icon: '🌲', name: 'Whispering Wood', land: 'forest', raid: 'goblin', lair: 'warchief' },
+    { id: 'mine',   x: 24, y: 32.5, icon: '⛏️', name: 'Iron Hills', land: 'mine', raid: 'dwarf', lairs: ['golem', 'dwarfking'] },
+    { id: 'forest', x: 22, y: 66, icon: '🌲', name: 'Whispering Wood', land: 'forest', raid: 'goblin', lairs: ['warchief', 'goblinking'] },
     { id: 'farm',   x: 55, y: 51, icon: '🌾', name: 'Golden Fields', land: 'farm' },
-    { id: 'ocean',  x: 85, y: 60, icon: '🌊', name: 'Sunlit Coast', land: 'ocean', lair: 'siren' },
+    { id: 'ocean',  x: 85, y: 60, icon: '🌊', name: 'Sunlit Coast', land: 'ocean', lairs: ['kingcrab'] },
     { id: 'camp',   x: 64, y: 77, icon: '🏰', name: 'Your Camp', sub: 'fortify', screen: 'fortify' },
     { id: 'craft',  x: 31, y: 89, icon: '⚒', art: 'smithhammer', name: 'Workshop', sub: 'craft', screen: 'craft' },
     { id: 'fair',   x: 54, y: 90, icon: '🎪', art: 'fairtent', name: 'Harvest Fair', sub: 'just for fun', screen: 'fair' },
     { id: 'kitchen', x: 12, y: 84.5, icon: '🍲', art: 'chowder', name: 'Kitchen', sub: 'cook', screen: 'craft', opts: { kitchen: true } },
     { id: 'beyond', x: 34, y: 9, icon: '❓', name: 'Beyond the Known Realm', sub: 'uncharted', locked: true },
   ];
-  const RAID = { goblin: { icon: '🔥', name: 'Raid the goblin village', how: 'follow 🐾 tracks in the Forest' }, dwarf: { icon: '⚒️', name: 'Raid the dwarf stronghold', how: 'find a ᚱ rune stone in the Iron Hills' } };
+  const RAID = { goblin: { icon: '🔥', name: 'Raid the goblin village', how: 'its 🐾 tracks appear on your next trip after that' }, dwarf: { icon: '⚒️', name: 'Raid the dwarf stronghold', how: 'its ᚱ rune stone appears on your next trip after that' } };
   let travelling = false;
   const LAND_NAME = { farm: 'Golden Fields', forest: 'Forest', mine: 'Iron Hills', ocean: 'Sunlit Coast' };
   // Before a boss's lair is found, the map only has rumors.
   const RUMOR = {
     siren: { hint: 'a song on the wind…', title: 'A song on the wind', text: 'Fishers say a voice sings from the rocks at night, and crabs gather on the shore to listen. No one who rows out there comes back.' },
     warchief: { hint: 'war drums in the trees…', title: 'War drums in the trees', text: 'Deep in the forest, drums beat every night. The goblin scouts all seem to answer to someone big.' },
+    kingcrab: { hint: 'the reef heaves…', title: 'The reef heaves', text: 'Fishers say something huge walks the reef at low tide, and every crab on the shore follows it.' },
+    goblinking: { hint: 'a throne in the deep wood…', title: 'A throne in the deep wood', text: 'Every goblin you meet answers to Grak — and Grak answers to someone. Only the deepest wood hides his hall.' },
+    dwarfking: { hint: 'a sealed door…', title: 'The last sealed door', text: 'The dwarves speak of their King only in whispers. His throne lies behind the last door in the deepest hill.' },
     golem: { hint: 'something moves in the deep…', title: 'Something moves in the deep', text: 'Miners whisper about a cave the dwarves walled up long ago — and about the grinding sound behind the wall.' },
   };
 
@@ -35,7 +38,7 @@ window.World = (() => {
       if (s.land) {
         sub = `Lv ${Data.landLevel(st.lands[s.land].runs)}`;
         if (s.raid && st.marked[s.raid] > 0) marks.push(`<span class="mk raid" title="raid ready">⚔️${st.marked[s.raid] > 1 ? st.marked[s.raid] : ''}</span>`);
-        if (s.lair && Boss.unlocked(s.lair)) marks.push(`<span class="mk boss" title="boss lair">${Boss.CONFIG[s.lair].icon}</span>`);
+        (s.lairs || []).filter(k => Boss.unlocked(k)).forEach(k => marks.push(`<span class="mk boss" title="boss lair">${Boss.CONFIG[k].icon}</span>`));
       }
       if (s.boss) { const wins = (st.bossWins || {})[s.boss] || 0; cls += ' bossspot'; sub = wins ? `slain ×${wins}` : s.sub; }
       if (s.id === 'beyond') sub = st.chart >= Data.CHART_PIECES ? 'the chart is whole!' : `chart ${st.chart || 0}/${Data.CHART_PIECES}`;
@@ -77,7 +80,7 @@ window.World = (() => {
       if (got.length) { bits.push(`Next at ⭐ ${n}: ${got.slice(0, 2).join(', ')}${got.length > 2 ? ` +${got.length - 2} more` : ''}`); break; }
     }
     const lairs = Object.values(Boss.CONFIG).filter(c => c.unlock && !Boss.unlocked(Object.keys(Boss.CONFIG).find(k => Boss.CONFIG[k] === c)))
-      .map(c => ({ c, trips: Math.ceil((c.unlock.lv - 1) * 3 / 2) - App.state.lands[c.unlock.land].runs }))
+      .filter(c => !c.deep).map(c => ({ c, trips: c.unlock.lv - 1 - App.state.lands[c.unlock.land].runs }))
       .filter(x => x.trips > 0).sort((a, b) => a.trips - b.trips);
     if (lairs[0]) bits.push(`${lairs[0].trips} more ${LAND_NAME[lairs[0].c.unlock.land]} trip${lairs[0].trips > 1 ? 's' : ''} to find ${lairs[0].c.place}`);
     return bits.length ? `🔓 ${bits.join(' · ')}` : '';
@@ -122,13 +125,16 @@ window.World = (() => {
     if (s.raid) {
       const R = RAID[s.raid], rank = Data.TIER_NAMES[s.raid][Data.enemyTier(st.enemyWins[s.raid]) - 1];
       if (st.marked[s.raid] > 0) buttons.push({ id: 'raid', label: `${R.icon} ${R.name} · ${rank}`, cls: 'danger' });
-      else notes.push(`${R.icon} <i>No ${s.raid === 'goblin' ? 'goblin village' : 'dwarf stronghold'} found yet — ${R.how}.</i>`);
+      else {
+        const next = 5 * (st.enemyWins[s.raid] + st.marked[s.raid] + 1);
+        notes.push(next <= 30 ? (lv >= next ? `${R.icon} <i>A ${s.raid === 'goblin' ? 'goblin keep' : 'dwarf stronghold'} is out there — ${s.raid === 'goblin' ? 'its 🐾 tracks' : 'its ᚱ rune stone'} will turn up on your next trip here.</i>` : `${R.icon} <i>The next ${s.raid === 'goblin' ? 'goblin keep' : 'dwarf stronghold'} turns up at ${LAND_NAME[s.land]} Lv ${next} — ${R.how}.</i>`) : `${R.icon} <i>You've taken every ${s.raid === 'goblin' ? 'goblin keep' : 'dwarf stronghold'}. Only their King remains.</i>`);
+      }
     }
-    if (s.lair) {
-      const C = Boss.CONFIG[s.lair];
-      if (Boss.unlocked(s.lair)) buttons.push({ id: 'boss', label: `${C.icon} ${C.place}`, cls: 'danger' });
-      else notes.push(`${C.icon} <i>${RUMOR[s.lair].text}</i> <small>(${LAND_NAME[s.land]} Lv ${C.unlock.lv})</small>`);
-    }
+    (s.lairs || []).forEach(k => {
+      const C = Boss.CONFIG[k];
+      if (Boss.unlocked(k)) buttons.push({ id: 'boss:' + k, label: `${C.icon} ${C.place}`, cls: 'danger' });
+      else notes.push(`${C.icon} <i>${RUMOR[k].text}</i> <small>(${LAND_NAME[s.land]} Lv ${C.unlock.lv})</small>`);
+    });
     if (buttons.length === 1 && !st.seenLandMenu?.[s.land]) {
       st.seenLandMenu = { ...(st.seenLandMenu || {}), [s.land]: true };
       App.save();
@@ -137,7 +143,7 @@ window.World = (() => {
     const c = await App.choose({ title: `${s.icon} ${s.name}`, html: notes.length ? `<div class="land-notes">${notes.map(n => `<p>${n}</p>`).join('')}</div>` : '<p class="hint">What will you do here?</p>', buttons });
     if (c === 'gather') App.go('gather', { land: s.land });
     else if (c === 'raid') App.prepareRaid(s.raid);
-    else if (c === 'boss') Boss.prepare(s.lair);
+    else if (c.startsWith('boss:')) Boss.prepare(c.slice(5));
   }
 
   return { render };
