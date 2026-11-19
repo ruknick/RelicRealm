@@ -429,7 +429,16 @@ window.App = (() => {
     if (Data.backpackSize(L) > Data.backpackSize(L - 1)) out.push(`🎒 backpack ${Data.backpackSize(L)}`);
     const st = Object.values(Data.STATIONS).find(s => s.lv === L && s.lv > 1);
     if (st) out.push(`${st.icon} you can now build the <b>${st.name}</b> in the Workshop`);
-    Data.RECIPES.filter(r => r.lv === L && L > 1).forEach(r => out.push(r.tier === 'food' ? `🍲 you can now cook <b>${Data.recipeName(r)}</b> in the Kitchen` : `⚒ you can now make <b>${Data.recipeName(r)}</b>`));
+    Data.RECIPES.filter(r => r.lv === L && L > 1).forEach(r => {
+      const it = Data.ITEMS[r.id], name = `<b>${Data.recipeName(r)}</b>`;
+      const pic = it && it.art ? `<span class="ico">${Art.piece(it.art)}</span>` : r.makes ? `<span class="ico">${Art.tile(Object.keys(r.makes)[0]) || ''}</span>` : '';
+      const where = Data.STATIONS[r.station] ? Data.STATIONS[r.station].name : 'Workshop';
+      out.push(r.tier === 'food' ? `${pic || '🍲'} cook ${name} in the Kitchen`
+        : r.tier === 'potion' ? `${pic || '⚗️'} brew ${name} in the Kitchen cauldron`
+        : r.tier === 'smelt' ? `${pic || '🔥'} make ${name} at the ${where}`
+        : it && it.gear ? `${pic} ${r.station === 'workbench' ? 'make' : 'forge'} the ${name} at the ${where}`
+        : `${pic || '⚒'} craft ${name} at the ${where}`);
+    });
     if (Data.ERA(L) > Data.ERA(L - 1)) out.unshift(`<b>The ${Data.ERA_NAME[Data.ERA(L)]} era begins!</b>`);
     return out;
   }
