@@ -418,7 +418,7 @@ window.Board = (() => {
       this.tray.querySelector('.spec.eat').onclick = () => {
         if (this.busy) return;
         const r = App.eatBest();
-        if (r && r.got) { this.float(this.centerCell(), `${App.foodName(r.k)} +${r.got} ❤️`, 'gain'); window.Sound?.sfx('found'); }
+        if (r && r.got) { this.float(this.centerCell(), `${App.foodName(r.k)} +${r.got} ❤️`, 'gain'); window.Sound?.sfx('found'); window.Story?.flag('ateTrip'); }
         else this.toast(!App.pouchTotal() ? '🍖 You packed no food. Pack some at Your Camp\'s Storehouse before you head out.' : '❤️ You\'re already at full health.', '', 2200);
         this.renderWeapons();
         this.hooks.onAte?.();

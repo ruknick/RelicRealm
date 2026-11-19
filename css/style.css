@@ -1583,3 +1583,40 @@ body[data-scene="farm"] #gather-hint { color: #3a2a10; font-weight: 600; }
 .lu-card .big { width: 100%; }
 .lu-conf { position: absolute; top: -20px; width: 8px; height: 13px; border-radius: 2px; animation: luFall linear forwards; }
 @keyframes luFall { to { transform: translateY(110vh) rotate(var(--spin)); } }
+
+/* ---------- story: dialogue cards, panels, remarks, journal tabs ---------- */
+.talk { position: fixed; inset: 0; z-index: 42; display: flex; align-items: flex-end; justify-content: center; padding: 16px 16px 28px;
+  background: linear-gradient(transparent 30%, rgba(8,5,2,.82)); opacity: 0; transition: opacity .2s; }
+.talk.show { opacity: 1; }
+.talk-card { width: 100%; max-width: 380px; color: var(--ink); border-radius: 12px; padding: 12px 14px 14px; border: 2px solid var(--ink);
+  background: radial-gradient(ellipse at 30% 15%, rgba(255,250,235,.7), transparent 60%), var(--paper); box-shadow: 0 10px 34px rgba(0,0,0,.6); }
+.talk.show .talk-card { animation: talkIn .35s cubic-bezier(.2,1.3,.4,1); }
+@keyframes talkIn { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.talk-title { font-family: Georgia, serif; font-size: .75rem; letter-spacing: 1.5px; text-transform: uppercase; color: #8a5d17; margin-bottom: 4px; }
+.talk-who { display: flex; align-items: center; gap: 10px; font-family: Georgia, serif; font-size: 1.05rem; }
+.talk-pic { flex: none; width: 64px; height: 64px; border-radius: 50%; overflow: hidden; border: 2px solid #6b4a10; background: radial-gradient(circle at 50% 35%, #f6ead0, #d9c08c); }
+.talk-pic svg, .remark-pic svg, .person-pic svg { width: 100%; height: 100%; display: block; }
+.talk-lines p { margin: 8px 0 0; font-family: Georgia, serif; font-size: 1rem; line-height: 1.45; }
+.talk-btns { display: grid; gap: 8px; margin-top: 12px; }
+.lore-art { width: 180px; margin: 0 auto; font-size: 0; filter: drop-shadow(0 6px 12px rgba(0,0,0,.35)); }
+.lore-art svg { width: 100%; height: auto; }
+.panel-pair { display: flex; gap: 4px; width: 260px; margin-left: -40px; } .panel-pair svg { width: 50%; }
+.remark { display: flex; gap: 10px; align-items: center; margin: 4px 0 10px; padding: 8px 10px; border-radius: 10px; color: var(--ink);
+  background: var(--paper); border: 1.5px solid var(--ink); box-shadow: 0 2px 6px rgba(0,0,0,.3); }
+.remark p { margin: 0; font-family: Georgia, serif; font-size: .88rem; line-height: 1.35; }
+.remark-pic { flex: none; width: 46px; height: 46px; border-radius: 50%; overflow: hidden; border: 1.5px solid #6b4a10; background: radial-gradient(circle at 50% 35%, #f6ead0, #d9c08c); }
+.jtabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 6px 0 10px; }
+.jtab { padding: 7px 4px; border-radius: 8px; border: 1.5px solid var(--ink); background: rgba(243,226,184,.6); color: var(--ink); font-family: Georgia, serif; font-weight: 700; font-size: .85rem; }
+.jtab.on { background: var(--paper); box-shadow: 0 0 0 2px var(--brass); }
+.jtab small { display: block; font-weight: 400; font-size: .7rem; color: var(--ink-soft); }
+.tale-list { list-style: none; padding: 0; margin: 6px 0 0; }
+.tale-list li { margin: 5px 0; font-size: .88rem; line-height: 1.4; } .tale-list li.locked { opacity: .55; }
+.jpage { margin: 6px 0; padding: 8px 10px; border-radius: 6px; background: #f6ead0; color: var(--ink); border: 1px solid rgba(43,27,13,.3); font-family: Georgia, serif; font-size: .9rem; }
+.jpage.locked { opacity: .5; }
+.person { display: flex; gap: 10px; align-items: center; margin: 6px 0; padding: 8px; border-radius: 10px; background: var(--paper); color: var(--ink); border: 1.5px solid var(--ink); }
+.person b { display: block; font-family: Georgia, serif; } .person small { font-size: .78rem; color: var(--ink-soft); }
+.person-pic { flex: none; width: 56px; height: 56px; border-radius: 50%; overflow: hidden; border: 1.5px solid #6b4a10; background: radial-gradient(circle at 50% 35%, #f6ead0, #d9c08c); }
+.jc-teller { display: flex; gap: 8px; align-items: center; margin: 4px 0; font-size: .8rem; color: var(--ink-soft); }
+.jc-teller .remark-pic { width: 32px; height: 32px; }
+
+.boss-quote { font-family: Georgia, serif; font-style: italic; padding: 8px 10px; border-left: 3px solid var(--brass); background: rgba(43,27,13,.06); margin: 0 0 8px; }

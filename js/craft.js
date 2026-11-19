@@ -133,7 +133,7 @@ window.Craft = (() => {
     const meals = R().filter(r => r.tier === 'food').sort((a, b) => a.lv - b.lv);
     const potions = R().filter(r => r.tier === 'potion').sort((a, b) => a.lv - b.lv);
     document.getElementById('craft-list').innerHTML =
-      `<p class="tab-sub">Meals and potions go to your bank — pack them at 🏰 Your Camp before a trip. Each one takes a backpack slot.</p>
+      `${Lore.remark('maren')}<p class="tab-sub">Meals and potions go to your bank — pack them at 🏰 Your Camp before a trip. Each one takes a backpack slot.</p>
        <div class="tier-h">🍲 Cook <small>· meals heal far more than raw food</small></div>${meals.map(card).join('')}
        <div class="tier-h">⚗️ Cauldron <small>· potions, drunk from the board tray</small></div>${potions.map(card).join('')}`;
     const root = document.getElementById('craft-list');
@@ -164,7 +164,7 @@ window.Craft = (() => {
           : `<button class="tier-fold" data-fold="${key}">🔒 Needs the <span class="si">${Art.stationArt(sid)}</span> <b>${S.name}</b> (Lv ${S.lv}) <small>· ${l.length} recipe${l.length > 1 ? 's' : ''} ▸</small></button>`;
       }).join('') || '<p class="hint">Nothing here yet.</p>';
     }
-    document.getElementById('craft-list').innerHTML = stationsStrip()
+    document.getElementById('craft-list').innerHTML = Lore.remark('bram') + stationsStrip()
       + `<div class="ctabs">${tabs.map(t => { const n = t.id === 'repair' ? reps.length : readyCount(t.list()); return `<button class="ctab${t.id === tab ? ' on' : ''}" data-tab="${t.id}"><span class="ti">${t.tile ? Art.tile(t.tile) : Art.piece(t.art)}</span><span class="tl">${t.label}</span>${n ? `<b>${n}</b>` : ''}</button>`; }).join('')}</div>`
       + `<p class="tab-sub">${T.sub}</p>` + body;
     const root = document.getElementById('craft-list');
@@ -285,6 +285,7 @@ window.Craft = (() => {
       if (!cur || (slot !== 'amulet' && Data.ITEMS[cur.id].tier < it.tier)) App.equip(slot, st().gear.length - 1);
     }
     Story.flag('crafted');
+    if (r.tier === 'food') Story.flag('cooked');
     App.save();
     forge.classList.add('done');
     item.classList.add('pop');

@@ -28,76 +28,157 @@ window.Story = (() => {
   ];
 
   // ---------- chapters ----------
-  // Each objective is checked against your save; finishing them all completes the chapter.
+  // Each chapter: who tells it, a few opening lines, goals checked against your save, a reward,
+  // and a short ending that leaves a question open. Some end on a full-screen story panel.
   const st = () => App.state;
   const ownsTier = t => [...st().gear, ...Object.values(st().equip).filter(Boolean)].some(g => Data.ITEMS[g.id].tier >= t && !Data.ITEMS[g.id].spoil && Data.ITEMS[g.id].gear !== 'trinket');
+  const landLv = k => Data.landLevel(st().lands[k].runs);
+  const beat = k => ((st().bossWins || {})[k] || 0) > 0;
+  const fl = k => !!(st().story && st().story.flags[k]);
+  const count = k => (st().story && st().story.counts && st().story.counts[k]) || 0;
+  const hasAmulet = () => [...st().gear, st().equip.amulet].filter(Boolean).some(g => Data.ITEMS[g.id].gear === 'trinket');
   const CHAPTERS = [
-    {
-      id: 'prologue', title: 'Prologue · From the Ashes',
-      intro: 'Ashford is gone, but the forest still stands, and so do you. Start again: gather what you can, forge something useful, and raise a camp the raiders can\'t simply walk into.',
+    { id: 'prologue', title: 'Prologue · From the Ashes', teller: 'maren',
+      intro: ['Ashford is ash. But you\'re alive, {name}, and so are a handful of us.', '"Wood first. Walls second. Grief can wait."'],
       goals: [
-        { text: 'Gather in the 🌲 Forest', spot: 'forest', done: () => st().lands.forest.runs >= 1 },
-        { text: 'Craft anything at the ⚒ Workshop', spot: 'craft', done: () => !!st().story.flags.crafted },
-        { text: 'Fortify 🏰 Your Camp', spot: 'camp', done: () => !!st().story.flags.fortify },
+        { text: 'Gather in the 🌲 Whispering Wood', spot: 'forest', done: () => st().lands.forest.runs >= 1 },
+        { text: 'Craft anything at the ⚒ Workshop', spot: 'craft', done: () => fl('crafted') },
+        { text: 'Fortify 🏰 Your Camp', spot: 'camp', done: () => fl('fortify') },
       ],
-      reward: { label: '🧢 Leather cap + 20 XP', give: () => { App.addGear('helmet1'); App.addXP(20); } },
-      outro: 'Smoke rises from your new camp. As you bank the fire, you notice small, clawed footprints in the mud by the trees, and a stolen Ashford cooking pot dropped beside them. Goblins.',
-    },
-    {
-      id: 'goblins', title: 'Chapter 1 · Goblin Trouble',
-      intro: 'The goblins who looted Ashford are still out there. Follow their tracks through the forest, find their village, and take back what\'s yours.',
+      reward: { label: 'Leather cap + 20 XP', give: () => { App.addGear('helmet1'); App.addXP(20); } },
+      outro: ['Smoke rises from a camp that wasn\'t here yesterday.', 'Maren hands you a bowl of something hot. "Good. Now we need proper food."'] },
+    { id: 'bread', title: 'Chapter 1 · Bread and Water', teller: 'maren',
+      intro: ['"We\'re starving, child. The old Ashford farms still stand — wheat, apples, chickens."', '"Bring me grain and water, and I\'ll show you bread."'],
       goals: [
-        { text: 'Find a goblin keep (reach Forest Lv 5, then follow the 🐾 tracks)', done: () => st().marked.goblin > 0 || st().enemyWins.goblin > 0 },
-        { text: 'Win a raid on the goblin keep', done: () => st().enemyWins.goblin >= 1 },
+        { text: 'Gather in the 🌾 Golden Fields', spot: 'farm', done: () => st().lands.farm.runs >= 1 },
+        { text: 'Bake Trail bread in the 🍲 Kitchen', spot: 'kitchen', done: () => fl('cooked') },
+        { text: 'Eat packed food on a trip (pack it at 🏰 Your Camp)', spot: 'camp', done: () => fl('ateTrip') },
       ],
-      reward: { label: '🗝️ Old key + 30 XP', give: () => { st().inventory.key++; App.addXP(30); } },
-      outro: 'Among the goblin loot you find a torn map with a dwarf rune scratched on it and a note in goblin scrawl: "shards only show for the strongest." Whatever it means, the dwarves in the hills may know more.',
-    },
-    {
-      id: 'dwarves', title: 'Chapter 2 · Iron in the Hills',
-      intro: 'Wood and stone won\'t be enough against what\'s coming. The Iron Hills hold ore and coal, and somewhere under them the dwarves guard their halls, and maybe a relic shard.',
+      reward: { label: 'Leather gloves + 25 XP', give: () => { App.addGear('gloves1'); App.addXP(25); } },
+      outro: ['Maren turns a coin in her fingers — an Ashford penny, found in a goblin\'s pocket.', '"Goblins don\'t spend coins. So who\'s paying them?"'] },
+    { id: 'tracks', title: 'Chapter 2 · Tracks in the Mud', teller: 'maren',
+      intro: ['Goblins keep creeping round the camp at night.', '"Drive them off — and keep your eyes open for where they come from."'],
       goals: [
-        { text: 'Gather in the ⛏️ Iron Hills', done: () => st().lands.mine.runs >= 1 },
-        { text: 'Forge any iron gear (weapon, tool or armor)', done: () => ownsTier(2) },
-        { text: 'Win a raid on a ⚒️ Dwarf Stronghold', done: () => st().enemyWins.dwarf >= 1 },
+        { text: 'Defeat 3 goblin raiders in the Forest', spot: 'forest', done: () => count('goblins') >= 3 },
+        { text: 'Open a locked chest (find its key on the board)', spot: 'forest', done: () => fl('chest') },
+        { text: 'Reach Whispering Wood Lv 5', spot: 'forest', done: () => landLv('forest') >= 5 },
       ],
-      reward: { label: '⛑️ Iron helm + 40 XP', give: () => { App.addGear('helmet2'); App.addXP(40); } },
-      outro: 'The dwarf chief, Thrain Ironbeard, lowers his axe. "Ye fight well for a surface-dweller. Emberwyrm burned our forges too, ye know. Fire must be met with water. Go to the coast, and learn."',
-    },
-    {
-      id: 'coast', title: 'Chapter 3 · Salt and Pearls',
-      intro: 'Thrain\'s advice leads you to the Sunlit Coast. Fresh water is the only thing that stops dragonfire, and the old fishers say the sea gives up treasures to the patient.',
+      reward: { label: '2 Old keys + 30 XP', give: () => { st().inventory.key += 2; App.addXP(30); } },
+      outro: ['Fresh tracks lead deeper into the wood. Something heavy was dragged between them.', '"Follow them," says Maren. "Carefully."'] },
+    { id: 'bell', title: 'Chapter 3 · The Stolen Bell', teller: 'maren',
+      intro: ['The tracks lead to a goblin keep walled with stolen Ashford timber.', '"Take it back," says Maren. "And build us a wall — they\'ll want revenge."'],
       goals: [
-        { text: 'Gather on the 🌊 Sunlit Coast', done: () => st().lands.ocean.runs >= 1 },
-        { text: 'Find a pearl', done: () => !!st().seen.pearl || st().stockpile.pearl > 0 },
-        { text: 'Craft 2 💧 Water flasks', done: () => st().inventory.flask >= 2 },
+        { text: 'Take the first goblin keep', spot: 'forest', done: () => st().enemyWins.goblin >= 1 },
+        { text: 'Build a stone wall at the ⚒ Workshop', spot: 'craft', done: () => (st().inventory.wall || 0) > 0 || Object.values((st().camp || {}).cells || {}).includes('wall') },
       ],
-      reward: { label: '💎 2 Sapphires + 50 XP', give: () => { st().stockpile.sapphire += 2; App.addXP(50); } },
-      outro: 'An old fisher watches you fill your flasks. "Water\'ll douse the flames, aye. But to stand in front of that wyrm, you\'ll want wood that never burns: elderwood, from the deep forest. And you\'ll want the Crown."',
-    },
-    {
-      id: 'crown', title: 'Chapter 4 · The Old King\'s Crown',
-      intro: 'The relic shards are bound to the land itself. Each one reveals itself only to someone who has mastered its place: the deepest forest, the richest hills, the farthest coast, and the mightiest goblin and dwarf war-bands. Master them all, melt gold into bars, and forge the Crown anew.',
+      reward: { label: 'Wooden buckler + 40 XP', give: () => { App.addGear('shield1'); App.addXP(40); } },
+      panel: 'bell',
+      outro: ['Inside the keep: Ashford\'s church bell. Maren turns it over and goes very quiet.', '"That bell rang over my wedding. And goblins can\'t write."'] },
+    { id: 'grak', title: 'Chapter 4 · Grak\'s Drums', teller: 'bram',
+      intro: ['Bram wipes his hands on his apron. "Drums in the wood every night. That\'s Grak, the Warchief."', '"Big, loud, and he swings a dwarf-made axe. Don\'t let him hit you."'],
+      goals: [{ text: 'Defeat Grak in the Warchief\'s Clearing (Forest Lv 6)', spot: 'forest', done: () => beat('warchief') }],
+      reward: { label: '6 Oak + 50 XP', give: () => { st().stockpile.oak += 6; App.addXP(50); } },
+      outro: ['Grak\'s axe is dwarf-made, all right. The runes on it belong to a dwarf clan.', 'Bram frowns. "Dwarves don\'t trade with goblins. Something stinks."'] },
+    { id: 'ore', title: 'Chapter 5 · Fire and Ore', teller: 'bram',
+      intro: ['"I need real metal," says Bram. "The Iron Hills are full of ore — if the dwarves let you near it."', '"Build me a smelter."'],
       goals: [
-        { text: 'Earn all 5 💎 relic shards (Lv 35 in each land, defeat the Goblin King & the Dwarf King)', done: () => Object.keys(st().shardFrom || {}).length >= 5 || st().inventory.crown > 0 },
-        { text: 'Forge the 👑 Old King\'s Crown (5 shards + 3 gold bars)', done: () => st().inventory.crown > 0 },
-        { text: 'Forge any steel gear', done: () => ownsTier(3) },
-        { text: 'Wear armor in every slot (helmet, body, gloves, legs, shield)', done: () => ['helmet', 'body', 'gloves', 'legs', 'shield'].every(s => st().equip[s]) },
+        { text: 'Gather in the ⛏️ Iron Hills', spot: 'mine', done: () => st().lands.mine.runs >= 1 },
+        { text: 'Build the Smelter (Lv 8)', spot: 'craft', done: () => !!st().stations.smelter },
+        { text: 'Have 5 iron bars', spot: 'craft', done: () => st().stockpile.ironbar >= 5 || !!st().stations.forge },
       ],
-      reward: { label: '🌳 3 Elderwood + 80 XP', give: () => { st().stockpile.elderwood += 3; App.addXP(80); } },
-      outro: 'The Crown is whole. When you lift it, the five relics glow, and far to the north the fire mountain answers with a rumble. Emberwyrm knows you\'re coming.',
-    },
-    {
-      id: 'dragon', title: 'Chapter 5 · Emberwyrm',
-      intro: 'Everything has led here. Gather water, elderwood and steel, then climb the fire mountain. Lava spreads across the dragon\'s lair, and Emberwyrm sleeps on the king\'s stolen gold.',
+      reward: { label: '8 Coal + 50 XP', give: () => { st().stockpile.coal += 8; App.addXP(50); } },
+      outro: ['In the hills a dwarf captain, Thrain Ironbeard, threw you out at axe-point.', '"Thief," he called you. Thief of what?'] },
+    { id: 'forge', title: 'Chapter 6 · The Forge', teller: 'bram',
+      intro: ['"Now a proper forge," says Bram, very nearly smiling. "Iron, not wood. Iron!"'],
       goals: [
-        { text: 'Carry 3 💧 Water flasks', done: () => st().inventory.flask >= 3 },
-        { text: 'Craft an 🛡️ Elderwood ward', done: () => st().inventory.elderward > 0 },
-        { text: 'Defeat Emberwyrm in the 🐉 Dragon\'s Lair', done: () => !!st().story.flags.dragonSlain },
+        { text: 'Build the Forge (Lv 10)', spot: 'craft', done: () => !!st().stations.forge },
+        { text: 'Forge any iron gear', spot: 'craft', done: () => ownsTier(2) },
+      ],
+      reward: { label: 'Iron gauntlets + 60 XP', give: () => { App.addGear('gloves2'); App.addXP(60); } },
+      outro: ['The forge roars. Bram turns an old Ashford coin over in the firelight: stamped on the back, a tiny silver seal.', '"Seen that mark before," he mutters. "Can\'t think where."'] },
+    { id: 'salt', title: 'Chapter 7 · Salt and Pearls', teller: 'wren',
+      intro: ['A girl with red hair is mending nets on the shore. "I\'m Wren. You\'re the one rebuilding Ashford?"', '"Help me with the crabs and I\'ll show you where the pearls hide."'],
+      goals: [
+        { text: 'Gather on the 🌊 Sunlit Coast', spot: 'ocean', done: () => st().lands.ocean.runs >= 1 },
+        { text: 'Find a pearl', spot: 'ocean', done: () => !!st().seen.pearl || st().stockpile.pearl > 0 },
+        { text: 'Craft 2 💧 Water flasks', spot: 'craft', done: () => st().inventory.flask >= 2 },
+      ],
+      reward: { label: '2 Sapphires + 60 XP', give: () => { st().stockpile.sapphire += 2; App.addXP(60); } },
+      outro: ['Wren\'s grandfather watches you from his doorway and says nothing.', '"He saw something the night Ashford burned," Wren whispers. "He won\'t say what."'] },
+    { id: 'crab', title: 'Chapter 8 · The King of the Shore', teller: 'wren',
+      intro: ['"The King Crab has taken the harbour," says Wren. "No boat goes out while he sits on the reef."'],
+      goals: [{ text: 'Defeat the King Crab (Coast Lv 8)', spot: 'ocean', done: () => beat('kingcrab') }],
+      reward: { label: '6 Crab shells + 70 XP', give: () => { st().stockpile.shell += 6; App.addXP(70); } },
+      outro: ['The boats go out again, and Wren\'s grandfather finally talks:', '"A tall ship. A silver sail. Loading the king\'s crates by torchlight, the night Ashford burned."'] },
+    { id: 'stones', title: 'Chapter 9 · Stones of Power', teller: 'ysolde',
+      intro: ['"Sit, sit." Madame Ysolde shuffles her cards. "The gems remember the Crown, darling. Wear one."', '"And look for the silver seal. Always the silver seal."'],
+      goals: [
+        { text: 'Find a gem in the Iron Hills', spot: 'mine', done: () => ['emerald', 'sapphire', 'ruby'].some(k => st().seen[k] || st().stockpile[k] > 0) },
+        { text: 'Smelt a silver bar', spot: 'craft', done: () => st().stockpile.silverbar > 0 || hasAmulet() },
+        { text: 'Craft an amulet', spot: 'craft', done: () => hasAmulet() },
+      ],
+      reward: { label: '4 Silver + 80 XP', give: () => { st().stockpile.silver += 4; App.addXP(80); } },
+      outro: ['Ysolde turns her last card: a ship with a silver sail.', '"Ah," she says softly. "Him." And she won\'t say another word.'] },
+    { id: 'thrain', title: 'Chapter 10 · Thrain\'s Test', teller: 'thrain',
+      intro: ['Thrain blocks the road. "Ye want into our halls? Prove ye\'re no thief."', '"Take one of our strongholds — fairly — and wear proper armor while ye do it."'],
+      goals: [
+        { text: 'Take a dwarf stronghold', spot: 'mine', done: () => st().enemyWins.dwarf >= 1 },
+        { text: 'Wear armor in every slot (helmet, body, gloves, legs, shield)', done: () => ['helmet', 'body', 'gloves', 'legs', 'shield'].every(k => st().equip[k]) },
+      ],
+      reward: { label: '6 Iron bars + 100 XP', give: () => { st().stockpile.ironbar += 6; App.addXP(100); } },
+      outro: ['Thrain lowers his axe. "Ye fight well for a surface-dweller."', '"Come to the Dwarven Forge. There\'s something ye should know."'] },
+    { id: 'hammer', title: 'Chapter 11 · The Missing Hammer', teller: 'thrain',
+      intro: ['"Years ago our great hammer was stolen," says Thrain. "The only tool in the realm that could cut the Crown\'s gold."', '"Learn our steel. Then help me find who took it."'],
+      goals: [
+        { text: 'Build the Dwarven Forge (Lv 20)', spot: 'craft', done: () => !!st().stations.dforge },
+        { text: 'Forge any steel gear', spot: 'craft', done: () => ownsTier(3) },
+      ],
+      reward: { label: 'Steel helm + 120 XP', give: () => { App.addGear('helmet3'); App.addXP(120); } },
+      panel: 'oath',
+      outro: ['Thrain watches your first steel cool. "Good."', '"The Golem guards the empty hammer vault. It saw the thief."'] },
+    { id: 'golem', title: 'Chapter 12 · The Golem\'s Vault', teller: 'thrain',
+      intro: ['"The Golem has stood in the hammer vault for a hundred years," says Thrain. "It lets no one pass. Not even me."'],
+      goals: [{ text: 'Defeat the Golem (Iron Hills Lv 12)', spot: 'mine', done: () => beat('golem') }],
+      reward: { label: '2 Emeralds + 140 XP', give: () => { st().stockpile.emerald += 2; App.addXP(140); } },
+      outro: ['Carved on the vault wall by the Golem\'s own stone hand: a man in fine robes, holding the hammer.', 'On his finger, a silver ring.'] },
+    { id: 'kings', title: 'Chapter 13 · Two Kings', teller: 'thrain',
+      intro: ['"Both kings were paid by the same man," Thrain growls. "I\'d stake my beard on it."', '"Clear the keeps, climb to their halls, and make them talk."'],
+      goals: [
+        { text: 'Defeat the Goblin King (Forest Lv 35)', spot: 'forest', done: () => beat('goblinking') },
+        { text: 'Defeat the Dwarf King (Iron Hills Lv 35)', spot: 'mine', done: () => beat('dwarfking') },
+      ],
+      reward: { label: '2 Gold bars + 200 XP', give: () => { st().stockpile.goldbar += 2; App.addXP(200); } },
+      panel: 'kings',
+      outro: ['Two letters. One seal. One name: M.', 'Maren goes pale. "Morvane," she whispers. "The King\'s steward."'] },
+    { id: 'crown', title: 'Chapter 14 · The Old King\'s Crown', teller: 'maren',
+      intro: ['"Five shards, gold bars, and Bram\'s best work," says Maren. "Let\'s make the Crown whole."'],
+      goals: [{ text: 'Forge the 👑 Old King\'s Crown (5 shards + 3 gold bars)', spot: 'craft', done: () => st().inventory.crown > 0 }],
+      reward: { label: '3 Elderwood + 200 XP', give: () => { st().stockpile.elderwood += 3; App.addXP(200); } },
+      panel: 'crown',
+      outro: ['The Crown glows — but one socket stays empty.', '"The binding stone," Maren says quietly. "Whoever holds it holds the dragon\'s chain."'] },
+    { id: 'star', title: 'Chapter 15 · Starsilver', teller: 'bram',
+      intro: ['"Only starsilver bites dragon scale," says Bram. "I\'ll need the Star Anvil — and you to bring me the metal."'],
+      goals: [
+        { text: 'Build the Star Anvil (Lv 35)', spot: 'craft', done: () => !!st().stations.staranvil },
+        { text: 'Forge any mythic gear', spot: 'craft', done: () => ownsTier(4) },
+      ],
+      reward: { label: '250 XP', give: () => { App.addXP(250); } },
+      outro: ['Bram hands you the finished blade without a word.', 'Then: "Come back. That\'s an order."'] },
+    { id: 'dragon', title: 'Chapter 16 · Emberwyrm', teller: 'maren',
+      intro: ['"Climb the fire mountain," says Maren. "Take water. Take your ward. And come home."'],
+      goals: [
+        { text: 'Carry 3 💧 Water flasks', spot: 'craft', done: () => st().inventory.flask >= 3 },
+        { text: 'Carry an Elderwood ward', spot: 'craft', done: () => st().inventory.elderward > 0 },
+        { text: 'Defeat Emberwyrm in the 🐉 Dragon\'s Lair', spot: 'lair', done: () => fl('dragonSlain') },
       ],
       reward: null,
-      outro: '',
-    },
+      panel: 'chain',
+      outro: ['The dragon flies free into the smoke. In its hoard you find the Old King\'s journal.', 'Its last page names the one who did all this: Morvane.'] },
+    { id: 'beyond', title: 'Epilogue · Beyond the Realm', teller: 'journal',
+      intro: ['"If anyone reads this: it was Morvane. Find the regalia. Put it right."', 'Morvane sailed beyond the map with the Lost Regalia. To follow him you\'ll need the whole Wayfarer\'s Chart — and a boat.'],
+      goals: [{ text: 'Complete the Wayfarer\'s Chart', done: () => (st().chart || 0) >= Data.CHART_PIECES }],
+      reward: null,
+      outro: ['To be continued…'] },
   ];
 
   // First visit to each place on the map.
@@ -225,19 +306,53 @@ window.Story = (() => {
   // ---------- chapters ----------
   const chapter = () => CHAPTERS[Math.min(ensure().chapter, CHAPTERS.length - 1)];
   // Called on returning to the map: finish the chapter if every goal is met.
-  async function check() {
+  // Saves from before the story rewrite: move to the matching new chapter (finishing any whose goals
+  // are already met, quietly), and mark the land tales already passed as read (they stay in the Journal).
+  const OLD_CHAPTER = [0, 2, 5, 7, 13, 16];
+  function migrate() {
     const s = ensure();
-    if (!App.state.profile || s.chapter >= CHAPTERS.length - 1) return;
-    const ch = CHAPTERS[s.chapter];
-    if (!ch.goals.every(g => g.done())) return;
-    s.chapter++;
-    ch.reward?.give();
+    if (s.v === 2) return;
+    s.v = 2;
+    if (App.state.profile) {
+      let c = OLD_CHAPTER[Math.min(s.chapter || 0, OLD_CHAPTER.length - 1)];
+      while (c < CHAPTERS.length - 1 && CHAPTERS[c].goals.every(g => g.done())) c++;
+      s.chapter = c;
+      s.tales ||= {};
+      ['forest', 'mine', 'ocean', 'farm'].forEach(k => { s.tales[k] = Math.min(35, Math.floor(landLv(k) / 5) * 5); });
+      if ((s.tales.forest || 0) >= 15 && !s.flags.pip) s.flags.pip = 'spared';
+    }
     App.save();
-    Sound.sfx('victory');
-    await App.choose({ title: `✓ ${ch.title}`, html: `<p class="story-text">${fill(ch.outro)}</p><p class="reward">Reward: <b>${ch.reward.label}</b></p>`, buttons: [{ id: 'ok', label: 'Continue →' }] });
-    const next = CHAPTERS[s.chapter];
-    await App.choose({ title: `📜 ${next.title}`, html: `<p class="story-text">${fill(next.intro)}</p>${goalList(next)}`, buttons: [{ id: 'ok', label: 'Onward' }] });
-    App.go('home');
+  }
+
+  // Called on the map: tell what piled up (tales, pages), then finish chapters whose goals are met.
+  let checking = false;
+  async function check() {
+    if (checking || !App.state.profile) return;
+    checking = true;
+    try {
+      const s = ensure();
+      migrate();
+      await Lore.playQueued();
+      s.shown ||= {};
+      if (!s.shown[s.chapter]) {   // the current chapter's opening lines, once
+        s.shown[s.chapter] = true; App.save();
+        const ch = CHAPTERS[s.chapter];
+        await Lore.say({ who: ch.teller, title: `📜 ${ch.title}`, lines: [...ch.intro, goalList(ch)] });
+      }
+      while (s.chapter < CHAPTERS.length - 1 && CHAPTERS[s.chapter].goals.every(g => g.done())) {
+        const ch = CHAPTERS[s.chapter];
+        s.chapter++;
+        ch.reward?.give();
+        App.save();
+        Sound.sfx('victory');
+        await Lore.say({ who: ch.teller, title: `✓ ${ch.title}`, lines: [...ch.outro, ...(ch.reward ? [`<span class="reward">Reward: <b>${ch.reward.label}</b></span>`] : [])] });
+        if (ch.panel) await Lore.panel(ch.panel);
+        const next = CHAPTERS[s.chapter];
+        s.shown[s.chapter] = true; App.save();
+        await Lore.say({ who: next.teller, title: `📜 ${next.title}`, lines: [...next.intro, goalList(next)] });
+      }
+    } finally { checking = false; }
+    if (!document.getElementById('screen-home').classList.contains('hidden')) World.render();
   }
   const goalList = ch => `<ul class="goals">${ch.goals.map(g => `<li class="${g.done() ? 'done' : ''}">${g.done() ? '✓' : '○'} ${g.text}</li>`).join('')}</ul>`;
 
@@ -248,18 +363,35 @@ window.Story = (() => {
     return `<button class="quest-banner" id="quest-banner"><span>📜 ${ch.title}</span><small>${next ? next.text : 'All done! Return to the map.'}</small></button>`;
   }
 
+  // The Journal: Chapters · Tales of the lands · Lost pages · People.
+  let jtab = 'chapters';
   function journal() {
     const s = ensure(), el = document.getElementById('journal-list');
-    el.innerHTML = CHAPTERS.map((ch, i) => {
-      if (i > s.chapter) return `<div class="jchap locked"><b>${ch.title.split('·')[0]}· ???</b></div>`;
-      const done = i < s.chapter;
-      return `<div class="jchap${done ? ' done' : ' now'}"><div class="jc-title">${done ? '✓ ' : ''}${ch.title}</div>
-        <p class="story-text">${fill(ch.intro)}</p>${goalList(ch)}
-        ${done && ch.outro ? `<p class="story-text outro">${fill(ch.outro)}</p>` : ''}
-        ${ch.reward ? `<p class="reward">${done ? 'Earned' : 'Reward'}: ${ch.reward.label}</p>` : ''}</div>`;
-    }).join('') + '<button class="link" id="j-intro">📖 Read the opening tale again</button>';
-    document.getElementById('j-intro').onclick = () => intro();
+    migrate();
+    const pages = (s.pages || []).length, people = Object.keys(s.met || {}).length;
+    const tabs = [['chapters', 'Chapters', `${Math.min(s.chapter + 1, CHAPTERS.length)}/${CHAPTERS.length}`], ['tales', 'Tales', 'of the lands'], ['pages', 'Pages', `${pages}/${Lore.PAGES.length}`], ['people', 'People', `${people} met`]];
+    let body = '';
+    if (jtab === 'chapters') {
+      body = CHAPTERS.map((ch, i) => {
+        if (i > s.chapter) return `<div class="jchap locked"><b>${ch.title.split('·')[0]}· ???</b></div>`;
+        const done = i < s.chapter, T = Lore.CAST[ch.teller];
+        return `<div class="jchap${done ? ' done' : ' now'}"><div class="jc-title">${done ? '✓ ' : ''}${ch.title}</div>
+          <div class="jc-teller"><span class="remark-pic">${T.pic()}</span>told by ${T.name}</div>
+          ${ch.intro.map(l => `<p class="story-text">${fill(l)}</p>`).join('')}${goalList(ch)}
+          ${done && ch.outro ? ch.outro.map(l => `<p class="story-text outro">${fill(l)}</p>`).join('') : ''}
+          ${ch.reward ? `<p class="reward">${done ? 'Earned' : 'Reward'}: ${ch.reward.label}</p>` : ''}</div>`;
+      }).join('') + '<button class="link" id="j-intro">📖 Read the opening tale again</button>';
+    } else if (jtab === 'tales') body = Lore.talesHtml();
+    else if (jtab === 'pages') body = Lore.pagesHtml();
+    else body = Lore.peopleHtml();
+    el.innerHTML = `<div class="jtabs">${tabs.map(([id, label, sub]) => `<button class="jtab${jtab === id ? ' on' : ''}" data-jt="${id}">${label}<small>${sub}</small></button>`).join('')}</div>${body}`;
+    el.querySelectorAll('[data-jt]').forEach(b => { b.onclick = () => { jtab = b.dataset.jt; journal(); }; });
+    const ji = document.getElementById('j-intro');
+    if (ji) ji.onclick = () => intro();
   }
+
+  // Count something the story is waiting for (e.g. goblins defeated).
+  function countUp(k, n = 1) { const s = ensure(); s.counts ||= {}; s.counts[k] = (s.counts[k] || 0) + n; App.save(); }
 
   // Introduce a place the first time you travel there.
   async function visit(id) {
@@ -273,5 +405,5 @@ window.Story = (() => {
   // Which map spot the story wants you at next (it glows on the map early on).
   const nextSpot = () => { const g = chapter().goals.find(x => !x.done()); return g && g.spot; };
 
-  return { nextSpot, GAME, ORIGINS, title, create, intro, check, banner, journal, visit, flag, ensure };
+  return { nextSpot, GAME, ORIGINS, title, create, intro, check, banner, journal, visit, flag, ensure, countUp, CHAPTERS, migrate };
 })();

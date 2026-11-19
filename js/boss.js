@@ -372,7 +372,7 @@ window.Boss = (() => {
     }).then(ch => {
       if (ch !== 'go') { App.go('home'); return; }
       App.save();
-      App.go('boss', { kind });
+      Lore.bossBefore(kind).then(() => App.go('boss', { kind }));
     });
   }
 
@@ -412,7 +412,7 @@ window.Boss = (() => {
       s.bossWins[kind] = (s.bossWins[kind] || 0) + 1;
       Object.entries(first ? cfg.firstReward : cfg.reward).forEach(([k, n]) => { s.stockpile[k] += n; gained.push(`+${n} ${Data.RESOURCES[k].label}`); });
       if (first && cfg.firstItem) { App.addGear(cfg.firstItem); gained.push(`✨ <b>${Data.ITEMS[cfg.firstItem].name}</b> — ${Data.ITEMS[cfg.firstItem].desc}`); }
-      if (kind === 'dragon') s.story.flags.dragonSlain = true;
+      if (kind === 'dragon') { s.story.flags.dragonSlain = true; if (Lore.findPage(20)) gained.push('📜 <b>The Old King\'s journal</b> — its last page is in your Journal'); }
       if (cfg.shard && App.grantShard(cfg.shard)) { gained.push(`💎 <b>Relic shard!</b> The ${cfg.shard === 'goblin' ? 'goblins\'' : 'dwarves\''} shard is yours (${s.shards}/5).`); Sound.sfx('rare'); }
       if (first || Math.random() < 0.25) gained.push(`✦ <b>Wayfarer's Chart fragment</b> — ${App.grantChart()}`);
       App.bountyEvent?.(`boss:${kind}`);
@@ -432,7 +432,7 @@ window.Boss = (() => {
       : `You escaped. ${cfg.short} had ${Math.ceil(run.boss.hp)}/${run.boss.maxHp} ❤️ left.`;
     App.choose({
       title,
-      html: `<p>${line}</p>${gained.length ? `<div class="sum-spoils"><b>Brought home</b><br>${gained.join('<br>')}</div>` : ''}`,
+      html: `${won && Lore.bossAfter(kind) ? `<p class="boss-quote">${Lore.bossAfter(kind)}</p>` : ''}<p>${line}</p>${gained.length ? `<div class="sum-spoils"><b>Brought home</b><br>${gained.join('<br>')}</div>` : ''}`,
       buttons: [{ id: 'home', label: 'Back to the map' }],
     }).then(async () => {
       if (first && kind === 'dragon') {

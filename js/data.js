@@ -336,6 +336,7 @@ window.Data = (() => {
     barrel:    { icon: '💧', name: 'Fresh-water barrel', desc: '+3 water', art: 'barrel' },
     sack:      { icon: '🌾', name: 'Sack of grain', desc: '+4 wheat', art: 'sack' },
     eggs:      { icon: '🥚', name: 'Nest of eggs', desc: '+3 eggs', art: 'egg' },
+    page:      { icon: '📜', name: 'Lost diary page', desc: 'A torn page of the Old King\'s diary', art: 'page' },
   };
 
   function rollFrom(list) {

@@ -572,6 +572,11 @@ window.Art = (() => {
       <path d="M26 6h12v4h-2v8c10 3 16 11 16 21 0 11-9 18-20 18S12 50 12 39c0-10 6-18 16-21v-8h-2z" fill="#e8f1f4" stroke="#2b1b0d" stroke-width="1.6" stroke-linejoin="round"/>
       <path d="M14.5 36h35c.5 1 .5 2 .5 3 0 9.5-8 16-18 16s-18-6.5-18-16c0-1 0-2 .5-3z" fill="#c9d4dc"/><path d="M15 40q17 5 34 0" stroke="#6e7a86" stroke-width="1.4" fill="none" opacity=".6"/>
       <path d="M25 4h14v4H25z" fill="#9a6a3a" stroke="#2b1b0d" stroke-width="1.2"/><path d="M19 30q2-6 8-9" stroke="#fff" stroke-width="2.4" opacity=".7" fill="none" stroke-linecap="round"/><path d="M33 40l-5 8h4l-2 7 7-9h-4l2-6z" fill="#f3d36a" stroke="#6b4a10" stroke-width=".6"/><circle cx="24" cy="44" r="1.4" fill="#fff"/><circle cx="41" cy="48" r="1.2" fill="#fff"/>`,
+    page: `<ellipse cx="32" cy="58" rx="18" ry="3" fill="#000" opacity=".3"/>
+      <path d="M14 8h30l6 8v38l-4-3-4 3-4-3-4 3-4-3-4 3-4-3-4 3z" fill="#f3e2b8" stroke="#2b1b0d" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M44 8v8h6" fill="#e2cc98" stroke="#2b1b0d" stroke-width="1.2"/>
+      <path d="M19 20h22M19 26h24M19 32h20M19 38h23M19 44h14" stroke="#8a6a3a" stroke-width="1.4"/>
+      <path d="M38 46c4-2 8 1 7 5" stroke="#c0392b" stroke-width="1.6" fill="none"/>`,
     fairtent: `<ellipse cx="32" cy="57" rx="22" ry="3" fill="#000" opacity=".3"/>
       <path d="M32 6v8" stroke="#2b1b0d" stroke-width="1.6"/><path d="M32 6l10 3-10 3z" fill="#c0392b" stroke="#2b1b0d" stroke-width=".9"/>
       <path d="M32 14L8 34h48z" fill="#f3e2b8" stroke="#2b1b0d" stroke-width="1.6" stroke-linejoin="round"/>

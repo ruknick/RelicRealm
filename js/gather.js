@@ -282,6 +282,7 @@ window.Gather = (() => {
       case 'sling': App.addGear('bow1'); break;
       case 'key': st.inventory.key++; break;
       case 'chart': detail = App.grantChart(); break;
+      case 'page': { const n = Lore.findPage(); detail = n ? `Page ${n} of the Old King's diary — read it when you get home.` : ''; break; }
       case 'runescrap':
       case 'scrap': {
         const enemy = id === 'runescrap' ? 'dwarf' : 'goblin';
@@ -576,7 +577,7 @@ window.Gather = (() => {
       }
       if (!board.hurt(p, dmg)) return;
       if (BREAK[land.key].includes(p.kind)) goalProgress('break');
-      if (p.kind === 'monster') goalProgress('slay');
+      if (p.kind === 'monster') { goalProgress('slay'); if (land.key === 'forest') Story.countUp('goblins'); }
       if (p.kind === BLOCKERS[land.key].kind) {
         goalProgress('blocker');
         const B = BLOCKERS[land.key];
@@ -620,6 +621,7 @@ window.Gather = (() => {
           break;
         case 'vein': board.toast('Vein mined out!'); break;
         case 'locked': {
+          Story.flag('chest');
           const t = p.lockTier || 1;
           addToBackpack('gold', [6, 12, 20][t - 1], cell);
           board.toast(`🔓 The ${Data.CHEST_TIERS[t].toLowerCase()} chest creaks open!`, 'win');
@@ -825,6 +827,7 @@ window.Gather = (() => {
     const rec = App.state.lands[land.key];
     rec.runs += stars >= 3 ? 2 : 1;   // a ★★★ trip tames the land twice as fast
     const newLv = Data.landLevel(rec.runs);
+    Lore.landProgress(land.key, run.landLv, newLv);
     if (newLv > run.landLv) notes.unshift(`${land.icon} <b>The ${land.name} grows wilder — now Lv ${newLv}!</b> More obstacles, tougher chests, richer finds.`);
     if (land.discover && Math.floor(newLv / 5) > Math.floor(run.landLv / 5) && keepWaiting(land.discover.enemy, newLv))
       notes.unshift(`${land.discover.enemy === 'goblin' ? '🐾 <b>Goblins are on the move!</b> Their tracks will turn up on your next Forest trip — follow them to a new keep.' : 'ᚱ <b>Dwarf runes glow in the hills!</b> Find the rune stone on your next Iron Hills trip to locate a new stronghold.'}`);
@@ -891,6 +894,8 @@ window.Gather = (() => {
     }
     const spots = board.tileCells().sort(() => Math.random() - 0.5).slice(0, lv.buried);
     spots.forEach(([r, c]) => board.buried.set(`${r},${c}`, Data.rollFrom(Data.FINDS[land.finds])));
+    // Now and then, a lost page of the Old King's diary is buried here (in order, about one trip in six).
+    if (spots.length && Lore.nextPage() && Math.random() < 0.17) { const [r, c] = spots.at(-1); board.buried.set(`${r},${c}`, 'page'); }
     // A bronze chest's Old key is on the same board: buried, or carried by one of the monsters.
     const chest = board.piecesOf('locked')[0];
     if (chest && chest.lockTier === 1 && ![...board.buried.values()].includes('key')) {
