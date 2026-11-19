@@ -194,8 +194,9 @@ window.Gather = (() => {
     // Tougher stumps and richer veins appear as the land levels up (they need better tools).
     const L = run.landLv, roll2 = Math.random();
     if (kind === 'stump') {
-      const t = L >= 20 && roll2 < 0.3 ? 3 : L >= 10 && roll2 < 0.45 ? 2 : L >= 6 && roll2 < 0.1 ? 2 : 1;
-      Object.assign(spec, { hard: t, wood: ['wood', 'oak', 'ironwood'][t - 1], art: ['stump', 'stumpoak', 'stumpiron'][t - 1] });
+      const t = L >= 12 && roll2 < 0.25 ? 3 : L >= 10 && roll2 < 0.5 ? 2 : L >= 6 && roll2 < 0.15 ? 2 : 1;
+      // Ironwood stumps are tough but an iron wood-axe can fell them (no steel needed to get started on steel).
+      Object.assign(spec, { hard: Math.min(t, 2), wood: ['wood', 'oak', 'ironwood'][t - 1], art: ['stump', 'stumpoak', 'stumpiron'][t - 1] });
     }
     if (kind === 'vein') {
       const t = L >= 25 && roll2 < 0.25 ? 3 : L >= 10 && roll2 < 0.45 ? 2 : L >= 6 && roll2 < 0.1 ? 2 : 1;
