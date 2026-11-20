@@ -1,6 +1,12 @@
 // App shell: save data, navigation, home screen, popups, raid prep, spoils.
 window.App = (() => {
   const KEY = 'warrior-m3-save-v1';
+  // Save slots: up to 3 adventurers, each with its own save on this device and in the cloud.
+  // Slot 1 is the original save (same storage key and cloud record as before).
+  const SLOTS = 3;
+  let slot = (() => { try { return Math.min(SLOTS, Math.max(1, Number(localStorage.getItem('rr-slot')) || 1)); } catch (e) { return 1; } })();
+  const skey = n => (n === 1 ? KEY : `${KEY}-slot${n}`);
+  const sdoc = n => (n === 1 ? 'save' : `save${n}`);
   const ENEMY_NAME = { goblin: 'goblin village', dwarf: 'dwarf stronghold' };
 
   let state;
@@ -38,7 +44,7 @@ window.App = (() => {
 
   function load() {
     let raw = null;
-    try { raw = localStorage.getItem(KEY); } catch (e) { /* storage blocked */ }
+    try { raw = localStorage.getItem(skey(slot)); } catch (e) { /* storage blocked */ }
     fromJson(raw);
   }
   // Build the game state from a saved JSON string (or a fresh game if there is none).
@@ -270,7 +276,7 @@ window.App = (() => {
   function save() {
     state.savedAt = Date.now();
     const json = JSON.stringify(state);
-    try { localStorage.setItem(KEY, json); } catch (e) { /* private mode etc. */ }
+    try { localStorage.setItem(skey(slot), json); } catch (e) { /* private mode etc. */ }
     Cloud.queue(json);
     renderStock();
   }
@@ -279,7 +285,7 @@ window.App = (() => {
   // Browser storage can be wiped when the page reopens inside the Claude app, so every save is
   // also written (a moment later, batched) to a per-player record tied to the viewer's account.
   const Cloud = (() => {
-    let ref = null, pending = null, timer = null, writing = false, status = 'checking';
+    let ref = null, coll = null, pending = null, timer = null, writing = false, status = 'checking';
     const setStatus = s => { status = s; const el = document.getElementById('cloud-status'); if (el) el.innerHTML = statusText(); };
     const statusText = () => ({
       checking: '☁️ Looking for your saved game…',
@@ -305,7 +311,8 @@ window.App = (() => {
         if (!db || !user) return null;
         const uid = await user.id();
         if (!uid) return null;
-        const r = db.collection('data/users/' + uid).doc('save');
+        coll = db.collection('data/users/' + uid);
+        const r = coll.doc(sdoc(slot));
         const snap = await r.get();
         ref = r;
         return { json: snap.exists ? snap.data().json : null };
@@ -318,7 +325,10 @@ window.App = (() => {
     }
     // Write now (e.g. when the page is being hidden).
     function now() { if (timer) { clearTimeout(timer); flush(); } }
-    return { queue, connect, now, statusText };
+    // Point saving at another slot's record, and read a slot's cloud save (null when offline).
+    function point(n) { pending = null; clearTimeout(timer); timer = null; ref = coll ? coll.doc(sdoc(n)) : null; }
+    async function read(n) { if (!coll) return null; try { const snap = await coll.doc(sdoc(n)).get(); return snap.exists ? snap.data().json : null; } catch (e) { return null; } }
+    return { queue, connect, now, statusText, point, read };
   })();
   document.addEventListener('visibilitychange', () => { if (document.hidden) Cloud.now(); });
 
@@ -358,6 +368,41 @@ window.App = (() => {
       pasted = pasted || document.getElementById('save-in')?.value || '';
       const ok = importSave(pasted);
       await choose({ title: ok ? '✓ Save loaded' : 'That code didn\'t work', html: ok ? `<p>Welcome back${state.profile ? `, <b>${state.profile.name}</b>` : ''} — level ${level()}.</p>` : '<p>Make sure you copied the whole code, starting with <b>TR1:</b>.</p>', buttons: [{ id: 'ok', label: 'OK' }] });
+    }
+    Story.title();
+  }
+
+  // ---------- adventurers (save slots) ----------
+  const summary = json => { try { const s = JSON.parse(json); return s && (s.profile || s.xp > 0) ? { name: s.profile ? s.profile.name : 'Adventurer', level: Data.levelFromXp(s.xp || 0), at: s.savedAt || 0, json } : null; } catch (e) { return null; } };
+  async function slotInfo(n) {
+    let local = null;
+    try { local = summary(localStorage.getItem(skey(n))); } catch (e) { /* ignore */ }
+    const cloud = summary(await Cloud.read(n));
+    return cloud && (!local || cloud.at > local.at) ? cloud : local;
+  }
+  async function switchSlot(n) {
+    if (n === slot) return;
+    Cloud.now();
+    const info = await slotInfo(n);
+    slot = n;
+    try { localStorage.setItem('rr-slot', String(n)); } catch (e) { /* ignore */ }
+    Cloud.point(n);
+    fromJson(info ? info.json : null);
+    if (info) try { localStorage.setItem(skey(n), info.json); } catch (e) { /* ignore */ }
+  }
+  async function pickSlot() {
+    const infos = await Promise.all([1, 2, 3].map(slotInfo));
+    const c = await choose({
+      title: '👥 Your adventurers',
+      html: '<p class="hint">Up to three adventurers, each on their own journey. Switching never touches the others.</p>',
+      buttons: infos.map((s, i) => {
+        const n = i + 1, here = n === slot;
+        return { id: 's' + n, label: s ? `${here ? '▶ ' : ''}${s.name} · Level ${s.level}${here ? ' (playing)' : ''}` : `✨ Slot ${n}: start a new adventurer`, cls: here ? '' : 'alt' };
+      }).concat([{ id: 'close', label: 'Close', cls: 'alt' }]),
+    });
+    if (c.startsWith('s') && Number(c.slice(1)) !== slot) {
+      await switchSlot(Number(c.slice(1)));
+      if (!state.profile && !(state.xp > 0)) { Story.create(); return; }
     }
     Story.title();
   }
@@ -613,7 +658,7 @@ window.App = (() => {
   function newGame(profile) {
     state = fresh();
     state.profile = profile;
-    state.tut = 0;   // first-trip coaching
+    state.tips = {};   // Maren's tutorial tips on the board (shown once each)
     state.pouch = { food: 4 };   // a few berries packed for the road
     starterKit();
     save();
@@ -689,7 +734,7 @@ window.App = (() => {
       try { cloudAt = json ? (JSON.parse(json).savedAt || 1) : 0; } catch (e) { /* ignore */ }
       if (json && cloudAt > localAt) {
         fromJson(json);
-        try { localStorage.setItem(KEY, json); } catch (e) { /* ignore */ }
+        try { localStorage.setItem(skey(slot), json); } catch (e) { /* ignore */ }
       } else if (state.profile || state.xp > 0) {
         Cloud.queue(JSON.stringify(state));   // first time: upload what this device has
       }
@@ -699,7 +744,7 @@ window.App = (() => {
   }
 
   return {
-    moveSave, exportSave, importSave, ENEMY_NAME, grantSpecial, addXP, bountyEvent: (id, n) => Bounty.event(id, n), levelPerks, get level() { return level(); }, boot, go, save, newGame, tripDone, get cloudReady() { return cloudReady; }, cloudStatus: () => Cloud.statusText(), choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
+    pickSlot, get slot() { return slot; }, moveSave, exportSave, importSave, ENEMY_NAME, grantSpecial, addXP, bountyEvent: (id, n) => Bounty.event(id, n), levelPerks, get level() { return level(); }, boot, go, save, newGame, tripDone, get cloudReady() { return cloudReady; }, cloudStatus: () => Cloud.statusText(), choose, prepareRaid, rollSpoil, spoilName, grantSpoil,
     fx, eatBest, POUCH_MAX, pouch, pouchTotal, pouchPut, pouchTake, pouchEmpty, eatPouch, pouchList, healOf, foodName, pouchLine: () => pouchLine(),
     addGear, gearCount, equip, unequip, wear, captureWeapon, recoverWeapons, grantShard, grantChart, heal, hurtPlayer, eatFood, eatMeal, foodTotal, spendFood, get maxHp() { return maxHp(); },
     get state() { return state; },

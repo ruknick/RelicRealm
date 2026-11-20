@@ -61,6 +61,11 @@ window.Lore = (() => {
   const CROWN = (gap = false) => `<svg viewBox="0 0 120 90"><path d="M14 74V26l22 22 24-36 24 36 22-22v48z" fill="#f3c34a" stroke="#5a3a08" stroke-width="3" stroke-linejoin="round"/><path d="M14 64h92" stroke="#c0392b" stroke-width="5"/>${[[36, 56, '#2fbf71'], [60, 50, gap ? 'none' : '#e0324b'], [84, 56, '#3d7bff'], [24, 68, '#8e44ad'], [96, 68, '#f3f3f3']].map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="6" fill="${c}" stroke="#5a3a08" stroke-width="2" ${c === 'none' ? 'stroke-dasharray="3 3"' : ''}/>`).join('')}</svg>`;
   const BELL = '<svg viewBox="0 0 100 100"><path d="M50 8v8" stroke="#5a3a08" stroke-width="4"/><path d="M50 16c-18 0-24 16-24 34 0 14-6 18-12 24h72c-6-6-12-10-12-24 0-18-6-34-24-34z" fill="#c9a24a" stroke="#5a3a08" stroke-width="3" stroke-linejoin="round"/><circle cx="50" cy="82" r="7" fill="#8a6a2a" stroke="#5a3a08" stroke-width="2"/><path d="M36 40q4-12 12-14" stroke="#fff6c8" stroke-width="3" fill="none" opacity=".7"/><text x="50" y="62" text-anchor="middle" font-family="Georgia" font-size="13" font-style="italic" fill="#5a3a08">M.</text></svg>';
   const SHIP = '<svg viewBox="0 0 120 90"><path d="M8 70c20 8 84 8 104 0" stroke="#2f5a66" stroke-width="3" fill="none"/><path d="M22 60h76l-10 12H32z" fill="#7a5a3a" stroke="#2b1b0d" stroke-width="2"/><path d="M60 60V12" stroke="#2b1b0d" stroke-width="3"/><path d="M62 14c22 12 22 32 0 42z" fill="#e8eef2" stroke="#2b1b0d" stroke-width="2"/><path d="M58 18c-16 10-16 26 0 36z" fill="#d8dfe4" stroke="#2b1b0d" stroke-width="2"/><circle cx="100" cy="22" r="8" fill="#f3d36a"/></svg>';
+  const VILLAGE = '<svg viewBox="0 0 140 90"><path d="M0 84h140" stroke="#5a3a1e" stroke-width="2"/>'
+    + [[14, 52, 30], [52, 44, 36], [96, 54, 30]].map(([x, y, w]) => `<path d="M${x} 84V${y + 12}l${w / 2} -14 ${w / 2} 14V84z" fill="#6b4a2a" stroke="#2b1b0d" stroke-width="1.6"/><path d="M${x + w / 2 - 4} 84v-10h8v10" fill="#2b1b0d"/>`).join('')
+    + '<g class="flames"><path d="M24 58c-6-12 4-16 2-26 10 8 12 16 8 26z" fill="#e0602a"/><path d="M62 50c-8-16 6-22 2-34 12 10 16 22 10 34z" fill="#ffb02e"/><path d="M68 52c-3-8 3-10 2-16 6 5 7 10 4 16z" fill="#ffd166"/><path d="M106 60c-5-10 3-13 2-21 8 6 10 13 6 21z" fill="#e0602a"/></g>'
+    + '<g fill="#5a5048" opacity=".55"><circle cx="60" cy="10" r="8"/><circle cx="72" cy="6" r="10"/><circle cx="30" cy="22" r="7"/><circle cx="104" cy="26" r="7"/></g></svg>';
+  const ART = { crown: () => CROWN(false), dragon: () => Art.piece('dragon'), village: () => VILLAGE, hero: () => Hero.figure() };
   const PANELS = {
     bell: { art: () => BELL, title: 'The Stolen Bell', text: 'Ashford\'s church bell, dragged into a goblin keep. Scratched inside, in a neat hand: "For services rendered. — M." Goblins can\'t write.' },
     oath: { art: () => Art.piece('guard'), title: 'The Dwarves\' Oath', text: 'Thrain Ironbeard kneels on the cold stone of his hall. "We were lied to, surface-dweller. Take the way of steel — and find the one who lied."' },
@@ -257,5 +262,5 @@ window.Lore = (() => {
       + (known.length < order.length ? `<p class="hint">${order.length - known.length} more to meet…</p>` : '');
   }
 
-  return { CAST, say, panel, meet, landProgress, playQueued, nextPage, findPage, PAGES, bossBefore, bossAfter, remark, talesHtml, pagesHtml, peopleHtml, LAND_TALES };
+  return { ART, CAST, say, panel, meet, landProgress, playQueued, nextPage, findPage, PAGES, bossBefore, bossAfter, remark, talesHtml, pagesHtml, peopleHtml, LAND_TALES };
 })();

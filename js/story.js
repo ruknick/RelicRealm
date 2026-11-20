@@ -21,10 +21,10 @@ window.Story = (() => {
 
   // ---------- the opening tale ----------
   const INTRO = [
-    { art: '👑', title: 'The Old King\'s Crown', text: `Long ago, the realm of ${GAME.realm} was held together by the Old King's Crown: five relics of power set in gold. Forests grew tall, dwarf hammers rang in the hills, and pearls glittered along the coast.` },
-    { art: '🐉', title: 'Emberwyrm', text: 'Then the dragon came. Emberwyrm burned the king\'s hall to ash and shattered the Crown. Its five relic shards scattered across the land, and the dragon carried the king\'s gold back to its fire mountain.' },
-    { art: '🔥', title: 'The realm falls apart', text: 'Without the Crown, everything fell apart. Goblins crept out of the forest to raid and steal. The dwarves sealed their halls and trusted no one. In the chaos, your village of Ashford burned.' },
-    { art: '⚔️', title: '{name} of Ashford', text: 'Only you are left. You have a stone axe, a little courage, and the ashes of home. Build a camp. Gather. Forge. Find the five relic shards. When the Crown is whole again, climb the fire mountain and face Emberwyrm.' },
+    { art: () => Lore.ART.crown(), title: 'The Old King\'s Crown', text: `Long ago, the realm of ${GAME.realm} was held together by the Old King's Crown: five relics of power set in gold. Forests grew tall, dwarf hammers rang in the hills, and pearls glittered along the coast.` },
+    { art: () => Lore.ART.dragon(), title: 'Emberwyrm', text: 'Then the dragon came. Emberwyrm burned the king\'s hall to ash and shattered the Crown. Its five relic shards scattered across the land, and the dragon carried the king\'s gold back to its fire mountain.' },
+    { art: () => Lore.ART.village(), title: 'The realm falls apart', text: 'Without the Crown, everything fell apart. Goblins crept out of the forest to raid and steal. The dwarves sealed their halls and trusted no one. In the chaos, your village of Ashford burned.' },
+    { art: () => Lore.ART.hero(), title: '{name} of Ashford', text: 'Only you are left. You have a stone axe, a little courage, and the ashes of home. Build a camp. Gather. Forge. Find the five relic shards. When the Crown is whole again, climb the fire mountain and face Emberwyrm.' },
   ];
 
   // ---------- chapters ----------
@@ -195,6 +195,18 @@ window.Story = (() => {
     craft:  { title: '⚒ The Workshop', text: 'An old anvil pulled from the ashes, a forge, a bench. Everything you gather becomes something here.' },
   };
 
+  // What each place teaches the first time you arrive, in the voice of whoever lives there.
+  const LESSONS = {
+    craft: { who: 'bram', lines: ['So you found my Workshop. Bring me what you gather and I\'ll make you something useful.', 'Tools break obstacles. Weapons fight monsters. Armor takes the hits. Better metal beats tougher things: wood, then iron, then steel.', 'New recipes unlock as you level up. Tap one to see what it needs.'] },
+    kitchen: { who: 'maren', lines: ['My kitchen. Raw berries keep you going, but a hot meal keeps you alive.', 'Cook here, then pack your food at Your Camp before a trip. On the board, tap 🍖 to eat.'] },
+    camp: { who: 'maren', lines: ['This is all that\'s left of Ashford: your keep, your bank, your walls.', 'Everything you gather is banked here. Pack food for the road from the Storehouse below the camp.', 'Raiders will come for your bank one day. Craft walls at the Workshop and place them around the keep.'] },
+    fair: { who: 'ysolde', lines: ['Welcome, darling! Find golden tickets on your travels and bring them here.', 'One ticket, one round on the fairground. Match the gold stars to win spins of the wheel — hats, capes, pies… and something very lucky, if the wheel likes you.'] },
+    forest: { who: 'maren', lines: ['The Whispering Wood. Pine, hide and berries — and goblins among the trunks.', 'Matches bring home what\'s on the board. Stumps need your axe; goblins need your weapon. Head home whenever you like.'] },
+    farm: { who: 'maren', lines: ['The old Ashford farms! Wheat, apples, eggs — and chickens that never stay where you put them.', 'No monsters here. Just honest work and a full larder.'] },
+    mine: { who: 'maren', lines: ['The Iron Hills. Ore and coal for Bram\'s smelter, and gems deep in the rock.', 'Boulders and veins need a pick. And mind the cave goblins.'] },
+    ocean: { who: 'maren', lines: ['The Sunlit Coast. Fish, fresh water, driftwood — and pearls, if you\'re patient.', 'Water is the only thing that stops dragonfire. Remember that.'] },
+  };
+
   function ensure() {
     const s = st();
     if (!s.story) s.story = { chapter: 0, flags: {}, places: {}, introSeen: false };
@@ -218,6 +230,7 @@ window.Story = (() => {
           ${has ? `<button class="big" id="t-continue">▶ Continue <small>${App.state.profile.name} · Level ${App.level}</small></button>` : ''}
           ${legacy ? `<button class="big" id="t-legacy">▶ Continue <small>Level ${App.level} · create your character, keep your progress</small></button>` : ''}
           <button class="big ${has || legacy ? 'alt' : ''}" id="t-new">✨ New game</button>
+          <button class="big alt" id="t-slots">👥 Adventurers <small>switch or start another · slot ${App.slot} of 3</small></button>
           ${has ? '<button class="link" id="t-intro">Watch the story again</button>' : ''}
           <p class="cloud-status" id="cloud-status">${App.cloudStatus()}</p>
           <button class="link" id="t-move">💾 Move your save</button>
@@ -226,12 +239,14 @@ window.Story = (() => {
     const on = (id, f) => { const b = document.getElementById(id); if (b) { b.onclick = f; b.disabled = !App.cloudReady; } };
     on('t-continue', () => { App.go('home'); });
     on('t-move', () => App.moveSave());
+    on('t-slots', () => App.pickSlot());
     on('t-legacy', () => create(true));
     on('t-intro', () => intro(() => App.go('home')));
     on('t-new', async () => {
       if (has || legacy) {
-        const c = await App.choose({ title: 'Start a new game?', html: `<p>This replaces ${has ? `<b>${App.state.profile.name}</b>'s` : 'your current'} journey: level, items, camp, everything.</p>`,
-          buttons: [{ id: 'yes', label: 'Start over', cls: 'danger' }, { id: 'no', label: 'Keep playing', cls: 'alt' }] });
+        const c = await App.choose({ title: 'Start a new game?', html: `<p>Starting over here replaces ${has ? `<b>${App.state.profile.name}</b>'s` : 'your current'} journey: level, items, camp, everything.</p><p class="hint">To keep it, start your new adventurer in another slot instead.</p>`,
+          buttons: [{ id: 'slot', label: '👥 Use another slot (keep this one)' }, { id: 'yes', label: 'Replace this journey', cls: 'danger' }, { id: 'no', label: 'Keep playing', cls: 'alt' }] });
+        if (c === 'slot') { App.pickSlot(); return; }
         if (c !== 'yes') return;
       }
       create();
@@ -287,8 +302,8 @@ window.Story = (() => {
     let i = 0;
     const show = () => {
       const p = INTRO[i];
-      el.innerHTML = `<div class="story-panel">
-          <div class="story-art">${p.art}</div>
+      el.innerHTML = `<div class="story-panel book-page" data-page="${i + 1}">
+          <div class="story-art lore-art">${typeof p.art === 'function' ? p.art() : p.art}</div>
           <h2>${fill(p.title)}</h2><p>${fill(p.text)}</p>
           <div class="story-dots">${INTRO.map((_, j) => `<i class="${j === i ? 'on' : ''}"></i>`).join('')}</div>
           <button class="big" id="s-next">${i < INTRO.length - 1 ? 'Next →' : 'Begin ⚔️'}</button>
@@ -380,7 +395,7 @@ window.Story = (() => {
           ${ch.intro.map(l => `<p class="story-text">${fill(l)}</p>`).join('')}${goalList(ch)}
           ${done && ch.outro ? ch.outro.map(l => `<p class="story-text outro">${fill(l)}</p>`).join('') : ''}
           ${ch.reward ? `<p class="reward">${done ? 'Earned' : 'Reward'}: ${ch.reward.label}</p>` : ''}</div>`;
-      }).join('') + '<button class="link" id="j-intro">📖 Read the opening tale again</button>';
+      }).join('') + '<button class="link" id="j-intro">📖 Read the opening tale again</button><br><button class="link" id="j-tips">💬 Show Maren\'s tips again</button>';
     } else if (jtab === 'tales') body = Lore.talesHtml();
     else if (jtab === 'pages') body = Lore.pagesHtml();
     else body = Lore.peopleHtml();
@@ -388,6 +403,8 @@ window.Story = (() => {
     el.querySelectorAll('[data-jt]').forEach(b => { b.onclick = () => { jtab = b.dataset.jt; journal(); }; });
     const ji = document.getElementById('j-intro');
     if (ji) ji.onclick = () => intro();
+    const jt = document.getElementById('j-tips');
+    if (jt) jt.onclick = () => { App.state.tips = {}; App.save(); jt.textContent = '✓ Maren will show her tips again on your next trips'; };
   }
 
   // Count something the story is waiting for (e.g. goblins defeated).
@@ -399,7 +416,8 @@ window.Story = (() => {
     if (!p || s.places[id]) return;
     s.places[id] = true;
     App.save();
-    await App.choose({ title: p.title, html: `<p class="story-text">${fill(p.text)}</p>`, buttons: [{ id: 'ok', label: 'Go on' }] });
+    const L = LESSONS[id];
+    await Lore.say({ who: L ? L.who : 'maren', title: p.title, lines: L ? L.lines : [p.text] });
   }
 
   // Which map spot the story wants you at next (it glows on the map early on).

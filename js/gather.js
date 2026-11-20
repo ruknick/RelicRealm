@@ -272,6 +272,7 @@ window.Gather = (() => {
       run.overflow += n - add;
       if (add === 0) board.float(cell, 'Full!', 'loss', delay);
     }
+    if (used() >= run.cap * 0.7) tip('pack');
     if (used() >= run.cap && !run.fullWarned) {
       run.fullWarned = true;
       board.toast('Backpack full! Head home when you\'re ready.', 'win', 2600);
@@ -402,6 +403,7 @@ window.Gather = (() => {
     if (carries && appear) setTimeout(() => board.toast(`🗝️ That ${M.name} has the chest key! Take it down.`, 'alert', 2600), 1500);
     if (appear) {
       board.render();
+      if (!M.harmless) tip('monster');
       if (!run.told.monster) {
         run.told.monster = true;
         board.toast(`${M.icon} A ${M.name} appears! It blocks the board and will pick your pack — tap it to swing (costs ⚡).`, 'alert', 3200);
@@ -469,6 +471,7 @@ window.Gather = (() => {
       }
       monLabel(m);
     }
+    if (stole && App.state.hp < App.maxHp * 0.6) tip('hurt');
     if (stole) {
       const wrap = document.getElementById('gather-wrap');
       wrap.classList.remove('ouch'); void wrap.offsetWidth; wrap.classList.add('ouch');
@@ -551,10 +554,11 @@ window.Gather = (() => {
   // ---------- board hooks ----------
   const hooks = {
     canPlay: () => !!run && !run.ended && run.moves > 0,
-    onMove: () => { run.moves--; run.movesMade++; hud(); coach('move'); },
+    onMove: () => { run.moves--; run.movesMade++; hud(); tipMove(); },
     onAte: () => hud(),
     onMatch(runs, step) {
-      coach('match');
+      if (curTip === 'swap') nextTip();
+      tip('energy');
       for (const ri of runs) {
         const res = land.gives[ri.type];
         if (!res) {   // filler tiles — but a rare one hidden among them (eggs in the hay) still counts
@@ -576,7 +580,6 @@ window.Gather = (() => {
       }
     },
     onPieceHit(p, n, src, w) {
-      if (src !== 'match') coach('swing');
       const dmg = src === 'match' ? n * Data.matchDamage(p) : n;
       if (dmg <= 0) {
         const tip = p.toolOnly === 'axe' ? '🪓 Matches can\'t clear that — wield a wood-axe (🛠️ slot) and tap it.'
@@ -780,32 +783,47 @@ window.Gather = (() => {
     return true;
   }
 
-  // ---------- first-trip coaching ----------
-  const COACH = [
-    { text: '<b>Swap two touching tiles</b> to line up 3 or more of a kind. Try the glowing pair on the board!', until: 'match' },
-    { text: 'Matches fill your <b>backpack</b> and charge your <b>⚡ energy</b>. With enough energy, <b>tap a stump</b> to chop it with your axe — or tap a goblin to fight it.', until: 'swing', moves: 8 },
-    { text: 'Meet the <b>🎯 goals</b> at the top for stars and rewards. Tap <b>Head home</b> any time — everything in your backpack goes to your Storehouse.', until: 'none', moves: 5 },
-  ];
-  function coach(ev) {
-    const s = App.state;
-    if (!run || s.tut == null || s.tut >= COACH.length || land.key !== 'forest') return;
-    if (ev === 'start') { run.coachAt = run.movesMade; showCoach(); return; }
-    const step = COACH[s.tut];
-    if (ev === step.until || ev === 'ok' || (ev === 'move' && step.moves && run.movesMade - run.coachAt >= step.moves)) {
-      s.tut++;
-      App.save();
-      run.coachAt = run.movesMade;
-      showCoach();
-    }
+  // ---------- Maren's tips: the storybook tutorial on the board ----------
+  // Each tip appears once, the first time it matters, in a speech bubble under the board.
+  // New adventurers get them (state.tips = {}); older saves start with them off.
+  const TIPS = {
+    swap: 'Swap two touching tiles, child — line up three or more and they\'re yours. Try the glowing pair!',
+    energy: 'Feel that spark? That\'s your <b>⚡ energy</b>. Matches charge it. When you have enough, tap a stump or a rock to swing your tool at it.',
+    monster: 'A {monster}! It\'ll swing at you every couple of moves. Tap it to hit back with your weapon — or match right beside it.',
+    hurt: 'You\'re hurt. Tap <b>🍖</b> to eat the food you packed — then keep going.',
+    goals: 'See the goals up top? Meet them for stars and a reward. Finish with moves to spare for the third star.',
+    pack: 'Your pack\'s nearly full! Tap <b>Head home</b> whenever you like — everything you carry goes straight to the bank.',
+  };
+  let curTip = null, tipQ = [], tipAt = 0;
+  const URGENT = ['monster', 'hurt', 'pack'];
+  function tip(key) {
+    const t = App.state.tips;
+    if (!run || run.ended || !t || t.off || t[key] || curTip === key || tipQ.includes(key)) return;
+    // A monster, an injury or a full pack can't wait behind a gentler tip.
+    if (URGENT.includes(key) && curTip && !URGENT.includes(curTip)) { tipQ.unshift(key, curTip); nextTip(); return; }   // the interrupted tip comes back next
+    tipQ.push(key);
+    if (!curTip) nextTip();
   }
-  function showCoach() {
-    const el = document.getElementById('coach'), step = run && !run.ended && land.key === 'forest' && COACH[App.state.tut];
-    if (!step) { el.classList.add('hidden'); return; }
-    el.innerHTML = `<span class="coach-n">${App.state.tut + 1}/${COACH.length}</span><p>${step.text}</p><button class="small" id="coach-ok">Got it</button>`;
+  function nextTip() {
+    const el = document.getElementById('coach');
+    curTip = run && !run.ended ? tipQ.shift() || null : null;
+    if (!curTip) { tipQ = []; el.classList.add('hidden'); return; }
+    App.state.tips[curTip] = true;
+    App.save();
+    tipAt = run.movesMade;
+    el.innerHTML = `<span class="coach-pic">${Lore.CAST.maren.pic()}</span><div class="coach-body"><b>Maren</b><p>${TIPS[curTip].replace('{monster}', land.monster.name)}</p>
+      <div class="coach-btns"><button class="small" id="coach-ok">Got it</button><button class="link" id="coach-skip">Skip tips</button></div></div>`;
     el.classList.remove('hidden');
     el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
-    document.getElementById('coach-ok').onclick = () => coach('ok');
-    if (App.state.tut === 0) board.scheduleHint(600);
+    document.getElementById('coach-ok').onclick = () => nextTip();
+    document.getElementById('coach-skip').onclick = () => { App.state.tips.off = true; App.save(); tipQ = []; nextTip(); };
+    if (curTip === 'swap') board.scheduleHint(600);
+  }
+  // Tips move along on their own after a few moves, so they never pile up.
+  function tipMove() {
+    if (curTip && run.movesMade - tipAt >= 4) nextTip();
+    if (run.movesMade === 5) tip('goals');
+    if (run.movesMade === 2 && board.piecesOf('monster').some(m => !land.monster.harmless)) tip('monster');
   }
 
   // ---------- end of run ----------
@@ -815,7 +833,7 @@ window.Gather = (() => {
     if (run.ended) return;
     run.ended = true;
     board.stop();
-    showCoach();
+    tipQ = []; nextTip();
     land.bag.forEach(t => { App.state.stockpile[t] += run.backpack[t]; });
     App.save();
     if (reason === 'raid') { App.prepareRaid(land.discover.enemy, { fromField: true }); return; }
@@ -934,7 +952,8 @@ window.Gather = (() => {
     hud();
     hudLevel();
     hudGoals();
-    coach('start');
+    curTip = null; tipQ = [];
+    tip('swap');
     if (!App.pouchTotal()) { const r0 = run; setTimeout(() => { if (run === r0 && !run.ended) board.toast('🍖 You packed no food — you can\'t heal on this trip. Pack some at Your Camp\'s Storehouse.', 'alert', 3200); }, 2700); }
     Sound.music(land.music);
     if (App.state.debug.discoverNow && land.discover) {

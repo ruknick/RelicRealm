@@ -1634,3 +1634,22 @@ body.modal-open { overflow: hidden; }
 .hero svg { width: 100%; height: 100%; display: block; animation: bob 1s ease-in-out infinite; }
 .hero.walking svg { animation: none; }
 .spot.beckon::after { content: none; }
+
+/* Maren's tips under the board */
+.coach { align-items: flex-start; gap: 10px; padding: 8px 10px; }
+.coach-pic { flex: none; width: 46px; height: 46px; border-radius: 50%; overflow: hidden; border: 1.5px solid #6b4a10; background: radial-gradient(circle at 50% 35%, #f6ead0, #d9c08c); }
+.coach-pic svg { width: 100%; height: 100%; display: block; }
+.coach-body { flex: 1; min-width: 0; } .coach-body b { font-family: Georgia, serif; font-size: .8rem; color: #8a5d17; }
+.coach-body p { margin: 2px 0 6px; font-size: .88rem; line-height: 1.35; }
+.coach-btns { display: flex; gap: 12px; align-items: center; }
+.coach .coach-n { display: none; }
+
+/* the opening tale as storybook pages */
+.book-page { position: relative; animation: pageTurn .55s cubic-bezier(.2,.8,.3,1); transform-origin: left center; }
+@keyframes pageTurn { from { transform: perspective(900px) rotateY(-32deg); opacity: 0; } to { transform: none; opacity: 1; } }
+.book-page::after { content: attr(data-page); position: absolute; bottom: 8px; right: 12px; font-family: Georgia, serif; font-style: italic; font-size: .8rem; color: var(--ink-soft); }
+.book-page .lore-art { width: 200px; }
+.book-page .lore-art .fig { width: 120px; margin: 0 auto; display: block; }
+.flames { animation: flicker .4s ease-in-out infinite alternate; transform-origin: 50% 100%; transform-box: fill-box; }
+
+.coach-btns .link { color: #8a5d17; font-size: .82rem; }
