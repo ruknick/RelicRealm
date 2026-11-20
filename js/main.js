@@ -194,7 +194,8 @@ window.App = (() => {
   const POUCH_MAX = 10;   // (legacy name) — packing is limited by your backpack size instead
   const isMeal = k => !!(Data.ITEMS[k] && Data.ITEMS[k].heal);
   const healOf = k => (isMeal(k) ? Data.ITEMS[k].heal : Data.FOODS[k] || 0);
-  const foodName = k => (isMeal(k) ? Data.ITEMS[k].name : Data.RESOURCES[k].label);
+  // Anything that can be packed: raw food, meals, potions.
+  const foodName = k => (Data.ITEMS[k] ? Data.ITEMS[k].name : Data.RESOURCES[k] ? Data.RESOURCES[k].label : k);
   const bankOf = k => (Data.ITEMS[k] ? state.inventory : state.stockpile);
   const pouch = () => (state.pouch ||= {});
   const pouchTotal = () => Object.values(pouch()).reduce((a, b) => a + b, 0);
