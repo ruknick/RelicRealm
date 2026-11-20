@@ -413,7 +413,7 @@ window.Board = (() => {
       this.tray.innerHTML = `<div class="gearbar"><div class="energy" title="Energy: make matches to charge, tap a monster or obstacle to swing">
           <span class="en-bolt">⚡</span><b class="en-num">${this.energy}</b><span class="en-bar"><i style="height:${this.energy / energyMax() * 100}%"></i></span></div>
         <div class="health${hp <= mx * 0.3 ? ' low' : ''}" title="Your health: monsters wear it down, food heals it"><span class="hp-ico">❤️</span><b class="hp-num">${hp}</b><span class="hp-bar"><i style="height:${hp / mx * 100}%"></i></span></div>
-        <button class="gearbtn">${mini('weapon', '⚔️')}${mini('tool', '🛠️')}<span class="gb-label">🧍 Gear</span></button>
+        <button class="gearbtn">${mini('weapon', '⚔️')}${mini('tool', '🛠️')}<span class="gb-label"><span class="gb-pic">${App.state.profile ? Hero.portrait() : '🧍'}</span>Gear</span></button>
         <div class="specials"><span class="fx-chips"></span>${App.pouchList().filter(k => Data.ITEMS[k]?.potion).map(k => `<button class="spec potion" data-potion="${k}" title="${Data.ITEMS[k].name}: ${Data.ITEMS[k].desc}">${Art.piece(Data.ITEMS[k].art)}<b>${App.pouch()[k]}</b><i class="rank">${'I'.repeat(Data.ITEMS[k].rank)}</i></button>`).join('')}<button class="spec eat${food ? '' : ' none'}" title="Eat: the packed food that best fits your missing health">🍖<b>${food}</b></button>${specials}</div></div>`;
       this.tray.querySelector('.spec.eat').onclick = () => {
         if (this.busy) return;

@@ -17,7 +17,8 @@ window.Story = (() => {
   const HAIR = ['#2a1a10', '#5a3a1e', '#a0642c', '#d8b25a', '#b03a1e', '#d9d9d9'];
   const STYLES = { short: 'Short', long: 'Long', tied: 'Tied up', bald: 'Bald' };
   const BEARDS = { none: 'None', short: 'Stubble', full: 'Full beard' };
-  const defaultLook = () => ({ skin: SKIN[1], hair: HAIR[1], style: 'short', beard: 'none' });
+  const BODIES = { hero: 'Hero', heroine: 'Heroine' };
+  const defaultLook = () => ({ body: 'hero', skin: SKIN[1], hair: HAIR[1], style: 'short', beard: 'none' });
 
   // ---------- the opening tale ----------
   const INTRO = [
@@ -270,6 +271,7 @@ window.Story = (() => {
         <div class="create-look">
           <label class="lbl">Name</label>
           <input id="c-name" maxlength="14" placeholder="Your name" value="${draft.name.replace(/"/g, '&quot;')}" autocomplete="off">
+          <div class="chips">${chips('body', BODIES)}</div>
           <label class="lbl">Skin</label><div class="swatches">${swatches('skin', SKIN)}</div>
           <label class="lbl">Hair</label><div class="swatches">${swatches('hair', HAIR)}</div>
           <div class="chips">${chips('style', STYLES)}</div>
@@ -283,11 +285,15 @@ window.Story = (() => {
       <button class="link" id="c-back">← Back</button>`;
     const name = document.getElementById('c-name');
     name.oninput = () => { draft.name = name.value; document.getElementById('c-go').disabled = !name.value.trim(); };
-    el.querySelectorAll('[data-k]').forEach(b => { b.onclick = () => { draft[b.dataset.k] = b.dataset.v; renderCreate(); }; });
+    el.querySelectorAll('[data-k]').forEach(b => { b.onclick = () => {
+      draft[b.dataset.k] = b.dataset.v;
+      if (b.dataset.k === 'body' && b.dataset.v === 'heroine') { draft.beard = 'none'; if (draft.style === 'short') draft.style = 'long'; }
+      renderCreate();
+    }; });
     el.querySelectorAll('[data-o]').forEach(b => { b.onclick = () => { draft.origin = b.dataset.o; renderCreate(); }; });
     document.getElementById('c-back').onclick = () => title();
     document.getElementById('c-go').onclick = () => {
-      const profile = { name: draft.name.trim().slice(0, 14), origin: draft.origin, look: { skin: draft.skin, hair: draft.hair, style: draft.style, beard: draft.beard } };
+      const profile = { name: draft.name.trim().slice(0, 14), origin: draft.origin, look: { body: draft.body, skin: draft.skin, hair: draft.hair, style: draft.style, beard: draft.beard } };
       if (draft.keepSave) { App.state.profile = profile; App.save(); intro(() => App.go('home')); return; }
       App.newGame(profile);
       ORIGINS[profile.origin].give(App.state);

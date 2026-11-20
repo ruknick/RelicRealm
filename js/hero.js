@@ -59,6 +59,9 @@ window.Hero = (() => {
       : `<path d="M44 123h8v6q0 6-4 6t-4-6z" fill="${skin}" ${ink(1)}/>`);
     const tunic = '#7d6a44';
     let html = `<ellipse cx="80" cy="228" rx="40" ry="5" fill="${K}" opacity=".25"/>`;
+    // A heroine is drawn a little slimmer through the shoulders and waist (armor and flair fit either).
+    const slim = look.body === 'heroine', SLIM = s => (slim ? `<g transform="translate(80 0) scale(.88 1) translate(-80 0)">${s}</g>` : s);
+    const b0 = html.length;
     html += leg + mirror(leg) + boot + mirror(boot);
     // leg armor
     if (legT === 1) html += `<ellipse cx="70" cy="170" rx="6" ry="5" fill="${METAL[1][1]}" ${ink(.8)}/>` + mirror(`<ellipse cx="70" cy="170" rx="6" ry="5" fill="${METAL[1][1]}" ${ink(.8)}/>`);
@@ -79,6 +82,7 @@ window.Hero = (() => {
     html += `<path d="M57 50Q80 45 103 50L101 70Q98 88 97.5 104L99.5 120H60.5L62.5 104Q62 88 59 70z" fill="${tunic}" ${ink()}/>`
       + `<path d="M74 50l6 10 6-10" fill="none" stroke="${K}" stroke-width="1" opacity=".7"/>`
       + `<path d="M66 64q-2 20 0 38M92 70q2 16 0 30" stroke="${K}" stroke-width=".7" fill="none" opacity=".35"/>`;
+    if (slim) html += `<path d="M61 100q19 6 38 0l8 24q-27 9-54 0z" fill="${tunic}" ${ink()}/><path d="M70 106l-3 16M90 106l3 16M80 107v17" stroke="${K}" stroke-width=".6" opacity=".35"/>`;
     // body armor
     if (bodyT === 1) {
       const [m, e] = METAL[1];
@@ -110,15 +114,17 @@ window.Hero = (() => {
       html += `<path d="M72 50q8 14 16 0" stroke="#c9cfd6" stroke-width="1" fill="none"/><path d="M80 60l4 4-4 6-4-6z" fill="${gem}" stroke="#fff" stroke-width=".8" filter="url(#fGlow)"/>`;
     }
     html += flair('front');
+    if (slim) html = html.slice(0, b0) + SLIM(html.slice(b0));
     // neck & head
     html += `<path d="M75 38h10v13h-10z" fill="${skin}" ${ink(1)}/><path d="M75 46h10" stroke="${K}" stroke-width=".6" opacity=".4"/>`
       + `<ellipse cx="69.5" cy="29" rx="2.2" ry="3.5" fill="${skin}" ${ink(.9)}/><ellipse cx="90.5" cy="29" rx="2.2" ry="3.5" fill="${skin}" ${ink(.9)}/>`
-      + `<path d="M69 26C69 10 91 10 91 26c0 9-4 16-11 16S69 35 69 26z" fill="${skin}" ${ink()}/>`
+      + (slim ? `<path d="M69 26C69 10 91 10 91 26c0 8-4.5 14-11 14S69 34 69 26z" fill="${skin}" ${ink()}/>` : `<path d="M69 26C69 10 91 10 91 26c0 9-4 16-11 16S69 35 69 26z" fill="${skin}" ${ink()}/>`)
       + `<path d="M86 22c3 6 3 12-1 17" stroke="${K}" stroke-width=".6" opacity=".3" fill="none"/>`
       + `<path d="M72.5 23.5q3-1.5 5.5 0M82 23.5q3-1.5 5.5 0" stroke="${hairC}" stroke-width="1.3" fill="none" stroke-linecap="round"/>`
       + `<path d="M73.5 27.5q2-1.2 4 0q-2 1-4 0zM82.5 27.5q2-1.2 4 0q-2 1-4 0z" fill="${K}"/>`
       + `<path d="M80 28l-1.6 5.5h2.8" stroke="${K}" stroke-width=".8" fill="none" opacity=".7"/>`
-      + `<path d="M76.5 37q3.5 .8 7 0" stroke="${K}" stroke-width=".9" fill="none" stroke-linecap="round"/>`;
+      + (slim ? `<path d="M76.8 35.6q3.2 1.4 6.4 0q-3.2-.6-6.4 0z" fill="#b5524a" stroke="#7a2e24" stroke-width=".6"/><path d="M73 27l-1.4-1.6M74.6 26.4l-.6-1.8M87 27l1.4-1.6M85.4 26.4l.6-1.8" stroke="${K}" stroke-width=".7" stroke-linecap="round"/>`
+        : `<path d="M76.5 37q3.5 .8 7 0" stroke="${K}" stroke-width=".9" fill="none" stroke-linecap="round"/>`);
     // beard
     if (look.beard === 'short') html += `<path d="M70 30q1 12 10 12t10-12q-2 8-10 8t-10-8z" fill="${hairC}" opacity=".45"/>`;
     if (look.beard === 'full') html += `<path d="M69.5 29q0 18 10.5 20 10.5-2 10.5-20-2 8-6 8-2 2-4.5 1.5-2.5.5-4.5-1.5-4 0-6-8z" fill="${hairC}" ${ink(.8)}/><path d="M75.5 36.5q4.5-2 9 0" stroke="${hairC}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
@@ -143,6 +149,7 @@ window.Hero = (() => {
     html += flair('hat');
     // weapon raised in the right hand, then the hands over the grips
     html += inset('weapon', 66, 72, 72, true);
+    const h0 = html.length;
     html += hand(gloveT) + mirror(hand(gloveT));
     // shield on the left forearm
     if (shieldT === 1) {
@@ -156,6 +163,7 @@ window.Hero = (() => {
         + (shieldT === 2 ? `<path d="M113 90v38M102 104h22" stroke="#c9a227" stroke-width="3"/>` : `<path d="M103 96l10 10 10-10M103 106l10 10 10-10" stroke="#c9a227" stroke-width="2.6" fill="none"/>`)
         + `<path d="M100 88q-1 20 6 34" stroke="#fff" stroke-width="1.2" opacity=".45" fill="none"/>`;
     }
+    if (slim) html = html.slice(0, h0) + SLIM(html.slice(h0));
     return `<svg viewBox="0 0 160 236" class="fig" aria-hidden="true">${html}</svg>`;
   }
 
@@ -227,7 +235,67 @@ window.Hero = (() => {
     cb?.();
   }
 
-  function init() { document.getElementById('hero-close').onclick = close; }
+  function init() {
+    document.getElementById('hero-close').onclick = close;
+    document.getElementById('hero-look').onclick = editLook;
+  }
 
-  return { init, open, close, figure };
+  // Head-and-shoulders portrait of your warrior (for the map, the board's Gear button…).
+  const portrait = () => figure().replace(/viewBox="[^"]*"/, 'viewBox="48 -6 64 64"');
+
+  // ---------- change your look (body, skin, hair, beard) any time ----------
+  async function editLook() {
+    const p = App.state.profile;
+    if (!p) return;
+    const L = { body: 'hero', ...p.look };
+    const SK = ['#f3cfb0', '#e0b089', '#c68b5e', '#8d5a3b', '#5e3a24'], HR = ['#2a1a10', '#5a3a1e', '#a0642c', '#d8b25a', '#b03a1e', '#d9d9d9'];
+    const OPTS = { body: { hero: 'Hero', heroine: 'Heroine' }, style: { short: 'Short', long: 'Long', tied: 'Tied up', bald: 'Bald' }, beard: { none: 'No beard', short: 'Stubble', full: 'Full beard' } };
+    const draw = () => {
+      const body = document.getElementById('modal-body');
+      body.innerHTML = `<div class="look-edit"><div class="look-fig">${figure({ look: L })}</div><div>
+        ${Object.entries(OPTS).map(([k, o]) => `<div class="chips">${Object.entries(o).map(([v, l]) => `<button class="chip-btn${L[k] === v ? ' on' : ''}" data-lk="${k}" data-lv="${v}">${l}</button>`).join('')}</div>`).join('')}
+        <div class="swatches">${SK.map(c => `<button class="swatch${L.skin === c ? ' on' : ''}" data-lk="skin" data-lv="${c}" style="background:${c}"></button>`).join('')}</div>
+        <div class="swatches">${HR.map(c => `<button class="swatch${L.hair === c ? ' on' : ''}" data-lk="hair" data-lv="${c}" style="background:${c}"></button>`).join('')}</div></div></div>`;
+      body.querySelectorAll('[data-lk]').forEach(b => { b.onclick = () => { L[b.dataset.lk] = b.dataset.lv; draw(); }; });
+    };
+    const panel = document.getElementById('hero-panel');
+    panel.classList.add('hidden');   // the look editor shows on top; the Warrior screen comes back after
+    const done = App.choose({ title: '✏️ Your look', html: '', buttons: [{ id: 'save', label: 'Keep this look' }, { id: 'cancel', label: 'Cancel', cls: 'alt' }] });
+    draw();
+    if (await done === 'save') { p.look = { ...L }; App.save(); }
+    panel.classList.remove('hidden');
+    render();
+  }
+
+  // ---------- setting out: your warrior, as equipped, before each trip or fight ----------
+  const SCENE_DECOR = { forest: ['stump', 'thorn'], mine: ['boulder', 'vein'], ocean: ['coral', 'kelp'], farm: ['haybale', 'molehill'], goblin: ['fence', 'gkeep'], dwarf: ['swall', 'gate'] };
+  let setoutEl = null;
+  function setOut({ scene, title }) {
+    const S = App.state;
+    if (!S.profile || (S.settings && S.settings.noSetout)) return Promise.resolve();
+    setoutEl ||= document.body.appendChild(Object.assign(document.createElement('div'), { id: 'setout', className: 'setout hidden' }));
+    const name = it => (S.equip[it] ? Data.ITEMS[S.equip[it].id].name : null);
+    const armor = ['helmet', 'body', 'gloves', 'legs', 'shield'].filter(k => S.equip[k]).length;
+    const food = App.pouchTotal();
+    const bits = [name('weapon') && `⚔ ${name('weapon')}`, name('tool') && `🛠 ${name('tool')}`, `🛡 ${armor} armor piece${armor === 1 ? '' : 's'}`, `🍖 ${food ? `${food} food packed` : 'no food packed!'}`].filter(Boolean);
+    const [d1, d2] = SCENE_DECOR[scene] || SCENE_DECOR.forest;
+    setoutEl.dataset.scene = scene;
+    setoutEl.innerHTML = `<div class="so-sky"></div>
+      <span class="so-deco l">${Art.any(d1)}</span><span class="so-deco r">${Art.any(d2)}</span>
+      <div class="so-fig">${figure()}</div>
+      <div class="so-card"><h2>${title}</h2><p>${bits.join(' · ')}</p><small>Tap to begin</small></div>
+      <button class="link so-off">Don't show this scene</button>`;
+    setoutEl.classList.remove('hidden');
+    void setoutEl.offsetWidth;
+    setoutEl.classList.add('show');
+    return new Promise(res => {
+      let gone = false;
+      const go = () => { if (gone) return; gone = true; setoutEl.classList.remove('show'); setTimeout(() => setoutEl.classList.add('hidden'), 300); res(); };
+      setoutEl.onclick = go;
+      setoutEl.querySelector('.so-off').onclick = e => { e.stopPropagation(); S.settings = { ...(S.settings || {}), noSetout: true }; App.save(); go(); };
+      setTimeout(go, 2600);
+    });
+  }
+
+  return { init, open, close, figure, portrait, setOut, editLook };
 })();

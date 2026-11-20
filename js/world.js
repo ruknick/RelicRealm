@@ -68,7 +68,7 @@ window.World = (() => {
   function renderLevel() {
     const st = App.state, L = App.level, a = Data.xpForLevel(L), b = Data.xpForLevel(L + 1);
     document.getElementById('home-level').innerHTML =
-      `<b>${st.profile ? `${Story.ORIGINS[st.profile.origin].icon} ${st.profile.name} · ` : ''}⭐ ${L}</b><span class="xpbar"><i style="width:${Math.round((st.xp - a) / (b - a) * 100)}%"></i></span><small>${st.xp - a}/${b - a} XP</small>`;
+      `${st.profile ? `<span class="hl-pic">${Hero.portrait()}</span>` : ''}<b>${st.profile ? `${st.profile.name} · ` : ''}⭐ ${L}</b><span class="xpbar"><i style="width:${Math.round((st.xp - a) / (b - a) * 100)}%"></i></span><small>${st.xp - a}/${b - a} XP</small>`;
     document.getElementById('next-up').innerHTML = nextUp();
   }
   // The very next thing you'll unlock: gear or a station by level, or a boss lair by trips.

@@ -953,7 +953,7 @@ window.Gather = (() => {
     hudLevel();
     hudGoals();
     curTip = null; tipQ = [];
-    tip('swap');
+    Hero.setOut({ scene: key, title: `${App.state.profile ? App.state.profile.name : 'You'} sets out for the ${land.name}` }).then(() => tip('swap'));
     if (!App.pouchTotal()) { const r0 = run; setTimeout(() => { if (run === r0 && !run.ended) board.toast('🍖 You packed no food — you can\'t heal on this trip. Pack some at Your Camp\'s Storehouse.', 'alert', 3200); }, 2700); }
     Sound.music(land.music);
     if (App.state.debug.discoverNow && land.discover) {
