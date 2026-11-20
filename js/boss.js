@@ -395,7 +395,7 @@ window.Boss = (() => {
     board.scheduleHint();
     hud();
     Sound.music(cfg.music);
-    Hero.setOut({ scene: cfg.frame === 'ocean' ? 'ocean' : cfg.frame === 'mine' ? 'dwarf' : 'goblin', title: `${App.state.profile ? App.state.profile.name : 'You'} enters ${cfg.place}` });
+    Hero.setOut({ scene: cfg.frame === 'ocean' ? 'ocean' : cfg.frame === 'mine' ? 'dwarf' : 'goblin', title: `${App.state.profile ? App.state.profile.name : 'You'} enters ${cfg.place}`, goals: [`Defeat ${cfg.name} before your ${CAP} moves run out`] });
     board.toast(cfg.intro, '', 3200);
   }
 

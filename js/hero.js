@@ -270,7 +270,7 @@ window.Hero = (() => {
   // ---------- setting out: your warrior, as equipped, before each trip or fight ----------
   const SCENE_DECOR = { forest: ['stump', 'thorn'], mine: ['boulder', 'vein'], ocean: ['coral', 'kelp'], farm: ['haybale', 'molehill'], goblin: ['fence', 'gkeep'], dwarf: ['swall', 'gate'] };
   let setoutEl = null;
-  function setOut({ scene, title }) {
+  function setOut({ scene, title, goals = [] }) {
     const S = App.state;
     if (!S.profile || (S.settings && S.settings.noSetout)) return Promise.resolve();
     setoutEl ||= document.body.appendChild(Object.assign(document.createElement('div'), { id: 'setout', className: 'setout hidden' }));
@@ -283,7 +283,9 @@ window.Hero = (() => {
     setoutEl.innerHTML = `<div class="so-sky"></div>
       <span class="so-deco l">${Art.any(d1)}</span><span class="so-deco r">${Art.any(d2)}</span>
       <div class="so-fig">${figure()}</div>
-      <div class="so-card"><h2>${title}</h2><p>${bits.join(' · ')}</p><small>Tap to begin</small></div>
+      <div class="so-card"><h2>${title}</h2>
+        ${goals.length ? `<div class="so-goals"><b>🎯 Your goals</b>${goals.map(g => `<div class="so-goal">☆ ${g}</div>`).join('')}${goals.length > 1 ? '<small>★ one goal · ★★ both · ★★★ both with 5+ moves to spare</small>' : ''}</div>` : ''}
+        <p class="so-gear">${bits.join(' · ')}</p><small>Tap to begin</small></div>
       <button class="link so-off">Don't show this scene</button>`;
     setoutEl.classList.remove('hidden');
     void setoutEl.offsetWidth;
@@ -293,7 +295,7 @@ window.Hero = (() => {
       const go = () => { if (gone) return; gone = true; setoutEl.classList.remove('show'); setTimeout(() => setoutEl.classList.add('hidden'), 300); res(); };
       setoutEl.onclick = go;
       setoutEl.querySelector('.so-off').onclick = e => { e.stopPropagation(); S.settings = { ...(S.settings || {}), noSetout: true }; App.save(); go(); };
-      setTimeout(go, 2600);
+      setTimeout(go, goals.length ? 4200 : 2600);
     });
   }
 

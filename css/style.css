@@ -1678,3 +1678,9 @@ body.modal-open { overflow: hidden; }
   background: radial-gradient(ellipse at 30% 15%, rgba(255,250,235,.7), transparent 60%), var(--paper); box-shadow: 0 8px 26px rgba(0,0,0,.5); }
 .so-card h2 { margin: 0 0 4px; font-family: Georgia, serif; font-size: 1.15rem; } .so-card p { margin: 0 0 4px; font-size: .86rem; } .so-card small { color: var(--ink-soft); font-style: italic; }
 .so-off { position: absolute; bottom: 16px; color: #f3e2b8; font-size: .8rem; opacity: .8; }
+
+.so-goals { margin: 6px 0 8px; padding: 8px 10px; border-radius: 10px; background: rgba(243,196,74,.18); border: 1.5px solid #c9a227; text-align: left; }
+.so-goals b { display: block; font-family: Georgia, serif; font-size: .95rem; margin-bottom: 2px; }
+.so-goal { font-family: Georgia, serif; font-size: 1.05rem; font-weight: 700; color: #6b2a10; margin: 3px 0; }
+.so-goals small { display: block; margin-top: 4px; font-size: .72rem; color: var(--ink-soft); font-style: normal; }
+.so-gear { font-size: .78rem !important; color: var(--ink-soft); }
