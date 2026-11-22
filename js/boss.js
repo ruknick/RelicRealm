@@ -327,7 +327,7 @@ window.Boss = (() => {
   function scaled(kind) {
     const base = CONFIG[kind], S = st(), wins = ((S.bossWins || {})[kind]) || 0;
     const wTier = S.equip.weapon ? Data.ITEMS[S.equip.weapon.id].tier : 1;
-    const worn = ['helmet', 'body', 'legs', 'shield'].map(k => (S.equip[k] ? Data.ITEMS[S.equip[k].id].tier : 0));
+    const worn = ['helmet', 'body', 'legs', 'shield'].map(k => (S.equip[k] && S.equip[k].dur !== 0 ? Data.ITEMS[S.equip[k].id].tier : 0));   // broken pieces don't count
     const aTier = Math.ceil(worn.reduce((a, b) => a + b, 0) / worn.length);
     const lift = kind === 'dragon' ? 0 : Math.max(0, Math.min(4, wTier) - base.boss.armor);       // hide & health
     const arm = kind === 'dragon' ? 0 : Math.max(0, Math.min(4, aTier) - base.boss.weapon);      // their weapons

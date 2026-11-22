@@ -1684,3 +1684,5 @@ body.modal-open { overflow: hidden; }
 .so-goal { font-family: Georgia, serif; font-size: 1.05rem; font-weight: 700; color: #6b2a10; margin: 3px 0; }
 .so-goals small { display: block; margin-top: 4px; font-size: .72rem; color: var(--ink-soft); font-style: normal; }
 .so-gear { font-size: .78rem !important; color: var(--ink-soft); }
+
+.broken { color: #b03a1e !important; font-weight: 700; }

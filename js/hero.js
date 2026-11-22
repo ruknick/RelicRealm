@@ -23,6 +23,7 @@ window.Hero = (() => {
     const it = Data.ITEMS[g.id];
     if (!it.dur) return text ? '<small>∞ never wears out</small>' : '';
     const pct = Math.round(g.dur / it.dur * 100);
+    if (g.dur <= 0) return `<span class="dur low"><i style="width:0%"></i></span>${text ? ' <small class="broken">💥 broken — repair it at the Workshop</small>' : '<small class="broken">broken</small>'}`;
     return `<span class="dur${pct <= 25 ? ' low' : ''}"><i style="width:${pct}%"></i></span>${text ? ` <small>${g.dur}/${it.dur} blocks left</small>` : ''}`;
   };
 
@@ -275,7 +276,7 @@ window.Hero = (() => {
     if (!S.profile || (S.settings && S.settings.noSetout)) return Promise.resolve();
     setoutEl ||= document.body.appendChild(Object.assign(document.createElement('div'), { id: 'setout', className: 'setout hidden' }));
     const name = it => (S.equip[it] ? Data.ITEMS[S.equip[it].id].name : null);
-    const armor = ['helmet', 'body', 'gloves', 'legs', 'shield'].filter(k => S.equip[k]).length;
+    const armor = ['helmet', 'body', 'gloves', 'legs', 'shield'].filter(k => S.equip[k] && S.equip[k].dur !== 0).length;
     const food = App.pouchTotal();
     const bits = [name('weapon') && `⚔ ${name('weapon')}`, name('tool') && `🛠 ${name('tool')}`, `🛡 ${armor} armor piece${armor === 1 ? '' : 's'}`, `🍖 ${food ? `${food} food packed` : 'no food packed!'}`].filter(Boolean);
     const [d1, d2] = SCENE_DECOR[scene] || SCENE_DECOR.forest;

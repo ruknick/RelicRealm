@@ -607,7 +607,7 @@ window.Board = (() => {
       if (crit) this.toast('💥 Critical hit!', 'win', 1000);
       window.Sound?.sfx(slot === 'weapon' ? 'slash' : 'hit');
       const broke = App.wear(slot);
-      if (broke) { this.toast(`💥 Your ${broke} broke!`, 'alert', 2400); window.Sound?.sfx('break'); }
+      if (broke) { this.toast(`💥 Your ${broke} broke! It stays with you — repair it at the Workshop.`, 'alert', 2600); window.Sound?.sfx('break'); }
       this.renderWeapons();
       this.render();
       await this.wait(220);

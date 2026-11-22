@@ -139,12 +139,13 @@ window.App = (() => {
     state.equip[slot] = null;
     save();
   }
-  // Wear down the equipped item. Returns the item's name if it broke.
+  // Wear down the equipped item. Returns the item's name the moment it breaks.
+  // A broken piece is never lost: it stays on you (no protection) until it's repaired at the Workshop.
   function wear(slot, n = 1) {
     const g = state.equip[slot];
-    if (!g || !Data.ITEMS[g.id].dur) return null;   // weapons, tools & amulets never wear out
-    g.dur -= n;
-    if (g.dur <= 0) { state.equip[slot] = null; save(); return Data.ITEMS[g.id].name; }
+    if (!g || !Data.ITEMS[g.id].dur || g.dur <= 0) return null;   // weapons, tools & amulets never wear out
+    g.dur = Math.max(0, g.dur - n);
+    if (g.dur === 0) { save(); return Data.ITEMS[g.id].name; }
     save();
     return null;
   }
@@ -165,12 +166,13 @@ window.App = (() => {
     const slots = [['body', 40], ['helmet', 20], ['legs', 20], [state.equip.shield ? 'shield' : 'body', 20]];
     const slot = Data.rollFrom(slots), g = state.equip[slot];
     let dmg = base, note = '';
-    if (g) {
+    if (g && g.dur <= 0) note = `your ${Data.ITEMS[g.id].name.toLowerCase()} is broken — repair it at the Workshop`;
+    else if (g) {
       const diff = Data.ITEMS[g.id].tier - weaponTier;
       dmg = diff >= 1 ? 0 : diff === 0 ? Math.ceil(base * 0.4) : diff === -1 ? Math.ceil(base * 0.75) : base;
       note = dmg === 0 ? `your ${Data.ITEMS[g.id].name.toLowerCase()} turns it aside` : `your ${Data.ITEMS[g.id].name.toLowerCase()} softens it`;
       const broke = wear(slot);
-      if (broke) note += ` — your ${broke} broke!`;
+      if (broke) note += ` — your ${broke} broke! It no longer protects you until it's repaired`;
     }
     state.hp = Math.max(0, state.hp - dmg);
     save();

@@ -63,7 +63,7 @@ window.Data = (() => {
     amulet: { cls: 'trinket', what: 'Amulet', trait: '' },
   };
   const ARMOR_LABEL = { 1: 'Leather', 2: 'Iron', 3: 'Steel', 4: 'Mythic' };
-  const gloveEnergy = g => (g ? ITEMS[g.id].tier : 0);
+  const gloveEnergy = g => (g && !(g.dur <= 0) ? ITEMS[g.id].tier : 0);   // broken gloves give no bonus
   const gear = (name, type, tier, extra = {}) => {
     const cls = TYPE_INFO[type].cls;
     const what = cls === 'weapon' ? 'monsters only' : cls === 'tool' ? 'obstacles & defenses only' : `armor (hardness ${tier})`;
