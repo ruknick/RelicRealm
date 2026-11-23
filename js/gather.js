@@ -130,7 +130,63 @@ window.Gather = (() => {
     const el = document.getElementById('g-goals');
     if (!el || !run) return;
     el.innerHTML = '🎯 ' + run.goals.map(x => `<span class="gl${x.have >= x.need ? ' done' : ''}">${x.text(x.need)} <b>${x.have}/${x.need}</b></span>`).join('')
-      + `<span class="gl-stars">${'★'.repeat(starsNow())}${'☆'.repeat(3 - starsNow())}</span>`;
+      + `<span class="gl-stars">${'★'.repeat(starsNow())}${'☆'.repeat(3 - starsNow())}</span>`
+      + (run.quest ? `<span class="gl quest${run.quest.done ? ' done' : ''}">📜 ${run.quest.step.text.replace(/ \([^)]*\)$/, '')}${questCount()}</span>` : '');
+  }
+  // ---------- quest steps on this board ----------
+  const questCount = () => {
+    const Q = run.quest, s = Q.step;
+    if (Q.done) return ' ✓';
+    if (s.type === 'clear') return ` <b>${run.qCount}/${s.n}</b>`;
+    if (s.type === 'survive') return ` <b>${Math.min(run.movesMade, s.moves)}/${s.moves}</b>`;
+    if (s.type === 'rescue') return ` <b>${Math.max(0, s.moves - run.movesMade)} moves left</b>`;
+    if (s.type === 'find' && s.count) return ` <b>${Quests.progress(Q.q)}</b>`;
+    return '';
+  };
+  function questSetup() {
+    const Q = run.quest, s = Q.step;
+    run.qCount = 0;
+    const mid = board.tileCells(r => r >= 2 && r <= 5).filter(([r, c]) => !board.buried.has(`${r},${c}`) && c >= 1 && c <= 5);
+    if (s.type === 'find' && mid.length) {
+      const [r, c] = pick(mid), k = `${r},${c}`;
+      board.buried.set(k, 'quest');
+      board.shown.add(k);
+      Q.msg = `📜 ${s.item[0].toUpperCase() + s.item.slice(1)} is buried here — clear the glinting tile to dig it up!`;
+    } else if (s.type === 'hunt') {
+      const f = s.foe, p = spawnMonster(false);
+      if (p) {
+        const hp = Math.round(p.hp * f.hpMul);
+        Object.assign(p, { name: f.name, art: f.art, questFoe: true, hp, maxHp: hp, armor: (p.armor || 1) + (f.cronies ? 1 : 0), weapon: f.weapon || p.weapon });
+        monLabel(p);
+      }
+      for (let i = 0; i < (f.cronies || 0); i++) spawnMonster(false);
+      Q.msg = `${f.icon} <b>${f.name}</b> is on this board! Take it down with your weapon.`;
+    } else if (s.type === 'rescue' && mid.length) {
+      const [r, c] = mid.sort((a, b) => Math.abs(a[0] - 3.5) + Math.abs(a[1] - 3) - Math.abs(b[0] - 3.5) - Math.abs(b[1] - 3))[0];
+      board.addPiece({ kind: 'captive', label: s.who, mat: 'other', hp: 3, art: 'prisoner', name: s.who }, r, c, 1);
+      spawnMonster(false);
+      Q.msg = `🧒 ${s.who} is stranded on the rocks! Match beside him 3 times to free him — within ${s.moves} moves.`;
+    } else if (s.type === 'clear') {
+      const spots = blockerSpots().sort(() => Math.random() - 0.5);
+      for (let i = board.piecesOf(BLOCKERS[land.key].kind).length; i < s.n + 1 && spots.length; i++) addBlocker(...spots.pop());
+      Q.msg = `📜 Clear ${s.n} ${BLOCKERS[land.key].name} this trip!`;
+    } else if (s.type === 'survive') {
+      run.mon.max += 2; run.mon.every = Math.max(2, run.mon.every - 1);
+      spawnMonster(false);
+      if (run.lv.growEvery) run.lv = { ...run.lv, growEvery: Math.max(2, run.lv.growEvery - 1) };
+      Q.msg = `📜 You carry the oath-stone. Survive ${s.moves} moves without collapsing — the deep hills fight back.`;
+    }
+  }
+  function questDone(cell) {
+    const Q = run.quest;
+    if (!Q || Q.done) return;
+    Q.done = true;
+    Quests.advance(Q.qid);
+    run.finds.push(`📜 ${Q.q.title}: step done!`);
+    if (cell) board.celebrate(cell, { icon: '📜', title: 'Quest step done!', sub: `${Q.q.title} — tell ${Lore.CAST[Q.q.who].name} back home.`, rare: true });
+    else board.toast(`📜 Quest step done: ${Q.q.title}!`, 'win', 2400);
+    Sound.sfx('rare');
+    hudGoals();
   }
 
   function addBlocker(r, c, appear = false) {
@@ -282,6 +338,15 @@ window.Gather = (() => {
 
   // ---------- finds ----------
   function applyFind(id, cell, delay = 0) {
+    if (id === 'quest') {
+      const Q = run.quest, r = Quests.found(Q.qid);
+      Q.done = true;   // one quest find per trip
+      if (Q.step.count && Quests.boardStep(land.key)?.qid === Q.qid) Q.partial = r.sub.match(/\((\d+\/\d+)\)/)?.[1];
+      run.finds.push(`📜 ${r.title.replace(/!$/, '')}`);
+      board.celebrate(cell, { icon: r.art ? Art.any(r.art) : r.icon, title: r.title, sub: `📜 ${r.sub}`, rare: true });
+      xp(Data.XP.find); Sound.sfx('rare'); hudGoals();
+      return;
+    }
     const info = Data.FIND_INFO[id];
     const st = App.state;
     let detail = '';
@@ -599,7 +664,10 @@ window.Gather = (() => {
       if (!board.hurt(p, dmg)) return;
       if (BREAK[land.key].includes(p.kind)) goalProgress('break');
       if (p.kind === 'monster') { goalProgress('slay'); if (land.key === 'forest') Story.countUp('goblins'); }
+      if (p.questFoe && !board.piecesOf('monster').some(m => m.questFoe && m !== p && !m.gone)) questDone(cell);
+      if (p.kind === 'captive') { board.toast(`🧒 ${p.name} is free!`, 'win', 2000); questDone(cell); }
       if (p.kind === BLOCKERS[land.key].kind) {
+        if (run.quest && run.quest.step.type === 'clear' && !run.quest.done && ++run.qCount >= run.quest.step.n) questDone(cell);
         goalProgress('blocker');
         const B = BLOCKERS[land.key];
         if (B.give && Math.random() < (B.give === 'silver' ? 0.6 : 0.35)) addToBackpack(B.give, 1, cell);
@@ -701,6 +769,7 @@ window.Gather = (() => {
         vine: 'Creeping vines — they spread every few moves. Match beside them to tear them out.',
         crystal: `Crystal cluster (${p.hp} HP) — match beside it to chip it. It hides silver.`,
         barnacle: 'Barnacles crusting the shore — they spread with the tide. Match beside them to scrape them off.',
+        captive: `${p.name} is stranded! Match right beside him to free him before the tide turns.`,
         crab: 'A giant crab with stolen loot! Only a weapon can stop it before it reaches the sea. Coral spears hit it extra hard.',
       }[p.kind];
       board.toast(msg || 'Match next to it.', '', 2800);
@@ -716,6 +785,13 @@ window.Gather = (() => {
         await moveEvent();
         await monstersAct();
         if (run.ended) return;
+        const Q = run.quest;
+        if (Q && !Q.done && Q.step.type === 'survive' && run.movesMade >= Q.step.moves && App.state.hp > 0) questDone();
+        if (Q && !Q.done && Q.step.type === 'rescue' && run.movesMade >= Q.step.moves) {
+          board.piecesOf('captive').forEach(x => board.removePiece(x, 'fog-out'));
+          Q.failed = true; run.quest = null; run.questFailed = true;
+          board.toast(`🌊 The tide pulls ${Q.step.who} further out — Wren's boat picks him up, but you'll have to try again next trip.`, 'alert', 3400);
+        }
         await spreadBlockers();
         await topUpBlockers();
         if (!run.eventSpawned && run.movesMade >= EVENT_AFTER && Math.random() < EVENT_CHANCE) {
@@ -848,6 +924,8 @@ window.Gather = (() => {
     if (run.overflow) notes.push(`${run.overflow} more didn't fit in your backpack.`);
     if (run.slain) notes.push(`${land.monster.icon} ${run.slain} ${land.monster.name}${run.slain > 1 ? 's' : ''} defeated.`);
     if (survivors && (land.key === 'forest' || land.key === 'mine')) notes.push(`${land.monster.icon} ${survivors} ${land.monster.name}${survivors > 1 ? 's' : ''} got away — they'll report back to their kin.`);
+    if (run.quest) notes.unshift(run.quest.partial ? `📜 <b>${run.quest.q.title}</b>: ${run.quest.step.item} found (${run.quest.partial}) — more are out there.` : run.quest.done ? `📜 <b>${run.quest.q.title}</b>: step done! ${Lore.CAST[run.quest.q.who].name} will want to hear about it.` : `📜 <b>${run.quest.q.title}</b>: not done yet — ${run.quest.step.text}.`);
+    else if (run.questFailed) notes.unshift('📜 The quest step slipped away this time — try again on your next trip.');
     if (run.lost) notes.unshift(`💀 <b>You collapsed</b> and dropped ${run.lost} things on the way home.`);
     notes.push(`❤️ ${App.state.hp}/${App.maxHp} after resting at camp.`);
     if (warn) notes.unshift(warn);
@@ -856,7 +934,7 @@ window.Gather = (() => {
     const L = run.landLv, rew = [];
     if (stars >= 1) { App.state.stockpile.gold += 5 + Math.floor(L / 2); rew.push(`${5 + Math.floor(L / 2)} gold`); }
     if (stars >= 2) { const x = 15 + L * 2; App.addXP(x); run.xp += x; rew.push(`${x} XP`); }
-    if (stars >= 3) { const rr = STAR_RARE[land.key]; App.state.stockpile[rr] += 2; App.state.stockpile.gold += 10; rew.push(`a reward chest: 10 gold + 2 ${Data.RESOURCES[rr].label}`); }
+    if (stars >= 3) { const rr = STAR_RARE[land.key], x2 = Quests.perk('fortune') ? 2 : 1; App.state.stockpile[rr] += 2 * x2; App.state.stockpile.gold += 10 * x2; rew.push(`${x2 > 1 ? 'two reward chests (Fortune\'s charm)' : 'a reward chest'}: ${10 * x2} gold + ${2 * x2} ${Data.RESOURCES[rr].label}`); }
     run.stars = stars;
     const best = App.state.bestStars = App.state.bestStars || {};
     best[land.key] = Math.max(best[land.key] || 0, stars);
@@ -942,6 +1020,10 @@ window.Gather = (() => {
         if (m) { m.carriesKey = true; monLabel(m); } else run.keyCarrier = true;
       }
     }
+    run.quest = Quests.boardStep(key);
+    if (run.quest) questSetup();
+    if (key === 'forest' && Quests.perk('scout')) { const k = [...board.buried.keys()].find(x => board.buried.get(x) !== 'quest'); if (k) board.shown.add(k); }
+    if (key === 'ocean' && Quests.perk('knot')) board.energy += 1;
     board.setFrame(key);
     Art.setScene(key);
     board.showBuried = has('lamp');
@@ -953,7 +1035,7 @@ window.Gather = (() => {
     hudLevel();
     hudGoals();
     curTip = null; tipQ = [];
-    Hero.setOut({ scene: key, title: `${App.state.profile ? App.state.profile.name : 'You'} sets out for the ${land.name}`, goals: run.goals.map(g => g.text(g.need)) }).then(() => tip('swap'));
+    Hero.setOut({ scene: key, title: `${App.state.profile ? App.state.profile.name : 'You'} sets out for the ${land.name}`, goals: [...run.goals.map(g => g.text(g.need)), ...(run.quest ? [`📜 ${run.quest.step.text}`] : [])] }).then(() => { if (run.quest && run.quest.msg) board.toast(run.quest.msg, 'win', 3400); tip('swap'); });
     if (!App.pouchTotal()) { const r0 = run; setTimeout(() => { if (run === r0 && !run.ended) board.toast('🍖 You packed no food — you can\'t heal on this trip. Pack some at Your Camp\'s Storehouse.', 'alert', 3200); }, 2700); }
     Sound.music(land.music);
     if (App.state.debug.discoverNow && land.discover) {

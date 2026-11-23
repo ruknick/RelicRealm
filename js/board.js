@@ -81,6 +81,7 @@ window.Board = (() => {
       this.pieces = [];
       this.buried = new Map();
       this.showBuried = false;
+      this.shown = new Set();   // buried spots that glint anyway (quest finds, Pip's scouting)
       this.energy = Data.startEnergy(window.App?.level || 1, window.App?.state?.equip?.gloves);
       if (window.App?.fx) { App.fx.sleep = 0; App.fx.giant = null; }   // ⚡ built by matching, spent on tap-swings (gloves add more)
       this.grid = Array.from({ length: this.rows }, () => Array(this.cols).fill(null));
@@ -712,11 +713,12 @@ window.Board = (() => {
     // Buried finds glimmer when the player owns a Miner's lamp.
     renderBuried() {
       this.fx.querySelectorAll('.glimmer').forEach(e => e.remove());
-      if (!this.buried || !this.showBuried) return;
-      this.buried.forEach((_, k) => {
+      if (!this.buried) return;
+      this.buried.forEach((f, k) => {
+        if (!this.showBuried && !(this.shown && this.shown.has(k))) return;
         const [r, c] = k.split(',').map(Number);
         const d = document.createElement('div');
-        d.className = 'glimmer';
+        d.className = f === 'quest' ? 'glimmer quest' : 'glimmer';
         d.style.left = (c / this.cols * 100) + '%';
         d.style.top = (r / this.rows * 100) + '%';
         d.style.width = (100 / this.cols) + '%';

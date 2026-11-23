@@ -1119,6 +1119,10 @@ window.Art = (() => {
       <circle cx="${cx}" cy="${top + h * 0.1}" r="2.6" fill="#c0392b" stroke="#5a3a08" stroke-width=".8"/><circle cx="${x + w * 0.33}" cy="${top + h * 0.62}" r="1.8" fill="#2e86c1"/><circle cx="${x + w * 0.67}" cy="${top + h * 0.62}" r="1.8" fill="#27ae60"/>
       <path d="M${x + 3} ${top + h * 0.45}l2 ${h * 0.35}" stroke="#fff6c8" stroke-width="1.4" opacity=".7"/>`;
   };
+  // Old Brass, the net-breaking salmon: a big golden fish.
+  PIECES.brass = `<ellipse cx="32" cy="56" rx="24" ry="3" fill="#000" opacity=".25"/><path d="M6 34q14-20 38-12l10-8v28l-10-8Q20 50 6 34z" fill="#c9a227" stroke="#2b1b0d" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M18 28q8 6 0 12M26 25q8 8 0 18" stroke="#8a6a1a" stroke-width="1.6" fill="none"/><circle cx="13" cy="31" r="2.6" fill="#2b1b0d"/><circle cx="12.3" cy="30.3" r=".9" fill="#fff"/>
+      <path d="M8 38q4 2 8 0" stroke="#2b1b0d" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M30 20l6-8 4 9" fill="#e0b84a" stroke="#2b1b0d" stroke-width="1.6" stroke-linejoin="round"/>`;
   const bigPiece = (k, tx, ty, sc = 2) => `<g transform="translate(${tx} ${ty}) scale(${sc})">${PIECES[k].replace(/<ellipse cx="3[0-9]" cy="5[6-9]"[^>]*\/>/, '')}</g>`;
   TALL.kingcrab = `<ellipse cx="96" cy="122" rx="62" ry="5" fill="#000" opacity=".35"/>${bigPiece('crab', 44, -6)}${kingCrown(96, 18, 34)}`;
   TALL.goblinking = `<ellipse cx="96" cy="122" rx="56" ry="5" fill="#000" opacity=".35"/>

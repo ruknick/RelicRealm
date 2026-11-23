@@ -54,7 +54,8 @@ window.Craft = (() => {
   function repairCost(id) {
     const r = Data.RECIPES.find(x => x.id === id);
     if (!r) return { gold: 4, iron: 2 };       // spoils
-    return Object.fromEntries(Object.entries(r.cost).map(([k, n]) => [k, Math.max(1, Math.ceil(n / 2))]));
+    const div = Quests.perk('halfRepair') ? 4 : 2;   // Bram's apprentice halves the cost again
+    return Object.fromEntries(Object.entries(r.cost).map(([k, n]) => [k, Math.max(1, Math.ceil(n / div))]));
   }
   function repairList() {
     const out = [];
@@ -130,7 +131,7 @@ window.Craft = (() => {
   let mode = 'workshop';
   const RAW_NAME = k => Data.RESOURCES[k].label;
   function renderKitchen() {
-    const meals = R().filter(r => r.tier === 'food').sort((a, b) => a.lv - b.lv);
+    const meals = R().filter(r => r.tier === 'food' && (!r.secret || Quests.perk(r.secret))).sort((a, b) => a.lv - b.lv);
     const potions = R().filter(r => r.tier === 'potion').sort((a, b) => a.lv - b.lv);
     document.getElementById('craft-list').innerHTML =
       `${Lore.remark('maren')}<p class="tab-sub">Meals and potions go to your bank — pack them at 🏰 Your Camp before a trip. Each one takes a backpack slot.</p>
@@ -286,6 +287,7 @@ window.Craft = (() => {
     }
     Story.flag('crafted');
     if (r.tier === 'food') Story.flag('cooked');
+    Quests.event('make', id);
     App.save();
     forge.classList.add('done');
     item.classList.add('pop');

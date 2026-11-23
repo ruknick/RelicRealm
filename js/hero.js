@@ -183,10 +183,12 @@ window.Hero = (() => {
     const worn = ['helmet', 'body', 'legs', 'shield'].filter(k => eq(k));
     const meals = Object.keys(Data.ITEMS).filter(k => Data.ITEMS[k].heal).filter(k => S.inventory[k] > 0)
       .map(k => `<button class="small eat-btn" data-meal="${k}">${Data.ITEMS[k].icon} ${Data.ITEMS[k].name} ×${S.inventory[k]} (+${Data.ITEMS[k].heal})</button>`).join('');
-    return `<div class="hp-line"><b>❤️ Health ${S.hp}/${mx}</b><span class="hp-wide"><i style="width:${S.hp / mx * 100}%"></i></span></div>
+    const qp = (S.quests && S.quests.perks) || {}, earned = Quests.QUESTS.filter(q => S.quests && S.quests.done && S.quests.done[q.id]);
+    return `${qp.title ? `<div class="q-title">🏅 ${S.profile ? S.profile.name : 'You'}, ${qp.title}</div>` : ''}<div class="hp-line"><b>❤️ Health ${S.hp}/${mx}</b><span class="hp-wide"><i style="width:${S.hp / mx * 100}%"></i></span></div>
       ${away ? `<div class="eat-row"><span class="hint">On a trip you eat from your 🎒 food pouch:</span>${App.pouchList().filter(k => App.healOf(k) > 0).map(k => `<button class="small eat-btn" data-pouch="${k}" ${S.hp < mx ? '' : 'disabled'}>${App.foodName(k)} ×${App.pouch()[k]} (+${App.healOf(k)})</button>`).join('') || '<span class="hint">— empty.</span>'}</div>` : `<div class="eat-row">${Data.FOOD_ORDER.filter(k => S.stockpile[k] > 0).map(k => `<button class="small eat-btn" data-food="${k}" ${S.hp < mx ? '' : 'disabled'}>${Data.RESOURCES[k].label} ×${S.stockpile[k]} (+${Data.FOODS[k]})</button>`).join('') || '<span class="hint">No food in your Storehouse — gather berries or fish.</span>'}${meals}</div>`}
       <div><b>🛡 Armor:</b> ${worn.length ? `${worn.length} piece${worn.length > 1 ? 's' : ''} — blows that land on armored spots are softened, or turned aside by better metal` : 'none — every blow lands in full'}</div>
       <div><b>💪 Strength:</b> +${Data.strength(L)} weapon damage (grows every 5 levels) · <b>⚡ Energy:</b> start ${Data.startEnergy(L, eq('gloves'))} · max ${Data.maxEnergy(L)}</div>
+      ${earned.length ? `<div><b>📜 From quests:</b> ${earned.map(q => q.reward.label).join(' · ')}</div>` : ''}
       <div><b>💎 Amulet:</b> ${eq('amulet') ? Data.ITEMS[eq('amulet').id].desc : 'none — set a gem in silver at the Workshop'}</div>
       <div class="h-est">⭐ Level ${L} · ${Data.ERA_NAME[Data.ERA(L)]} era</div>`;
   }

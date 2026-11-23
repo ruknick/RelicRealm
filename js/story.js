@@ -372,6 +372,7 @@ window.Story = (() => {
         s.shown[s.chapter] = true; App.save();
         await Lore.say({ who: next.teller, title: `📜 ${next.title}`, lines: [...next.intro, goalList(next)] });
       }
+      await Quests.check();
     } finally { checking = false; }
     if (!document.getElementById('screen-home').classList.contains('hidden')) World.render();
   }
@@ -390,7 +391,7 @@ window.Story = (() => {
     const s = ensure(), el = document.getElementById('journal-list');
     migrate();
     const pages = (s.pages || []).length, people = Object.keys(s.met || {}).length;
-    const tabs = [['chapters', 'Chapters', `${Math.min(s.chapter + 1, CHAPTERS.length)}/${CHAPTERS.length}`], ['tales', 'Tales', 'of the lands'], ['pages', 'Pages', `${pages}/${Lore.PAGES.length}`], ['people', 'People', `${people} met`]];
+    const tabs = [['chapters', 'Chapters', `${Math.min(s.chapter + 1, CHAPTERS.length)}/${CHAPTERS.length}`], ['tales', 'Tales', 'of the lands'], ['quests', 'Quests', Quests.count()], ['pages', 'Pages', `${pages}/${Lore.PAGES.length}`], ['people', 'People', `${people} met`]];
     let body = '';
     if (jtab === 'chapters') {
       body = CHAPTERS.map((ch, i) => {
@@ -404,9 +405,11 @@ window.Story = (() => {
       }).join('') + '<button class="link" id="j-intro">📖 Read the opening tale again</button><br><button class="link" id="j-tips">💬 Show Maren\'s tips again</button>';
     } else if (jtab === 'tales') body = Lore.talesHtml();
     else if (jtab === 'pages') body = Lore.pagesHtml();
+    else if (jtab === 'quests') body = Quests.journalHtml();
     else body = Lore.peopleHtml();
     el.innerHTML = `<div class="jtabs">${tabs.map(([id, label, sub]) => `<button class="jtab${jtab === id ? ' on' : ''}" data-jt="${id}">${label}<small>${sub}</small></button>`).join('')}</div>${body}`;
     el.querySelectorAll('[data-jt]').forEach(b => { b.onclick = () => { jtab = b.dataset.jt; journal(); }; });
+    if (jtab === 'quests') Quests.bind(el, journal);
     const ji = document.getElementById('j-intro');
     if (ji) ji.onclick = () => intro();
     const jt = document.getElementById('j-tips');

@@ -151,7 +151,7 @@ window.App = (() => {
   }
 
   // ---------- your health ----------
-  const maxHp = () => Data.maxHp(level()) + (Data.amuletPower() === 'stone' ? 8 : 0);
+  const maxHp = () => Data.maxHp(level()) + (Data.amuletPower() === 'stone' ? 8 : 0) + ((state.quests && state.quests.perks && state.quests.perks.hp) || 0);
   function heal(n) {
     const before = state.hp;
     state.hp = Math.min(maxHp(), state.hp + n);

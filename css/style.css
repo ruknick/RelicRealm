@@ -1686,3 +1686,21 @@ body.modal-open { overflow: hidden; }
 .so-gear { font-size: .78rem !important; color: var(--ink-soft); }
 
 .broken { color: #b03a1e !important; font-weight: 700; }
+
+/* ---------- side quests ---------- */
+.sp-sub .mk.quest { background: #c9a227; color: #2a1a0c; font-weight: 900; animation: qbob 1.4s ease-in-out infinite; }
+@keyframes qbob { 50% { transform: translateY(-2px); } }
+.goalbar .gl.quest { flex-basis: 100%; color: #f2d58a; border-top: 1px dashed rgba(242,228,194,.25); padding-top: 2px; }
+.goalbar .gl.quest.done { text-decoration: none; color: #9fe07a; }
+.glimmer.quest { background: radial-gradient(circle, rgba(255,214,90,.8), transparent 65%); }
+.glimmer.quest::after { content: "📜"; font-size: 3.4cqw; right: 4%; top: 0; }
+.jquest { background: var(--panel); border-radius: 14px; padding: 12px; margin-bottom: 10px; border: 2px solid transparent; }
+.jquest.now { border-color: #c9a227; }
+.jquest.done { opacity: .88; }
+.jquest .goals li.cur { color: var(--ink); }
+.jquest .goals li.cur small, .jquest .goals li.later { color: var(--ink-soft); }
+.jquest .story-text { color: var(--ink); }
+.jquest button { margin-top: 6px; }
+.q-next { display: block; margin-top: 6px; font-size: .9em; }
+.q-clue { display: block; font-style: italic; color: #6a4a8a; }
+.q-title { font-family: Georgia, serif; font-weight: 800; color: #ffe08a; margin-bottom: 4px; }

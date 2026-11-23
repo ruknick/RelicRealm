@@ -180,6 +180,7 @@ window.Data = (() => {
     crown:      { name: 'Old King\'s Crown', icon: '👑', trinket: true, desc: 'Legendary. Forged from the five relic shards and gold. On raids their defenders wait 2 moves longer, and the way to Emberwyrm opens.' },
     // Provisions
     bread:      { name: 'Trail bread', icon: '🍞', special: true, instant: true, heal: 5, desc: 'Plain wheat bread: +5 ❤️.' },
+    stew:       { name: 'Ashford stew', icon: '🍲', art: 'chowder', special: true, instant: true, heal: 14, desc: 'Jory\'s winter-feast stew, with a pinch of sea salt: +14 ❤️.' },
     chowder:    { name: 'Fish chowder', icon: '🍲', art: 'chowder', special: true, instant: true, heal: 8, desc: 'Herring chowder in a bottle: +8 ❤️.' },
     honeycake:  { name: 'Honey cake', icon: '🍯', special: true, instant: true, heal: 12, desc: 'Sweet and filling: +12 ❤️.' },
     roastchicken: { name: 'Roast chicken', icon: '🍗', special: true, instant: true, heal: 10, desc: 'Spit-roasted over a wood fire: +10 ❤️.' },
@@ -434,6 +435,7 @@ window.Data = (() => {
     { id: 'roastchicken', tier: 'food', station: 'workbench', cost: { meat: 2, wood: 1 } },
     { id: 'farmpie', tier: 'food', station: 'workbench', cost: { meat: 2, wheat: 2, egg: 1 } },
     { id: 'chowder', tier: 'food', station: 'workbench', cost: { herring: 3, water: 2 } },
+    { id: 'stew', tier: 'food', station: 'workbench', cost: { herring: 2, wheat: 2, egg: 1, water: 1 }, secret: 'stew' },   // from Maren's quest
     { id: 'honeycake', tier: 'food', station: 'workbench', cost: { honey: 2, wheat: 1, egg: 1 } },
     { id: 'salmonpie', tier: 'food', station: 'workbench', cost: { salmon: 2, mushroom: 2, wood: 1 } },
     { id: 'swordsteak', tier: 'food', station: 'workbench', cost: { swordfish: 1, coal: 1 } },
@@ -511,7 +513,7 @@ window.Data = (() => {
   const ERA = L => (L < 10 ? 1 : L < 20 ? 2 : L < 35 ? 3 : 4);
   const ERA_NAME = { 1: 'Wood & Leather', 2: 'Iron', 3: 'Steel', 4: 'Mythic' };
   const LAND_MAX = 35;
-  const backpackSize = L => Math.min(100, 30 + 2 * (L - 1));
+  const backpackSize = L => Math.min(100, 30 + 2 * (L - 1)) + (window.Quests && Quests.perk('mill') ? 4 : 0);   // the mill turns: +4
   const maxHp = L => 10 + 2 * Math.floor(L / 2);
   // Energy grows with you: +1 max every 5 levels, +1 starting energy each new era.
   const maxEnergy = L => 10 + Math.floor(L / 5);

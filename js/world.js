@@ -31,7 +31,7 @@ window.World = (() => {
     const st = App.state;
     document.getElementById('world-map').innerHTML = Art.WORLD;
 
-    const beckon = Story.nextSpot();
+    const beckon = Story.nextSpot(), qmarks = Quests.marks();
     document.getElementById('world-spots').innerHTML = SPOTS.map(s => {
       let cls = 'spot', sub = s.sub || '';
       const marks = [];
@@ -40,6 +40,7 @@ window.World = (() => {
         if (s.raid && st.marked[s.raid] > 0) marks.push(`<span class="mk raid" title="raid ready">⚔️${st.marked[s.raid] > 1 ? st.marked[s.raid] : ''}</span>`);
         (s.lairs || []).filter(k => Boss.unlocked(k)).forEach(k => marks.push(`<span class="mk boss" title="boss lair">${Boss.CONFIG[k].icon}</span>`));
       }
+      if (qmarks.has(s.id)) marks.push('<span class="mk quest" title="quest">❗</span>');
       if (s.boss) { const wins = (st.bossWins || {})[s.boss] || 0; cls += ' bossspot'; sub = wins ? `slain ×${wins}` : s.sub; }
       if (s.id === 'beyond') sub = st.chart >= Data.CHART_PIECES ? 'the chart is whole!' : `chart ${st.chart || 0}/${Data.CHART_PIECES}`;
       if (s.locked) cls += ' locked';
@@ -110,6 +111,7 @@ window.World = (() => {
     setTimeout(async () => {
       hero.classList.remove('walking');
       await Story.visit(s.id);
+      await Quests.visit(s.id);
       travelling = false;
       if (s.land) landMenu(s);
       else if (s.boss) Boss.prepare(s.boss);

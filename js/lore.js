@@ -20,6 +20,8 @@ window.Lore = (() => {
     thrain: { name: 'Thrain Ironbeard', role: 'Dwarf captain of the Iron Hills. Enemy, then ally. Teaches the way of steel.', pic: () => Art.piece('guard') },
     pip:    { name: 'Pip', role: 'A young goblin scout — nervous, chatty, and terrible at keeping secrets.', pic: () => Art.piece('goblin') },
     wren:   { name: 'Wren', role: 'A fisher-girl of the Sunlit Coast who dreams of the open sea.', pic: () => head({ skin: '#f3cfb0', hair: '#b03a1e', style: 'long', beard: 'none' }, { hat: 'featheredcap' }) },
+    agnes:  { name: 'Agnes Hale', role: 'The miller\'s widow of the Golden Fields. Sharp-tongued, kind underneath, grieving.', pic: () => head({ skin: '#f3cfb0', hair: '#d9d9d9', style: 'tied', beard: 'none' }) },
+    tobin:  { name: 'Old Tobin', role: 'The ferryman who carried Ashford\'s post. Knows every name in the village.', pic: () => head({ skin: '#c68b5e', hair: '#d9d9d9', style: 'bald', beard: 'full' }) },
     ysolde: { name: 'Madame Ysolde', role: 'The fortune teller at the Harvest Fair. Right more often than is comfortable.', pic: () => head({ skin: '#c68b5e', hair: '#2a1a10', style: 'long', beard: 'none' }, { hat: 'wizard' }) },
     journal: { name: 'The Old King\'s diary', role: 'Torn pages of the Old King\'s own diary, scattered across the realm. They tell what really happened.', pic: () => BOOK },
     // the bosses speak too
@@ -229,9 +231,16 @@ window.Lore = (() => {
       [13, 'Two kings, one seal. I know that seal. I wish I didn\'t.'],
       [16, 'Whatever happens on that mountain — come home and eat.']],
   };
+  // Once a quest is done, the village remembers it.
+  const QUEST_REMARKS = {
+    bram: [['halfRepair', 'Nell! Fetch the big bellows. — Sorry. New apprentice. Keen as mustard, that one.'], ['halfRepair', 'Bring your battered kit here. Nell needs the practice, so it\'s half price.'], ['mill', 'Hear that? The mill. Took me a week to stop listening for it.']],
+    maren: [['stew', 'Folk still talk about that supper. Jory would\'ve pretended not to be pleased.'], ['stew', 'Salt. Of all the things to forget. Wren\'s a good girl.'], ['scout', 'Pip\'s little sister came by for honey cake. Ate four. Hid one.']],
+  };
   function remark(who) {
     const ch = S().chapter || 0;
-    const line = REMARKS[who].filter(([c]) => c <= ch).at(-1)[1];
+    let line = REMARKS[who].filter(([c]) => c <= ch).at(-1)[1];
+    const extra = (QUEST_REMARKS[who] || []).filter(([k]) => window.Quests && Quests.perk(k)).map(([, l]) => l);
+    if (extra.length && Math.random() < 0.5) line = extra[Math.floor(Math.random() * extra.length)];
     const c = CAST[who];
     return `<div class="remark"><span class="remark-pic">${c.pic()}</span><p><b>${c.name}:</b> “${fill(line)}”</p></div>`;
   }
