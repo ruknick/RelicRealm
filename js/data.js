@@ -534,10 +534,10 @@ window.Data = (() => {
   // Roaming monsters on gathering boards: more of them, sooner, tougher as the land levels up (1–35).
   const landEra = L => (L < 10 ? 1 : L < 20 ? 2 : 3);
   const monsterPlan = L => ({
-    start: Math.min(3, 1 + Math.floor(L / 8)),            // on the board when you arrive
-    every: Math.max(3, 6 - Math.floor(L / 7)),            // a new one every N moves
-    max: Math.min(6, 2 + Math.floor(L / 6)),              // most on the board at once
-    hp: Math.round(8 + L * 0.6),
+    start: Math.min(2, 1 + Math.floor(L / 12)),            // on the board when you arrive
+    every: Math.max(4, 7 - Math.floor(L / 10)),            // a new one every N moves
+    max: Math.min(4, 2 + Math.floor(L / 12)),              // most on the board at once
+    hp: Math.round(7 + L * 0.4),
     armor: landEra(L), weapon: landEra(L),                // wood → iron (Lv 10) → steel (Lv 20)
     attackEvery: 2,                                       // each one swings at you every N moves — pack food!
     extra: Math.floor(L / 12),                            // and hits a little harder deeper in
@@ -551,8 +551,8 @@ window.Data = (() => {
   const levelFromXp = xp => { let L = 1; while (xp >= xpForLevel(L + 1)) L++; return L; };
   function levelInfo(L) {
     return {
-      startObstacles: Math.min(10, 4 + Math.floor((L - 1) * 0.25)),
-      growEvery: L < 2 ? 0 : Math.max(3, 8 - Math.floor(L / 5)),
+      startObstacles: Math.min(7, 3 + Math.floor(L / 7)),
+      growEvery: L < 2 ? 0 : Math.max(4, 8 - Math.floor(L / 8)),
       hpBonus: L >= 21 ? 2 : L >= 11 ? 1 : 0,
       buried: Math.min(6, 3 + Math.floor((L - 1) / 9)),
     };

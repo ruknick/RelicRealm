@@ -89,8 +89,11 @@ window.Gather = (() => {
       intro: '🐚 New: <b>Barnacles!</b> They crust over the shore rows and spread with the tide. Match beside them to scrape them off.' },
   };
   const BLOCKER_LV = 5;
-  const blockerCount = L => (L < BLOCKER_LV ? 0 : Math.min(7, 2 + Math.floor((L - BLOCKER_LV) / 6)));
-  const spreadEvery = L => Math.max(3, 6 - Math.floor(L / 10));
+  const blockerCount = L => (L < BLOCKER_LV ? 0 : Math.min(4, 2 + Math.floor((L - BLOCKER_LV) / 10)));
+  const spreadEvery = L => Math.max(4, 7 - Math.floor(L / 10));
+  // The board must stay playable: obstacles, blockers and monsters together never fill more than ~a quarter of it.
+  const CLUTTER_MAX = 12;
+  const clutter = () => board.pieces.length;
 
   // ---------- trip goals: two per trip, 1-3 stars ----------
   const GOAL_RES = { farm: ['wheat', 'apple'], forest: ['wood', 'hide', 'food'], mine: ['iron', 'coal', 'stone'], ocean: ['herring', 'water', 'wood'] };
@@ -203,7 +206,7 @@ window.Gather = (() => {
     const B = BLOCKERS[land.key], gl = run.goals.find(g => g.type === 'blocker' && g.have < g.need);
     if (!gl) return;
     const left = gl.need - gl.have, onBoard = board.piecesOf(B.kind).length;
-    if (onBoard >= Math.min(left, 3) || ++run.sinceTopUp < 2) return;
+    if (onBoard >= Math.min(left, 3) || ++run.sinceTopUp < 2 || clutter() >= CLUTTER_MAX + 2) return;
     run.sinceTopUp = 0;
     const spots = blockerSpots();
     if (!spots.length) return;
@@ -218,7 +221,7 @@ window.Gather = (() => {
     if (!B.spreads || run.landLv < BLOCKER_LV || ++run.sinceSpread < spreadEvery(run.landLv)) return;
     run.sinceSpread = 0;
     const have = board.piecesOf(B.kind);
-    if (!have.length || have.length >= 10) return;
+    if (!have.length || have.length >= 6 || clutter() >= CLUTTER_MAX) return;
     const [lo, hi] = B.rows;
     const from = pick(have);
     const opts = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dr, dc]) => [from.r + dr, from.c + dc])
@@ -547,7 +550,7 @@ window.Gather = (() => {
     }
     if (App.state.hp <= 0) { await board.wait(500); collapse(); return; }
     // More arrive as the land grows wilder.
-    if (++run.sinceMon >= run.mon.every && mons.length < run.mon.max) {
+    if (++run.sinceMon >= run.mon.every && mons.length < run.mon.max && clutter() < CLUTTER_MAX + 2) {
       run.sinceMon = 0;
       spawnMonster(true);
       Sound.sfx('drums');
@@ -736,6 +739,7 @@ window.Gather = (() => {
           break;
         case 'monster': {
           run.slain++;
+          board.gainEnergy(2); board.float(cell, '+2 ⚡', 'gain');   // a win gets your blood up
           monsterDrops(p, cell);
           break;
         }
@@ -800,9 +804,8 @@ window.Gather = (() => {
         }
         if (run.lv.growEvery && ++run.sinceGrow >= run.lv.growEvery) {
           run.sinceGrow = 0;
-          const n = board.pieces.filter(x => SCALES.includes(x.kind)).length;
           const spots = board.tileCells(r => r >= 1);
-          if (n < 12 && spots.length) {
+          if (clutter() < CLUTTER_MAX && spots.length) {
             const kind = land.grow();
             const [r, c] = pick(spots);
             addObstacle(kind, r, c, true);
